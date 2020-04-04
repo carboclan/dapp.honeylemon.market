@@ -64,7 +64,7 @@ contract MarketContractProxy is Ownable {
 
     function mintPositionTokens(
         address marketContractAddress,
-        uint qtyToMint    
+        uint qtyToMint
     ) public onlyMinterBridge
     {
         // We need to call `mintPositionTo/*  */kens(CURRENT_CONTRACT_ADDRESS, amount, false)` on the

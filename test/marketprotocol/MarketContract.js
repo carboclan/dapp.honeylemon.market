@@ -2,7 +2,7 @@ const BN = require('bn.js');
 const CollateralToken = artifacts.require('CollateralToken');
 const MarketCollateralPool = artifacts.require('MarketCollateralPool');
 const PositionToken = artifacts.require('PositionToken');
-const utility = require('./utility');
+const utility = require('../utility');
 
 contract('MarketContract', function(accounts) {
   let marketContract;

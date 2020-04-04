@@ -5,7 +5,7 @@ const MarketContractRegistry = artifacts.require('MarketContractRegistry');
 const MarketToken = artifacts.require('MarketToken');
 const PositionToken = artifacts.require('PositionToken');
 const truffleAssert = require('truffle-assertions');
-const utility = require('./utility.js');
+const utility = require('../utility.js');
 
 // basic tests to ensure MarketCollateralPool works and is set up to allow trading
 contract('MarketCollateralPool', function(accounts) {
