@@ -1,0 +1,38 @@
+sudo: required
+
+services:
+  - docker
+
+language: node_js
+node_js:
+  - "8"
+
+cache:
+  directories:
+    - node_modules
+
+env:
+  - TRUFFLE_DEVELOP_HOST=truffle TRUFFLE_DEVELOP_PORT=9545 TRUFFLE_COVERAGE_HOST=truffle-coverage TRUFFLE_COVERAGE_PORT=8555
+
+before_install:
+  - pwd
+  - ./scripts/travis_npm_compile.sh
+  - docker-compose up -d
+  - docker-compose --version
+  - docker-compose ps
+
+
+script:
+#  - docker-compose exec truffle-coverage env CONTINUOUS_INTEGRATION=true TRAVIS=true TRAVIS_JOB_ID="$TRAVIS_JOB_ID" TRAVIS_BRANCH="$TRAVIS_BRANCH" TRAVIS_PULL_REQUEST="$TRAVIS_PULL_REQUEST" scripts/coverage_run.sh
+  - docker-compose exec truffle truffle migrate
+  - docker-compose exec truffle truffle test
+
+deploy:
+  - provider: npm
+    email: phil@marketprotocol.io
+    skip_cleanup: true
+    api_key:
+      secure: EhLMN7JJn6Uv7PFyDeI3tYQP5LWHZasNP+ImU7c30xCnOlwPIFKqBlaqwGnHX4DxC/Bn/de/f8Y8Dcl0LnsbBCfvzReARoDyZVmw++EsKy8kU2YuCyS/LPI3bPtetQ7hcMDqC/z1k0zPkK2+4NFYIlYx1qDJKsS8g+fkK4rmCvTvpSLzyOL5KsBRNagd52gTQ+jazrYEC0DMAZqXCfzO/sYCjlVojI3bugQq+ssHWY7OfKNJWRx8MoMMAV7D6V/XMLMmQw7KP1U7e+oSRDBqvjiDiouo0u7cJn12hfnPyKjQzrBPlVNRicE1YH0YIZXn/rkFidPLep0wCaIu6MQbzrE2CNyhevppXXBAi3WIp+pfjdKo0kDENT+vaWP/A86e2zcRY+fwqaCnRd2OW0bPU3Lhfq+eheWrQpFqX7ItZj7NEtLiveOM7hs65XPj9nINkyQuT/VTlWWlvb7sAIWCeU2t0l1WqEaC3UH0i5WuhzHhQRYIlqtOxxIkF3j0hjC2aMb+3bdQY3zBvoiDP6dJ3QU+BJFWAPl2l+9JGOH4FCnawkFiIBNb0QgrFHIR4XL2kaIcWCAWMbz/VxW3c9lTzhBIbnb08ulpPTE3jHvd2zbgziNim7YqEt1jKdBfutea8Znb4IRxntdveW0D7up0MZyVlOHpmZCLS9cgvAVBbAc=
+    on:
+      branch: master
+      tags: true
