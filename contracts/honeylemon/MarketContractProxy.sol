@@ -22,6 +22,11 @@ contract MarketContractProxy is Ownable {
         MINTER_BRIDGE_ADDRESS = _minterBridge;
     }
 
+
+    //////////////////////////////////////
+    //// PERMISSION SCOPING MODIFIERS ////
+    //////////////////////////////////////
+    
     modifier onlyHoneyLemonOracle(){
         require(msg.sender == HONEY_LEMON_ORACLE_ADDRESS);
         _;
@@ -32,6 +37,10 @@ contract MarketContractProxy is Ownable {
         _;
     }
 
+    //////////////////////////
+    //// PUBLIC FUNCTIONS ////
+    //////////////////////////
+    
     function balanceOf(address _owner) public view returns (uint256 balance) {
         // Return `balanceOf` for current day PositionTokenLong
     }
@@ -41,21 +50,31 @@ contract MarketContractProxy is Ownable {
         // return min(imBTC.balanceOf(_owner), imBTC.allowance(_owner, MARKET_PROTOCOL_POOL_ADDRESS)) / (indexValue * CONTRACT_DURATION)
     }
 
+    /////////////////////////////////////
+    //// ORACLE PRIVILEGED FUNCTIONS ////
+    /////////////////////////////////////
+
               // Settles old contract and deploys the new contract
     function dailySettlement(uint currentIndexValue, uint lookbackIndexValue, uint timestamp) public onlyHoneyLemonOracle {
 
     }
+    /////////////////////////////////////
+    //// 0X-MINTER-BRIDGE FUNCTIONS /////
+    /////////////////////////////////////
 
     function mintPositionTokens(
         address marketContractAddress,
         uint qtyToMint    
     ) public onlyMinterBridge
     {
-        // We need to call `mintPositionTo/*  */kens(CURRENT_CONTRACT_ADDRESS, amount, false)` on the 
+        // We need to call `mintPositionTo/*  */kens(CURRENT_CONTRACT_ADDRESS, amount, false)` on the
         // MarketCollateralPool. We can get to the pool this way:
         // CURRENT_CONTRACT_ADDRESS -> COLLATERAL_POOL_ADDRESS
     }
 
+    ////////////////////////////
+    //// INTERNAL FUNCTIONS ////
+    ////////////////////////////
 
     // Internal function to add the current index price to the oracle and push settlement price into MPX.
     function pushOraclePriceIndex(uint currentIndexValue, uint lookbackIndexValue, uint timestamp) internal {}
@@ -64,14 +83,14 @@ contract MarketContractProxy is Ownable {
     function settleLatestMarketContract() internal {}
 
 
-     // It is much safer to deploy Market contracts from the contract. This ensures that the code deployed 
+     // It is much safer to deploy Market contracts from the contract. This ensures that the code deployed
     // cannot be substituted (e.g. to steal the collateral)
     function deployContract(uint indexValue) internal {
-        // Deploys the current day Market contract. `indexValue` is used to initialize collateral requirement in its constructor
-        // Stores the new contract address, block it was deployed in, as well as the value of the index
-        // we’ll need easy access to the latest values of contract address and index.
-        // collateral requirement = indexValue * 28 * overcollateralization_factor
-        // returns the address of the new contract
+    // Deploys the current day Market contract. `indexValue` is used to initialize collateral requirement in its constructor
+    // Stores the new contract address, block it was deployed in, as well as the value of the index
+    // we’ll need easy access to the latest values of contract address and index.
+    // collateral requirement = indexValue * 28 * overcollateralization_factor
+    // returns the address of the new contract
     }
 
     
