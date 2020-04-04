@@ -32,9 +32,6 @@ contract MarketContractProxy is Ownable {
         _;
     }
 
-    
-
-
     function balanceOf(address _owner) public view returns (uint256 balance) {
         // Return `balanceOf` for current day PositionTokenLong
     }
@@ -54,7 +51,7 @@ contract MarketContractProxy is Ownable {
         uint qtyToMint    
     ) public onlyMinterBridge
     {
-        // We need to call `mintPositionTokens(CURRENT_CONTRACT_ADDRESS, amount, false)` on the 
+        // We need to call `mintPositionTo/*  */kens(CURRENT_CONTRACT_ADDRESS, amount, false)` on the 
         // MarketCollateralPool. We can get to the pool this way:
         // CURRENT_CONTRACT_ADDRESS -> COLLATERAL_POOL_ADDRESS
     }
