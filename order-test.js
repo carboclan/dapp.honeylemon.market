@@ -12,7 +12,7 @@ const { ContractWrappers } = require('@0x/contract-wrappers');
 const { Web3Wrapper } = require('@0x/web3-wrapper');
 const { BigNumber } = require('@0x/utils');
 
-const AssetDataUtils = artifacts.require('AssetDataUtils');
+// const AssetDataUtils = artifacts.require('AssetDataUtils');
 const FakeToken = artifacts.require('FakeToken');
 const CollateralToken = artifacts.require('CollateralToken');
 const MinterBridge = artifacts.require('MinterBridge');
@@ -55,6 +55,7 @@ module.exports = async function() {
     );
     console.log('decodeAssetDataOrThrow', assetDataUtils.decodeAssetDataOrThrow(makerAssetData));
     console.log('makerAssetData:', makerAssetData);
+    console.log('takerToken.address', takerToken.address);
     // Encode the selected takerToken as assetData for 0x
     const takerAssetData = await contractWrappers.devUtils
       .encodeERC20AssetData(takerToken.address)

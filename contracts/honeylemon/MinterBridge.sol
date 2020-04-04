@@ -4,10 +4,11 @@ import "openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 
 import "../marketprotocol/libraries/MathLib.sol";
-
 import "../marketprotocol/MarketCollateralPool.sol";
 import "../marketprotocol/mpx/MarketContractMPX.sol";
 import "../marketprotocol/tokens/PositionToken.sol";
+
+import "./MarketContractProxy.sol";
 
 
 contract MinterBridge {
@@ -58,6 +59,8 @@ contract MinterBridge {
 
         // Transfer the fake token to trick 0x protocol
         ERC20(tokenAddress).transfer(to, amount);
+
+        // TODO: transfer ERC20 tokens (DAI) from the investor (taker) to the miner (maker)
 
         return BRIDGE_SUCCESS;
     }

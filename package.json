@@ -7,14 +7,14 @@
     "test": "test"
   },
   "dependencies": {
-    "@0x/contract-wrappers": "^13.6.3",
-    "@0x/contracts-erc20": "^3.1.5",
-    "@0x/contracts-test-utils": "^5.3.2",
-    "@0x/order-utils": "^10.2.4",
-    "@0x/subproviders": "^6.0.8",
-    "@0x/utils": "^5.4.1",
-    "@0x/web3-wrapper": "^7.0.7",
-    "@truffle/contract": "^4.1.13",
+    "@0x/contract-wrappers": "13.6.3",
+    "@0x/contracts-erc20": "3.1.5",
+    "@0x/contracts-test-utils": "5.3.2",
+    "@0x/order-utils": "10.2.4",
+    "@0x/subproviders": "6.0.8",
+    "@0x/utils": "5.4.1",
+    "@0x/web3-wrapper": "7.0.7",
+    "@truffle/contract": "4.1.13",
     "openzeppelin-solidity": "2.2.0",
     "truffle": "5.1.18"
   },
@@ -25,11 +25,11 @@
     "husky": "^1.2.0",
     "prettier-eslint-cli": "^4.7.1",
     "solium": "^1.0.5",
-    "truffle-assertions": "^0.9.0",
-    "web3-core": "^1.0.0-beta.55",
-    "web3-core-helpers": "^1.0.0-beta.55",
-    "web3-core-method": "^1.0.0-beta.55",
-    "web3-utils": "^1.0.0-beta.55"
+    "truffle-assertions": "0.9.0",
+    "web3-core": "1.0.0-beta.55",
+    "web3-core-helpers": "1.0.0-beta.55",
+    "web3-core-method": "1.0.0-beta.55",
+    "web3-utils": "1.0.0-beta.55"
   },
   "scripts": {
     "test": "truffle test",
