@@ -11,13 +11,27 @@ contract MarketContractProxy is Ownable {
 
     address public HONEY_LEMON_ORACLE_ADDRESS;
     address public MINTER_BRIDGE_ADDRESS;
-    address IMBTC_TOKEN_ADDRESS;
+    address public IMBTC_TOKEN_ADDRESS;
 
-    uint[7] public marketProtocolContractSpecifications;
+    string public ORACLE_URL = 'null';
+    string public ORACLE_STATISTIC = 'null';
 
-    constructor(address _marketContractFactoryMPX, address _honeyLemonOracle, address _minterBridge, _imBTCTokenAddress)
-        public
-    {
+    uint[7] public marketProtocolContractSpecifications = [
+        0, // floorPrice - the lower bound price for the CFD [constant]
+        0, // capPrice - the upper bound price for the CFD [updated before deployment]
+        10, // priceDecimalPlaces - number of decimals used to convert prices [constant]
+        100000000, // qtyMultiplier - multiply traded qty by this value from base units of collateral token.  [constant]
+        0, // feeInBasisPoints - fee for minting tokens [constant]
+        0, // mktFeeInBasisPoints - fees charged by the market in MKT [constant]
+        0 // expirationTimeStamp [updated before deployment]
+    ];
+
+    constructor(
+        address _marketContractFactoryMPX,
+        address _honeyLemonOracle,
+        address _minterBridge,
+        address _imBTCTokenAddress
+    ) public {
         marketContractFactoryMPX = MarketContractFactoryMPX(_marketContractFactoryMPX);
         HONEY_LEMON_ORACLE_ADDRESS = _honeyLemonOracle;
         MINTER_BRIDGE_ADDRESS = _minterBridge;
@@ -51,6 +65,10 @@ contract MarketContractProxy is Ownable {
         // return min(imBTC.balanceOf(_owner), imBTC.allowance(_owner, MARKET_PROTOCOL_POOL_ADDRESS)) / (indexValue * CONTRACT_DURATION)
     }
 
+    function getCurrentMarketContractAddress() public view returns (address) {
+        return address(0);
+    }
+
     /////////////////////////////////////
     //// ORACLE PRIVILEGED FUNCTIONS ////
     /////////////////////////////////////
@@ -65,7 +83,7 @@ contract MarketContractProxy is Ownable {
     //// 0X-MINTER-BRIDGE PRIVILEGED FUNCTIONS /////
     ////////////////////////////////////////////////
 
-    function mintPositionTokens(address marketContractAddress, uint qtyToMint) public onlyMinterBridge {
+    function mintPositionTokens(uint qtyToMint) public onlyMinterBridge {
         // We need to call `mintPositionTo/*  */kens(CURRENT_CONTRACT_ADDRESS, amount, false)` on the
         // MarketCollateralPool. We can get to the pool this way:
         // CURRENT_CONTRACT_ADDRESS -> COLLATERAL_POOL_ADDRESS
@@ -81,6 +99,10 @@ contract MarketContractProxy is Ownable {
 
     function setMinterBridgeAddress(address _minterBridgeAddress) public onlyOwner {
         MINTER_BRIDGE_ADDRESS = _minterBridgeAddress;
+    }
+
+    function setmMrketProtocolContractSpecifications(uint[7] memory _params) public onlyOwner {
+        marketProtocolContractSpecifications = _params;
     }
 
     ////////////////////////////
@@ -99,9 +121,15 @@ contract MarketContractProxy is Ownable {
     // collateral requirement = indexValue * 28 * overcollateralization_factor
     // returns the address of the new contract
     function deployContract(uint _indexValue) internal {
-        uint[3] contractNames;
-        uint[7] contractSpecs;
-        marketContractFactoryMPX.deployMarketContractMPX(contractNames, imBTCAddress, contractSpecs);
+        bytes32[3] memory contractNames;
+        uint[7] memory contractSpecs;
+        address contractAddress = marketContractFactoryMPX.deployMarketContractMPX(
+            contractNames,
+            IMBTC_TOKEN_ADDRESS,
+            contractSpecs,
+            ORACLE_URL,
+            ORACLE_STATISTIC
+        );
     }
 
     // function generateContractSpecs() internal returns(unit[7]){},

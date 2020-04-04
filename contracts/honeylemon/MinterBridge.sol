@@ -18,14 +18,16 @@ contract MinterBridge {
 
     // @dev Result of a successful bridge call.
     bytes4 internal constant BRIDGE_SUCCESS = 0xdc1600f3;
-    address public MARKET_CONTRACT_ADDRESS;
+    address public MARKET_CONTRACT_PROXY_ADDRESS;
 
-    constructor(address marketContractAddress) public {
-        MARKET_CONTRACT_ADDRESS = marketContractAddress;
+    constructor(address _marketContractProxyAddress) public {
+        MARKET_CONTRACT_PROXY_ADDRESS = _marketContractProxyAddress;
     }
 
     /// @dev Transfers `amount` of the ERC20 `tokenAddress` from `from` to `to`.
-    /// @param tokenAddress The address of the ERC20 token to transfer.
+    /// @param tokenAddress in the standard 0x implementation this is the transferred token.
+    // In HoneyLemon this is the marketContractProxy which acts to spoof a token and inform
+    // the MinterBridge of the latest perpetual token.
     /// @param from Address to transfer asset from.
     /// @param to Address to transfer asset to.
     /// @param amount Amount of asset to transfer.
@@ -38,22 +40,29 @@ contract MinterBridge {
         uint256 amount,
         bytes calldata bridgeData
     ) external returns (bytes4 success) {
-        MarketContract marketContract = MarketContract(MARKET_CONTRACT_ADDRESS);
-        address poolAddress = marketContract.COLLATERAL_POOL_ADDRESS();
-        address collateralTokenAddress = marketContract.COLLATERAL_TOKEN_ADDRESS();
-        address longAddress = marketContract.LONG_POSITION_TOKEN();
-        address shortAddress = marketContract.SHORT_POSITION_TOKEN();
+        require(tokenAddress == MARKET_CONTRACT_PROXY_ADDRESS, 'bad proxy address');
 
-        uint neededCollateral = MathLib.multiply(amount, marketContract.COLLATERAL_PER_UNIT());
+        MarketContractProxy marketProtocolProxy = MarketContractProxy(MARKET_CONTRACT_PROXY_ADDRESS);
+        address marketContractAddress = marketProtocolProxy.getCurrentMarketContractAddress();
+        MarketContract marketProtocol = MarketContract(marketContractAddress);
 
-        ERC20(collateralTokenAddress).safeTransferFrom(from, address(this), neededCollateral);
-        ERC20(collateralTokenAddress).approve(poolAddress, neededCollateral);
-        MarketCollateralPool(poolAddress).mintPositionTokens(MARKET_CONTRACT_ADDRESS, amount, false);
-        PositionToken(longAddress).transfer(to, amount);
-        PositionToken(shortAddress).transfer(from, amount);
+        address poolAddress = marketProtocol.COLLATERAL_POOL_ADDRESS();
+        ERC20 collateralToken = ERC20(marketProtocol.COLLATERAL_TOKEN_ADDRESS());
+        ERC20 longToken = ERC20(marketProtocol.LONG_POSITION_TOKEN());
+        ERC20 shortToken = ERC20(marketProtocol.SHORT_POSITION_TOKEN());
+
+        uint neededCollateral = MathLib.multiply(amount, marketProtocol.COLLATERAL_PER_UNIT());
+
+        collateralToken.safeTransferFrom(from, address(this), neededCollateral);
+        collateralToken.approve(poolAddress, neededCollateral);
+
+        marketProtocolProxy.mintPositionTokens(amount);
+
+        longToken.transfer(to, amount);
+        shortToken.transfer(from, amount);
 
         // Transfer the fake token to trick 0x protocol
-        ERC20(tokenAddress).transfer(to, amount);
+        // ERC20(tokenAddress).transfer(to, amount);
 
         // TODO: transfer ERC20 tokens (DAI) from the investor (taker) to the miner (maker)
 

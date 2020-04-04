@@ -43,7 +43,7 @@ module.exports = async function() {
     const makerAddress = addresses[0]; // Miner
     const takerAddress = addresses[1]; // Investor
 
-    // Fake token
+    // Fake token for the maker (miner)
     const makerToken = { address: fakeToken.address, decimals: 18 };
     // We use CollateralToken. This is imBTC sent from the investor to the Market protocol contract
     const takerToken = { address: collateralToken.address, decimals: 18 };

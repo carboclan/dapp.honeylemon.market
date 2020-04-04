@@ -68,11 +68,11 @@ contract MarketContractFactoryMPX is Ownable {
         uint[7] calldata contractSpecs,
         string calldata oracleURL,
         string calldata oracleStatistic
-    ) external onlyOwner {
+    ) external onlyOwner returns (address) {
         MarketContractMPX mktContract = new MarketContractMPX(
             contractNames,
             [owner(), collateralTokenAddress, MARKET_COLLATERAL_POOL],
-            oracleHub,
+            oracleHub, /*  */
             contractSpecs,
             oracleURL,
             oracleStatistic
@@ -80,6 +80,7 @@ contract MarketContractFactoryMPX is Ownable {
 
         MarketContractRegistryInterface(marketContractRegistry).addAddressToWhiteList(address(mktContract));
         emit MarketContractCreated(msg.sender, address(mktContract));
+        return address(mktContract);
     }
 
     /// @dev allows for the owner to set the desired registry for contract creation.
