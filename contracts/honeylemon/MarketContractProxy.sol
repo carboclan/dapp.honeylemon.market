@@ -2,7 +2,7 @@ pragma solidity 0.5.2;
 
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
-import "../marketprotocol/MarketContractPool.sol";
+import "../marketprotocol/MarketCollateralPool.sol";
 import "../marketprotocol/mpx/MarketContractFactoryMPX.sol";
 
 
@@ -11,13 +11,15 @@ contract MarketContractProxy is Ownable {
     MarketContractFactoryMPX marketContractFactoryMPX;
     
     address public HONEY_LEMON_ORACLE_ADDRESS;
-    address public 0X_MINTER_BRIDGE_ADDRESS;
+    address public MINTER_BRIDGE_ADDRESS;
 
-    constructor(address marketContractFactoryMPX, address honeyLemonOracle, address 0xMinterBridge){
+    uint[7] public marketProtocolContractSpecifications;
 
-        marketContractFactoryMPX = MarketContractFactoryMPX(marketContractFactoryMPX);
-        HONEY_LEMON_ORACLE_ADDRESS = honeyLemonOracle;
-        0X_MINTER_BRIDGE_ADDRESS = 0xMinterBridge;
+    constructor(address _marketContractFactoryMPX, address _honeyLemonOracle, address _minterBridge) public{
+
+        marketContractFactoryMPX = MarketContractFactoryMPX(_marketContractFactoryMPX);
+        HONEY_LEMON_ORACLE_ADDRESS = _honeyLemonOracle;
+        MINTER_BRIDGE_ADDRESS = _minterBridge;
     }
 
     modifier onlyHoneyLemonOracle(){
@@ -26,14 +28,14 @@ contract MarketContractProxy is Ownable {
     }
 
     modifier onlyMinterBridge(){
-        require(msg.sender == 0X_MINTER_BRIDGE_ADDRESS);
+        require(msg.sender == MINTER_BRIDGE_ADDRESS);
         _;
     }
 
-    marketProtocolContractSpecifications[7];
+    
 
 
-    function balanceOf(address _owner) public view returns (uint256 balance) public {
+    function balanceOf(address _owner) public view returns (uint256 balance) {
         // Return `balanceOf` for current day PositionTokenLong
     }
 
@@ -67,7 +69,7 @@ contract MarketContractProxy is Ownable {
 
      // It is much safer to deploy Market contracts from the contract. This ensures that the code deployed 
     // cannot be substituted (e.g. to steal the collateral)
-    function deployContract(uint indexValue) onlyOwner (address) internal {
+    function deployContract(uint indexValue) internal {
         // Deploys the current day Market contract. `indexValue` is used to initialize collateral requirement in its constructor
         // Stores the new contract address, block it was deployed in, as well as the value of the index
         // we’ll need easy access to the latest values of contract address and index.
@@ -77,9 +79,9 @@ contract MarketContractProxy is Ownable {
 
     
 
-    function generateContractSpecs() internal returns(unit[7]){},
+    // function generateContractSpecs() internal returns(unit[7]){},
 
-    function generateContractNames() internal returns(bytes32[3]){},
+    // function generateContractNames() internal returns(bytes32[3]){},
 
 
 }
