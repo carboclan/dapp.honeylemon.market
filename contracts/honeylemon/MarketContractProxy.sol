@@ -26,7 +26,7 @@ contract MarketContractProxy is Ownable {
     //////////////////////////////////////
     //// PERMISSION SCOPING MODIFIERS ////
     //////////////////////////////////////
-    
+
     modifier onlyHoneyLemonOracle(){
         require(msg.sender == HONEY_LEMON_ORACLE_ADDRESS);
         _;
@@ -58,9 +58,9 @@ contract MarketContractProxy is Ownable {
     function dailySettlement(uint currentIndexValue, uint lookbackIndexValue, uint timestamp) public onlyHoneyLemonOracle {
 
     }
-    /////////////////////////////////////
-    //// 0X-MINTER-BRIDGE FUNCTIONS /////
-    /////////////////////////////////////
+    ////////////////////////////////////////////////
+    //// 0X-MINTER-BRIDGE PRIVILEGED FUNCTIONS /////
+    ////////////////////////////////////////////////
 
     function mintPositionTokens(
         address marketContractAddress,
@@ -70,6 +70,18 @@ contract MarketContractProxy is Ownable {
         // We need to call `mintPositionTo/*  */kens(CURRENT_CONTRACT_ADDRESS, amount, false)` on the
         // MarketCollateralPool. We can get to the pool this way:
         // CURRENT_CONTRACT_ADDRESS -> COLLATERAL_POOL_ADDRESS
+    }
+    
+    ////////////////////////////////////
+    //// OWNER (DEPLOYER) FUNCTIONS ////
+    ////////////////////////////////////
+
+    function setOracleAddress(address _honeyLemonOracleAddress) public onlyOwner{
+        HONEY_LEMON_ORACLE_ADDRESS = _honeyLemonOracleAddress;
+    }
+
+    function setMinterBridgeAddress(address _minterBridgeAddress) public onlyOwner {
+        MINTER_BRIDGE_ADDRESS = _minterBridgeAddress;
     }
 
     ////////////////////////////
