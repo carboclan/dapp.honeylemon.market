@@ -43,7 +43,7 @@ contract MarketContractProxy is Ownable {
     }
 
               // Settles old contract and deploys the new contract
-    function settle(uint currentIndexValue, uint lookbackIndexValue, uint timestamp) public onlyHoneyLemonOracle {
+    function dailySettlement(uint currentIndexValue, uint lookbackIndexValue, uint timestamp) public onlyHoneyLemonOracle {
 
     }
 
@@ -57,6 +57,14 @@ contract MarketContractProxy is Ownable {
         // CURRENT_CONTRACT_ADDRESS -> COLLATERAL_POOL_ADDRESS
     }
 
+
+    // Internal function to add the current index price to the oracle and push settlement price into MPX.
+    function pushOraclePriceIndex(uint currentIndexValue, uint lookbackIndexValue, uint timestamp) internal {}
+
+    // function called daily to settle the current expiring 28 day contract.
+    function settleLatestMarketContract() internal {}
+
+
      // It is much safer to deploy Market contracts from the contract. This ensures that the code deployed 
     // cannot be substituted (e.g. to steal the collateral)
     function deployContract(uint indexValue) onlyOwner (address) internal {
@@ -67,7 +75,7 @@ contract MarketContractProxy is Ownable {
         // returns the address of the new contract
     }
 
-    function pushOraclePriceIndex(uint currentIndexValue, uint lookbackIndexValue, uint timestamp) internal {}
+    
 
     function generateContractSpecs() internal returns(unit[7]){},
 
