@@ -16,13 +16,12 @@
 
 pragma solidity 0.5.2;
 
-import "../MarketContract.sol";
+import '../MarketContract.sol';
 
 
 /// @title MarketContractMPX - a MarketContract designed to be used with our internal oracle service
 /// @author Phil Elsasser <phil@marketprotocol.io>
 contract MarketContractMPX is MarketContract {
-
     address public ORACLE_HUB_ADDRESS;
     string public ORACLE_URL;
     string public ORACLE_STATISTIC;
@@ -54,12 +53,7 @@ contract MarketContractMPX is MarketContract {
         uint[7] memory contractSpecs,
         string memory oracleURL,
         string memory oracleStatistic
-    ) MarketContract(
-        contractNames,
-        baseAddresses,
-        contractSpecs
-    )  public
-    {
+    ) public MarketContract(contractNames, baseAddresses, contractSpecs) {
         ORACLE_URL = oracleURL;
         ORACLE_STATISTIC = oracleStatistic;
         ORACLE_HUB_ADDRESS = oracleHubAddress;
@@ -75,7 +69,7 @@ contract MarketContractMPX is MarketContract {
         require(!isSettled);
         lastPrice = price;
         emit UpdatedLastPrice(price);
-        checkSettlement();  // Verify settlement at expiration or requested early settlement.
+        checkSettlement(); // Verify settlement at expiration or requested early settlement.
     }
 
     /// @dev allows us to arbitrate a settlement price by updating the settlement value, and resetting the
@@ -83,7 +77,7 @@ contract MarketContractMPX is MarketContract {
     /// if a dispute arises that we believe is best resolved by early settlement.
     /// @param price settlement price
     function arbitrateSettlement(uint256 price) public onlyOwner {
-        require(price >= PRICE_FLOOR && price <= PRICE_CAP, "arbitration price must be within contract bounds");
+        require(price >= PRICE_FLOOR && price <= PRICE_CAP, 'arbitration price must be within contract bounds');
         lastPrice = price;
         emit UpdatedLastPrice(price);
         settleContract(price);
@@ -92,14 +86,13 @@ contract MarketContractMPX is MarketContract {
 
     /// @dev allows calls only from the oracle hub.
     modifier onlyOracleHub() {
-        require(msg.sender == ORACLE_HUB_ADDRESS, "only callable by the oracle hub");
+        require(msg.sender == ORACLE_HUB_ADDRESS, 'only callable by the oracle hub');
         _;
     }
 
     /// @dev allows for the owner of the contract to change the oracle hub address if needed
     function setOracleHubAddress(address oracleHubAddress) public onlyOwner {
-        require(oracleHubAddress != address(0), "cannot set oracleHubAddress to null address");
+        require(oracleHubAddress != address(0), 'cannot set oracleHubAddress to null address');
         ORACLE_HUB_ADDRESS = oracleHubAddress;
     }
-
 }

@@ -16,9 +16,9 @@
 
 pragma solidity 0.5.2;
 
-import "./UpgradeableTarget.sol";
-import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
-import "openzeppelin-solidity/contracts/token/ERC20/ERC20Burnable.sol";
+import './UpgradeableTarget.sol';
+import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
+import 'openzeppelin-solidity/contracts/token/ERC20/ERC20Burnable.sol';
 
 
 /// @title Upgradeable Token
@@ -26,9 +26,8 @@ import "openzeppelin-solidity/contracts/token/ERC20/ERC20Burnable.sol";
 /// from Golems migrate functionality.
 /// @author Phil Elsasser <phil@marketprotocol.io>
 contract UpgradeableToken is Ownable, ERC20Burnable {
-
-    address public upgradeableTarget;       // contract address handling upgrade
-    uint256 public totalUpgraded;           // total token amount already upgraded
+    address public upgradeableTarget; // contract address handling upgrade
+    uint256 public totalUpgraded; // total token amount already upgraded
 
     event Upgraded(address indexed from, address indexed to, uint256 value);
 
@@ -39,9 +38,9 @@ contract UpgradeableToken is Ownable, ERC20Burnable {
     /// @notice Update token to the new upgraded token
     /// @param value The amount of token to be migrated to upgraded token
     function upgrade(uint256 value) external {
-        require(upgradeableTarget != address(0), "cannot upgrade with no target");
+        require(upgradeableTarget != address(0), 'cannot upgrade with no target');
 
-        burn(value);                    // burn tokens as we migrate them.
+        burn(value); // burn tokens as we migrate them.
         totalUpgraded = totalUpgraded.add(value);
 
         UpgradeableTarget(upgradeableTarget).upgradeFrom(msg.sender, value);
@@ -53,5 +52,4 @@ contract UpgradeableToken is Ownable, ERC20Burnable {
     function setUpgradeableTarget(address upgradeAddress) external onlyOwner {
         upgradeableTarget = upgradeAddress;
     }
-
 }

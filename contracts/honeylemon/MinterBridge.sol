@@ -1,14 +1,14 @@
 pragma solidity 0.5.2;
 
-import "openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol";
-import "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
+import 'openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol';
+import 'openzeppelin-solidity/contracts/token/ERC20/ERC20.sol';
 
-import "../marketprotocol/libraries/MathLib.sol";
-import "../marketprotocol/MarketCollateralPool.sol";
-import "../marketprotocol/mpx/MarketContractMPX.sol";
-import "../marketprotocol/tokens/PositionToken.sol";
+import '../marketprotocol/libraries/MathLib.sol';
+import '../marketprotocol/MarketCollateralPool.sol';
+import '../marketprotocol/mpx/MarketContractMPX.sol';
+import '../marketprotocol/tokens/PositionToken.sol';
 
-import "./MarketContractProxy.sol";
+import './MarketContractProxy.sol';
 
 
 contract MinterBridge {
@@ -17,12 +17,10 @@ contract MinterBridge {
     using SafeERC20 for ERC20;
 
     // @dev Result of a successful bridge call.
-    bytes4 constant internal BRIDGE_SUCCESS = 0xdc1600f3;
+    bytes4 internal constant BRIDGE_SUCCESS = 0xdc1600f3;
     address public MARKET_CONTRACT_ADDRESS;
 
-
-    constructor(address marketContractAddress) public
-    {
+    constructor(address marketContractAddress) public {
         MARKET_CONTRACT_ADDRESS = marketContractAddress;
     }
 
@@ -39,10 +37,7 @@ contract MinterBridge {
         address to,
         uint256 amount,
         bytes calldata bridgeData
-    )
-        external
-        returns (bytes4 success)
-    {
+    ) external returns (bytes4 success) {
         MarketContract marketContract = MarketContract(MARKET_CONTRACT_ADDRESS);
         address poolAddress = marketContract.COLLATERAL_POOL_ADDRESS();
         address collateralTokenAddress = marketContract.COLLATERAL_TOKEN_ADDRESS();

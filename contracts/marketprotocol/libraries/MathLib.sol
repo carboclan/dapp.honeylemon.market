@@ -18,38 +18,32 @@ pragma solidity 0.5.2;
 
 /// @title Math function library with overflow protection inspired by Open Zeppelin
 library MathLib {
-
     int256 constant INT256_MIN = int256((uint256(1) << 255));
     int256 constant INT256_MAX = int256(~((uint256(1) << 255)));
 
-    function multiply(uint256 a, uint256 b) pure internal returns (uint256) {
+    function multiply(uint256 a, uint256 b) internal pure returns (uint256) {
         if (a == 0) {
             return 0;
         }
 
         uint256 c = a * b;
-        require(c / a == b,  "MathLib: multiplication overflow");
+        require(c / a == b, 'MathLib: multiplication overflow');
 
         return c;
     }
 
-    function divideFractional(
-        uint256 a,
-        uint256 numerator,
-        uint256 denominator
-    ) pure internal returns (uint256)
-    {
+    function divideFractional(uint256 a, uint256 numerator, uint256 denominator) internal pure returns (uint256) {
         return multiply(a, numerator) / denominator;
     }
 
-    function subtract(uint256 a, uint256 b) pure internal returns (uint256) {
-        require(b <= a, "MathLib: subtraction overflow");
+    function subtract(uint256 a, uint256 b) internal pure returns (uint256) {
+        require(b <= a, 'MathLib: subtraction overflow');
         return a - b;
     }
 
-    function add(uint256 a, uint256 b) pure internal returns (uint256) {
+    function add(uint256 a, uint256 b) internal pure returns (uint256) {
         uint256 c = a + b;
-        require(c >= a, "MathLib: addition overflow");
+        require(c >= a, 'MathLib: addition overflow');
         return c;
     }
 
@@ -67,47 +61,41 @@ library MathLib {
         uint longQty,
         uint shortQty,
         uint price
-    ) pure internal returns (uint)
-    {
+    ) internal pure returns (uint) {
         uint neededCollateral = 0;
         uint maxLoss;
-        if (longQty > 0) {   // calculate max loss from entry price to floor
+        if (longQty > 0) {
+            // calculate max loss from entry price to floor
             if (price <= priceFloor) {
                 maxLoss = 0;
             } else {
                 maxLoss = subtract(price, priceFloor);
             }
-            neededCollateral = multiply(multiply(maxLoss, longQty),  qtyMultiplier);
+            neededCollateral = multiply(multiply(maxLoss, longQty), qtyMultiplier);
         }
 
-        if (shortQty > 0) {  // calculate max loss from entry price to ceiling;
+        if (shortQty > 0) {
+            // calculate max loss from entry price to ceiling;
             if (price >= priceCap) {
                 maxLoss = 0;
             } else {
                 maxLoss = subtract(priceCap, price);
             }
-            neededCollateral = add(neededCollateral, multiply(multiply(maxLoss, shortQty),  qtyMultiplier));
+            neededCollateral = add(neededCollateral, multiply(multiply(maxLoss, shortQty), qtyMultiplier));
         }
         return neededCollateral;
     }
 
     /// @notice determines the amount of needed collateral for minting a long and short position token
-    function calculateTotalCollateral(
-        uint priceFloor,
-        uint priceCap,
-        uint qtyMultiplier
-    ) pure internal returns (uint)
-    {
+    function calculateTotalCollateral(uint priceFloor, uint priceCap, uint qtyMultiplier) internal pure returns (uint) {
         return multiply(subtract(priceCap, priceFloor), qtyMultiplier);
     }
 
     /// @notice calculates the fee in terms of base units of the collateral token per unit pair minted.
-    function calculateFeePerUnit(
-        uint priceFloor,
-        uint priceCap,
-        uint qtyMultiplier,
-        uint feeInBasisPoints
-    ) pure internal returns (uint)
+    function calculateFeePerUnit(uint priceFloor, uint priceCap, uint qtyMultiplier, uint feeInBasisPoints)
+        internal
+        pure
+        returns (uint)
     {
         uint midPrice = add(priceCap, priceFloor) / 2;
         return multiply(multiply(midPrice, qtyMultiplier), feeInBasisPoints) / 10000;

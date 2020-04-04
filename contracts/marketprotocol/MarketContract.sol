@@ -16,11 +16,11 @@
 
 pragma solidity 0.5.2;
 
-import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
+import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
 
-import "./libraries/MathLib.sol";
-import "./libraries/StringLib.sol";
-import "./tokens/PositionToken.sol";
+import './libraries/MathLib.sol';
+import './libraries/StringLib.sol';
+import './tokens/PositionToken.sol';
 
 
 /// @title MarketContract base contract implement all needed functionality for trading.
@@ -35,9 +35,9 @@ contract MarketContract is Ownable {
     address public COLLATERAL_POOL_ADDRESS;
     uint public PRICE_CAP;
     uint public PRICE_FLOOR;
-    uint public PRICE_DECIMAL_PLACES;   // how to convert the pricing from decimal format (if valid) to integer
-    uint public QTY_MULTIPLIER;         // multiplier corresponding to the value of 1 increment in price to token base units
-    uint public COLLATERAL_PER_UNIT;    // required collateral amount for the full range of outcome tokens
+    uint public PRICE_DECIMAL_PLACES; // how to convert the pricing from decimal format (if valid) to integer
+    uint public QTY_MULTIPLIER; // multiplier corresponding to the value of 1 increment in price to token base units
+    uint public COLLATERAL_PER_UNIT; // required collateral amount for the full range of outcome tokens
     uint public COLLATERAL_TOKEN_FEE_PER_UNIT;
     uint public MKT_TOKEN_FEE_PER_UNIT;
     uint public EXPIRATION;
@@ -72,21 +72,16 @@ contract MarketContract is Ownable {
     ///     feeInBasisPoints    fee amount in basis points (Collateral token denominated) for minting.
     ///     mktFeeInBasisPoints fee amount in basis points (MKT denominated) for minting.
     ///     expirationTimeStamp seconds from epoch that this contract expires and enters settlement
-    constructor(
-        bytes32[3] memory contractNames,
-        address[3] memory baseAddresses,
-        uint[7] memory contractSpecs
-    ) public
-    {
+    constructor(bytes32[3] memory contractNames, address[3] memory baseAddresses, uint[7] memory contractSpecs) public {
         PRICE_FLOOR = contractSpecs[0];
         PRICE_CAP = contractSpecs[1];
-        require(PRICE_CAP > PRICE_FLOOR, "PRICE_CAP must be greater than PRICE_FLOOR");
+        require(PRICE_CAP > PRICE_FLOOR, 'PRICE_CAP must be greater than PRICE_FLOOR');
 
         PRICE_DECIMAL_PLACES = contractSpecs[2];
         QTY_MULTIPLIER = contractSpecs[3];
         EXPIRATION = contractSpecs[6];
-        require(EXPIRATION > now, "EXPIRATION must be in the future");
-        require(QTY_MULTIPLIER != 0,"QTY_MULTIPLIER cannot be 0");
+        require(EXPIRATION > now, 'EXPIRATION must be in the future');
+        require(QTY_MULTIPLIER != 0, 'QTY_MULTIPLIER cannot be 0');
 
         COLLATERAL_TOKEN_ADDRESS = baseAddresses[1];
         COLLATERAL_POOL_ADDRESS = baseAddresses[2];
@@ -97,22 +92,17 @@ contract MarketContract is Ownable {
             QTY_MULTIPLIER,
             contractSpecs[4]
         );
-        MKT_TOKEN_FEE_PER_UNIT = MathLib.calculateFeePerUnit(
-            PRICE_FLOOR,
-            PRICE_CAP,
-            QTY_MULTIPLIER,
-            contractSpecs[5]
-        );
+        MKT_TOKEN_FEE_PER_UNIT = MathLib.calculateFeePerUnit(PRICE_FLOOR, PRICE_CAP, QTY_MULTIPLIER, contractSpecs[5]);
 
         // create long and short tokens
         CONTRACT_NAME = contractNames[0].bytes32ToString();
         PositionToken longPosToken = new PositionToken(
-            "MARKET Protocol Long Position Token",
+            'MARKET Protocol Long Position Token',
             contractNames[1].bytes32ToString(),
             uint8(PositionToken.MarketSide.Long)
         );
         PositionToken shortPosToken = new PositionToken(
-            "MARKET Protocol Short Position Token",
+            'MARKET Protocol Short Position Token',
             contractNames[2].bytes32ToString(),
             uint8(PositionToken.MarketSide.Short)
         );
@@ -130,11 +120,7 @@ contract MarketContract is Ownable {
     /// @notice called only by our collateral pool to create long and short position tokens
     /// @param qtyToMint    qty in base units of how many short and long tokens to mint
     /// @param minter       address of minter to receive tokens
-    function mintPositionTokens(
-        uint256 qtyToMint,
-        address minter
-    ) external onlyCollateralPool
-    {
+    function mintPositionTokens(uint256 qtyToMint, address minter) external onlyCollateralPool {
         // mint and distribute short and long position tokens to our caller
         PositionToken(LONG_POSITION_TOKEN).mintAndSendToken(qtyToMint, minter);
         PositionToken(SHORT_POSITION_TOKEN).mintAndSendToken(qtyToMint, minter);
@@ -143,11 +129,7 @@ contract MarketContract is Ownable {
     /// @notice called only by our collateral pool to redeem long position tokens
     /// @param qtyToRedeem  qty in base units of how many tokens to redeem
     /// @param redeemer     address of person redeeming tokens
-    function redeemLongToken(
-        uint256 qtyToRedeem,
-        address redeemer
-    ) external onlyCollateralPool
-    {
+    function redeemLongToken(uint256 qtyToRedeem, address redeemer) external onlyCollateralPool {
         // mint and distribute short and long position tokens to our caller
         PositionToken(LONG_POSITION_TOKEN).redeemToken(qtyToRedeem, redeemer);
     }
@@ -155,11 +137,7 @@ contract MarketContract is Ownable {
     /// @notice called only by our collateral pool to redeem short position tokens
     /// @param qtyToRedeem  qty in base units of how many tokens to redeem
     /// @param redeemer     address of person redeeming tokens
-    function redeemShortToken(
-        uint256 qtyToRedeem,
-        address redeemer
-    ) external onlyCollateralPool
-    {
+    function redeemShortToken(uint256 qtyToRedeem, address redeemer) external onlyCollateralPool {
         // mint and distribute short and long position tokens to our caller
         PositionToken(SHORT_POSITION_TOKEN).redeemToken(qtyToRedeem, redeemer);
     }
@@ -180,16 +158,19 @@ contract MarketContract is Ownable {
     /// @dev checks our last query price to see if our contract should enter settlement due to it being past our
     //  expiration date or outside of our tradeable ranges.
     function checkSettlement() internal {
-        require(!isSettled, "Contract is already settled"); // already settled.
+        require(!isSettled, 'Contract is already settled'); // already settled.
 
         uint newSettlementPrice;
-        if (now > EXPIRATION) {  // note: miners can cheat this by small increments of time (minutes, not hours)
-            isSettled = true;                   // time based expiration has occurred.
+        if (now > EXPIRATION) {
+            // note: miners can cheat this by small increments of time (minutes, not hours)
+            isSettled = true; // time based expiration has occurred.
             newSettlementPrice = lastPrice;
-        } else if (lastPrice >= PRICE_CAP) {    // price is greater or equal to our cap, settle to CAP price
+        } else if (lastPrice >= PRICE_CAP) {
+            // price is greater or equal to our cap, settle to CAP price
             isSettled = true;
             newSettlementPrice = PRICE_CAP;
-        } else if (lastPrice <= PRICE_FLOOR) {  // price is lesser or equal to our floor, settle to FLOOR price
+        } else if (lastPrice <= PRICE_FLOOR) {
+            // price is lesser or equal to our floor, settle to FLOOR price
             isSettled = true;
             newSettlementPrice = PRICE_FLOOR;
         }
@@ -210,8 +191,7 @@ contract MarketContract is Ownable {
     /// @notice only able to be called directly by our collateral pool which controls the position tokens
     /// for this contract!
     modifier onlyCollateralPool {
-        require(msg.sender == COLLATERAL_POOL_ADDRESS, "Only callable from the collateral pool");
+        require(msg.sender == COLLATERAL_POOL_ADDRESS, 'Only callable from the collateral pool');
         _;
     }
-
 }

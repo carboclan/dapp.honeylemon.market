@@ -57,9 +57,7 @@ module.exports = async function() {
     console.log('makerAssetData:', makerAssetData);
     console.log('takerToken.address', takerToken.address);
     // Encode the selected takerToken as assetData for 0x
-    const takerAssetData = await contractWrappers.devUtils
-      .encodeERC20AssetData(takerToken.address)
-      .callAsync();
+    const takerAssetData = await contractWrappers.devUtils.encodeERC20AssetData(takerToken.address).callAsync();
     console.log('takerAssetData:', takerAssetData);
     // Amounts are in Unit amounts, 0x requires base units (as many tokens use decimals)
     const makerAssetAmount = Web3Wrapper.toBaseUnitAmount(new BigNumber(1), 0);
@@ -67,11 +65,9 @@ module.exports = async function() {
     const exchangeAddress = contractWrappers.exchange.address;
 
     // Approve the contract wrapper from 0x to pull imBTC from the taker(investor)
-    await collateralToken.approve(
-      contractWrappers.contractAddresses.erc20Proxy,
-      new BigNumber(10).pow(256).minus(1),
-      { from: takerAddress }
-    );
+    await collateralToken.approve(contractWrappers.contractAddresses.erc20Proxy, new BigNumber(10).pow(256).minus(1), {
+      from: takerAddress
+    });
 
     const order = {
       makerAddress, // maker is the first address (miner)

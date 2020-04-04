@@ -16,18 +16,17 @@
 
 pragma solidity 0.5.2;
 
-import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
-import "./MarketContractRegistryInterface.sol";
+import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
+import './MarketContractRegistryInterface.sol';
 
 
 /// @title MarketContractRegistry
 /// @author Phil Elsasser <phil@marketprotocol.io>
 contract MarketContractRegistry is Ownable, MarketContractRegistryInterface {
-
     // whitelist accounting
     mapping(address => bool) public isWhiteListed;
-    address[] public addressWhiteList;                             // record of currently deployed addresses;
-    mapping(address => bool) public factoryAddressWhiteList;       // record of authorized factories
+    address[] public addressWhiteList; // record of currently deployed addresses;
+    mapping(address => bool) public factoryAddressWhiteList; // record of authorized factories
 
     // events
     event AddressAddedToWhitelist(address indexed contractAddress);
@@ -55,13 +54,9 @@ contract MarketContractRegistry is Ownable, MarketContractRegistryInterface {
     /// a decentralized smart contract of community members to vote
     /// @param contractAddress contract to removed from white list
     /// @param whiteListIndex of the contractAddress in the addressWhiteList to be removed.
-    function removeContractFromWhiteList(
-        address contractAddress,
-        uint whiteListIndex
-    ) external onlyOwner
-    {
-        require(isWhiteListed[contractAddress], "can only remove whitelisted addresses");
-        require(addressWhiteList[whiteListIndex] == contractAddress, "index does not match address");
+    function removeContractFromWhiteList(address contractAddress, uint whiteListIndex) external onlyOwner {
+        require(isWhiteListed[contractAddress], 'can only remove whitelisted addresses');
+        require(addressWhiteList[whiteListIndex] == contractAddress, 'index does not match address');
         isWhiteListed[contractAddress] = false;
 
         // push the last item in array to replace the address we are removing and then trim the array.
@@ -74,8 +69,8 @@ contract MarketContractRegistry is Ownable, MarketContractRegistryInterface {
     /// a decentralized smart contract of community members to vote
     /// @param contractAddress contract to removed from white list
     function addAddressToWhiteList(address contractAddress) external {
-        require(isOwner() || factoryAddressWhiteList[msg.sender], "Can only be added by factory or owner");
-        require(!isWhiteListed[contractAddress], "Address must not be whitelisted");
+        require(isOwner() || factoryAddressWhiteList[msg.sender], 'Can only be added by factory or owner');
+        require(!isWhiteListed[contractAddress], 'Address must not be whitelisted');
         isWhiteListed[contractAddress] = true;
         addressWhiteList.push(contractAddress);
         emit AddressAddedToWhitelist(contractAddress);
@@ -84,7 +79,7 @@ contract MarketContractRegistry is Ownable, MarketContractRegistryInterface {
     /// @dev allows for the owner to add a new address of a factory responsible for creating new market contracts
     /// @param factoryAddress address of factory to be allowed to add contracts to whitelist
     function addFactoryAddress(address factoryAddress) external onlyOwner {
-        require(!factoryAddressWhiteList[factoryAddress], "address already added");
+        require(!factoryAddressWhiteList[factoryAddress], 'address already added');
         factoryAddressWhiteList[factoryAddress] = true;
         emit FactoryAddressAdded(factoryAddress);
     }
@@ -92,7 +87,7 @@ contract MarketContractRegistry is Ownable, MarketContractRegistryInterface {
     /// @dev allows for the owner to remove an address of a factory
     /// @param factoryAddress address of factory to be removed
     function removeFactoryAddress(address factoryAddress) external onlyOwner {
-        require(factoryAddressWhiteList[factoryAddress], "factory address is not in the white list");
+        require(factoryAddressWhiteList[factoryAddress], 'factory address is not in the white list');
         factoryAddressWhiteList[factoryAddress] = false;
         emit FactoryAddressRemoved(factoryAddress);
     }

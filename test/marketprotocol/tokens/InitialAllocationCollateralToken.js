@@ -36,11 +36,7 @@ contract('InitialAllocationCollateralToken', function(accounts) {
     assert.equal(isAllocationClaimed, true, 'allocation not marked as claimed');
 
     const isAllocationClaimedOfDiffAccount = await collateralToken.isAllocationClaimed(accounts[2]);
-    assert.equal(
-      isAllocationClaimedOfDiffAccount,
-      false,
-      'allocation marked as claimed for fresh account'
-    );
+    assert.equal(isAllocationClaimedOfDiffAccount, false, 'allocation marked as claimed for fresh account');
 
     let error = null;
     try {

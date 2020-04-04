@@ -19,5 +19,6 @@ pragma solidity 0.5.2;
 
 contract MarketContractRegistryInterface {
     function addAddressToWhiteList(address contractAddress) external;
+
     function isAddressWhiteListed(address contractAddress) external view returns (bool);
 }

@@ -16,8 +16,8 @@
 
 pragma solidity 0.5.2;
 
-import "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
-import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
+import 'openzeppelin-solidity/contracts/token/ERC20/ERC20.sol';
+import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
 
 
 /// @title Position Token
@@ -28,20 +28,14 @@ import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 /// every time a new market contract is deployed.
 /// @author Phil Elsasser <phil@marketprotocol.io>
 contract PositionToken is ERC20, Ownable {
-
     string public name;
     string public symbol;
     uint8 public decimals;
 
     MarketSide public MARKET_SIDE; // 0 = Long, 1 = Short
-    enum MarketSide { Long, Short}
+    enum MarketSide { Long, Short }
 
-    constructor(
-        string memory tokenName,
-        string memory tokenSymbol,
-        uint8 marketSide
-    ) public
-    {
+    constructor(string memory tokenName, string memory tokenSymbol, uint8 marketSide) public {
         name = tokenName;
         symbol = tokenSymbol;
         decimals = 5;
@@ -54,11 +48,7 @@ contract PositionToken is ERC20, Ownable {
     /// position tokens
     /// @param qtyToMint quantity of position tokens to mint (in base units)
     /// @param recipient the person minting and receiving these position tokens.
-    function mintAndSendToken(
-        uint256 qtyToMint,
-        address recipient
-    ) external onlyOwner
-    {
+    function mintAndSendToken(uint256 qtyToMint, address recipient) external onlyOwner {
         _mint(recipient, qtyToMint);
     }
 
@@ -67,11 +57,7 @@ contract PositionToken is ERC20, Ownable {
     /// side of the tokens are needed to redeem (handled by the collateral pool)
     /// @param qtyToRedeem quantity of tokens to burn (remove from supply / circulation)
     /// @param redeemer the person redeeming these tokens (who are we taking the balance from)
-    function redeemToken(
-        uint256 qtyToRedeem,
-        address redeemer
-    ) external onlyOwner
-    {
+    function redeemToken(uint256 qtyToRedeem, address redeemer) external onlyOwner {
         _burn(redeemer, qtyToRedeem);
     }
 }

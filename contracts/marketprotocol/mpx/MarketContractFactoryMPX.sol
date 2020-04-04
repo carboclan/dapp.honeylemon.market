@@ -16,16 +16,15 @@
 
 pragma solidity 0.5.2;
 
-import "./MarketContractMPX.sol";
-import "../MarketContractRegistryInterface.sol";
+import './MarketContractMPX.sol';
+import '../MarketContractRegistryInterface.sol';
 
-import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
+import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
 
 
 /// @title MarketContractFactoryMPX
 /// @author Phil Elsasser <phil@marketprotocol.io>
 contract MarketContractFactoryMPX is Ownable {
-
     address public marketContractRegistry;
     address public oracleHub;
     address public MARKET_COLLATERAL_POOL;
@@ -36,15 +35,11 @@ contract MarketContractFactoryMPX is Ownable {
     /// @param registryAddress - address of our MARKET registry
     /// @param collateralPoolAddress - address of our MARKET Collateral pool
     /// @param oracleHubAddress - address of the MPX oracle
-    constructor(
-        address registryAddress,
-        address collateralPoolAddress,
-        address oracleHubAddress
-    ) public {
-        require(registryAddress != address(0), "registryAddress can not be null");
-        require(collateralPoolAddress != address(0), "collateralPoolAddress can not be null");
-        require(oracleHubAddress != address(0), "oracleHubAddress can not be null");
-        
+    constructor(address registryAddress, address collateralPoolAddress, address oracleHubAddress) public {
+        require(registryAddress != address(0), 'registryAddress can not be null');
+        require(collateralPoolAddress != address(0), 'collateralPoolAddress can not be null');
+        require(oracleHubAddress != address(0), 'oracleHubAddress can not be null');
+
         marketContractRegistry = registryAddress;
         MARKET_COLLATERAL_POOL = collateralPoolAddress;
         oracleHub = oracleHubAddress;
@@ -73,15 +68,10 @@ contract MarketContractFactoryMPX is Ownable {
         uint[7] calldata contractSpecs,
         string calldata oracleURL,
         string calldata oracleStatistic
-    ) external onlyOwner
-    {
+    ) external onlyOwner {
         MarketContractMPX mktContract = new MarketContractMPX(
             contractNames,
-            [
-            owner(),
-            collateralTokenAddress,
-            MARKET_COLLATERAL_POOL
-            ],
+            [owner(), collateralTokenAddress, MARKET_COLLATERAL_POOL],
             oracleHub,
             contractSpecs,
             oracleURL,
@@ -95,7 +85,7 @@ contract MarketContractFactoryMPX is Ownable {
     /// @dev allows for the owner to set the desired registry for contract creation.
     /// @param registryAddress desired registry address.
     function setRegistryAddress(address registryAddress) external onlyOwner {
-        require(registryAddress != address(0), "registryAddress can not be null");
+        require(registryAddress != address(0), 'registryAddress can not be null');
         marketContractRegistry = registryAddress;
     }
 
@@ -103,7 +93,7 @@ contract MarketContractFactoryMPX is Ownable {
     /// contracts
     /// @param oracleHubAddress   address of the oracle hub, cannot be null address
     function setOracleHubAddress(address oracleHubAddress) external onlyOwner {
-        require(oracleHubAddress != address(0), "oracleHubAddress can not be null");
+        require(oracleHubAddress != address(0), 'oracleHubAddress can not be null');
         oracleHub = oracleHubAddress;
     }
 }

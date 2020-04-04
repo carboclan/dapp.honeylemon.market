@@ -16,6 +16,7 @@
     "@0x/web3-wrapper": "7.0.7",
     "@truffle/contract": "4.1.13",
     "openzeppelin-solidity": "2.2.0",
+    "prettier-plugin-solidity": "^1.0.0-alpha.47",
     "truffle": "5.1.18"
   },
   "devDependencies": {
@@ -33,7 +34,7 @@
   },
   "scripts": {
     "test": "truffle test",
-    "lint": "prettier-eslint --write './**/*.js' --ignore './node_modules/**' --ignore './coverage/**'"
+    "lint": "prettier-eslint --write './**/*.js' './**/*.sol' --ignore './node_modules/**' --ignore './coverage/**'"
   },
   "husky": {
     "hooks": {

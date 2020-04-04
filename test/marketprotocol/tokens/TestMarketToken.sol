@@ -16,25 +16,22 @@
 
 pragma solidity 0.5.2;
 
-import "truffle/Assert.sol";
-import "../../contracts/tokens/MarketToken.sol";
-import "../../contracts/tokens/UpgradeableTokenMock.sol";
+import 'truffle/Assert.sol';
+import '../../contracts/tokens/MarketToken.sol';
+import '../../contracts/tokens/UpgradeableTokenMock.sol';
 
 
 /// @title TestMarketToken
 /// @author Phil Elsasser <phil@marketprotcol.io>
 contract TestMarketToken {
-
     function testInitialBalance() public {
         MarketToken marketToken = new MarketToken();
         Assert.equal(
             marketToken.balanceOf(address(this)),
             marketToken.INITIAL_SUPPLY(),
-            "init supply allocated to creator"
+            'init supply allocated to creator'
         );
     }
-
-
 
     function testBurnTokens() public {
         MarketToken marketToken = new MarketToken();
@@ -42,22 +39,13 @@ contract TestMarketToken {
         Assert.equal(
             marketToken.balanceOf(address(this)),
             marketToken.INITIAL_SUPPLY(),
-            "Unexpected initial supply allocation"
+            'Unexpected initial supply allocation'
         );
 
-        Assert.equal(
-            marketToken.totalSupply(),
-            marketToken.INITIAL_SUPPLY(),
-            "Unexpected initial supply allocation"
-        );
+        Assert.equal(marketToken.totalSupply(), marketToken.INITIAL_SUPPLY(), 'Unexpected initial supply allocation');
 
         marketToken.burn(marketToken.INITIAL_SUPPLY() / 2);
 
-        Assert.equal(
-            marketToken.totalSupply(),
-            marketToken.INITIAL_SUPPLY() / 2,
-            "Unexpected supply after burn"
-        );
+        Assert.equal(marketToken.totalSupply(), marketToken.INITIAL_SUPPLY() / 2, 'Unexpected supply after burn');
     }
-
 }

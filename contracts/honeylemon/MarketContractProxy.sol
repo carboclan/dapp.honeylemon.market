@@ -1,38 +1,39 @@
 pragma solidity 0.5.2;
 
-import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
+import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
 
-import "../marketprotocol/MarketCollateralPool.sol";
-import "../marketprotocol/mpx/MarketContractFactoryMPX.sol";
+import '../marketprotocol/MarketCollateralPool.sol';
+import '../marketprotocol/mpx/MarketContractFactoryMPX.sol';
 
 
 contract MarketContractProxy is Ownable {
-
     MarketContractFactoryMPX marketContractFactoryMPX;
-    
+
     address public HONEY_LEMON_ORACLE_ADDRESS;
     address public MINTER_BRIDGE_ADDRESS;
+    address IMBTC_TOKEN_ADDRESS;
 
     uint[7] public marketProtocolContractSpecifications;
 
-    constructor(address _marketContractFactoryMPX, address _honeyLemonOracle, address _minterBridge) public{
-
+    constructor(address _marketContractFactoryMPX, address _honeyLemonOracle, address _minterBridge, _imBTCTokenAddress)
+        public
+    {
         marketContractFactoryMPX = MarketContractFactoryMPX(_marketContractFactoryMPX);
         HONEY_LEMON_ORACLE_ADDRESS = _honeyLemonOracle;
         MINTER_BRIDGE_ADDRESS = _minterBridge;
+        IMBTC_TOKEN_ADDRESS = _imBTCTokenAddress;
     }
-
 
     //////////////////////////////////////
     //// PERMISSION SCOPING MODIFIERS ////
     //////////////////////////////////////
 
-    modifier onlyHoneyLemonOracle(){
+    modifier onlyHoneyLemonOracle() {
         require(msg.sender == HONEY_LEMON_ORACLE_ADDRESS);
         _;
     }
 
-    modifier onlyMinterBridge(){
+    modifier onlyMinterBridge() {
         require(msg.sender == MINTER_BRIDGE_ADDRESS);
         _;
     }
@@ -40,7 +41,7 @@ contract MarketContractProxy is Ownable {
     //////////////////////////
     //// PUBLIC FUNCTIONS ////
     //////////////////////////
-    
+
     function balanceOf(address _owner) public view returns (uint256 balance) {
         // Return `balanceOf` for current day PositionTokenLong
     }
@@ -54,29 +55,27 @@ contract MarketContractProxy is Ownable {
     //// ORACLE PRIVILEGED FUNCTIONS ////
     /////////////////////////////////////
 
-              // Settles old contract and deploys the new contract
-    function dailySettlement(uint currentIndexValue, uint lookbackIndexValue, uint timestamp) public onlyHoneyLemonOracle {
+    // Settles old contract and deploys the new contract
+    function dailySettlement(uint currentIndexValue, uint lookbackIndexValue, uint timestamp)
+        public
+        onlyHoneyLemonOracle
+    {}
 
-    }
     ////////////////////////////////////////////////
     //// 0X-MINTER-BRIDGE PRIVILEGED FUNCTIONS /////
     ////////////////////////////////////////////////
 
-    function mintPositionTokens(
-        address marketContractAddress,
-        uint qtyToMint
-    ) public onlyMinterBridge
-    {
+    function mintPositionTokens(address marketContractAddress, uint qtyToMint) public onlyMinterBridge {
         // We need to call `mintPositionTo/*  */kens(CURRENT_CONTRACT_ADDRESS, amount, false)` on the
         // MarketCollateralPool. We can get to the pool this way:
         // CURRENT_CONTRACT_ADDRESS -> COLLATERAL_POOL_ADDRESS
     }
-    
+
     ////////////////////////////////////
     //// OWNER (DEPLOYER) FUNCTIONS ////
     ////////////////////////////////////
 
-    function setOracleAddress(address _honeyLemonOracleAddress) public onlyOwner{
+    function setOracleAddress(address _honeyLemonOracleAddress) public onlyOwner {
         HONEY_LEMON_ORACLE_ADDRESS = _honeyLemonOracleAddress;
     }
 
@@ -94,22 +93,18 @@ contract MarketContractProxy is Ownable {
     // function called daily to settle the current expiring 28 day contract.
     function settleLatestMarketContract() internal {}
 
-
-     // It is much safer to deploy Market contracts from the contract. This ensures that the code deployed
-    // cannot be substituted (e.g. to steal the collateral)
-    function deployContract(uint indexValue) internal {
     // Deploys the current day Market contract. `indexValue` is used to initialize collateral requirement in its constructor
     // Stores the new contract address, block it was deployed in, as well as the value of the index
     // we’ll need easy access to the latest values of contract address and index.
     // collateral requirement = indexValue * 28 * overcollateralization_factor
     // returns the address of the new contract
+    function deployContract(uint _indexValue) internal {
+        uint[3] contractNames;
+        uint[7] contractSpecs;
+        marketContractFactoryMPX.deployMarketContractMPX(contractNames, imBTCAddress, contractSpecs);
     }
-
-    
 
     // function generateContractSpecs() internal returns(unit[7]){},
 
     // function generateContractNames() internal returns(bytes32[3]){},
-
-
 }

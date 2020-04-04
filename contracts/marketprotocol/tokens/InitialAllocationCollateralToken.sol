@@ -16,12 +16,11 @@
 
 pragma solidity 0.5.2;
 
-import "./CollateralToken.sol";
+import './CollateralToken.sol';
 
 
 /// token with initial grant to all addresses
 contract InitialAllocationCollateralToken is CollateralToken {
-
     uint256 public INITIAL_TOKEN_ALLOCATION;
     uint256 public totalTokenAllocationsRequested;
     mapping(address => bool) isInitialAllocationClaimed;
@@ -29,18 +28,11 @@ contract InitialAllocationCollateralToken is CollateralToken {
     event AllocationClaimed(address indexed claimeeAddress);
 
     /// @dev creates a token that allows for all addresses to retrieve an initial token allocation.
-    constructor (
-        string memory tokenName,
-        string memory tokenSymbol,
-        uint256 initialTokenAllocation,
-        uint8 tokenDecimals
-    ) public CollateralToken(
-        tokenName,
-        tokenSymbol,
-        initialTokenAllocation,
-        tokenDecimals
-    ){
-        INITIAL_TOKEN_ALLOCATION = initialTokenAllocation * (10 ** uint256(decimals));
+    constructor(string memory tokenName, string memory tokenSymbol, uint256 initialTokenAllocation, uint8 tokenDecimals)
+        public
+        CollateralToken(tokenName, tokenSymbol, initialTokenAllocation, tokenDecimals)
+    {
+        INITIAL_TOKEN_ALLOCATION = initialTokenAllocation * (10**uint256(decimals));
     }
 
     /// @notice allows caller to claim a one time allocation of tokens.
