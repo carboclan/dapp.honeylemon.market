@@ -24,5 +24,5 @@ module.exports = async function(deployer, network, accounts) {
   await collateralToken.transfer(accounts[1], '1000000000000000000');
 
   // Allow MinterBridge to draw the collateral
-  await collateralToken.approve(bridge.address, '10000000000000000000000', {from: accounts[0]})
+  await collateralToken.approve(bridge.address, '10000000000000000000000', { from: accounts[0] });
 };
