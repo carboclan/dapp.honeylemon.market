@@ -16,7 +16,7 @@
 
 pragma solidity 0.5.2;
 
-import './libraries/MathLib.sol';
+import '../libraries/MathLib.sol';
 import './MarketContract.sol';
 import './tokens/PositionToken.sol';
 import './MarketContractRegistryInterface.sol';

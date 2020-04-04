@@ -120,7 +120,7 @@ contract MarketContractProxy is Ownable {
     // we’ll need easy access to the latest values of contract address and index.
     // collateral requirement = indexValue * 28 * overcollateralization_factor
     // returns the address of the new contract
-    function deployContract(uint _indexValue) internal {
+    function deployContract(uint _indexValue) internal returns (address) {
         bytes32[3] memory contractNames;
         uint[7] memory contractSpecs;
         address contractAddress = marketContractFactoryMPX.deployMarketContractMPX(
@@ -130,6 +130,7 @@ contract MarketContractProxy is Ownable {
             ORACLE_URL,
             ORACLE_STATISTIC
         );
+        return (contractAddress);
     }
 
     // function generateContractSpecs() internal returns(unit[7]){},

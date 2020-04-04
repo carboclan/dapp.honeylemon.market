@@ -18,8 +18,8 @@ pragma solidity 0.5.2;
 
 import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
 
-import './libraries/MathLib.sol';
-import './libraries/StringLib.sol';
+import '../libraries/MathLib.sol';
+import '../libraries/StringLib.sol';
 import './tokens/PositionToken.sol';
 
 
