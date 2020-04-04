@@ -19,8 +19,8 @@ contract MarketContractProxy is Ownable {
     uint[7] public marketProtocolContractSpecifications = [
         0, // floorPrice - the lower bound price for the CFD [constant]
         0, // capPrice - the upper bound price for the CFD [updated before deployment]
-        10, // priceDecimalPlaces - number of decimals used to convert prices [constant]
-        100000000, // qtyMultiplier - multiply traded qty by this value from base units of collateral token.  [constant]
+        8, // priceDecimalPlaces - number of decimals used to convert prices [constant]
+        1, // qtyMultiplier - multiply traded qty by this value from base units of collateral token.  [constant]
         0, // feeInBasisPoints - fee for minting tokens [constant]
         0, // mktFeeInBasisPoints - fees charged by the market in MKT [constant]
         0 // expirationTimeStamp [updated before deployment]
