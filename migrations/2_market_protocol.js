@@ -25,7 +25,8 @@ module.exports = async function(deployer, network, accounts) {
                     .then(function() {
                       return MarketCollateralPool.deployed().then(function() {
                         return deployer
-                          .deploy(CollateralToken, 'CollateralToken', 'CTK', 20000, 18, {
+                          .deploy(CollateralToken, 'Mock imBTC', 'imBTC', 20000, 8, {
+                            // note 8 decimals
                             gas: gasLimit
                           })
                           .then(function() {

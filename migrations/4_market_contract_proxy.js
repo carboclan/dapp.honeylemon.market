@@ -11,12 +11,6 @@ module.exports = async function(deployer, network, accounts) {
   let collateralToken = await CollateralToken.deployed();
   let marketContractFactoryMPX = await MarketContractFactoryMPX.deployed();
 
-  let marketContractAddresss = await registry.addressWhiteList.call(0);
-  console.log('marketContractAddresss:', marketContractAddresss);
-  if (!marketContractAddresss) {
-    throw Error('Unable to get MarketContract address');
-  }
-
   // Deploy the Market Contract proxy
   let marketContractProxy = await deployer.deploy(
     MarketContractProxy,

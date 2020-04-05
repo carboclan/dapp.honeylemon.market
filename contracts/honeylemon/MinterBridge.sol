@@ -17,12 +17,15 @@ contract MinterBridge is Ownable {
     using MathLib for int;
     using SafeERC20 for ERC20;
 
+    MarketContractProxy marketProxy;
+
     // @dev Result of a successful bridge call.
     bytes4 internal constant BRIDGE_SUCCESS = 0xdc1600f3;
     address public MARKET_CONTRACT_PROXY_ADDRESS;
 
     function setMarketProxyAddress(address _marketContractProxyAddress) public onlyOwner {
         MARKET_CONTRACT_PROXY_ADDRESS = _marketContractProxyAddress;
+        marketProxy = MarketContractProxy(MARKET_CONTRACT_PROXY_ADDRESS);
     }
 
     modifier onlyMarketProxy() {
@@ -52,26 +55,24 @@ contract MinterBridge is Ownable {
         bytes calldata bridgeData
     ) external onlyIfSetMarketProxy returns (bytes4 success) {
         require(tokenAddress == MARKET_CONTRACT_PROXY_ADDRESS, 'bad proxy address');
-
-        MarketContractProxy marketProxy = MarketContractProxy(MARKET_CONTRACT_PROXY_ADDRESS);
         address marketContractAddress = marketProxy.getCurrentMarketContractAddress();
         MarketContract market = MarketContract(marketContractAddress);
 
-        address poolAddress = market.COLLATERAL_POOL_ADDRESS();
+        // address poolAddress = market.COLLATERAL_POOL_ADDRESS();
         // (imBTC) sent from the miner
         ERC20 collateralToken = ERC20(market.COLLATERAL_TOKEN_ADDRESS());
-        ERC20 longToken = ERC20(market.LONG_POSITION_TOKEN());
-        ERC20 shortToken = ERC20(market.SHORT_POSITION_TOKEN());
+        // Long token sent to the investor
+        // ERC20 longToken = ERC20(market.LONG_POSITION_TOKEN());
+        // // Short token sent to the miner
+        // ERC20 shortToken = ERC20(market.SHORT_POSITION_TOKEN());
 
         uint neededCollateral = MathLib.multiply(amount, market.COLLATERAL_PER_UNIT());
 
-        collateralToken.safeTransferFrom(from, address(this), neededCollateral);
-        collateralToken.approve(poolAddress, neededCollateral);
+        collateralToken.safeTransferFrom(from, MARKET_CONTRACT_PROXY_ADDRESS, neededCollateral);
+        // to: long & taker (investor)
+        // from: short & maker (miner)
 
-        marketProxy.mintPositionTokens(amount);
-
-        longToken.transfer(to, amount);
-        shortToken.transfer(from, amount);
+        marketProxy.mintPositionTokens(amount, to, from);
 
         // Transfer the fake token to trick 0x
         // ERC20(tokenAddress).transfer(to, amount);

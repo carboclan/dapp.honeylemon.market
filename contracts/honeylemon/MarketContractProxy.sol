@@ -83,10 +83,15 @@ contract MarketContractProxy is Ownable {
     //// 0X-MINTER-BRIDGE PRIVILEGED FUNCTIONS /////
     ////////////////////////////////////////////////
 
-    function mintPositionTokens(uint qtyToMint) public onlyMinterBridge {
+    function mintPositionTokens(uint qtyToMint, address longTokenRecipient, address shortTokenRecipient)
+        public
+        onlyMinterBridge
+    {
         // We need to call `mintPositionTo/*  */kens(CURRENT_CONTRACT_ADDRESS, amount, false)` on the
         // MarketCollateralPool. We can get to the pool this way:
         // CURRENT_CONTRACT_ADDRESS -> COLLATERAL_POOL_ADDRESS
+        // longToken.transfer(longTokenRecipient, amount);
+        // shortToken.transfer(shortTokenRecipient, amount);
     }
 
     ////////////////////////////////////
