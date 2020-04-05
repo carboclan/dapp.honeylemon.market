@@ -6,3 +6,5 @@ build/
 coverage.json
 coverage/
 node_modules/
+abigenBindings/
+goBindings/

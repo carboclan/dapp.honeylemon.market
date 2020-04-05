@@ -8,10 +8,6 @@ module.exports = async function(deployer, network, accounts) {
   await deployer.deploy(MinterBridge);
 
   // let bridge = await MinterBridge.deployed();
-  // const fakeTokenSupply = '20000000000000000000000';
-  // const fakeToken = await deployer.deploy(FakeToken, 'Fake', 'FAK', fakeTokenSupply, 18);
-  // await fakeToken.transfer(bridge.address, '10000000000000000000000');
-  // await fakeToken.transfer(accounts[0], '10000000000000000000000');
 
   // give some collateral tokens to the buyer
   // const collateralToken = await CollateralToken.deployed();

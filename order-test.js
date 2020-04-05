@@ -19,6 +19,7 @@ const { BigNumber } = require('@0x/utils');
 
 //Contracts
 const CollateralToken = artifacts.require('CollateralToken'); // IMBTC
+const PaymentToken = artifacts.require('Paymenttoken'); // USDC
 const MinterBridge = artifacts.require('MinterBridge');
 const MarketContractProxy = artifacts.require('MarketContractProxy');
 
@@ -35,6 +36,7 @@ module.exports = async function() {
     const web3Wrapper = new Web3Wrapper(provider);
 
     const collateralToken = await CollateralToken.deployed();
+    const paymentToken = await PaymentToken.deployed();
     const minterBridge = await MinterBridge.deployed();
     const marketContractProxy = await MarketContractProxy.deployed();
 
@@ -66,7 +68,7 @@ module.exports = async function() {
 
     // Taker token is imBTC sent to collateralize the contractWe use CollateralToken.
     // This is imBTC sent from the investor to the Market protocol contract
-    const takerToken = { address: collateralToken.address, decimals: 18 };
+    const takerToken = { address: paymentToken.address, decimals: 18 };
 
     // 0x sees the marketContractProxy as the maker token. This has a `balanceOf` method to get 0x
     // to think the order has processed.
@@ -78,10 +80,7 @@ module.exports = async function() {
       minterBridge.address,
       '0x0000'
     );
-    console.log('decodeAssetDataOrThrow', assetDataUtils.decodeAssetDataOrThrow(makerAssetData));
 
-    console.log('makerAssetData:', makerAssetData);
-    console.log('takerToken.address', takerToken.address);
     // Encode the selected takerToken as assetData for 0x
     const takerAssetData = await contractWrappers.devUtils.encodeERC20AssetData(takerToken.address).callAsync();
     console.log('takerAssetData:', takerAssetData);
@@ -90,9 +89,14 @@ module.exports = async function() {
     const takerAssetAmount = Web3Wrapper.toBaseUnitAmount(new BigNumber(1), 0);
     const exchangeAddress = contractWrappers.exchange.address;
 
-    // Approve the contract wrapper from 0x to pull imBTC from the taker(investor)
-    await collateralToken.approve(contractWrappers.contractAddresses.erc20Proxy, new BigNumber(10).pow(256).minus(1), {
+    // Approve the contract wrapper from 0x to pull USDC from the taker(investor)
+    await paymentToken.approve(contractWrappers.contractAddresses.erc20Proxy, new BigNumber(10).pow(256).minus(1), {
       from: takerAddress
+    });
+
+    // Approve the contract wrapper from 0x to pull imBTC from the maker(miner)
+    await collateralToken.approve(minterBridge.address, new BigNumber(10).pow(256).minus(1), {
+      from: makerAddress
     });
 
     // Generate the 0x order
@@ -117,15 +121,24 @@ module.exports = async function() {
 
     // Generate the order hash and sign it
     const signedOrder = await signatureUtils.ecSignOrderAsync(provider, order, makerAddress);
-    console.log('signedOrder:', signedOrder);
+    console.log('signedOrder:', JSON.stringify(signedOrder));
 
     console.log('contractWrappers.exchange', contractWrappers.exchange.address);
 
     // Fill order
-    const txHash = await contractWrappers.exchange
-      .fillOrder(signedOrder, makerAssetAmount, signedOrder.signature)
-      .sendTransactionAsync({ from: takerAddress, gas: 6700000, value: 3000000000000000 }); // value is required to pay 0x fees
-    console.log('txHash:', txHash);
+    const debug = false;
+    if (debug) {
+      // Call MinterBridge directly for debugging
+      await minterBridge.bridgeTransferFrom(makerToken.address, makerAddress, takerAddress, 1, '0x0000', {
+        from: takerAddress,
+        gas: 6700000
+      });
+    } else {
+      const txHash = await contractWrappers.exchange
+        .fillOrder(signedOrder, makerAssetAmount, signedOrder.signature)
+        .sendTransactionAsync({ from: takerAddress, gas: 6700000, value: 3000000000000000 }); // value is required to pay 0x fees
+      console.log('txHash:', txHash);
+    }
   } catch (e) {
     console.log(e);
   }

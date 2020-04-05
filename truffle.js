@@ -26,5 +26,6 @@ module.exports = {
         runs: 200
       }
     }
-  }
+  },
+  plugins: ['@chainsafe/truffle-plugin-abigen']
 };

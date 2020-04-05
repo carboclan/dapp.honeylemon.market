@@ -22,7 +22,7 @@ contract MarketContractProxy is Ownable {
     uint CONTRACT_DURATION = 60 * 60 * 24 * 28; // 28 days in seconds
 
     uint[7] public marketContractSpecs = [
-        1, // floorPrice - the lower bound price for the CFD [constant]
+        0, // floorPrice - the lower bound price for the CFD [constant]
         0, // capPrice - the upper bound price for the CFD [updated before deployment]
         8, // priceDecimalPlaces - number of decimals used to convert prices [constant]
         1, // qtyMultiplier - multiply traded qty by this value from base units of collateral token. [constant]
@@ -134,7 +134,7 @@ contract MarketContractProxy is Ownable {
         collateralToken.transferFrom(MINTER_BRIDGE_ADDRESS, address(this), collateralNeeded);
 
         // Permission market contract to spent collateral token
-        collateralToken.increaseAllowance(address(latestMarketContract), collateralNeeded);
+        collateralToken.approve(address(marketCollateralPool), collateralNeeded);
 
         // Generate long and short tokens to sent to invester and miner
         marketCollateralPool.mintPositionTokens(address(latestMarketContract), qtyToMint, false);
