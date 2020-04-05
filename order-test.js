@@ -53,7 +53,10 @@ module.exports = async function() {
     console.log('spects');
     console.log(contractSpecs);
 
+    // Create Todays market protocol contract
     await marketContractProxy.deployContract();
+
+    // Get the address of todays marketProtocolContract
     let deployedContracts = await marketContractProxy.marketContracts(0);
     console.log('Deployed market contracts', deployedContracts);
 
@@ -61,67 +64,68 @@ module.exports = async function() {
      * Generate 0x order *
      *********************/
 
-    //   // Taker token is imBTC sent to collateralize the contractWe use CollateralToken.
-    //   // This is imBTC sent from the investor to the Market protocol contract
-    //   const takerToken = { address: collateralToken.address, decimals: 18 };
+    // Taker token is imBTC sent to collateralize the contractWe use CollateralToken.
+    // This is imBTC sent from the investor to the Market protocol contract
+    const takerToken = { address: collateralToken.address, decimals: 18 };
 
-    //   // 0x sees the marketContractProxy as the maker token. This has a `balanceOf` method to get 0x
-    //   // to think the order has processed.
-    //   const makerToken = { address: marketContractProxy.address };
+    // 0x sees the marketContractProxy as the maker token. This has a `balanceOf` method to get 0x
+    // to think the order has processed.
+    const makerToken = { address: marketContractProxy.address };
 
-    //   // Encode the selected makerToken as assetData for 0x
-    //   const makerAssetData = assetDataUtils.encodeERC20BridgeAssetData(
-    //     makerToken.address,
-    //     minterBridge.address,
-    //     "0x0000"
-    //   );
-    //   console.log("decodeAssetDataOrThrow", assetDataUtils.decodeAssetDataOrThrow(makerAssetData));
-    //   console.log("makerAssetData:", makerAssetData);
-    //   console.log("takerToken.address", takerToken.address);
-    //   // Encode the selected takerToken as assetData for 0x
-    //   const takerAssetData = await contractWrappers.devUtils.encodeERC20AssetData(takerToken.address).callAsync();
-    //   console.log("takerAssetData:", takerAssetData);
-    //   // Amounts are in Unit amounts, 0x requires base units (as many tokens use decimals)
-    //   const makerAssetAmount = Web3Wrapper.toBaseUnitAmount(new BigNumber(1), 0);
-    //   const takerAssetAmount = Web3Wrapper.toBaseUnitAmount(new BigNumber(1), 0);
-    //   const exchangeAddress = contractWrappers.exchange.address;
+    // Encode the selected makerToken as assetData for 0x
+    const makerAssetData = assetDataUtils.encodeERC20BridgeAssetData(
+      makerToken.address,
+      minterBridge.address,
+      '0x0000'
+    );
+    console.log('decodeAssetDataOrThrow', assetDataUtils.decodeAssetDataOrThrow(makerAssetData));
 
-    //   // Approve the contract wrapper from 0x to pull imBTC from the taker(investor)
-    //   await collateralToken.approve(contractWrappers.contractAddresses.erc20Proxy, new BigNumber(10).pow(256).minus(1), {
-    //     from: takerAddress,
-    //   });
+    console.log('makerAssetData:', makerAssetData);
+    console.log('takerToken.address', takerToken.address);
+    // Encode the selected takerToken as assetData for 0x
+    const takerAssetData = await contractWrappers.devUtils.encodeERC20AssetData(takerToken.address).callAsync();
+    console.log('takerAssetData:', takerAssetData);
+    // Amounts are in Unit amounts, 0x requires base units (as many tokens use decimals)
+    const makerAssetAmount = Web3Wrapper.toBaseUnitAmount(new BigNumber(1), 0);
+    const takerAssetAmount = Web3Wrapper.toBaseUnitAmount(new BigNumber(1), 0);
+    const exchangeAddress = contractWrappers.exchange.address;
 
-    //   // Generate the 0x order
-    //   const order = {
-    //     makerAddress, // maker is the first address (miner)
-    //     takerAddress: NULL_ADDRESS, // taker is open and can be filled by anyone (when an investor comes along)
-    //     makerAssetAmount, // The maker asset amount
-    //     takerAssetAmount, // The taker asset amount
-    //     expirationTimeSeconds: new BigNumber(Math.round(Date.now() / 1000) + 10 * 60), // Time when this order expires
-    //     makerFee: 0, // 0 maker fees
-    //     takerFee: 0, // 0 taker fees
-    //     feeRecipientAddress: NULL_ADDRESS, // No fee recipient
-    //     senderAddress: NULL_ADDRESS, // Sender address is open and can be submitted by anyone
-    //     salt: generatePseudoRandomSalt(), // Random value to provide uniqueness
-    //     makerAssetData,
-    //     takerAssetData,
-    //     exchangeAddress,
-    //     makerFeeAssetData: "0x",
-    //     takerFeeAssetData: "0x",
-    //     chainId,
-    //   };
+    // Approve the contract wrapper from 0x to pull imBTC from the taker(investor)
+    await collateralToken.approve(contractWrappers.contractAddresses.erc20Proxy, new BigNumber(10).pow(256).minus(1), {
+      from: takerAddress
+    });
 
-    //   // Generate the order hash and sign it
-    //   const signedOrder = await signatureUtils.ecSignOrderAsync(provider, order, makerAddress);
-    //   console.log("signedOrder:", signedOrder);
+    // Generate the 0x order
+    const order = {
+      makerAddress, // maker is the first address (miner)
+      takerAddress: NULL_ADDRESS, // taker is open and can be filled by anyone (when an investor comes along)
+      makerAssetAmount, // The maker asset amount
+      takerAssetAmount, // The taker asset amount
+      expirationTimeSeconds: new BigNumber(Math.round(Date.now() / 1000) + 10 * 60), // Time when this order expires
+      makerFee: 0, // 0 maker fees
+      takerFee: 0, // 0 taker fees
+      feeRecipientAddress: NULL_ADDRESS, // No fee recipient
+      senderAddress: NULL_ADDRESS, // Sender address is open and can be submitted by anyone
+      salt: generatePseudoRandomSalt(), // Random value to provide uniqueness
+      makerAssetData,
+      takerAssetData,
+      exchangeAddress,
+      makerFeeAssetData: '0x',
+      takerFeeAssetData: '0x',
+      chainId
+    };
 
-    //   console.log("contractWrappers.exchange", contractWrappers.exchange.address);
+    // Generate the order hash and sign it
+    const signedOrder = await signatureUtils.ecSignOrderAsync(provider, order, makerAddress);
+    console.log('signedOrder:', signedOrder);
 
-    //   // Fill order
-    //   const txHash = await contractWrappers.exchange
-    //     .fillOrder(signedOrder, makerAssetAmount, signedOrder.signature)
-    //     .sendTransactionAsync({ from: takerAddress, gas: 6700000, value: 3000000000000000 }); // value is required to pay 0x fees
-    //   console.log("txHash:", txHash);
+    console.log('contractWrappers.exchange', contractWrappers.exchange.address);
+
+    // Fill order
+    const txHash = await contractWrappers.exchange
+      .fillOrder(signedOrder, makerAssetAmount, signedOrder.signature)
+      .sendTransactionAsync({ from: takerAddress, gas: 6700000, value: 3000000000000000 }); // value is required to pay 0x fees
+    console.log('txHash:', txHash);
   } catch (e) {
     console.log(e);
   }

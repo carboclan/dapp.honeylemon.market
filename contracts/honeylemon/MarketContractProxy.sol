@@ -89,7 +89,7 @@ contract MarketContractProxy is Ownable {
         return MathLib.multiply(amount, latestMarketContract.COLLATERAL_PER_UNIT());
     }
 
-    function getAllMarketContracts() public returns (address[]) {
+    function getAllMarketContracts() public returns (address[] memory) {
         return marketContracts;
     }
 
