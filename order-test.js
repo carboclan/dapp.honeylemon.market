@@ -1,5 +1,6 @@
-const { RPCSubprovider, Web3ProviderEngine } = require('@0x/subproviders');
+//Ox libs and tools
 
+const { RPCSubprovider, Web3ProviderEngine } = require('@0x/subproviders');
 const {
   generatePseudoRandomSalt,
   Order,
@@ -13,22 +14,20 @@ const { Web3Wrapper } = require('@0x/web3-wrapper');
 const { BigNumber } = require('@0x/utils');
 
 // const AssetDataUtils = artifacts.require('AssetDataUtils');
-const FakeToken = artifacts.require('FakeToken');
-const CollateralToken = artifacts.require('CollateralToken');
+// const FakeToken = artifacts.require('FakeToken');
+//TODO: Add Dai
+
+//Contracts
+const CollateralToken = artifacts.require('CollateralToken'); // IMBTC
 const MinterBridge = artifacts.require('MinterBridge');
+const MarketContractProxy = artifacts.require('MarketContractProxy');
 
 const NULL_ADDRESS = '0x0000000000000000000000000000000000000000';
 
 module.exports = async function() {
   try {
-    // const rpcSubprovider = new RPCSubprovider('http://localhost:8545');
-    //const provider = new Web3ProviderEngine();
-    //provider.addProvider(web3.currentProvider);
-    // provider.addProvider(rpcSubprovider);
-    //provider.start();
-
+    // params to init 0x setup
     const provider = web3.currentProvider;
-    // console.log('provider', provider);
 
     // Then use the provider
     const chainId = 1337;
@@ -38,15 +37,18 @@ module.exports = async function() {
     const fakeToken = await FakeToken.deployed();
     const collateralToken = await CollateralToken.deployed();
     const minterBridge = await MinterBridge.deployed();
+    const marketContractProxy = await MarketContractProxy.deployed();
 
     const addresses = await web3Wrapper.getAvailableAddressesAsync();
     const makerAddress = addresses[0]; // Miner
     const takerAddress = addresses[1]; // Investor
 
-    // Fake token for the maker (miner)
-    const makerToken = { address: fakeToken.address, decimals: 18 };
-    // We use CollateralToken. This is imBTC sent from the investor to the Market protocol contract
+    // Taker token is imBTC sent to collateralize the contractWe use CollateralToken. This is imBTC sent from the investor to the Market protocol contract
     const takerToken = { address: collateralToken.address, decimals: 18 };
+
+    // Fake token for the maker (miner)
+    const makerToken = { address: marketContractProxy.address, decimals: 18 };
+
     // Encode the selected makerToken as assetData for 0x
     const makerAssetData = assetDataUtils.encodeERC20BridgeAssetData(
       makerToken.address,

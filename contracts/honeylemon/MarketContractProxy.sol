@@ -4,6 +4,9 @@ import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
 
 import '../marketprotocol/MarketCollateralPool.sol';
 import '../marketprotocol/mpx/MarketContractFactoryMPX.sol';
+import '../marketprotocol/mpx/MarketContractMPX.sol';
+
+import '../libraries/MathLib.sol';
 
 
 contract MarketContractProxy is Ownable {
@@ -11,7 +14,7 @@ contract MarketContractProxy is Ownable {
 
     address public HONEY_LEMON_ORACLE_ADDRESS;
     address public MINTER_BRIDGE_ADDRESS;
-    address public IMBTC_TOKEN_ADDRESS;
+    address public COLLATERAL_TOKEN_ADDRESS; //imBTC
 
     string public ORACLE_URL = 'null';
     string public ORACLE_STATISTIC = 'null';
@@ -26,6 +29,8 @@ contract MarketContractProxy is Ownable {
         0 // expirationTimeStamp [updated before deployment]
     ];
 
+    address[] marketContracts;
+
     constructor(
         address _marketContractFactoryMPX,
         address _honeyLemonOracle,
@@ -35,7 +40,7 @@ contract MarketContractProxy is Ownable {
         marketContractFactoryMPX = MarketContractFactoryMPX(_marketContractFactoryMPX);
         HONEY_LEMON_ORACLE_ADDRESS = _honeyLemonOracle;
         MINTER_BRIDGE_ADDRESS = _minterBridge;
-        IMBTC_TOKEN_ADDRESS = _imBTCTokenAddress;
+        COLLATERAL_TOKEN_ADDRESS = _imBTCTokenAddress;
     }
 
     //////////////////////////////////////
@@ -43,12 +48,12 @@ contract MarketContractProxy is Ownable {
     //////////////////////////////////////
 
     modifier onlyHoneyLemonOracle() {
-        require(msg.sender == HONEY_LEMON_ORACLE_ADDRESS);
+        require(msg.sender == HONEY_LEMON_ORACLE_ADDRESS, 'Only Honey Lemon Oracle');
         _;
     }
 
     modifier onlyMinterBridge() {
-        require(msg.sender == MINTER_BRIDGE_ADDRESS);
+        require(msg.sender == MINTER_BRIDGE_ADDRESS, 'Only Minter Bridge');
         _;
     }
 
@@ -65,8 +70,21 @@ contract MarketContractProxy is Ownable {
         // return min(imBTC.balanceOf(_owner), imBTC.allowance(_owner, MARKET_PROTOCOL_POOL_ADDRESS)) / (indexValue * CONTRACT_DURATION)
     }
 
-    function getCurrentMarketContractAddress() public view returns (address) {
-        return address(0);
+    //TODO: refactor this to return an interface
+    function getLatestMarketContract() public view returns (MarketContract) {
+        uint lastIndex = marketContracts.length - 1;
+        return MarketContract(marketContracts[lastIndex]);
+    }
+
+    //TODO: refactor this to return an interface
+    function getLatestMarketCollateralPool() public view returns (MarketCollateralPool) {
+        MarketContract latestMarketContract = getLatestMarketContract();
+        return MarketCollateralPool(latestMarketContract.COLLATERAL_POOL_ADDRESS());
+    }
+
+    function calculateRequiredCollateral(uint amount) public view returns (uint) {
+        MarketContract latestMarketContract = getLatestMarketContract();
+        return MathLib.multiply(amount, latestMarketContract.COLLATERAL_PER_UNIT());
     }
 
     /////////////////////////////////////
@@ -89,9 +107,32 @@ contract MarketContractProxy is Ownable {
     {
         // We need to call `mintPositionTo/*  */kens(CURRENT_CONTRACT_ADDRESS, amount, false)` on the
         // MarketCollateralPool. We can get to the pool this way:
-        // CURRENT_CONTRACT_ADDRESS -> COLLATERAL_POOL_ADDRESS
-        // longToken.transfer(longTokenRecipient, amount);
-        // shortToken.transfer(shortTokenRecipient, amount);
+        uint collateralNeeded = calculateRequiredCollateral(qtyToMint);
+
+        // Create instance of the latest market contract for today
+        MarketContract latestMarketContract = getLatestMarketContract();
+        // Create instance of the market collateral pool
+        MarketCollateralPool marketCollateralPool = getLatestMarketCollateralPool();
+
+        // Long token sent to the investor
+        ERC20 longToken = ERC20(latestMarketContract.LONG_POSITION_TOKEN());
+        // Short token sent to the miner
+        ERC20 shortToken = ERC20(latestMarketContract.SHORT_POSITION_TOKEN());
+        // Collateral token (imBTC)
+        ERC20 collateralToken = ERC20(COLLATERAL_TOKEN_ADDRESS);
+
+        // Move tokens from the MinterBridge to this proxy address
+        collateralToken.transferFrom(MINTER_BRIDGE_ADDRESS, address(this), collateralNeeded);
+
+        // Permission market contract to spent collateral token
+        collateralToken.increaseAllowance(address(latestMarketContract), collateralNeeded);
+
+        // Generate long and short tokens to sent to invester and miner
+        marketCollateralPool.mintPositionTokens(address(latestMarketContract), qtyToMint, false);
+
+        // Send the tokens
+        longToken.transfer(longTokenRecipient, qtyToMint);
+        shortToken.transfer(shortTokenRecipient, qtyToMint);
     }
 
     ////////////////////////////////////
@@ -130,7 +171,7 @@ contract MarketContractProxy is Ownable {
         uint[7] memory contractSpecs;
         address contractAddress = marketContractFactoryMPX.deployMarketContractMPX(
             contractNames,
-            IMBTC_TOKEN_ADDRESS,
+            COLLATERAL_TOKEN_ADDRESS,
             contractSpecs,
             ORACLE_URL,
             ORACLE_STATISTIC
