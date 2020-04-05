@@ -63,10 +63,6 @@ contract MarketContractProxy is Ownable {
     //// PUBLIC FUNCTIONS ////
     //////////////////////////
 
-    function balanceOf(address _owner) public view returns (uint256 balance) {
-        // Return `balanceOf` for current day PositionTokenLong
-    }
-
     // What’s the TH amount that can currently be filled based on owner’s BTC balance and allowance
     function fillableAmount(address _owner) public view returns (uint256 amount) {
         // return min(imBTC.balanceOf(_owner), imBTC.allowance(_owner, MARKET_PROTOCOL_POOL_ADDRESS)) / (indexValue * CONTRACT_DURATION)
@@ -91,6 +87,13 @@ contract MarketContractProxy is Ownable {
 
     function getAllMarketContracts() public returns (address[] memory) {
         return marketContracts;
+    }
+
+    // Return `balanceOf` for current day PositionTokenLong
+    function balanceOf(address _owner) public returns (uint) {
+        MarketContract latestMarketContract = getLatestMarketContract();
+        ERC20 longToken = ERC20(latestMarketContract.LONG_POSITION_TOKEN());
+        return longToken.balanceOf(_owner);
     }
 
     /////////////////////////////////////
