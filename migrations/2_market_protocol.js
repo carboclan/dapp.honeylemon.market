@@ -1,4 +1,4 @@
-const MathLib = artifacts.require('./libraries/MathLib.sol');
+const MathLib = artifacts.require('MathLib');
 const StringLib = artifacts.require('./libraries/StringLib.sol');
 const CollateralToken = artifacts.require('./tokens/CollateralToken.sol');
 const MarketToken = artifacts.require('./tokens/MarketToken.sol');
@@ -42,19 +42,7 @@ module.exports = async function(deployer, network, accounts) {
                               .then(function(factory) {
                                 return MarketContractRegistry.deployed().then(function(registryInstance) {
                                   return registryInstance.addFactoryAddress(factory.address).then(function() {
-                                    // white list the factory
-                                    return factory.deployMarketContractMPX(
-                                      [
-                                        web3.utils.asciiToHex('BTC', 32),
-                                        web3.utils.asciiToHex('LBTC', 32),
-                                        web3.utils.asciiToHex('SBTC', 32)
-                                      ],
-                                      CollateralToken.address,
-                                      [20000000000000, 60000000000000, 10, 100000000, 0, 0, marketContractExpiration],
-                                      'api.coincap.io/v2/rates/bitcoin',
-                                      'rateUsd',
-                                      { gas: gasLimit }
-                                    );
+                                    console.log('💹Done Market Migration!');
                                   });
                                 });
                               });

@@ -21,17 +21,17 @@ contract MinterBridge is Ownable {
     bytes4 internal constant BRIDGE_SUCCESS = 0xdc1600f3;
     address public MARKET_CONTRACT_PROXY_ADDRESS;
 
-    function setMarketProtocolProxyAddress(address _marketContractProxyAddress) public onlyOwner {
+    function setMarketProxyAddress(address _marketContractProxyAddress) public onlyOwner {
         MARKET_CONTRACT_PROXY_ADDRESS = _marketContractProxyAddress;
     }
 
-    modifier onlyMarketProtocolProxy() {
+    modifier onlyMarketProxy() {
         require(msg.sender == MARKET_CONTRACT_PROXY_ADDRESS, 'bad proxy address');
         _;
     }
 
-    modifier onlyIfSetMarketProtocolProxy() {
-        require(MARKET_CONTRACT_PROXY_ADDRESS != address(0), 'MarketProtocolProxy not set');
+    modifier onlyIfSetMarketProxy() {
+        require(MARKET_CONTRACT_PROXY_ADDRESS != address(0), 'MarketProxy not set');
         _;
     }
 
@@ -50,29 +50,30 @@ contract MinterBridge is Ownable {
         address to,
         uint256 amount,
         bytes calldata bridgeData
-    ) external onlyIfSetMarketProtocolProxy returns (bytes4 success) {
+    ) external onlyIfSetMarketProxy returns (bytes4 success) {
         require(tokenAddress == MARKET_CONTRACT_PROXY_ADDRESS, 'bad proxy address');
 
-        MarketContractProxy marketProtocolProxy = MarketContractProxy(MARKET_CONTRACT_PROXY_ADDRESS);
-        address marketContractAddress = marketProtocolProxy.getCurrentMarketContractAddress();
-        MarketContract marketProtocol = MarketContract(marketContractAddress);
+        MarketContractProxy marketProxy = MarketContractProxy(MARKET_CONTRACT_PROXY_ADDRESS);
+        address marketContractAddress = marketProxy.getCurrentMarketContractAddress();
+        MarketContract market = MarketContract(marketContractAddress);
 
-        address poolAddress = marketProtocol.COLLATERAL_POOL_ADDRESS();
-        ERC20 collateralToken = ERC20(marketProtocol.COLLATERAL_TOKEN_ADDRESS());
-        ERC20 longToken = ERC20(marketProtocol.LONG_POSITION_TOKEN());
-        ERC20 shortToken = ERC20(marketProtocol.SHORT_POSITION_TOKEN());
+        address poolAddress = market.COLLATERAL_POOL_ADDRESS();
+        // (imBTC) sent from the miner
+        ERC20 collateralToken = ERC20(market.COLLATERAL_TOKEN_ADDRESS());
+        ERC20 longToken = ERC20(market.LONG_POSITION_TOKEN());
+        ERC20 shortToken = ERC20(market.SHORT_POSITION_TOKEN());
 
-        uint neededCollateral = MathLib.multiply(amount, marketProtocol.COLLATERAL_PER_UNIT());
+        uint neededCollateral = MathLib.multiply(amount, market.COLLATERAL_PER_UNIT());
 
         collateralToken.safeTransferFrom(from, address(this), neededCollateral);
         collateralToken.approve(poolAddress, neededCollateral);
 
-        marketProtocolProxy.mintPositionTokens(amount);
+        marketProxy.mintPositionTokens(amount);
 
         longToken.transfer(to, amount);
         shortToken.transfer(from, amount);
 
-        // Transfer the fake token to trick 0x protocol
+        // Transfer the fake token to trick 0x
         // ERC20(tokenAddress).transfer(to, amount);
 
         // TODO: transfer ERC20 tokens (DAI) from the investor (taker) to the miner (maker)

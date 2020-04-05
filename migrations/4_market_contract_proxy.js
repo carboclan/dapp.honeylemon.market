@@ -1,15 +1,15 @@
-const MinterBridge = artifacts.require('./honeylemon/MinterBridge.sol');
-const MarketContractProxy = artifacts.require('./honeylemon/MarketContractProxy.sol');
+const MinterBridge = artifacts.require('MinterBridge');
+const MarketContractProxy = artifacts.require('MarketContractProxy');
 
-const MarketContractRegistry = artifacts.require('./marketprotocol/MarketContractRegistry.sol');
-const CollateralToken = artifacts.require('./marketprotocol/tokens/CollateralToken.sol');
-const MarketContractFactoryMPX = artifacts.require('./marketprotocol/mpx/MarketContractFactoryMPX.sol');
+const MarketContractRegistry = artifacts.require('MarketContractRegistry');
+const CollateralToken = artifacts.require('CollateralToken');
+const MarketContractFactoryMPX = artifacts.require('MarketContractFactoryMPX');
 
 module.exports = async function(deployer, network, accounts) {
   let registry = await MarketContractRegistry.deployed();
   let minterBridge = await MinterBridge.deployed();
   let collateralToken = await CollateralToken.deployed();
-  let marketContractFactoryMPX = await MarketContractFactoryMPX.deploy();
+  let marketContractFactoryMPX = await MarketContractFactoryMPX.deployed();
 
   let marketContractAddresss = await registry.addressWhiteList.call(0);
   console.log('marketContractAddresss:', marketContractAddresss);
@@ -17,6 +17,7 @@ module.exports = async function(deployer, network, accounts) {
     throw Error('Unable to get MarketContract address');
   }
 
+  // Deploy the Market Contract proxy
   let marketContractProxy = await deployer.deploy(
     MarketContractProxy,
     marketContractFactoryMPX.address,
@@ -25,5 +26,20 @@ module.exports = async function(deployer, network, accounts) {
     collateralToken.address
   );
 
-  console.log(marketContractProxy.address);
+  console.log('👉Deployed Market Contract Proxy');
+
+  // Transfer all appropriate rights from the deployed market protocol to marketContractProxy:
+  // Point the 0x MinterBridge to the marketContractProxy
+  await minterBridge.setMarketProxyAddress(marketContractProxy.address);
+
+  // Ability for proxy to mint tokens for each market
+  await registry.addAddressToWhiteList(marketContractProxy.address);
+
+  // Ability for proxy to push prices
+  await marketContractFactoryMPX.setOracleHubAddress(marketContractProxy.address);
+
+  // Ability for proxy to deploy new market protocol contracts
+  await marketContractFactoryMPX.transferOwnership(marketContractProxy.address);
+
+  console.log('🙇‍♂️Transferred permissions to proxy');
 };
