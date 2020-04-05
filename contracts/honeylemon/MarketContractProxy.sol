@@ -19,8 +19,10 @@ contract MarketContractProxy is Ownable {
     string public ORACLE_URL = 'null';
     string public ORACLE_STATISTIC = 'null';
 
-    uint[7] public marketProtocolContractSpecifications = [
-        0, // floorPrice - the lower bound price for the CFD [constant]
+    uint CONTRACT_DURATION = 60 * 60 * 24 * 28; // 28 days in seconds
+
+    uint[7] public marketContractSpecs = [
+        1, // floorPrice - the lower bound price for the CFD [constant]
         0, // capPrice - the upper bound price for the CFD [updated before deployment]
         8, // priceDecimalPlaces - number of decimals used to convert prices [constant]
         1, // qtyMultiplier - multiply traded qty by this value from base units of collateral token. [constant]
@@ -29,7 +31,7 @@ contract MarketContractProxy is Ownable {
         0 // expirationTimeStamp [updated before deployment]
     ];
 
-    address[] marketContracts;
+    address[] public marketContracts;
 
     constructor(
         address _marketContractFactoryMPX,
@@ -85,6 +87,10 @@ contract MarketContractProxy is Ownable {
     function calculateRequiredCollateral(uint amount) public view returns (uint) {
         MarketContract latestMarketContract = getLatestMarketContract();
         return MathLib.multiply(amount, latestMarketContract.COLLATERAL_PER_UNIT());
+    }
+
+    function getAllMarketContracts() public returns (address[]) {
+        return marketContracts;
     }
 
     /////////////////////////////////////
@@ -147,8 +153,8 @@ contract MarketContractProxy is Ownable {
         MINTER_BRIDGE_ADDRESS = _minterBridgeAddress;
     }
 
-    function setmMrketProtocolContractSpecifications(uint[7] memory _params) public onlyOwner {
-        marketProtocolContractSpecifications = _params;
+    function setMarketContractSpecs(uint[7] memory _params) public onlyOwner {
+        marketContractSpecs = _params;
     }
 
     ////////////////////////////
@@ -166,22 +172,27 @@ contract MarketContractProxy is Ownable {
     // we’ll need easy access to the latest values of contract address and index.
     // collateral requirement = indexValue * 28 * overcollateralization_factor
     // returns the address of the new contract
-    function deployContract(uint _indexValue) internal returns (address) {
-        bytes32[3] memory contractNames;
-        uint[7] memory contractSpecs;
+    function deployContract() public onlyOwner returns (address) {
         address contractAddress = marketContractFactoryMPX.deployMarketContractMPX(
-            contractNames,
+            generateContractNames(),
             COLLATERAL_TOKEN_ADDRESS,
-            contractSpecs,
+            generateContractSpecs(),
             ORACLE_URL,
             ORACLE_STATISTIC
         );
+        marketContracts.push(contractAddress);
         return (contractAddress);
     }
 
-    // function generateContractSpecs() internal returns(unit[7]){},
+    function generateContractSpecs() public returns (uint[7] memory) {
+        //TODO: replace elements in this array with the correct parms
+        uint[7] memory todaysMarketContractSpecs = marketContractSpecs;
+        todaysMarketContractSpecs[1] = 100000; // capPrice
+        todaysMarketContractSpecs[6] = now + CONTRACT_DURATION; // expirationTimeStamp
+        return todaysMarketContractSpecs;
+    }
 
-    function generateContractNames() internal returns (bytes32[3] memory) {
+    function generateContractNames() public returns (bytes32[3] memory) {
         //TODO: replace this with a function that dynamically generates names. Use the `DateLib.sol`
         return [
             bytes32('MRI-BTC-28D-20200501'),
