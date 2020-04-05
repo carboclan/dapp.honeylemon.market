@@ -1,5 +1,6 @@
 pragma solidity 0.5.2;
 
+import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
 import 'openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol';
 import 'openzeppelin-solidity/contracts/token/ERC20/ERC20.sol';
 
@@ -11,7 +12,7 @@ import '../marketprotocol/tokens/PositionToken.sol';
 import './MarketContractProxy.sol';
 
 
-contract MinterBridge {
+contract MinterBridge is Ownable {
     using MathLib for uint;
     using MathLib for int;
     using SafeERC20 for ERC20;
@@ -20,8 +21,18 @@ contract MinterBridge {
     bytes4 internal constant BRIDGE_SUCCESS = 0xdc1600f3;
     address public MARKET_CONTRACT_PROXY_ADDRESS;
 
-    constructor(address _marketContractProxyAddress) public {
+    function setMarketProtocolProxyAddress(address _marketContractProxyAddress) public onlyOwner {
         MARKET_CONTRACT_PROXY_ADDRESS = _marketContractProxyAddress;
+    }
+
+    modifier onlyMarketProtocolProxy() {
+        require(msg.sender == MARKET_CONTRACT_PROXY_ADDRESS, 'bad proxy address');
+        _;
+    }
+
+    modifier onlyIfSetMarketProtocolProxy() {
+        require(MARKET_CONTRACT_PROXY_ADDRESS != address(0), 'MarketProtocolProxy not set');
+        _;
     }
 
     /// @dev Transfers `amount` of the ERC20 `tokenAddress` from `from` to `to`.
@@ -39,7 +50,7 @@ contract MinterBridge {
         address to,
         uint256 amount,
         bytes calldata bridgeData
-    ) external returns (bytes4 success) {
+    ) external onlyIfSetMarketProtocolProxy returns (bytes4 success) {
         require(tokenAddress == MARKET_CONTRACT_PROXY_ADDRESS, 'bad proxy address');
 
         MarketContractProxy marketProtocolProxy = MarketContractProxy(MARKET_CONTRACT_PROXY_ADDRESS);

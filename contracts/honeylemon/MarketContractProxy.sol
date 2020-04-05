@@ -20,7 +20,7 @@ contract MarketContractProxy is Ownable {
         0, // floorPrice - the lower bound price for the CFD [constant]
         0, // capPrice - the upper bound price for the CFD [updated before deployment]
         8, // priceDecimalPlaces - number of decimals used to convert prices [constant]
-        1, // qtyMultiplier - multiply traded qty by this value from base units of collateral token.  [constant]
+        1, // qtyMultiplier - multiply traded qty by this value from base units of collateral token. [constant]
         0, // feeInBasisPoints - fee for minting tokens [constant]
         0, // mktFeeInBasisPoints - fees charged by the market in MKT [constant]
         0 // expirationTimeStamp [updated before deployment]
@@ -135,5 +135,12 @@ contract MarketContractProxy is Ownable {
 
     // function generateContractSpecs() internal returns(unit[7]){},
 
-    // function generateContractNames() internal returns(bytes32[3]){},
+    function generateContractNames() internal returns (bytes32[3] memory) {
+        //TODO: replace this with a function that dynamically generates names. Use the `DateLib.sol`
+        return [
+            bytes32('MRI-BTC-28D-20200501'),
+            bytes32('MRI-BTC-28D-20200501-Long'),
+            bytes32('MRI-BTC-28D-20200501-Short')
+        ];
+    }
 }

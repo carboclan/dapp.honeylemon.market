@@ -34,7 +34,7 @@ module.exports = async function(deployer, network, accounts) {
                                 MarketContractFactory,
                                 MarketContractRegistry.address,
                                 MarketCollateralPool.address,
-                                accounts[8],
+                                accounts[0],
                                 {
                                   gas: gasLimit
                                 }
@@ -43,34 +43,18 @@ module.exports = async function(deployer, network, accounts) {
                                 return MarketContractRegistry.deployed().then(function(registryInstance) {
                                   return registryInstance.addFactoryAddress(factory.address).then(function() {
                                     // white list the factory
-
-                                    return factory
-                                      .deployMarketContractMPX(
-                                        [
-                                          web3.utils.asciiToHex('BTC', 32),
-                                          web3.utils.asciiToHex('LBTC', 32),
-                                          web3.utils.asciiToHex('SBTC', 32)
-                                        ],
-                                        CollateralToken.address,
-                                        [20000000000000, 60000000000000, 10, 100000000, 0, 0, marketContractExpiration],
-                                        'api.coincap.io/v2/rates/bitcoin',
-                                        'rateUsd',
-                                        { gas: gasLimit }
-                                      )
-                                      .then(function() {
-                                        return factory.deployMarketContractMPX(
-                                          [
-                                            web3.utils.asciiToHex('BTC-2', 32),
-                                            web3.utils.asciiToHex('LBTC', 32),
-                                            web3.utils.asciiToHex('SBTC', 32)
-                                          ],
-                                          CollateralToken.address,
-                                          [20000000000000, 60000000000000, 10, 25, 0, 0, marketContractExpiration],
-                                          'api.coincap.io/v2/rates/bitcoin',
-                                          'rateUsd',
-                                          { gas: gasLimit }
-                                        );
-                                      });
+                                    return factory.deployMarketContractMPX(
+                                      [
+                                        web3.utils.asciiToHex('BTC', 32),
+                                        web3.utils.asciiToHex('LBTC', 32),
+                                        web3.utils.asciiToHex('SBTC', 32)
+                                      ],
+                                      CollateralToken.address,
+                                      [20000000000000, 60000000000000, 10, 100000000, 0, 0, marketContractExpiration],
+                                      'api.coincap.io/v2/rates/bitcoin',
+                                      'rateUsd',
+                                      { gas: gasLimit }
+                                    );
                                   });
                                 });
                               });
