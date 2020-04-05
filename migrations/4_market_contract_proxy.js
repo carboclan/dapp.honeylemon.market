@@ -24,7 +24,7 @@ module.exports = async function(deployer, network, accounts) {
 
   // Transfer all appropriate rights from the deployed market protocol to marketContractProxy:
   // Point the 0x MinterBridge to the marketContractProxy
-  await minterBridge.setMarketProxyAddress(marketContractProxy.address);
+  await minterBridge.setMarketContractProxyAddress(marketContractProxy.address);
 
   // Ability for proxy to mint tokens for each market
   await registry.addAddressToWhiteList(marketContractProxy.address);

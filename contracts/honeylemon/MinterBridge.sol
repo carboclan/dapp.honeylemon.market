@@ -58,18 +58,14 @@ contract MinterBridge is Ownable {
         address to,
         uint256 amount,
         bytes calldata bridgeData
-    ) external onlyIfSetMarketContractProxy only0xBridgeProxy returns (bytes4 success) {
-        // The proxy acts as the toker token to make 0x think that the appropriate amount
-        // was transfered
+    ) external onlyIfSetMarketContractProxy returns (bytes4 success) {
+        // The proxy acts as the taker token to make 0x think that the appropriate amount
+        // was transferred and accept the trade as passing. Under the hood the  marketContractProxy
+        // has minted long and short tokens and sent them to the the investor and miner.
         require(tokenAddress == MARKET_CONTRACT_PROXY_ADDRESS, 'bad proxy address');
 
-        // address poolAddress = market.COLLATERAL_POOL_ADDRESS();
         // (imBTC) sent from the miner
         ERC20 collateralToken = ERC20(marketContractProxy.COLLATERAL_TOKEN_ADDRESS());
-        // Long token sent to the investor
-        // ERC20 longToken = ERC20(market.LONG_POSITION_TOKEN());
-        // // Short token sent to the miner
-        // ERC20 shortToken = ERC20(market.SHORT_POSITION_TOKEN());
 
         uint neededCollateral = marketContractProxy.calculateRequiredCollateral(amount);
 
@@ -79,10 +75,6 @@ contract MinterBridge is Ownable {
         // to: long & taker (investor)
         // from: short & maker (miner)
         marketContractProxy.mintPositionTokens(amount, to, from);
-
-        // Transfer the fake token to trick 0x
-        // ERC20(tokenAddress).transfer(to, amount);
-
         // TODO: transfer ERC20 tokens (DAI) from the investor (taker) to the miner (maker)
 
         return BRIDGE_SUCCESS;
