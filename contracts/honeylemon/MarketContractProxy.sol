@@ -96,6 +96,10 @@ contract MarketContractProxy is Ownable {
         return longToken.balanceOf(_owner);
     }
 
+    function getTime() public returns (uint) {
+        return now;
+    }
+
     /////////////////////////////////////
     //// ORACLE PRIVILEGED FUNCTIONS ////
     /////////////////////////////////////

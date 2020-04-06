@@ -13,9 +13,10 @@ const { ContractWrappers } = require('@0x/contract-wrappers');
 const { Web3Wrapper } = require('@0x/web3-wrapper');
 const { BigNumber } = require('@0x/utils');
 
+const { BN, constants, expectEvent, expectRevert, ether, time } = require('@openzeppelin/test-helpers');
+
 // const AssetDataUtils = artifacts.require('AssetDataUtils');
 // const FakeToken = artifacts.require('FakeToken');
-//TODO: Add Dai
 
 // Token mocks
 const CollateralToken = artifacts.require('CollateralToken'); // IMBTC
@@ -173,6 +174,11 @@ module.exports = async function() {
     }
 
     await printWalletBalances('After 0x order fill');
+    console.log('starTime', (await marketContractProxy.getTime.call()).toString());
+
+    await time.increase(200);
+
+    console.log('endTime', (await marketContractProxy.getTime.call()).toString());
   } catch (e) {
     console.log(e);
   }

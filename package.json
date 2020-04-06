@@ -15,7 +15,9 @@
     "@0x/utils": "5.4.1",
     "@0x/web3-wrapper": "7.0.7",
     "@chainsafe/truffle-plugin-abigen": "0.0.1",
+    "@openzeppelin/test-helpers": "^0.5.5",
     "@truffle/contract": "4.1.13",
+    "ganache-time-traveler": "^1.0.14",
     "openzeppelin-solidity": "2.2.0",
     "prettier-plugin-solidity": "^1.0.0-alpha.47",
     "truffle": "5.1.18"
