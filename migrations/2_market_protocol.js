@@ -9,7 +9,6 @@ const MarketContractRegistry = artifacts.require('./MarketContractRegistry.sol')
 
 module.exports = async function(deployer, network, accounts) {
   if (network !== 'live') {
-    const marketContractExpiration = Math.floor(Date.now() / 1000) + 60 * 15; // expires in 15 minutes.
     const gasLimit = (await web3.eth.getBlock('latest')).gasLimit;
 
     return deployer.deploy(MarketToken).then(function() {

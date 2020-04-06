@@ -17,16 +17,39 @@ const { BigNumber } = require('@0x/utils');
 // const FakeToken = artifacts.require('FakeToken');
 //TODO: Add Dai
 
-//Contracts
+// Token mocks
 const CollateralToken = artifacts.require('CollateralToken'); // IMBTC
-const PaymentToken = artifacts.require('Paymenttoken'); // USDC
+const PaymentToken = artifacts.require('PaymentToken'); // USDC
+const PositionToken = artifacts.require('PositionToken'); // To create the Long & Short tokens
+
+// Honey Lemon contracts
 const MinterBridge = artifacts.require('MinterBridge');
 const MarketContractProxy = artifacts.require('MarketContractProxy');
+
+// Market Protocol contracts
+const MarketContract = artifacts.require('MarketContract');
 
 const NULL_ADDRESS = '0x0000000000000000000000000000000000000000';
 
 module.exports = async function() {
   try {
+    async function printWalletBalances(timeLabel) {
+      let p = [];
+      p['Miner(maker) --> imBTC(collateralToken) balance'] = (await collateralToken.balanceOf(makerAddress)).toString();
+      p['Miner(maker) --> USDC(paymentToken) balance'] = (await paymentToken.balanceOf(makerAddress)).toString();
+      p['Miner(maker) --> Long Token'] = (await longToken.balanceOf(makerAddress)).toString();
+      p['Miner(maker) --> Short Token'] = (await shortToken.balanceOf(makerAddress)).toString();
+      p['----'] = '----';
+      p['Investor(taker) --> imBTC(collateralToken) balance'] = (await collateralToken.balanceOf(
+        takerAddress
+      )).toString();
+      p['Investor(taker) --> USDC(paymentToken) balance'] = (await paymentToken.balanceOf(takerAddress)).toString();
+      p['Investor(taker) --> Long Token'] = (await longToken.balanceOf(takerAddress)).toString();
+      p['Investor(taker) --> Short Token'] = (await shortToken.balanceOf(takerAddress)).toString();
+      console.log('***', timeLabel, '***');
+      console.table(p);
+    }
+
     // params to init 0x setup
     const provider = web3.currentProvider;
 
@@ -37,6 +60,7 @@ module.exports = async function() {
 
     const collateralToken = await CollateralToken.deployed();
     const paymentToken = await PaymentToken.deployed();
+
     const minterBridge = await MinterBridge.deployed();
     const marketContractProxy = await MarketContractProxy.deployed();
 
@@ -57,10 +81,14 @@ module.exports = async function() {
 
     // Create Todays market protocol contract
     await marketContractProxy.deployContract();
-
     // Get the address of todays marketProtocolContract
     let deployedContracts = await marketContractProxy.marketContracts(0);
-    console.log('Deployed market contracts', deployedContracts);
+    console.log('1.Deployed market contracts @', deployedContracts);
+
+    const marketContract = await MarketContract.at(deployedContracts);
+
+    const longToken = await PositionToken.at(await marketContract.LONG_POSITION_TOKEN());
+    const shortToken = await PositionToken.at(await marketContract.SHORT_POSITION_TOKEN());
 
     /*********************
      * Generate 0x order *
@@ -86,7 +114,9 @@ module.exports = async function() {
     console.log('takerAssetData:', takerAssetData);
     // Amounts are in Unit amounts, 0x requires base units (as many tokens use decimals)
     const makerAssetAmount = Web3Wrapper.toBaseUnitAmount(new BigNumber(1), 0);
+    console.log('makerAssetAmount', makerAssetAmount);
     const takerAssetAmount = Web3Wrapper.toBaseUnitAmount(new BigNumber(1), 0);
+    console.log('takerAssetAmount', takerAssetAmount);
     const exchangeAddress = contractWrappers.exchange.address;
 
     // Approve the contract wrapper from 0x to pull USDC from the taker(investor)
@@ -125,6 +155,8 @@ module.exports = async function() {
 
     console.log('contractWrappers.exchange', contractWrappers.exchange.address);
 
+    await printWalletBalances('Before 0x order fill');
+
     // Fill order
     const debug = false;
     if (debug) {
@@ -139,6 +171,8 @@ module.exports = async function() {
         .sendTransactionAsync({ from: takerAddress, gas: 6700000, value: 3000000000000000 }); // value is required to pay 0x fees
       console.log('txHash:', txHash);
     }
+
+    await printWalletBalances('After 0x order fill');
   } catch (e) {
     console.log(e);
   }
