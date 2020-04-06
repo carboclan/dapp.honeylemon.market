@@ -11,7 +11,7 @@ module.exports = async function(deployer, network, accounts) {
 
   // Give some collateral token to miner
   const collateralToken = await CollateralToken.deployed();
-  collateralToken.transfer(accounts[1], 100000);
+  collateralToken.transfer(accounts[1], 100000000000);
 
   console.log('Transferred balances');
 };

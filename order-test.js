@@ -113,9 +113,9 @@ module.exports = async function() {
     const takerAssetData = await contractWrappers.devUtils.encodeERC20AssetData(takerToken.address).callAsync();
     console.log('takerAssetData:', takerAssetData);
     // Amounts are in Unit amounts, 0x requires base units (as many tokens use decimals)
-    const makerAssetAmount = Web3Wrapper.toBaseUnitAmount(new BigNumber(1), 0);
+    const makerAssetAmount = Web3Wrapper.toBaseUnitAmount(new BigNumber(100), 0);
     console.log('makerAssetAmount', makerAssetAmount);
-    const takerAssetAmount = Web3Wrapper.toBaseUnitAmount(new BigNumber(1), 0);
+    const takerAssetAmount = Web3Wrapper.toBaseUnitAmount(new BigNumber(100), 0);
     console.log('takerAssetAmount', takerAssetAmount);
     const exchangeAddress = contractWrappers.exchange.address;
 
