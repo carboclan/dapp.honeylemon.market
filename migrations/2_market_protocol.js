@@ -1,6 +1,5 @@
 const MathLib = artifacts.require('MathLib');
 const StringLib = artifacts.require('./libraries/StringLib.sol');
-const CollateralToken = artifacts.require('./tokens/CollateralToken.sol');
 const MarketToken = artifacts.require('./tokens/MarketToken.sol');
 const MarketContractMPX = artifacts.require('./mpx/MarketContractMPX.sol');
 const MarketContractFactory = artifacts.require('./mpx/MarketContractFactoryMPX.sol');
@@ -24,28 +23,21 @@ module.exports = async function(deployer, network, accounts) {
                     .then(function() {
                       return MarketCollateralPool.deployed().then(function() {
                         return deployer
-                          .deploy(CollateralToken, 'Mock imBTC', 'imBTC', 100000, 8, {
-                            // note 8 decimals
-                            gas: gasLimit
-                          })
-                          .then(function() {
-                            return deployer
-                              .deploy(
-                                MarketContractFactory,
-                                MarketContractRegistry.address,
-                                MarketCollateralPool.address,
-                                accounts[0],
-                                {
-                                  gas: gasLimit
-                                }
-                              )
-                              .then(function(factory) {
-                                return MarketContractRegistry.deployed().then(function(registryInstance) {
-                                  return registryInstance.addFactoryAddress(factory.address).then(function() {
-                                    console.log('💹Done Market Migration!');
-                                  });
-                                });
+                          .deploy(
+                            MarketContractFactory,
+                            MarketContractRegistry.address,
+                            MarketCollateralPool.address,
+                            accounts[0],
+                            {
+                              gas: gasLimit
+                            }
+                          )
+                          .then(function(factory) {
+                            return MarketContractRegistry.deployed().then(function(registryInstance) {
+                              return registryInstance.addFactoryAddress(factory.address).then(function() {
+                                console.log('💹Done Market Migration!');
                               });
+                            });
                           });
                       });
                     });

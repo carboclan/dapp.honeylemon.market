@@ -6,9 +6,17 @@ const CollateralToken = artifacts.require('CollateralToken');
 const MarketContractFactoryMPX = artifacts.require('MarketContractFactoryMPX');
 
 module.exports = async function(deployer, network, accounts) {
+  // Deploy imBTC token
+  await deployer.deploy(CollateralToken, 'Mock imBTC', 'imBTC', 10000000, 8);
+
+  // Give some collateral token to miner
+  const collateralToken = await CollateralToken.deployed();
+  collateralToken.transfer(accounts[1], 10000000);
+
+  console.log('🕺Deployed Mock Collateral token');
+
   let registry = await MarketContractRegistry.deployed();
   let minterBridge = await MinterBridge.deployed();
-  let collateralToken = await CollateralToken.deployed();
   let marketContractFactoryMPX = await MarketContractFactoryMPX.deployed();
 
   // Deploy the Market Contract proxy
