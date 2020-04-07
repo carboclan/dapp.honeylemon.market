@@ -19,6 +19,8 @@ contract MarketContractProxy is Ownable {
     string public ORACLE_URL = 'null';
     string public ORACLE_STATISTIC = 'null';
 
+    uint public CONTRACT_DURATION_DAYS = 28;
+
     uint public CONTRACT_DURATION = 10 * 60; // 28 days in seconds
 
     uint[7] public marketContractSpecs = [
@@ -64,8 +66,20 @@ contract MarketContractProxy is Ownable {
     //////////////////////////
 
     // What’s the TH amount that can currently be filled based on owner’s BTC balance and allowance
-    function fillableAmount(address _owner) public view returns (uint256 amount) {
-        // return min(imBTC.balanceOf(_owner), imBTC.allowance(_owner, MARKET_PROTOCOL_POOL_ADDRESS)) / (indexValue * CONTRACT_DURATION)
+    function fillableAmount(address makersAddress) public view returns (uint256) {
+        // in the spec is says MarketCollateralPool allowance. however I think this should be the MINTER_BRIDGE_ADDRESS allowance?
+        // MarketCollateralPool marketCollateralPool = getLatestMarketCollateralPool();
+
+        // TODO: replace this with the latest daily value
+        uint latestIndexValue = 1000;
+        ERC20 collateralToken = ERC20(COLLATERAL_TOKEN_ADDRESS);
+
+        uint minerBalance = collateralToken.balanceOf(makersAddress);
+        uint minerAllowance = collateralToken.allowance(makersAddress, MINTER_BRIDGE_ADDRESS);
+
+        uint uintMinAllowanceBalance = minerBalance < minerAllowance ? minerBalance : minerAllowance;
+
+        return uintMinAllowanceBalance / (latestIndexValue * CONTRACT_DURATION_DAYS);
     }
 
     //TODO: refactor this to return an interface

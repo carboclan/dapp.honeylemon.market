@@ -169,6 +169,9 @@ async function runExport() {
    * Fill 0x order *
    *****************/
 
+  console.log('fillableAmount', (await marketContractProxy.fillableAmount(takerAddress)).toString());
+  console.log('fillableAmount', (await marketContractProxy.fillableAmount(makerAddress)).toString());
+
   console.log('4. Filling 0x order...');
 
   const debug = false;
@@ -193,7 +196,7 @@ async function runExport() {
 
   await time.increase(contractDuration + 1);
 
-  await marketContractProxy.settleLatestMarketContract(50000, { from: honeyLemonOracle });
+  await marketContractProxy.settleLatestMarketContract(70000, { from: honeyLemonOracle });
 
   /**********************************************
    * Redeem long and short tokens against market *
