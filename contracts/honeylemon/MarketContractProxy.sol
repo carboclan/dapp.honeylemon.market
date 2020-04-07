@@ -19,7 +19,7 @@ contract MarketContractProxy is Ownable {
     string public ORACLE_URL = 'null';
     string public ORACLE_STATISTIC = 'null';
 
-    uint CONTRACT_DURATION = 60 * 60 * 24 * 28; // 28 days in seconds
+    uint public CONTRACT_DURATION = 10 * 60; // 28 days in seconds
 
     uint[7] public marketContractSpecs = [
         0, // floorPrice - the lower bound price for the CFD [constant]
@@ -69,9 +69,9 @@ contract MarketContractProxy is Ownable {
     }
 
     //TODO: refactor this to return an interface
-    function getLatestMarketContract() public view returns (MarketContract) {
+    function getLatestMarketContract() public view returns (MarketContractMPX) {
         uint lastIndex = marketContracts.length - 1;
-        return MarketContract(marketContracts[lastIndex]);
+        return MarketContractMPX(marketContracts[lastIndex]);
     }
 
     //TODO: refactor this to return an interface
@@ -123,7 +123,7 @@ contract MarketContractProxy is Ownable {
         uint collateralNeeded = calculateRequiredCollateral(qtyToMint);
 
         // Create instance of the latest market contract for today
-        MarketContract latestMarketContract = getLatestMarketContract();
+        MarketContractMPX latestMarketContract = getLatestMarketContract();
         // Create instance of the market collateral pool
         MarketCollateralPool marketCollateralPool = getLatestMarketCollateralPool();
 
@@ -172,7 +172,10 @@ contract MarketContractProxy is Ownable {
     function pushOraclePriceIndex(uint currentIndexValue, uint lookbackIndexValue, uint timestamp) internal {}
 
     // function called daily to settle the current expiring 28 day contract.
-    function settleLatestMarketContract() internal {}
+    function settleLatestMarketContract(uint price) public {
+        MarketContractMPX latestMarketContract = getLatestMarketContract();
+        latestMarketContract.oracleCallBack(price);
+    }
 
     // Deploys the current day Market contract. `indexValue` is used to initialize collateral requirement in its constructor
     // Stores the new contract address, block it was deployed in, as well as the value of the index

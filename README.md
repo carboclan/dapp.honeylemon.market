@@ -5,4 +5,3 @@
 4. `truffle exec order-test.js` - that's where the POC script is
 
 Relevant contracts are in `contracts/honeylemon`, the rest of the contracts are taken from the Market protocol repo.
-
