@@ -30,6 +30,7 @@ const MarketContractProxy = artifacts.require('MarketContractProxy');
 // Market Protocol contracts
 // const MarketContract = artifacts.require('MarketContract');
 const MarketContractMPX = artifacts.require('marketContractMPX');
+const MarketCollateralPool = artifacts.require('MarketCollateralPool');
 
 const NULL_ADDRESS = '0x0000000000000000000000000000000000000000';
 
@@ -75,18 +76,24 @@ async function runExport() {
   /********************************************
    * Honey Lemon oracle deploy daily contract *
    ********************************************/
+  console.log('0. Setting up proxy and deploying daily contract...');
 
   let contractSpecs = await marketContractProxy.generateContractSpecs.call();
-  console.log('spects');
-  console.log(contractSpecs);
 
   // Create Todays market protocol contract
   await marketContractProxy.deployContract();
   // Get the address of todays marketProtocolContract
-  let deployedMarketContractInstance = await marketContractProxy.marketContracts(0);
-  console.log('1.Deployed market contracts @', deployedMarketContractInstance);
 
-  const marketContract = await MarketContractMPX.at(deployedMarketContractInstance);
+  /***************************************************
+   * Market contracts created from Honey Lemon proxy *
+   ***************************************************/
+
+  const deployedMarketContract = await marketContractProxy.getLatestMarketContract();
+  console.log('1. Deployed market contracts @', deployedMarketContract);
+  const marketContract = await MarketContractMPX.at(deployedMarketContract);
+
+  const deployedMarketContractPool = await marketContractProxy.getLatestMarketCollateralPool();
+  const marketContractPool = await MarketCollateralPool.at(deployedMarketContractPool);
 
   const longToken = await PositionToken.at(await marketContract.LONG_POSITION_TOKEN());
   const shortToken = await PositionToken.at(await marketContract.SHORT_POSITION_TOKEN());
@@ -94,6 +101,7 @@ async function runExport() {
   /*********************
    * Generate 0x order *
    *********************/
+  console.log('2. Generating 0x order...');
 
   // Taker token is imBTC sent to collateralize the contractWe use CollateralToken.
   // This is imBTC sent from the investor to the Market protocol contract
@@ -108,12 +116,11 @@ async function runExport() {
 
   // Encode the selected takerToken as assetData for 0x
   const takerAssetData = await contractWrappers.devUtils.encodeERC20AssetData(takerToken.address).callAsync();
-  console.log('takerAssetData:', takerAssetData);
+
   // Amounts are in Unit amounts, 0x requires base units (as many tokens use decimals)
-  const makerAssetAmount = Web3Wrapper.toBaseUnitAmount(new BigNumber(100), 0);
-  console.log('makerAssetAmount', makerAssetAmount);
-  const takerAssetAmount = Web3Wrapper.toBaseUnitAmount(new BigNumber(100), 0);
-  console.log('takerAssetAmount', takerAssetAmount);
+  const amountToMint = 100;
+  const makerAssetAmount = Web3Wrapper.toBaseUnitAmount(new BigNumber(amountToMint), 0);
+  const takerAssetAmount = Web3Wrapper.toBaseUnitAmount(new BigNumber(amountToMint), 0);
   const exchangeAddress = contractWrappers.exchange.address;
 
   // Approve the contract wrapper from 0x to pull USDC from the taker(investor)
@@ -128,7 +135,6 @@ async function runExport() {
 
   // expiration time in the future
   const currentContractTime = (await marketContractProxy.getTime.call()).toNumber();
-  console.log('currentContractTime', currentContractTime);
   const contractDuration = (await marketContractProxy.CONTRACT_DURATION()).toNumber();
   const expirationTime = currentContractTime + contractDuration;
 
@@ -152,15 +158,19 @@ async function runExport() {
     chainId
   };
 
+  console.log('3. signing 0x order...');
+
   // Generate the order hash and sign it
   const signedOrder = await signatureUtils.ecSignOrderAsync(provider, order, makerAddress);
-  console.log('signedOrder:', JSON.stringify(signedOrder));
-
-  console.log('contractWrappers.exchange', contractWrappers.exchange.address);
 
   await printWalletBalances('Before 0x order fill');
 
-  // Fill order
+  /*****************
+   * Fill 0x order *
+   *****************/
+
+  console.log('4. Filling 0x order...');
+
   const debug = false;
   if (debug) {
     // Call MinterBridge directly for debugging
@@ -176,14 +186,27 @@ async function runExport() {
   }
 
   await printWalletBalances('After 0x order fill');
-  console.log('timeBefore', (await marketContractProxy.getTime.call()).toString());
+
+  /**************************************************
+   * Advance time and settle market protocol oracle *
+   **************************************************/
+
   await time.increase(contractDuration + 1);
-  console.log('timeBefore', (await marketContractProxy.getTime.call()).toString());
-  console.log('expirationTime', (await marketContract.EXPIRATION()).toString());
 
   await marketContractProxy.settleLatestMarketContract(50000, { from: honeyLemonOracle });
 
-  await console.log('endTime', (await marketContractProxy.getTime.call()).toString());
+  /**********************************************
+   * Redeem long and short tokens against market *
+   ***********************************************/
+  console.log('5. redeeming tokens...');
+
+  await longToken.approve(marketContract.address, amountToMint, { from: takerAddress });
+  await shortToken.approve(marketContract.address, amountToMint, { from: makerAddress });
+
+  await marketContractPool.settleAndClose(marketContract.address, amountToMint, 0, { from: takerAddress });
+  await marketContractPool.settleAndClose(marketContract.address, 0, amountToMint, { from: makerAddress });
+
+  await printWalletBalances('6. After token redemptions');
 }
 
 run = async function(callback) {
