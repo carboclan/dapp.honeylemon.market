@@ -65,8 +65,23 @@ contract MarketContractProxy is Ownable {
     //// PUBLIC FUNCTIONS ////
     //////////////////////////
 
+    function getFillableAmounts(address[] memory makerAddresses)
+        public
+        view
+        returns (uint256[] memory fillableAmounts)
+    {
+        uint256 length = makerAddresses.length;
+        fillableAmounts = new uint256[](length);
+
+        for (uint256 i = 0; i != length; i++) {
+            fillableAmounts[i] = getFillableAmount(makerAddresses[i]);
+        }
+
+        return fillableAmounts;
+    }
+
     // What’s the TH amount that can currently be filled based on owner’s BTC balance and allowance
-    function fillableAmount(address makersAddress) public view returns (uint256) {
+    function getFillableAmount(address makerAddress) public view returns (uint256) {
         // in the spec is says MarketCollateralPool allowance. however I think this should be the MINTER_BRIDGE_ADDRESS allowance?
         // MarketCollateralPool marketCollateralPool = getLatestMarketCollateralPool();
 
@@ -74,8 +89,8 @@ contract MarketContractProxy is Ownable {
         uint latestIndexValue = 1000;
         ERC20 collateralToken = ERC20(COLLATERAL_TOKEN_ADDRESS);
 
-        uint minerBalance = collateralToken.balanceOf(makersAddress);
-        uint minerAllowance = collateralToken.allowance(makersAddress, MINTER_BRIDGE_ADDRESS);
+        uint minerBalance = collateralToken.balanceOf(makerAddress);
+        uint minerAllowance = collateralToken.allowance(makerAddress, MINTER_BRIDGE_ADDRESS);
 
         uint uintMinAllowanceBalance = minerBalance < minerAllowance ? minerBalance : minerAllowance;
 
