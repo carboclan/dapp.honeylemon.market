@@ -115,14 +115,14 @@ contract MarketContractProxy is Ownable {
     }
 
     function getExpiringMarketContract() public view returns (MarketContractMPX) {
-        uint lastIndex = marketContracts.length - 1;
+        uint contractsAdded = marketContracts.length;
 
         // If the marketContracts array has not had enough markets pushed into it to settle an old one then return 0x0.
-        if (lastIndex < CONTRACT_DURATION_DAYS) {
+        if (contractsAdded < CONTRACT_DURATION_DAYS) {
             return MarketContractMPX(address(0x0));
         }
-        uint expiringIndex = lastIndex - CONTRACT_DURATION_DAYS;
-        return MarketContractMPX(marketContracts[lastIndex]);
+        uint expiringIndex = contractsAdded - CONTRACT_DURATION_DAYS;
+        return MarketContractMPX(marketContracts[contractsAdded]);
     }
 
     //TODO: refactor this to return an interface
@@ -246,7 +246,10 @@ contract MarketContractProxy is Ownable {
     ////////////////////////////
 
     // function called daily to settle the current expiring 28 day contract.
-    function settleMarketContract(uint mri, address marketContractAddress) internal {
+    function settleMarketContract(uint mri, address marketContractAddress)
+        public
+        onlyHoneyLemonOracle
+    {
         require(mri != 0, 'The mri value can not be 0');
         require(marketContractAddress != address(0x0));
 
@@ -295,12 +298,13 @@ contract MarketContractProxy is Ownable {
         public
         returns (bytes32[3] memory)
     {
-        bytes memory longTokenName = abi.encodePacked(marketName, '-Long');
-        bytes memory shortTimeName = abi.encodePacked(marketName, '-Short');
+        // bytes memory longTokenName = abi.encodePacked(marketName, '-Long');
+        // bytes memory shortTimeName = abi.encodePacked(marketName, '-Short');
+        // return [stringToBytes32(marketName), bytesToBytes32(longTokenName), bytesToBytes32(shortTimeName)];
         return [
-            stringToBytes32(marketName),
-            bytesToBytes32(longTokenName),
-            bytesToBytes32(shortTimeName)
+            bytes32('MRI-BTC-28D-20200501'),
+            bytes32('MRI-BTC-28D-20200501-Long'),
+            bytes32('MRI-BTC-28D-20200501-Short')
         ];
     }
 

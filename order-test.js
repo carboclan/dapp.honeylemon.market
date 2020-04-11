@@ -100,16 +100,34 @@ async function runExport() {
    ********************************************/
   console.log('0. Setting up proxy and deploying daily contract...');
 
-  let contractSpecs = await marketContractProxy.generateContractSpecs.call();
+  const currentMRIScaled = 1645;
+
+  // expiration time in the future
+  const currentContractTime = (await marketContractProxy.getTime.call()).toNumber();
+  const contractDuration = (await marketContractProxy.CONTRACT_DURATION()).toNumber();
+  const expirationTime = currentContractTime + contractDuration;
+
+  let contractSpecs = await marketContractProxy.generateContractSpecs.call(
+    currentMRIScaled,
+    expirationTime
+  );
+
+  console.log('***payoutSpects', contractSpecs);
+  console.log('capPrice', contractSpecs[1].toString());
 
   // Create Todays market protocol contract
-  await marketContractProxy.deployContract();
-  // Get the address of todays marketProtocolContract
+  await marketContractProxy.dailySettlement(
+    0, // lookback index
+    currentMRIScaled.toString(), // current index value
+    '20200501', // new market name
+    expirationTime.toString() // new market expiration
+  );
 
   /***************************************************
    * Market contracts created from Honey Lemon proxy *
    ***************************************************/
 
+  // Get the address of todays marketProtocolContract
   const deployedMarketContract = await marketContractProxy.getLatestMarketContract();
   console.log('1. Deployed market contracts @', deployedMarketContract);
   const marketContract = await MarketContractMPX.at(deployedMarketContract);
@@ -170,9 +188,9 @@ async function runExport() {
   );
 
   // expiration time in the future
-  const currentContractTime = (await marketContractProxy.getTime.call()).toNumber();
-  const contractDuration = (await marketContractProxy.CONTRACT_DURATION()).toNumber();
-  const expirationTime = currentContractTime + contractDuration;
+  // const currentContractTime = (await marketContractProxy.getTime.call()).toNumber();
+  // const contractDuration = (await marketContractProxy.CONTRACT_DURATION()).toNumber();
+  // const expirationTime = currentContractTime + contractDuration;
 
   // Generate the 0x order
   const order = {
@@ -210,12 +228,11 @@ async function runExport() {
    *****************/
 
   console.log(
-    'fillableAmount',
-    (await marketContractProxy.fillableAmount(takerAddress)).toString()
-  );
-  console.log(
-    'fillableAmount',
-    (await marketContractProxy.fillableAmount(makerAddress)).toString()
+    'fillableAmounts',
+    (await marketContractProxy.getFillableAmounts([
+      takerAddress,
+      makerAddress
+    ])).toString()
   );
 
   console.log('4. Filling 0x order...');
@@ -253,7 +270,9 @@ async function runExport() {
 
   await time.increase(contractDuration + 1);
 
-  await marketContractProxy.settleLatestMarketContract(70000, { from: honeyLemonOracle });
+  await marketContractProxy.settleMarketContract(1645, marketContract.address, {
+    from: honeyLemonOracle
+  });
 
   /**********************************************
    * Redeem long and short tokens against market *
