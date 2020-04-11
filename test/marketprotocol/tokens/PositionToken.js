@@ -26,7 +26,11 @@ contract('PositionToken', function(accounts) {
     collateralPool = await MarketCollateralPool.deployed();
     collateralToken = await CollateralToken.deployed();
 
-    marketContract = await utility.createMarketContract(collateralToken, collateralPool, userAddress);
+    marketContract = await utility.createMarketContract(
+      collateralToken,
+      collateralPool,
+      userAddress
+    );
 
     await marketContractRegistry.addAddressToWhiteList(marketContract.address, {
       from: userAddress
@@ -35,8 +39,12 @@ contract('PositionToken', function(accounts) {
     qtyMultiplier = await marketContract.QTY_MULTIPLIER.call();
     priceFloor = await marketContract.PRICE_FLOOR.call();
     priceCap = await marketContract.PRICE_CAP.call();
-    longPositionToken = await PositionToken.at(await marketContract.LONG_POSITION_TOKEN());
-    shortPositionToken = await PositionToken.at(await marketContract.SHORT_POSITION_TOKEN());
+    longPositionToken = await PositionToken.at(
+      await marketContract.LONG_POSITION_TOKEN()
+    );
+    shortPositionToken = await PositionToken.at(
+      await marketContract.SHORT_POSITION_TOKEN()
+    );
   });
 
   describe('Token symbols correctly created', function() {
@@ -66,7 +74,10 @@ contract('PositionToken', function(accounts) {
         error = err;
       }
 
-      assert.ok(error instanceof Error, `should throw an error upon calling mint token method directly`);
+      assert.ok(
+        error instanceof Error,
+        `should throw an error upon calling mint token method directly`
+      );
     });
 
     it(`redeem position tokens fails calling directly`, async function() {
@@ -77,7 +88,10 @@ contract('PositionToken', function(accounts) {
         error = err;
       }
 
-      assert.ok(error instanceof Error, `should throw an error upon calling redeem token method directly`);
+      assert.ok(
+        error instanceof Error,
+        `should throw an error upon calling redeem token method directly`
+      );
     });
   });
 
@@ -91,17 +105,37 @@ contract('PositionToken', function(accounts) {
         from: userAddress
       });
 
-      const initialLongPosTokenBalance = await longPositionToken.balanceOf.call(userAddress);
-      const initialShortPosTokenBalance = await shortPositionToken.balanceOf.call(userAddress);
+      const initialLongPosTokenBalance = await longPositionToken.balanceOf.call(
+        userAddress
+      );
+      const initialShortPosTokenBalance = await shortPositionToken.balanceOf.call(
+        userAddress
+      );
 
-      assert.equal(initialLongPosTokenBalance.toNumber(), qtyToMint, 'incorrect amount of long tokens minted');
-      assert.equal(initialShortPosTokenBalance.toNumber(), qtyToMint, 'incorrect amount of short tokens minted');
+      assert.equal(
+        initialLongPosTokenBalance.toNumber(),
+        qtyToMint,
+        'incorrect amount of long tokens minted'
+      );
+      assert.equal(
+        initialShortPosTokenBalance.toNumber(),
+        qtyToMint,
+        'incorrect amount of short tokens minted'
+      );
 
       const initialLongPosTokenSupply = await longPositionToken.totalSupply();
       const initialShortPosTokenSupply = await shortPositionToken.totalSupply();
 
-      assert.equal(initialLongPosTokenSupply.toNumber(), qtyToMint, 'incorrect amount of long tokens total supply');
-      assert.equal(initialShortPosTokenSupply.toNumber(), qtyToMint, 'incorrect amount of short tokens total supply');
+      assert.equal(
+        initialLongPosTokenSupply.toNumber(),
+        qtyToMint,
+        'incorrect amount of long tokens total supply'
+      );
+      assert.equal(
+        initialShortPosTokenSupply.toNumber(),
+        qtyToMint,
+        'incorrect amount of short tokens total supply'
+      );
 
       // 2. redeem tokens
       const qtyToRedeem = 50;
@@ -113,8 +147,12 @@ contract('PositionToken', function(accounts) {
       const expectedFinalLongPosTokenBalance = initialLongPosTokenBalance - qtyToRedeem;
       const expectedFinalShortPosTokenBalance = initialShortPosTokenBalance - qtyToRedeem;
 
-      const finalLongPosTokenBalance = await longPositionToken.balanceOf.call(userAddress);
-      const finalShortPosTokenBalance = await shortPositionToken.balanceOf.call(userAddress);
+      const finalLongPosTokenBalance = await longPositionToken.balanceOf.call(
+        userAddress
+      );
+      const finalShortPosTokenBalance = await shortPositionToken.balanceOf.call(
+        userAddress
+      );
 
       assert.equal(
         finalLongPosTokenBalance.toNumber(),

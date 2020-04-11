@@ -96,9 +96,14 @@ contract MarketContractProxy is Ownable {
         ERC20 collateralToken = ERC20(COLLATERAL_TOKEN_ADDRESS);
 
         uint minerBalance = collateralToken.balanceOf(makerAddress);
-        uint minerAllowance = collateralToken.allowance(makerAddress, MINTER_BRIDGE_ADDRESS);
+        uint minerAllowance = collateralToken.allowance(
+            makerAddress,
+            MINTER_BRIDGE_ADDRESS
+        );
 
-        uint uintMinAllowanceBalance = minerBalance < minerAllowance ? minerBalance : minerAllowance;
+        uint uintMinAllowanceBalance = minerBalance < minerAllowance
+            ? minerBalance
+            : minerAllowance;
 
         return uintMinAllowanceBalance / (latestIndexValue * CONTRACT_DURATION_DAYS);
     }
@@ -110,14 +115,14 @@ contract MarketContractProxy is Ownable {
     }
 
     function getExpiringMarketContract() public view returns (MarketContractMPX) {
-        uint lastIndex = marketContracts.length - 1;
+        uint contractsAdded = marketContracts.length;
 
         // If the marketContracts array has not had enough markets pushed into it to settle an old one then return 0x0.
-        if (lastIndex < CONTRACT_DURATION_DAYS) {
+        if (contractsAdded < CONTRACT_DURATION_DAYS) {
             return MarketContractMPX(address(0x0));
         }
-        uint expiringIndex = lastIndex - CONTRACT_DURATION_DAYS;
-        return MarketContractMPX(marketContracts[lastIndex]);
+        uint expiringIndex = contractsAdded - CONTRACT_DURATION_DAYS;
+        return MarketContractMPX(marketContracts[contractsAdded]);
     }
 
     //TODO: refactor this to return an interface
@@ -177,10 +182,11 @@ contract MarketContractProxy is Ownable {
     //// 0X-MINTER-BRIDGE PRIVILEGED FUNCTIONS /////
     ////////////////////////////////////////////////
 
-    function mintPositionTokens(uint qtyToMint, address longTokenRecipient, address shortTokenRecipient)
-        public
-        onlyMinterBridge
-    {
+    function mintPositionTokens(
+        uint qtyToMint,
+        address longTokenRecipient,
+        address shortTokenRecipient
+    ) public onlyMinterBridge {
         // We need to call `mintPositionTo/*  */kens(CURRENT_CONTRACT_ADDRESS, amount, false)` on the
         // MarketCollateralPool. We can get to the pool this way:
         uint collateralNeeded = calculateRequiredCollateral(qtyToMint);
@@ -198,13 +204,21 @@ contract MarketContractProxy is Ownable {
         ERC20 collateralToken = ERC20(COLLATERAL_TOKEN_ADDRESS);
 
         // Move tokens from the MinterBridge to this proxy address
-        collateralToken.transferFrom(MINTER_BRIDGE_ADDRESS, address(this), collateralNeeded);
+        collateralToken.transferFrom(
+            MINTER_BRIDGE_ADDRESS,
+            address(this),
+            collateralNeeded
+        );
 
         // Permission market contract to spent collateral token
         collateralToken.approve(address(marketCollateralPool), collateralNeeded);
 
         // Generate long and short tokens to sent to invester and miner
-        marketCollateralPool.mintPositionTokens(address(latestMarketContract), qtyToMint, false);
+        marketCollateralPool.mintPositionTokens(
+            address(latestMarketContract),
+            qtyToMint,
+            false
+        );
 
         // Send the tokens
         longToken.transfer(longTokenRecipient, qtyToMint);
@@ -232,7 +246,10 @@ contract MarketContractProxy is Ownable {
     ////////////////////////////
 
     // function called daily to settle the current expiring 28 day contract.
-    function settleMarketContract(uint mri, address marketContractAddress) internal {
+    function settleMarketContract(uint mri, address marketContractAddress)
+        public
+        onlyHoneyLemonOracle
+    {
         require(mri != 0, 'The mri value can not be 0');
         require(marketContractAddress != address(0x0));
 
@@ -265,7 +282,10 @@ contract MarketContractProxy is Ownable {
         //TODO: emit event
     }
 
-    function generateContractSpecs(uint currentMRI, uint expiration) public returns (uint[7] memory) {
+    function generateContractSpecs(uint currentMRI, uint expiration)
+        public
+        returns (uint[7] memory)
+    {
         //TODO: replace elements in this array with the correct parms
         uint[7] memory todaysMarketContractSpecs = marketContractSpecs;
         // todaysMarketContractSpecs[1] = 100000; // capPrice
@@ -274,10 +294,18 @@ contract MarketContractProxy is Ownable {
         return todaysMarketContractSpecs;
     }
 
-    function generateContractNames(string memory marketName) public returns (bytes32[3] memory) {
-        bytes memory longTokenName = abi.encodePacked(marketName, '-Long');
-        bytes memory shortTimeName = abi.encodePacked(marketName, '-Short');
-        return [stringToBytes32(marketName), bytesToBytes32(longTokenName), bytesToBytes32(shortTimeName)];
+    function generateContractNames(string memory marketName)
+        public
+        returns (bytes32[3] memory)
+    {
+        // bytes memory longTokenName = abi.encodePacked(marketName, '-Long');
+        // bytes memory shortTimeName = abi.encodePacked(marketName, '-Short');
+        // return [stringToBytes32(marketName), bytesToBytes32(longTokenName), bytesToBytes32(shortTimeName)];
+        return [
+            bytes32('MRI-BTC-28D-20200501'),
+            bytes32('MRI-BTC-28D-20200501-Long'),
+            bytes32('MRI-BTC-28D-20200501-Short')
+        ];
     }
 
     // TODO: move these to a library

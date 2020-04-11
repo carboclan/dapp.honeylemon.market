@@ -35,9 +35,16 @@ contract MarketContractFactoryMPX is Ownable {
     /// @param registryAddress - address of our MARKET registry
     /// @param collateralPoolAddress - address of our MARKET Collateral pool
     /// @param oracleHubAddress - address of the MPX oracle
-    constructor(address registryAddress, address collateralPoolAddress, address oracleHubAddress) public {
+    constructor(
+        address registryAddress,
+        address collateralPoolAddress,
+        address oracleHubAddress
+    ) public {
         require(registryAddress != address(0), 'registryAddress can not be null');
-        require(collateralPoolAddress != address(0), 'collateralPoolAddress can not be null');
+        require(
+            collateralPoolAddress != address(0),
+            'collateralPoolAddress can not be null'
+        );
         require(oracleHubAddress != address(0), 'oracleHubAddress can not be null');
 
         marketContractRegistry = registryAddress;
@@ -78,7 +85,9 @@ contract MarketContractFactoryMPX is Ownable {
             oracleStatistic
         );
 
-        MarketContractRegistryInterface(marketContractRegistry).addAddressToWhiteList(address(mktContract));
+        MarketContractRegistryInterface(marketContractRegistry).addAddressToWhiteList(
+            address(mktContract)
+        );
         emit MarketContractCreated(msg.sender, address(mktContract));
         return address(mktContract);
     }

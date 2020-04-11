@@ -74,14 +74,28 @@ contract TestMathLib {
 
         // neededCollateral for a long position and price equal to priceFloor returns zero
         Assert.equal(
-            MathLib.calculateCollateralToReturn(priceFloor, priceCap, qtyMultiplier, longQty, 0, priceFloor),
+            MathLib.calculateCollateralToReturn(
+                priceFloor,
+                priceCap,
+                qtyMultiplier,
+                longQty,
+                0,
+                priceFloor
+            ),
             0,
             'collateral for a long position and price equal to priceFloor should be 0'
         );
 
         // neededCollateral for a long position and price less than priceFloor returns zero
         Assert.equal(
-            MathLib.calculateCollateralToReturn(priceFloor, priceCap, qtyMultiplier, longQty, 0, priceFloor - 1),
+            MathLib.calculateCollateralToReturn(
+                priceFloor,
+                priceCap,
+                qtyMultiplier,
+                longQty,
+                0,
+                priceFloor - 1
+            ),
             0,
             'collateral for a long position and price less than priceFloor should be 0'
         );
@@ -112,14 +126,28 @@ contract TestMathLib {
 
         // neededCollateral for a short position and price equal to priceCap returns zero
         Assert.equal(
-            MathLib.calculateCollateralToReturn(priceFloor, priceCap, qtyMultiplier, 0, shortQty, priceCap),
+            MathLib.calculateCollateralToReturn(
+                priceFloor,
+                priceCap,
+                qtyMultiplier,
+                0,
+                shortQty,
+                priceCap
+            ),
             0,
             'collateral for a short position and price equal to priceCap should be 0'
         );
 
         // neededCollateral for a short position and price greater than priceCap returns zero
         Assert.equal(
-            MathLib.calculateCollateralToReturn(priceFloor, priceCap, qtyMultiplier, 0, shortQty, priceCap + 1),
+            MathLib.calculateCollateralToReturn(
+                priceFloor,
+                priceCap,
+                qtyMultiplier,
+                0,
+                shortQty,
+                priceCap + 1
+            ),
             0,
             'collateral for a short position and price greater than priceCap should be 0'
         );
@@ -156,7 +184,11 @@ contract TestMathLib {
         uint priceCap = 20;
         uint multiplier = 1;
         uint expectedTotalCollateral = 10;
-        uint actualTotalCollateral = MathLib.calculateTotalCollateral(priceFloor, priceCap, multiplier);
+        uint actualTotalCollateral = MathLib.calculateTotalCollateral(
+            priceFloor,
+            priceCap,
+            multiplier
+        );
         Assert.equal(
             actualTotalCollateral,
             expectedTotalCollateral,
@@ -169,7 +201,11 @@ contract TestMathLib {
         uint priceCap = 20;
         uint multiplier = 2;
         uint expectedTotalCollateral = 20;
-        uint actualTotalCollateral = MathLib.calculateTotalCollateral(priceFloor, priceCap, multiplier);
+        uint actualTotalCollateral = MathLib.calculateTotalCollateral(
+            priceFloor,
+            priceCap,
+            multiplier
+        );
         Assert.equal(
             actualTotalCollateral,
             expectedTotalCollateral,
@@ -177,7 +213,11 @@ contract TestMathLib {
         );
     }
 
-    function failCalculatingTotalCollateralWithAbnormalPrices() public pure returns (uint256) {
+    function failCalculatingTotalCollateralWithAbnormalPrices()
+        public
+        pure
+        returns (uint256)
+    {
         uint higherPriceFloor = 20;
         uint priceCap = 10;
         uint multiplier = 1;
@@ -185,9 +225,14 @@ contract TestMathLib {
     }
 
     function testCalculateTotalCollateralWithAbnormalPrices() public {
-        bytes memory test_abi = abi.encodeWithSignature('failCalculatingTotalCollateralWithAbnormalPrices()');
+        bytes memory test_abi = abi.encodeWithSignature(
+            'failCalculatingTotalCollateralWithAbnormalPrices()'
+        );
         (bool success, bytes memory returndata) = address(this).call(test_abi);
-        Assert.isFalse(success, 'total collateral should fail for abnormal price margins');
+        Assert.isFalse(
+            success,
+            'total collateral should fail for abnormal price margins'
+        );
     }
 
     function testCalculateFeePerUnit() public {
@@ -195,8 +240,17 @@ contract TestMathLib {
         uint priceCap = 2000;
         uint multiplier = 1000;
         uint feeAmountInBasis = 100; // 1 percent fee.
-        uint fee = MathLib.calculateFeePerUnit(priceFloor, priceCap, multiplier, feeAmountInBasis);
+        uint fee = MathLib.calculateFeePerUnit(
+            priceFloor,
+            priceCap,
+            multiplier,
+            feeAmountInBasis
+        );
         uint expectedFeeAmount = 15000; // midpoint * multiplier * 1% (100 basis points)
-        Assert.equal(fee, expectedFeeAmount, 'Fee amount should be equal to midpoint * multiplier * percent');
+        Assert.equal(
+            fee,
+            expectedFeeAmount,
+            'Fee amount should be equal to midpoint * multiplier * percent'
+        );
     }
 }
