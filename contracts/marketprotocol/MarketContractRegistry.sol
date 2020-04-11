@@ -54,9 +54,15 @@ contract MarketContractRegistry is Ownable, MarketContractRegistryInterface {
     /// a decentralized smart contract of community members to vote
     /// @param contractAddress contract to removed from white list
     /// @param whiteListIndex of the contractAddress in the addressWhiteList to be removed.
-    function removeContractFromWhiteList(address contractAddress, uint whiteListIndex) external onlyOwner {
+    function removeContractFromWhiteList(address contractAddress, uint whiteListIndex)
+        external
+        onlyOwner
+    {
         require(isWhiteListed[contractAddress], 'can only remove whitelisted addresses');
-        require(addressWhiteList[whiteListIndex] == contractAddress, 'index does not match address');
+        require(
+            addressWhiteList[whiteListIndex] == contractAddress,
+            'index does not match address'
+        );
         isWhiteListed[contractAddress] = false;
 
         // push the last item in array to replace the address we are removing and then trim the array.
@@ -69,7 +75,10 @@ contract MarketContractRegistry is Ownable, MarketContractRegistryInterface {
     /// a decentralized smart contract of community members to vote
     /// @param contractAddress contract to removed from white list
     function addAddressToWhiteList(address contractAddress) external {
-        require(isOwner() || factoryAddressWhiteList[msg.sender], 'Can only be added by factory or owner');
+        require(
+            isOwner() || factoryAddressWhiteList[msg.sender],
+            'Can only be added by factory or owner'
+        );
         require(!isWhiteListed[contractAddress], 'Address must not be whitelisted');
         isWhiteListed[contractAddress] = true;
         addressWhiteList.push(contractAddress);
@@ -87,7 +96,10 @@ contract MarketContractRegistry is Ownable, MarketContractRegistryInterface {
     /// @dev allows for the owner to remove an address of a factory
     /// @param factoryAddress address of factory to be removed
     function removeFactoryAddress(address factoryAddress) external onlyOwner {
-        require(factoryAddressWhiteList[factoryAddress], 'factory address is not in the white list');
+        require(
+            factoryAddressWhiteList[factoryAddress],
+            'factory address is not in the white list'
+        );
         factoryAddressWhiteList[factoryAddress] = false;
         emit FactoryAddressRemoved(factoryAddress);
     }

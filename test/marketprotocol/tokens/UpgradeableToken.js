@@ -21,12 +21,19 @@ contract('UpgradeableToken', function(accounts) {
 
   it('Main account should have entire balance', async function() {
     const mainAcctBalance = await marketToken.balanceOf.call(accountOwner);
-    assert.isTrue(mainAcctBalance.eq(initBalance), 'Entire token balance should be in primary account');
+    assert.isTrue(
+      mainAcctBalance.eq(initBalance),
+      'Entire token balance should be in primary account'
+    );
   });
 
   it('Upgradeable token should have the MKT token as the previous token', async function() {
     const tokenAddress = await upgradeableToken.PREVIOUS_TOKEN_ADDRESS();
-    assert.equal(tokenAddress, marketToken.address, 'Upgrade token should point back at the original MKT token');
+    assert.equal(
+      tokenAddress,
+      marketToken.address,
+      'Upgrade token should point back at the original MKT token'
+    );
   });
 
   it('Only owner can set upgradeable target', async function() {
@@ -38,14 +45,21 @@ contract('UpgradeableToken', function(accounts) {
     } catch (err) {
       error = err;
     }
-    assert.ok(error instanceof Error, "didn't fail when non owner attempted to set upgradeable target");
+    assert.ok(
+      error instanceof Error,
+      "didn't fail when non owner attempted to set upgradeable target"
+    );
 
     await marketToken.setUpgradeableTarget(upgradeableToken.address, {
       from: accountOwner
     });
 
     const upgradeableTarget = await marketToken.upgradeableTarget();
-    assert.equal(upgradeableTarget, upgradeableToken.address, 'Upgrade target should point at new token');
+    assert.equal(
+      upgradeableTarget,
+      upgradeableToken.address,
+      'Upgrade target should point at new token'
+    );
   });
 
   it('Can only burn owned tokens', async function() {
@@ -54,7 +68,11 @@ contract('UpgradeableToken', function(accounts) {
     await marketToken.transfer(accountUser, initialBalance, { from: accounts[0] });
     let currentBalance = await marketToken.balanceOf.call(accountUser);
 
-    assert.equal(initialBalance, currentBalance, 'user account should have correct balance');
+    assert.equal(
+      initialBalance,
+      currentBalance,
+      'user account should have correct balance'
+    );
 
     error = null;
     try {
@@ -62,18 +80,29 @@ contract('UpgradeableToken', function(accounts) {
     } catch (err) {
       error = err;
     }
-    assert.ok(error instanceof Error, "didn't fail when attempting to burn more tokens than owned");
+    assert.ok(
+      error instanceof Error,
+      "didn't fail when attempting to burn more tokens than owned"
+    );
 
     const amountToBurn = initialBalance / 2;
     await marketToken.burn(amountToBurn, { from: accountUser });
 
     currentBalance = await marketToken.balanceOf.call(accountUser);
-    assert.equal(initialBalance - amountToBurn, currentBalance, 'user account should have correct balance after burn');
+    assert.equal(
+      initialBalance - amountToBurn,
+      currentBalance,
+      'user account should have correct balance after burn'
+    );
 
     const initialSupply = await marketToken.INITIAL_SUPPLY.call();
     let currentSupply = await marketToken.totalSupply.call();
 
-    assert.equal(initialSupply - amountToBurn, currentSupply, "current supply doesn't match after burn");
+    assert.equal(
+      initialSupply - amountToBurn,
+      currentSupply,
+      "current supply doesn't match after burn"
+    );
   });
 
   it('Can only upgrade owned tokens', async function() {
@@ -83,7 +112,11 @@ contract('UpgradeableToken', function(accounts) {
     });
 
     const upgradeableTarget = await marketToken.upgradeableTarget();
-    assert.equal(upgradeableTarget, upgradeableToken.address, 'Upgrade target should point at new token');
+    assert.equal(
+      upgradeableTarget,
+      upgradeableToken.address,
+      'Upgrade target should point at new token'
+    );
 
     error = null;
     try {
@@ -91,12 +124,19 @@ contract('UpgradeableToken', function(accounts) {
     } catch (err) {
       error = err;
     }
-    assert.ok(error instanceof Error, "didn't fail when attempting to upgrade more tokens than owned");
+    assert.ok(
+      error instanceof Error,
+      "didn't fail when attempting to upgrade more tokens than owned"
+    );
 
     const amountToUpgrade = initialBalance / 2;
     await marketToken.upgrade(amountToUpgrade, { from: accountUser });
 
-    assert.equal(upgradeableTarget, upgradeableToken.address, 'Upgrade target should point at new token');
+    assert.equal(
+      upgradeableTarget,
+      upgradeableToken.address,
+      'Upgrade target should point at new token'
+    );
 
     const balanceAfterUpgrade = await marketToken.balanceOf.call(accountUser);
     assert.equal(
@@ -122,6 +162,9 @@ contract('UpgradeableToken', function(accounts) {
     } catch (err) {
       error = err;
     }
-    assert.ok(error instanceof Error, "didn't fail when attempting to upgrade without a target");
+    assert.ok(
+      error instanceof Error,
+      "didn't fail when attempting to upgrade without a target"
+    );
   });
 });

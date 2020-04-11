@@ -3,7 +3,11 @@ const MarketContractMPX = artifacts.require('MarketContractMPX');
 const Utils = require('web3-utils');
 
 const { AbstractWeb3Module } = require('web3-core');
-const { AbstractMethodFactory, GetBlockByNumberMethod, AbstractMethod } = require('web3-core-method');
+const {
+  AbstractMethodFactory,
+  GetBlockByNumberMethod,
+  AbstractMethod
+} = require('web3-core-method');
 const { formatters } = require('web3-core-helpers');
 
 class EVMManipulator extends AbstractWeb3Module {
@@ -41,7 +45,13 @@ class EVMManipulator extends AbstractWeb3Module {
   }
 
   increase(duration) {
-    const increaseTimeMethod = new AbstractMethod('evm_increaseTime', 1, Utils, formatters, this);
+    const increaseTimeMethod = new AbstractMethod(
+      'evm_increaseTime',
+      1,
+      Utils,
+      formatters,
+      this
+    );
     increaseTimeMethod.setArguments([duration]);
 
     return increaseTimeMethod.execute().then(() => {
@@ -106,7 +116,13 @@ module.exports = {
    * @param {number[] | null} contractSpecs
    * @return {MarketContractMPX}
    */
-  createMarketContract(collateralToken, collateralPool, userAddress, oracleHubAddress, contractSpecs) {
+  createMarketContract(
+    collateralToken,
+    collateralPool,
+    userAddress,
+    oracleHubAddress,
+    contractSpecs
+  ) {
     const expiration = Math.round(new Date().getTime() / 1000 + 60 * 50); // order expires 50 minutes from now.
     const oracleURL = 'api.coincap.io/v2/rates/bitcoin';
     const oracleStatistic = 'rateUSD';
