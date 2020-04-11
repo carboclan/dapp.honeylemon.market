@@ -1,5 +1,6 @@
-//Ox libs and tools
+// This script simulates one life cycle with honey lemon + market protocol + 0x.
 
+//Ox libs and tools
 const { RPCSubprovider, Web3ProviderEngine } = require('@0x/subproviders');
 const {
   generatePseudoRandomSalt,

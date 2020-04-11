@@ -23,6 +23,8 @@ contract MarketContractProxy is Ownable {
 
     uint public CONTRACT_DURATION = 10 * 60; // 28 days in seconds
 
+    uint public CONTRACT_COLLATERAL_RATIO = 135000000; //1.35e8; 1.35, with 8 decimal places
+
     uint[7] public marketContractSpecs = [
         0, // floorPrice - the lower bound price for the CFD [constant]
         0, // capPrice - the upper bound price for the CFD [updated before deployment]
@@ -34,6 +36,10 @@ contract MarketContractProxy is Ownable {
     ];
 
     address[] public marketContracts;
+
+    mapping(address => uint256) addressToMarketId;
+
+    uint latestMri = 0;
 
     constructor(
         address _marketContractFactoryMPX,
@@ -86,7 +92,7 @@ contract MarketContractProxy is Ownable {
         // MarketCollateralPool marketCollateralPool = getLatestMarketCollateralPool();
 
         // TODO: replace this with the latest daily value
-        uint latestIndexValue = 1000;
+        uint latestIndexValue = latestMri;
         ERC20 collateralToken = ERC20(COLLATERAL_TOKEN_ADDRESS);
 
         uint minerBalance = collateralToken.balanceOf(makerAddress);
@@ -100,6 +106,17 @@ contract MarketContractProxy is Ownable {
     //TODO: refactor this to return an interface
     function getLatestMarketContract() public view returns (MarketContractMPX) {
         uint lastIndex = marketContracts.length - 1;
+        return MarketContractMPX(marketContracts[lastIndex]);
+    }
+
+    function getExpiringMarketContract() public view returns (MarketContractMPX) {
+        uint lastIndex = marketContracts.length - 1;
+
+        // If the marketContracts array has not had enough markets pushed into it to settle an old one then return 0x0.
+        if (lastIndex < CONTRACT_DURATION_DAYS) {
+            return MarketContractMPX(address(0x0));
+        }
+        uint expiringIndex = lastIndex - CONTRACT_DURATION_DAYS;
         return MarketContractMPX(marketContracts[lastIndex]);
     }
 
@@ -134,10 +151,27 @@ contract MarketContractProxy is Ownable {
     /////////////////////////////////////
 
     // Settles old contract and deploys the new contract
-    function dailySettlement(uint currentIndexValue, uint lookbackIndexValue, uint timestamp)
-        public
-        onlyHoneyLemonOracle
-    {}
+    function dailySettlement(
+        uint lookbackIndexValue,
+        uint currentIndexValue,
+        string memory newMarketName,
+        uint newMarketExpiration
+    ) public onlyHoneyLemonOracle {
+        require(currentIndexValue != 0, 'Current MRI value cant be zero');
+
+        // 1. Settle the past contract, if there is a price and contract exists.
+        MarketContractMPX expiringMarketContract = getExpiringMarketContract();
+        if (address(expiringMarketContract) != address(0x0)) {
+            settleMarketContract(lookbackIndexValue, address(expiringMarketContract));
+            //TODO: emit an event here
+        }
+
+        // 2. Deploy daily contract for the next 28 days.
+        deployContract(currentIndexValue, newMarketName, newMarketExpiration);
+
+        // 3. Store the latest MRI value
+        latestMri = currentIndexValue;
+    }
 
     ////////////////////////////////////////////////
     //// 0X-MINTER-BRIDGE PRIVILEGED FUNCTIONS /////
@@ -197,13 +231,13 @@ contract MarketContractProxy is Ownable {
     //// INTERNAL FUNCTIONS ////
     ////////////////////////////
 
-    // Internal function to add the current index price to the oracle and push settlement price into MPX.
-    function pushOraclePriceIndex(uint currentIndexValue, uint lookbackIndexValue, uint timestamp) internal {}
-
     // function called daily to settle the current expiring 28 day contract.
-    function settleLatestMarketContract(uint price) public {
-        MarketContractMPX latestMarketContract = getLatestMarketContract();
-        latestMarketContract.oracleCallBack(price);
+    function settleMarketContract(uint mri, address marketContractAddress) internal {
+        require(mri != 0, 'The mri value can not be 0');
+        require(marketContractAddress != address(0x0));
+
+        MarketContractMPX marketContract = MarketContractMPX(marketContractAddress);
+        marketContract.oracleCallBack(mri);
     }
 
     // Deploys the current day Market contract. `indexValue` is used to initialize collateral requirement in its constructor
@@ -211,32 +245,59 @@ contract MarketContractProxy is Ownable {
     // we’ll need easy access to the latest values of contract address and index.
     // collateral requirement = indexValue * 28 * overcollateralization_factor
     // returns the address of the new contract
-    function deployContract() public onlyOwner returns (address) {
+    function deployContract(uint currentMRI, string memory marketName, uint expiration)
+        public
+        onlyOwner
+        returns (address)
+    {
         address contractAddress = marketContractFactoryMPX.deployMarketContractMPX(
-            generateContractNames(),
+            generateContractNames(marketName),
             COLLATERAL_TOKEN_ADDRESS,
-            generateContractSpecs(),
+            generateContractSpecs(currentMRI, expiration),
             ORACLE_URL,
             ORACLE_STATISTIC
         );
-        marketContracts.push(contractAddress);
+
+        // Add new market to storage
+        uint index = marketContracts.push(contractAddress) - 1;
+        addressToMarketId[contractAddress] = index;
         return (contractAddress);
+        //TODO: emit event
     }
 
-    function generateContractSpecs() public returns (uint[7] memory) {
+    function generateContractSpecs(uint currentMRI, uint expiration) public returns (uint[7] memory) {
         //TODO: replace elements in this array with the correct parms
         uint[7] memory todaysMarketContractSpecs = marketContractSpecs;
-        todaysMarketContractSpecs[1] = 100000; // capPrice
-        todaysMarketContractSpecs[6] = now + CONTRACT_DURATION; // expirationTimeStamp
+        // todaysMarketContractSpecs[1] = 100000; // capPrice
+        todaysMarketContractSpecs[1] = (currentMRI * (CONTRACT_COLLATERAL_RATIO)) / 1e8; // capPrice. div by 1e8 to correct scaling
+        todaysMarketContractSpecs[6] = expiration; // expirationTimeStamp. Fed in directly from oracle to ensure timing is exact, irrespective of block mining times
         return todaysMarketContractSpecs;
     }
 
-    function generateContractNames() public returns (bytes32[3] memory) {
-        //TODO: replace this with a function that dynamically generates names. Use the `DateLib.sol`
-        return [
-            bytes32('MRI-BTC-28D-20200501'),
-            bytes32('MRI-BTC-28D-20200501-Long'),
-            bytes32('MRI-BTC-28D-20200501-Short')
-        ];
+    function generateContractNames(string memory marketName) public returns (bytes32[3] memory) {
+        bytes memory longTokenName = abi.encodePacked(marketName, '-Long');
+        bytes memory shortTimeName = abi.encodePacked(marketName, '-Short');
+        return [stringToBytes32(marketName), bytesToBytes32(longTokenName), bytesToBytes32(shortTimeName)];
+    }
+
+    // TODO: move these to a library
+    function bytesToBytes32(bytes memory b) private pure returns (bytes32) {
+        bytes32 out;
+
+        for (uint i = 0; i < 32; i++) {
+            out |= bytes32(b[i] & 0xFF) >> (i * 8);
+        }
+        return out;
+    }
+
+    function stringToBytes32(string memory source) private pure returns (bytes32 result) {
+        bytes memory tempEmptyStringTest = bytes(source);
+        if (tempEmptyStringTest.length == 0) {
+            return 0x0;
+        }
+
+        assembly {
+            result := mload(add(source, 32))
+        }
     }
 }
