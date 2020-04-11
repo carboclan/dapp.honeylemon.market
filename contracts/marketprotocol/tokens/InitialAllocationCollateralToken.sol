@@ -28,12 +28,7 @@ contract InitialAllocationCollateralToken is CollateralToken {
     event AllocationClaimed(address indexed claimeeAddress);
 
     /// @dev creates a token that allows for all addresses to retrieve an initial token allocation.
-    constructor(
-        string memory tokenName,
-        string memory tokenSymbol,
-        uint256 initialTokenAllocation,
-        uint8 tokenDecimals
-    )
+    constructor(string memory tokenName, string memory tokenSymbol, uint256 initialTokenAllocation, uint8 tokenDecimals)
         public
         CollateralToken(tokenName, tokenSymbol, initialTokenAllocation, tokenDecimals)
     {

@@ -32,15 +32,7 @@ contract('MarketContractFactoryMPX', function(accounts) {
     let result = await marketContractFactory.deployMarketContractMPX(
       contractName,
       CollateralToken.address,
-      [
-        priceFloor,
-        priceCap,
-        priceDecimalPlaces,
-        qtyMultiplier,
-        feesInCollateralToken,
-        feesInMKTToken,
-        expiration
-      ],
+      [priceFloor, priceCap, priceDecimalPlaces, qtyMultiplier, feesInCollateralToken, feesInMKTToken, expiration],
       oracleURL,
       oracleStatistic
     );
@@ -57,61 +49,33 @@ contract('MarketContractFactoryMPX', function(accounts) {
     assert.equal(await marketContract.ORACLE_STATISTIC(), oracleStatistic);
     assert.equal((await marketContract.EXPIRATION()).toNumber(), expiration);
     assert.equal((await marketContract.QTY_MULTIPLIER()).toNumber(), qtyMultiplier);
-    assert.equal(
-      (await marketContract.PRICE_DECIMAL_PLACES()).toNumber(),
-      priceDecimalPlaces
-    );
+    assert.equal((await marketContract.PRICE_DECIMAL_PLACES()).toNumber(), priceDecimalPlaces);
     assert.equal((await marketContract.PRICE_FLOOR()).toNumber(), priceFloor);
     assert.equal((await marketContract.PRICE_CAP()).toNumber(), priceCap);
-    assert.equal(
-      await marketContract.COLLATERAL_TOKEN_ADDRESS(),
-      CollateralToken.address
-    );
-    assert.equal(
-      (await marketContract.CONTRACT_NAME()).replace(/\0.*$/g, ''),
-      web3.utils.toUtf8(contractName[0])
-    );
+    assert.equal(await marketContract.COLLATERAL_TOKEN_ADDRESS(), CollateralToken.address);
+    assert.equal((await marketContract.CONTRACT_NAME()).replace(/\0.*$/g, ''), web3.utils.toUtf8(contractName[0]));
   });
 
   it('Adds a new MarketContract to the white list', async function() {
     const result = await marketContractFactory.deployMarketContractMPX(
       contractName,
       CollateralToken.address,
-      [
-        priceFloor,
-        priceCap,
-        priceDecimalPlaces,
-        qtyMultiplier,
-        feesInCollateralToken,
-        feesInMKTToken,
-        expiration
-      ],
+      [priceFloor, priceCap, priceDecimalPlaces, qtyMultiplier, feesInCollateralToken, feesInMKTToken, expiration],
       oracleURL,
       oracleStatistic
     );
 
     // Should fire the MarketContractCreated event!
     let marketContractAddress;
-    await truffleAssert.eventEmitted(
-      result,
-      'MarketContractCreated',
-      async createdEvent => {
-        marketContractAddress = createdEvent.contractAddress;
-        return true;
-      }
-    );
+    await truffleAssert.eventEmitted(result, 'MarketContractCreated', async createdEvent => {
+      marketContractAddress = createdEvent.contractAddress;
+      return true;
+    });
 
-    let registryTransaction = await truffleAssert.createTransactionResult(
-      marketContractRegistry,
-      result.tx
-    );
-    await truffleAssert.eventEmitted(
-      registryTransaction,
-      'AddressAddedToWhitelist',
-      whitelistEvent => {
-        return marketContractAddress === whitelistEvent.contractAddress;
-      }
-    );
+    let registryTransaction = await truffleAssert.createTransactionResult(marketContractRegistry, result.tx);
+    await truffleAssert.eventEmitted(registryTransaction, 'AddressAddedToWhitelist', whitelistEvent => {
+      return marketContractAddress === whitelistEvent.contractAddress;
+    });
   });
 
   it('Allows the registry address to be changed only by the owner', async function() {
@@ -122,10 +86,7 @@ contract('MarketContractFactoryMPX', function(accounts) {
     } catch (err) {
       error = err;
     }
-    assert.ok(
-      error instanceof Error,
-      'should not be able to set registry from non-owner account'
-    );
+    assert.ok(error instanceof Error, 'should not be able to set registry from non-owner account');
 
     await marketContractFactory.setRegistryAddress(accounts[1], { from: accounts[0] });
 
@@ -141,10 +102,7 @@ contract('MarketContractFactoryMPX', function(accounts) {
     } catch (err) {
       error = err;
     }
-    assert.ok(
-      error instanceof Error,
-      'should not be able to set registry to null address'
-    );
+    assert.ok(error instanceof Error, 'should not be able to set registry to null address');
 
     await marketContractFactory.setRegistryAddress(originalRegistryAddress, {
       from: accounts[0]
@@ -159,18 +117,11 @@ contract('MarketContractFactoryMPX', function(accounts) {
     } catch (err) {
       error = err;
     }
-    assert.ok(
-      error instanceof Error,
-      'should not be able to set the hub address from non-owner account'
-    );
+    assert.ok(error instanceof Error, 'should not be able to set the hub address from non-owner account');
 
     await marketContractFactory.setOracleHubAddress(accounts[1], { from: accounts[0] });
 
-    assert.equal(
-      await marketContractFactory.oracleHub(),
-      accounts[1],
-      'did not correctly set the hub address'
-    );
+    assert.equal(await marketContractFactory.oracleHub(), accounts[1], 'did not correctly set the hub address');
 
     error = null;
     try {

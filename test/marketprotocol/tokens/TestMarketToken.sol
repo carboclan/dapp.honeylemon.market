@@ -42,18 +42,10 @@ contract TestMarketToken {
             'Unexpected initial supply allocation'
         );
 
-        Assert.equal(
-            marketToken.totalSupply(),
-            marketToken.INITIAL_SUPPLY(),
-            'Unexpected initial supply allocation'
-        );
+        Assert.equal(marketToken.totalSupply(), marketToken.INITIAL_SUPPLY(), 'Unexpected initial supply allocation');
 
         marketToken.burn(marketToken.INITIAL_SUPPLY() / 2);
 
-        Assert.equal(
-            marketToken.totalSupply(),
-            marketToken.INITIAL_SUPPLY() / 2,
-            'Unexpected supply after burn'
-        );
+        Assert.equal(marketToken.totalSupply(), marketToken.INITIAL_SUPPLY() / 2, 'Unexpected supply after burn');
     }
 }

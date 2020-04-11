@@ -31,11 +31,7 @@ library DateLib {
     //      - 3 * ((year + 4900 + (month - 14) / 12) / 100) / 4
     //      - offset
     // ------------------------------------------------------------------------
-    function _daysFromDate(uint year, uint month, uint day)
-        internal
-        pure
-        returns (uint _days)
-    {
+    function _daysFromDate(uint year, uint month, uint day) internal pure returns (uint _days) {
         require(year >= 1970);
         int _year = int(year);
         int _month = int(month);
@@ -71,11 +67,7 @@ library DateLib {
     // month = month + 2 - 12 * L
     // year = 100 * (N - 49) + year + L
     // ------------------------------------------------------------------------
-    function _daysToDate(uint _days)
-        internal
-        pure
-        returns (uint year, uint month, uint day)
-    {
+    function _daysToDate(uint _days) internal pure returns (uint year, uint month, uint day) {
         int __days = int(_days);
 
         int L = __days + 68569 + OFFSET19700101;
@@ -94,22 +86,15 @@ library DateLib {
         day = uint(_day);
     }
 
-    function timestampFromDate(uint year, uint month, uint day)
+    function timestampFromDate(uint year, uint month, uint day) internal pure returns (uint timestamp) {
+        timestamp = _daysFromDate(year, month, day) * SECONDS_PER_DAY;
+    }
+
+    function timestampFromDateTime(uint year, uint month, uint day, uint hour, uint minute, uint second)
         internal
         pure
         returns (uint timestamp)
     {
-        timestamp = _daysFromDate(year, month, day) * SECONDS_PER_DAY;
-    }
-
-    function timestampFromDateTime(
-        uint year,
-        uint month,
-        uint day,
-        uint hour,
-        uint minute,
-        uint second
-    ) internal pure returns (uint timestamp) {
         timestamp =
             _daysFromDate(year, month, day) *
             SECONDS_PER_DAY +
@@ -120,11 +105,7 @@ library DateLib {
             second;
     }
 
-    function timestampToDate(uint timestamp)
-        internal
-        pure
-        returns (uint year, uint month, uint day)
-    {
+    function timestampToDate(uint timestamp) internal pure returns (uint year, uint month, uint day) {
         (year, month, day) = _daysToDate(timestamp / SECONDS_PER_DAY);
     }
 
@@ -141,11 +122,7 @@ library DateLib {
         second = secs % SECONDS_PER_MINUTE;
     }
 
-    function isValidDate(uint year, uint month, uint day)
-        internal
-        pure
-        returns (bool valid)
-    {
+    function isValidDate(uint year, uint month, uint day) internal pure returns (bool valid) {
         if (year >= 1970 && month > 0 && month <= 12) {
             uint daysInMonth = _getDaysInMonth(year, month);
             if (day > 0 && day <= daysInMonth) {
@@ -154,14 +131,11 @@ library DateLib {
         }
     }
 
-    function isValidDateTime(
-        uint year,
-        uint month,
-        uint day,
-        uint hour,
-        uint minute,
-        uint second
-    ) internal pure returns (bool valid) {
+    function isValidDateTime(uint year, uint month, uint day, uint hour, uint minute, uint second)
+        internal
+        pure
+        returns (bool valid)
+    {
         if (isValidDate(year, month, day)) {
             if (hour < 24 && minute < 60 && second < 60) {
                 valid = true;
@@ -197,20 +171,8 @@ library DateLib {
         daysInMonth = _getDaysInMonth(year, month);
     }
 
-    function _getDaysInMonth(uint year, uint month)
-        internal
-        pure
-        returns (uint daysInMonth)
-    {
-        if (
-            month == 1 ||
-            month == 3 ||
-            month == 5 ||
-            month == 7 ||
-            month == 8 ||
-            month == 10 ||
-            month == 12
-        ) {
+    function _getDaysInMonth(uint year, uint month) internal pure returns (uint daysInMonth) {
+        if (month == 1 || month == 3 || month == 5 || month == 7 || month == 8 || month == 10 || month == 12) {
             daysInMonth = 31;
         } else if (month != 2) {
             daysInMonth = 30;
@@ -257,11 +219,7 @@ library DateLib {
         second = timestamp % SECONDS_PER_MINUTE;
     }
 
-    function addYears(uint timestamp, uint _years)
-        internal
-        pure
-        returns (uint newTimestamp)
-    {
+    function addYears(uint timestamp, uint _years) internal pure returns (uint newTimestamp) {
         uint year;
         uint month;
         uint day;
@@ -271,18 +229,11 @@ library DateLib {
         if (day > daysInMonth) {
             day = daysInMonth;
         }
-        newTimestamp =
-            _daysFromDate(year, month, day) *
-            SECONDS_PER_DAY +
-            (timestamp % SECONDS_PER_DAY);
+        newTimestamp = _daysFromDate(year, month, day) * SECONDS_PER_DAY + (timestamp % SECONDS_PER_DAY);
         require(newTimestamp >= timestamp);
     }
 
-    function addMonths(uint timestamp, uint _months)
-        internal
-        pure
-        returns (uint newTimestamp)
-    {
+    function addMonths(uint timestamp, uint _months) internal pure returns (uint newTimestamp) {
         uint year;
         uint month;
         uint day;
@@ -294,54 +245,31 @@ library DateLib {
         if (day > daysInMonth) {
             day = daysInMonth;
         }
-        newTimestamp =
-            _daysFromDate(year, month, day) *
-            SECONDS_PER_DAY +
-            (timestamp % SECONDS_PER_DAY);
+        newTimestamp = _daysFromDate(year, month, day) * SECONDS_PER_DAY + (timestamp % SECONDS_PER_DAY);
         require(newTimestamp >= timestamp);
     }
 
-    function addDays(uint timestamp, uint _days)
-        internal
-        pure
-        returns (uint newTimestamp)
-    {
+    function addDays(uint timestamp, uint _days) internal pure returns (uint newTimestamp) {
         newTimestamp = timestamp + _days * SECONDS_PER_DAY;
         require(newTimestamp >= timestamp);
     }
 
-    function addHours(uint timestamp, uint _hours)
-        internal
-        pure
-        returns (uint newTimestamp)
-    {
+    function addHours(uint timestamp, uint _hours) internal pure returns (uint newTimestamp) {
         newTimestamp = timestamp + _hours * SECONDS_PER_HOUR;
         require(newTimestamp >= timestamp);
     }
 
-    function addMinutes(uint timestamp, uint _minutes)
-        internal
-        pure
-        returns (uint newTimestamp)
-    {
+    function addMinutes(uint timestamp, uint _minutes) internal pure returns (uint newTimestamp) {
         newTimestamp = timestamp + _minutes * SECONDS_PER_MINUTE;
         require(newTimestamp >= timestamp);
     }
 
-    function addSeconds(uint timestamp, uint _seconds)
-        internal
-        pure
-        returns (uint newTimestamp)
-    {
+    function addSeconds(uint timestamp, uint _seconds) internal pure returns (uint newTimestamp) {
         newTimestamp = timestamp + _seconds;
         require(newTimestamp >= timestamp);
     }
 
-    function subYears(uint timestamp, uint _years)
-        internal
-        pure
-        returns (uint newTimestamp)
-    {
+    function subYears(uint timestamp, uint _years) internal pure returns (uint newTimestamp) {
         uint year;
         uint month;
         uint day;
@@ -351,18 +279,11 @@ library DateLib {
         if (day > daysInMonth) {
             day = daysInMonth;
         }
-        newTimestamp =
-            _daysFromDate(year, month, day) *
-            SECONDS_PER_DAY +
-            (timestamp % SECONDS_PER_DAY);
+        newTimestamp = _daysFromDate(year, month, day) * SECONDS_PER_DAY + (timestamp % SECONDS_PER_DAY);
         require(newTimestamp <= timestamp);
     }
 
-    function subMonths(uint timestamp, uint _months)
-        internal
-        pure
-        returns (uint newTimestamp)
-    {
+    function subMonths(uint timestamp, uint _months) internal pure returns (uint newTimestamp) {
         uint year;
         uint month;
         uint day;
@@ -374,54 +295,31 @@ library DateLib {
         if (day > daysInMonth) {
             day = daysInMonth;
         }
-        newTimestamp =
-            _daysFromDate(year, month, day) *
-            SECONDS_PER_DAY +
-            (timestamp % SECONDS_PER_DAY);
+        newTimestamp = _daysFromDate(year, month, day) * SECONDS_PER_DAY + (timestamp % SECONDS_PER_DAY);
         require(newTimestamp <= timestamp);
     }
 
-    function subDays(uint timestamp, uint _days)
-        internal
-        pure
-        returns (uint newTimestamp)
-    {
+    function subDays(uint timestamp, uint _days) internal pure returns (uint newTimestamp) {
         newTimestamp = timestamp - _days * SECONDS_PER_DAY;
         require(newTimestamp <= timestamp);
     }
 
-    function subHours(uint timestamp, uint _hours)
-        internal
-        pure
-        returns (uint newTimestamp)
-    {
+    function subHours(uint timestamp, uint _hours) internal pure returns (uint newTimestamp) {
         newTimestamp = timestamp - _hours * SECONDS_PER_HOUR;
         require(newTimestamp <= timestamp);
     }
 
-    function subMinutes(uint timestamp, uint _minutes)
-        internal
-        pure
-        returns (uint newTimestamp)
-    {
+    function subMinutes(uint timestamp, uint _minutes) internal pure returns (uint newTimestamp) {
         newTimestamp = timestamp - _minutes * SECONDS_PER_MINUTE;
         require(newTimestamp <= timestamp);
     }
 
-    function subSeconds(uint timestamp, uint _seconds)
-        internal
-        pure
-        returns (uint newTimestamp)
-    {
+    function subSeconds(uint timestamp, uint _seconds) internal pure returns (uint newTimestamp) {
         newTimestamp = timestamp - _seconds;
         require(newTimestamp <= timestamp);
     }
 
-    function diffYears(uint fromTimestamp, uint toTimestamp)
-        internal
-        pure
-        returns (uint _years)
-    {
+    function diffYears(uint fromTimestamp, uint toTimestamp) internal pure returns (uint _years) {
         require(fromTimestamp <= toTimestamp);
         uint fromYear;
         uint fromMonth;
@@ -434,11 +332,7 @@ library DateLib {
         _years = toYear - fromYear;
     }
 
-    function diffMonths(uint fromTimestamp, uint toTimestamp)
-        internal
-        pure
-        returns (uint _months)
-    {
+    function diffMonths(uint fromTimestamp, uint toTimestamp) internal pure returns (uint _months) {
         require(fromTimestamp <= toTimestamp);
         uint fromYear;
         uint fromMonth;
@@ -451,38 +345,22 @@ library DateLib {
         _months = toYear * 12 + toMonth - fromYear * 12 - fromMonth;
     }
 
-    function diffDays(uint fromTimestamp, uint toTimestamp)
-        internal
-        pure
-        returns (uint _days)
-    {
+    function diffDays(uint fromTimestamp, uint toTimestamp) internal pure returns (uint _days) {
         require(fromTimestamp <= toTimestamp);
         _days = (toTimestamp - fromTimestamp) / SECONDS_PER_DAY;
     }
 
-    function diffHours(uint fromTimestamp, uint toTimestamp)
-        internal
-        pure
-        returns (uint _hours)
-    {
+    function diffHours(uint fromTimestamp, uint toTimestamp) internal pure returns (uint _hours) {
         require(fromTimestamp <= toTimestamp);
         _hours = (toTimestamp - fromTimestamp) / SECONDS_PER_HOUR;
     }
 
-    function diffMinutes(uint fromTimestamp, uint toTimestamp)
-        internal
-        pure
-        returns (uint _minutes)
-    {
+    function diffMinutes(uint fromTimestamp, uint toTimestamp) internal pure returns (uint _minutes) {
         require(fromTimestamp <= toTimestamp);
         _minutes = (toTimestamp - fromTimestamp) / SECONDS_PER_MINUTE;
     }
 
-    function diffSeconds(uint fromTimestamp, uint toTimestamp)
-        internal
-        pure
-        returns (uint _seconds)
-    {
+    function diffSeconds(uint fromTimestamp, uint toTimestamp) internal pure returns (uint _seconds) {
         require(fromTimestamp <= toTimestamp);
         _seconds = toTimestamp - fromTimestamp;
     }

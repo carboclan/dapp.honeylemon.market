@@ -24,10 +24,7 @@ contract MinterBridge is Ownable {
     address public MARKET_CONTRACT_PROXY_ADDRESS;
     address public ERC20_BRIDGE_PROXY_ADDRESS;
 
-    function setMarketContractProxyAddress(address _marketContractProxyAddress)
-        public
-        onlyOwner
-    {
+    function setMarketContractProxyAddress(address _marketContractProxyAddress) public onlyOwner {
         MARKET_CONTRACT_PROXY_ADDRESS = _marketContractProxyAddress;
         marketContractProxy = MarketContractProxy(MARKET_CONTRACT_PROXY_ADDRESS);
     }
@@ -42,10 +39,7 @@ contract MinterBridge is Ownable {
     }
 
     modifier onlyIfSetMarketContractProxy() {
-        require(
-            MARKET_CONTRACT_PROXY_ADDRESS != address(0),
-            'MarketContractProxy not set'
-        );
+        require(MARKET_CONTRACT_PROXY_ADDRESS != address(0), 'MarketContractProxy not set');
         _;
     }
 

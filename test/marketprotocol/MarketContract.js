@@ -24,41 +24,26 @@ contract('MarketContract', function(accounts) {
       const expiration = Math.floor(new Date().getTime() / 1000 + 60 * 50);
       const fees = new BN('0');
 
-      marketContract = await utility.createMarketContract(
-        collateralToken,
-        collateralPool,
-        accounts[0],
-        null,
-        [priceFloor, priceCap, priceDecimalPlaces, qtyMultiplier, fees, fees, expiration]
-      );
+      marketContract = await utility.createMarketContract(collateralToken, collateralPool, accounts[0], null, [
+        priceFloor,
+        priceCap,
+        priceDecimalPlaces,
+        qtyMultiplier,
+        fees,
+        fees,
+        expiration
+      ]);
 
-      assert.isTrue(
-        (await marketContract.PRICE_FLOOR()).eq(priceFloor),
-        'price floor is not correct'
-      );
-      assert.isTrue(
-        (await marketContract.PRICE_CAP()).eq(priceCap),
-        'price cap is not correct'
-      );
+      assert.isTrue((await marketContract.PRICE_FLOOR()).eq(priceFloor), 'price floor is not correct');
+      assert.isTrue((await marketContract.PRICE_CAP()).eq(priceCap), 'price cap is not correct');
       assert.isTrue(
         (await marketContract.PRICE_DECIMAL_PLACES()).eq(priceDecimalPlaces),
         'price decimal places is not correct'
       );
-      assert.isTrue(
-        (await marketContract.QTY_MULTIPLIER()).eq(qtyMultiplier),
-        'qty multiplier is not correct'
-      );
-      assert.equal(
-        await marketContract.EXPIRATION(),
-        expiration,
-        'expiration is not correct'
-      );
+      assert.isTrue((await marketContract.QTY_MULTIPLIER()).eq(qtyMultiplier), 'qty multiplier is not correct');
+      assert.equal(await marketContract.EXPIRATION(), expiration, 'expiration is not correct');
       // strip null chars from string!
-      assert.equal(
-        (await marketContract.CONTRACT_NAME()).replace(/\0.*$/g, ''),
-        name,
-        'contract name is not correct'
-      );
+      assert.equal((await marketContract.CONTRACT_NAME()).replace(/\0.*$/g, ''), name, 'contract name is not correct');
 
       assert.equal(
         await marketContract.COLLATERAL_TOKEN_ADDRESS(),
@@ -71,11 +56,7 @@ contract('MarketContract', function(accounts) {
         'collateral pool address is not correct'
       );
 
-      const collateralPerUnit = utility.calculateTotalCollateral(
-        priceFloor,
-        priceCap,
-        qtyMultiplier
-      );
+      const collateralPerUnit = utility.calculateTotalCollateral(priceFloor, priceCap, qtyMultiplier);
       assert.isTrue(
         (await marketContract.COLLATERAL_PER_UNIT()).eq(collateralPerUnit),
         'collateral per unit is not correct'
@@ -90,13 +71,13 @@ contract('MarketContract', function(accounts) {
       const expiration = Math.floor(new Date().getTime() / 1000 + 60 * 50);
 
       await utility.shouldFail(async function() {
-        await utility.createMarketContract(
-          collateralToken,
-          collateralPool,
-          accounts[0],
-          null,
-          [higherPriceFloor, lowerPriceCap, priceDecimalPlaces, qtyMultiplier, expiration]
-        );
+        await utility.createMarketContract(collateralToken, collateralPool, accounts[0], null, [
+          higherPriceFloor,
+          lowerPriceCap,
+          priceDecimalPlaces,
+          qtyMultiplier,
+          expiration
+        ]);
       });
     });
 
@@ -108,13 +89,13 @@ contract('MarketContract', function(accounts) {
       const pastExpiration = Math.floor(new Date().getTime() / 1000 - 60 * 50); // 50 mins in the past
 
       await utility.shouldFail(async function() {
-        await utility.createMarketContract(
-          collateralToken,
-          collateralPool,
-          accounts[0],
-          null,
-          [priceFloor, priceCap, priceDecimalPlaces, qtyMultiplier, pastExpiration]
-        );
+        await utility.createMarketContract(collateralToken, collateralPool, accounts[0], null, [
+          priceFloor,
+          priceCap,
+          priceDecimalPlaces,
+          qtyMultiplier,
+          pastExpiration
+        ]);
       });
     });
   });
@@ -128,12 +109,8 @@ contract('MarketContract', function(accounts) {
       );
 
       const qtyToMint = 1;
-      const longPositionTokens = await PositionToken.at(
-        await marketContract.LONG_POSITION_TOKEN()
-      );
-      const shortPositionTokens = await PositionToken.at(
-        await marketContract.SHORT_POSITION_TOKEN()
-      );
+      const longPositionTokens = await PositionToken.at(await marketContract.LONG_POSITION_TOKEN());
+      const shortPositionTokens = await PositionToken.at(await marketContract.SHORT_POSITION_TOKEN());
 
       await marketContract.mintPositionTokens(qtyToMint, accounts[1], {
         from: accounts[0]
@@ -152,11 +129,7 @@ contract('MarketContract', function(accounts) {
     });
 
     it('should fail if caller is not collateral pool', async function() {
-      marketContract = await utility.createMarketContract(
-        collateralToken,
-        collateralPool,
-        accounts[0]
-      );
+      marketContract = await utility.createMarketContract(collateralToken, collateralPool, accounts[0]);
 
       await utility.shouldFail(async function() {
         await marketContract.mintPositionTokens(1, accounts[1], { from: accounts[0] });
@@ -166,11 +139,7 @@ contract('MarketContract', function(accounts) {
 
   describe('redeemLongToken', function() {
     it('should fail if caller is not collateral pool', async function() {
-      marketContract = await utility.createMarketContract(
-        collateralToken,
-        { address: accounts[0] },
-        accounts[0]
-      );
+      marketContract = await utility.createMarketContract(collateralToken, { address: accounts[0] }, accounts[0]);
 
       await marketContract.mintPositionTokens(1, accounts[1], { from: accounts[0] });
 
@@ -182,11 +151,7 @@ contract('MarketContract', function(accounts) {
 
   describe('redeemShortToken', function() {
     it('should fail if caller is not collateral pool', async function() {
-      marketContract = await utility.createMarketContract(
-        collateralToken,
-        { address: accounts[0] },
-        accounts[0]
-      );
+      marketContract = await utility.createMarketContract(collateralToken, { address: accounts[0] }, accounts[0]);
 
       await marketContract.mintPositionTokens(1, accounts[1], { from: accounts[0] });
 
