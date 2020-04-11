@@ -1,4 +1,4 @@
-class payoutCalculator {
+class PayoutCalculator {
   constructor() {
     this.data = [
       { timestampString: '2020-02-01', mri: 0.00001641 },
@@ -41,5 +41,5 @@ class payoutCalculator {
 }
 
 module.exports = {
-  Liquidator
+  PayoutCalculator
 };

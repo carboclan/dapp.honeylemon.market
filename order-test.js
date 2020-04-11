@@ -1,4 +1,6 @@
 // This script simulates one life cycle with honey lemon + market protocol + 0x.
+// This is used to validate the interconnection of the layers and to check payouts
+// of tokens are what are expected.
 
 //Ox libs and tools
 const { RPCSubprovider, Web3ProviderEngine } = require('@0x/subproviders');
@@ -23,8 +25,9 @@ const {
   time
 } = require('@openzeppelin/test-helpers');
 
-// const AssetDataUtils = artifacts.require('AssetDataUtils');
-// const FakeToken = artifacts.require('FakeToken');
+// Data store with historic MRI values
+// const PayoutCalculator = require('./payout-calculator');
+// const pc = new PayoutCalculator();
 
 // Token mocks
 const CollateralToken = artifacts.require('CollateralToken'); // IMBTC
@@ -103,9 +106,9 @@ async function runExport() {
   const currentMRIScaled = 1645;
 
   // expiration time in the future
-  const currentContractTime = (await marketContractProxy.getTime.call()).toNumber();
-  const contractDuration = (await marketContractProxy.CONTRACT_DURATION()).toNumber();
-  const expirationTime = currentContractTime + contractDuration;
+  let currentContractTime = (await marketContractProxy.getTime.call()).toNumber();
+  let contractDuration = (await marketContractProxy.CONTRACT_DURATION()).toNumber();
+  let expirationTime = currentContractTime + contractDuration;
 
   let contractSpecs = await marketContractProxy.generateContractSpecs.call(
     currentMRIScaled,
@@ -290,6 +293,22 @@ async function runExport() {
   });
 
   await printWalletBalances('6. After token redemptions');
+
+  /*************************************************
+   * Life cycle loop test over a number of markets *
+   *************************************************/
+  // expiration time in the future
+  currentContractTime = (await marketContractProxy.getTime.call()).toNumber();
+  contractDuration = (await marketContractProxy.CONTRACT_DURATION()).toNumber();
+  expirationTime = currentContractTime + contractDuration;
+
+  // deploy a new market contract
+  // await marketContractProxy.dailySettlement(
+  //   '0',
+  //   '1200',
+  //   '2020-02-02',
+  //   expirationTime.toString()
+  // );
 }
 
 run = async function(callback) {
