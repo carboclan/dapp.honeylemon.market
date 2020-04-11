@@ -15,11 +15,19 @@ module.exports = async function(deployer, network, accounts) {
         return deployer.deploy(MathLib).then(function() {
           return deployer.deploy(MarketContractRegistry).then(function() {
             return deployer
-              .link(MathLib, [MarketContractMPX, MarketCollateralPool, MarketContractFactory])
+              .link(MathLib, [
+                MarketContractMPX,
+                MarketCollateralPool,
+                MarketContractFactory
+              ])
               .then(function() {
                 return deployer.link(StringLib, MarketContractMPX).then(function() {
                   return deployer
-                    .deploy(MarketCollateralPool, MarketContractRegistry.address, MarketToken.address)
+                    .deploy(
+                      MarketCollateralPool,
+                      MarketContractRegistry.address,
+                      MarketToken.address
+                    )
                     .then(function() {
                       return MarketCollateralPool.deployed().then(function() {
                         return deployer
@@ -33,10 +41,14 @@ module.exports = async function(deployer, network, accounts) {
                             }
                           )
                           .then(function(factory) {
-                            return MarketContractRegistry.deployed().then(function(registryInstance) {
-                              return registryInstance.addFactoryAddress(factory.address).then(function() {
-                                console.log('💹Done Market Migration!');
-                              });
+                            return MarketContractRegistry.deployed().then(function(
+                              registryInstance
+                            ) {
+                              return registryInstance
+                                .addFactoryAddress(factory.address)
+                                .then(function() {
+                                  console.log('💹Done Market Migration!');
+                                });
                             });
                           });
                       });

@@ -38,14 +38,20 @@ contract('MarketContractMPX', function(accounts) {
     } catch (err) {
       error = err;
     }
-    assert.ok(error instanceof Error, 'should not be able to be called from an address that is an oracleHub');
+    assert.ok(
+      error instanceof Error,
+      'should not be able to be called from an address that is an oracleHub'
+    );
 
     const txHash = await marketContract.oracleCallBack(100, { from: accounts[8] });
     assert.notEqual(txHash, null, 'oracleCallBack from oracle hub address failed');
   });
 
   it('oracleCallBack can push contract into settlement', async function() {
-    assert.isTrue(!(await marketContract.isSettled()), 'marketContract is already settled');
+    assert.isTrue(
+      !(await marketContract.isSettled()),
+      'marketContract is already settled'
+    );
     await marketContract.oracleCallBack(175, { from: accounts[8] }); // price above cap!
     assert.isTrue(await marketContract.isSettled(), 'marketContract is not settled');
   });
@@ -68,7 +74,10 @@ contract('MarketContractMPX', function(accounts) {
     } catch (err) {
       error = err;
     }
-    assert.ok(error instanceof Error, 'should not be able to be called from an address that is not the owner');
+    assert.ok(
+      error instanceof Error,
+      'should not be able to be called from an address that is not the owner'
+    );
 
     const txHash = await marketContract.arbitrateSettlement(100, { from: accounts[0] });
     assert.notEqual(txHash, null, 'arbitrateSettlement from owner address failed');
@@ -89,7 +98,10 @@ contract('MarketContractMPX', function(accounts) {
       oracleStatistic
     );
 
-    assert.isTrue(!(await marketContract.isSettled()), 'marketContract is already settled');
+    assert.isTrue(
+      !(await marketContract.isSettled()),
+      'marketContract is already settled'
+    );
     await marketContract.arbitrateSettlement(25, { from: accounts[0] }); // price at floor
     assert.isTrue(await marketContract.isSettled(), 'marketContract is not settled');
   });

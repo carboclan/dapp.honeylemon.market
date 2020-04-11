@@ -14,7 +14,14 @@ const { ContractWrappers } = require('@0x/contract-wrappers');
 const { Web3Wrapper } = require('@0x/web3-wrapper');
 const { BigNumber } = require('@0x/utils');
 
-const { BN, constants, expectEvent, expectRevert, ether, time } = require('@openzeppelin/test-helpers');
+const {
+  BN,
+  constants,
+  expectEvent,
+  expectRevert,
+  ether,
+  time
+} = require('@openzeppelin/test-helpers');
 
 // const AssetDataUtils = artifacts.require('AssetDataUtils');
 // const FakeToken = artifacts.require('FakeToken');
@@ -38,17 +45,31 @@ const NULL_ADDRESS = '0x0000000000000000000000000000000000000000';
 async function runExport() {
   async function printWalletBalances(timeLabel) {
     let p = [];
-    p['Miner(maker) --> imBTC(collateralToken) balance'] = (await collateralToken.balanceOf(makerAddress)).toString();
-    p['Miner(maker) --> USDC(paymentToken) balance'] = (await paymentToken.balanceOf(makerAddress)).toString();
-    p['Miner(maker) --> Long Token'] = (await longToken.balanceOf(makerAddress)).toString();
-    p['Miner(maker) --> Short Token'] = (await shortToken.balanceOf(makerAddress)).toString();
+    p[
+      'Miner(maker) --> imBTC(collateralToken) balance'
+    ] = (await collateralToken.balanceOf(makerAddress)).toString();
+    p['Miner(maker) --> USDC(paymentToken) balance'] = (await paymentToken.balanceOf(
+      makerAddress
+    )).toString();
+    p['Miner(maker) --> Long Token'] = (await longToken.balanceOf(
+      makerAddress
+    )).toString();
+    p['Miner(maker) --> Short Token'] = (await shortToken.balanceOf(
+      makerAddress
+    )).toString();
     p['----'] = '----';
-    p['Investor(taker) --> imBTC(collateralToken) balance'] = (await collateralToken.balanceOf(
+    p[
+      'Investor(taker) --> imBTC(collateralToken) balance'
+    ] = (await collateralToken.balanceOf(takerAddress)).toString();
+    p['Investor(taker) --> USDC(paymentToken) balance'] = (await paymentToken.balanceOf(
       takerAddress
     )).toString();
-    p['Investor(taker) --> USDC(paymentToken) balance'] = (await paymentToken.balanceOf(takerAddress)).toString();
-    p['Investor(taker) --> Long Token'] = (await longToken.balanceOf(takerAddress)).toString();
-    p['Investor(taker) --> Short Token'] = (await shortToken.balanceOf(takerAddress)).toString();
+    p['Investor(taker) --> Long Token'] = (await longToken.balanceOf(
+      takerAddress
+    )).toString();
+    p['Investor(taker) --> Short Token'] = (await shortToken.balanceOf(
+      takerAddress
+    )).toString();
     console.log('***', timeLabel, '***');
     console.table(p);
   }
@@ -113,10 +134,16 @@ async function runExport() {
   const makerToken = { address: marketContractProxy.address };
 
   // Encode the selected makerToken as assetData for 0x
-  const makerAssetData = assetDataUtils.encodeERC20BridgeAssetData(makerToken.address, minterBridge.address, '0x0000');
+  const makerAssetData = assetDataUtils.encodeERC20BridgeAssetData(
+    makerToken.address,
+    minterBridge.address,
+    '0x0000'
+  );
 
   // Encode the selected takerToken as assetData for 0x
-  const takerAssetData = await contractWrappers.devUtils.encodeERC20AssetData(takerToken.address).callAsync();
+  const takerAssetData = await contractWrappers.devUtils
+    .encodeERC20AssetData(takerToken.address)
+    .callAsync();
 
   // Amounts are in Unit amounts, 0x requires base units (as many tokens use decimals)
   const amountToMint = 100;
@@ -125,14 +152,22 @@ async function runExport() {
   const exchangeAddress = contractWrappers.exchange.address;
 
   // Approve the contract wrapper from 0x to pull USDC from the taker(investor)
-  await paymentToken.approve(contractWrappers.contractAddresses.erc20Proxy, new BigNumber(10).pow(256).minus(1), {
-    from: takerAddress
-  });
+  await paymentToken.approve(
+    contractWrappers.contractAddresses.erc20Proxy,
+    new BigNumber(10).pow(256).minus(1),
+    {
+      from: takerAddress
+    }
+  );
 
   // Approve the contract wrapper from 0x to pull imBTC from the maker(miner)
-  await collateralToken.approve(minterBridge.address, new BigNumber(10).pow(256).minus(1), {
-    from: makerAddress
-  });
+  await collateralToken.approve(
+    minterBridge.address,
+    new BigNumber(10).pow(256).minus(1),
+    {
+      from: makerAddress
+    }
+  );
 
   // expiration time in the future
   const currentContractTime = (await marketContractProxy.getTime.call()).toNumber();
@@ -162,7 +197,11 @@ async function runExport() {
   console.log('3. signing 0x order...');
 
   // Generate the order hash and sign it
-  const signedOrder = await signatureUtils.ecSignOrderAsync(provider, order, makerAddress);
+  const signedOrder = await signatureUtils.ecSignOrderAsync(
+    provider,
+    order,
+    makerAddress
+  );
 
   await printWalletBalances('Before 0x order fill');
 
@@ -170,22 +209,39 @@ async function runExport() {
    * Fill 0x order *
    *****************/
 
-  console.log('fillableAmount', (await marketContractProxy.fillableAmount(takerAddress)).toString());
-  console.log('fillableAmount', (await marketContractProxy.fillableAmount(makerAddress)).toString());
+  console.log(
+    'fillableAmount',
+    (await marketContractProxy.fillableAmount(takerAddress)).toString()
+  );
+  console.log(
+    'fillableAmount',
+    (await marketContractProxy.fillableAmount(makerAddress)).toString()
+  );
 
   console.log('4. Filling 0x order...');
 
   const debug = false;
   if (debug) {
     // Call MinterBridge directly for debugging
-    await minterBridge.bridgeTransferFrom(makerToken.address, makerAddress, takerAddress, 1, '0x0000', {
-      from: takerAddress,
-      gas: 6700000
-    });
+    await minterBridge.bridgeTransferFrom(
+      makerToken.address,
+      makerAddress,
+      takerAddress,
+      1,
+      '0x0000',
+      {
+        from: takerAddress,
+        gas: 6700000
+      }
+    );
   } else {
     const txHash = await contractWrappers.exchange
       .fillOrder(signedOrder, makerAssetAmount, signedOrder.signature)
-      .sendTransactionAsync({ from: takerAddress, gas: 6700000, value: 3000000000000000 }); // value is required to pay 0x fees
+      .sendTransactionAsync({
+        from: takerAddress,
+        gas: 6700000,
+        value: 3000000000000000
+      }); // value is required to pay 0x fees
     console.log('txHash:', txHash);
   }
 
@@ -207,8 +263,12 @@ async function runExport() {
   await longToken.approve(marketContract.address, amountToMint, { from: takerAddress });
   await shortToken.approve(marketContract.address, amountToMint, { from: makerAddress });
 
-  await marketContractPool.settleAndClose(marketContract.address, amountToMint, 0, { from: takerAddress });
-  await marketContractPool.settleAndClose(marketContract.address, 0, amountToMint, { from: makerAddress });
+  await marketContractPool.settleAndClose(marketContract.address, amountToMint, 0, {
+    from: takerAddress
+  });
+  await marketContractPool.settleAndClose(marketContract.address, 0, amountToMint, {
+    from: makerAddress
+  });
 
   await printWalletBalances('6. After token redemptions');
 }

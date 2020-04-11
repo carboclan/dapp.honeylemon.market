@@ -28,7 +28,12 @@ contract PaymentToken is ERC20 {
     /**
      * @dev Constructor that gives msg.sender all of existing tokens.
      */
-    constructor(string memory tokenName, string memory tokenSymbol, uint256 initialSupply, uint8 tokenDecimals) public {
+    constructor(
+        string memory tokenName,
+        string memory tokenSymbol,
+        uint256 initialSupply,
+        uint8 tokenDecimals
+    ) public {
         name = tokenName;
         symbol = tokenSymbol;
         decimals = tokenDecimals;
