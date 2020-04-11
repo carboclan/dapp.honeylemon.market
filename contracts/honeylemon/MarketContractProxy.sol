@@ -159,7 +159,7 @@ contract MarketContractProxy is Ownable {
     function dailySettlement(
         uint lookbackIndexValue,
         uint currentIndexValue,
-        string memory newMarketName,
+        bytes32[3] memory marketAndsTokenNames,
         uint newMarketExpiration
     ) public onlyHoneyLemonOracle {
         require(currentIndexValue != 0, 'Current MRI value cant be zero');
@@ -172,7 +172,7 @@ contract MarketContractProxy is Ownable {
         }
 
         // 2. Deploy daily contract for the next 28 days.
-        deployContract(currentIndexValue, newMarketName, newMarketExpiration);
+        deployContract(currentIndexValue, marketAndsTokenNames, newMarketExpiration);
 
         // 3. Store the latest MRI value
         latestMri = currentIndexValue;
@@ -262,13 +262,13 @@ contract MarketContractProxy is Ownable {
     // we’ll need easy access to the latest values of contract address and index.
     // collateral requirement = indexValue * 28 * overcollateralization_factor
     // returns the address of the new contract
-    function deployContract(uint currentMRI, string memory marketName, uint expiration)
-        public
-        onlyOwner
-        returns (address)
-    {
+    function deployContract(
+        uint currentMRI,
+        bytes32[3] memory marketAndsTokenNames,
+        uint expiration
+    ) public onlyOwner returns (address) {
         address contractAddress = marketContractFactoryMPX.deployMarketContractMPX(
-            generateContractNames(marketName),
+            marketAndsTokenNames,
             COLLATERAL_TOKEN_ADDRESS,
             generateContractSpecs(currentMRI, expiration),
             ORACLE_URL,
@@ -292,40 +292,5 @@ contract MarketContractProxy is Ownable {
         todaysMarketContractSpecs[1] = (currentMRI * (CONTRACT_COLLATERAL_RATIO)) / 1e8; // capPrice. div by 1e8 to correct scaling
         todaysMarketContractSpecs[6] = expiration; // expirationTimeStamp. Fed in directly from oracle to ensure timing is exact, irrespective of block mining times
         return todaysMarketContractSpecs;
-    }
-
-    function generateContractNames(string memory marketName)
-        public
-        returns (bytes32[3] memory)
-    {
-        // bytes memory longTokenName = abi.encodePacked(marketName, '-Long');
-        // bytes memory shortTimeName = abi.encodePacked(marketName, '-Short');
-        // return [stringToBytes32(marketName), bytesToBytes32(longTokenName), bytesToBytes32(shortTimeName)];
-        return [
-            bytes32('MRI-BTC-28D-20200501'),
-            bytes32('MRI-BTC-28D-20200501-Long'),
-            bytes32('MRI-BTC-28D-20200501-Short')
-        ];
-    }
-
-    // TODO: move these to a library
-    function bytesToBytes32(bytes memory b) private pure returns (bytes32) {
-        bytes32 out;
-
-        for (uint i = 0; i < 32; i++) {
-            out |= bytes32(b[i] & 0xFF) >> (i * 8);
-        }
-        return out;
-    }
-
-    function stringToBytes32(string memory source) private pure returns (bytes32 result) {
-        bytes memory tempEmptyStringTest = bytes(source);
-        if (tempEmptyStringTest.length == 0) {
-            return 0x0;
-        }
-
-        assembly {
-            result := mload(add(source, 32))
-        }
     }
 }

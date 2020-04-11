@@ -103,6 +103,9 @@ async function runExport() {
    ********************************************/
   console.log('0. Setting up proxy and deploying daily contract...');
 
+  let dayCounter = 0;
+
+  // Starting MRI value
   const currentMRIScaled = 1645;
 
   // expiration time in the future
@@ -115,14 +118,15 @@ async function runExport() {
     expirationTime
   );
 
-  console.log('***payoutSpects', contractSpecs);
-  console.log('capPrice', contractSpecs[1].toString());
-
   // Create Todays market protocol contract
   await marketContractProxy.dailySettlement(
     0, // lookback index
     currentMRIScaled.toString(), // current index value
-    '20200501', // new market name
+    [
+      web3.utils.utf8ToHex('MRI-BTC-28D-20200501'),
+      web3.utils.utf8ToHex('MRI-BTC-28D-20200501-Long'),
+      web3.utils.utf8ToHex('MRI-BTC-28D-20200501-Short')
+    ], // new market name
     expirationTime.toString() // new market expiration
   );
 
@@ -139,8 +143,19 @@ async function runExport() {
   const marketContractPool = await MarketCollateralPool.at(deployedMarketContractPool);
 
   const longToken = await PositionToken.at(await marketContract.LONG_POSITION_TOKEN());
+  console.log(
+    'Long token deployed! Name:',
+    await longToken.name.call(),
+    '& symbol',
+    await longToken.symbol.call()
+  );
   const shortToken = await PositionToken.at(await marketContract.SHORT_POSITION_TOKEN());
-
+  console.log(
+    'Short token deployed! Name:',
+    await shortToken.name.call(),
+    '& symbol',
+    await shortToken.symbol.call()
+  );
   /*********************
    * Generate 0x order *
    *********************/
@@ -271,7 +286,8 @@ async function runExport() {
    * Advance time and settle market protocol oracle *
    **************************************************/
 
-  await time.increase(contractDuration + 1);
+  await time.increase(contractDuration);
+  dayCounter++;
 
   await marketContractProxy.settleMarketContract(1645, marketContract.address, {
     from: honeyLemonOracle
@@ -303,6 +319,7 @@ async function runExport() {
   expirationTime = currentContractTime + contractDuration;
 
   // deploy a new market contract
+
   // await marketContractProxy.dailySettlement(
   //   '0',
   //   '1200',
