@@ -72,7 +72,11 @@ contract MarketContract is Ownable {
     ///     feeInBasisPoints    fee amount in basis points (Collateral token denominated) for minting.
     ///     mktFeeInBasisPoints fee amount in basis points (MKT denominated) for minting.
     ///     expirationTimeStamp seconds from epoch that this contract expires and enters settlement
-    constructor(bytes32[3] memory contractNames, address[3] memory baseAddresses, uint[7] memory contractSpecs) public {
+    constructor(
+        bytes32[3] memory contractNames,
+        address[3] memory baseAddresses,
+        uint[7] memory contractSpecs
+    ) public {
         PRICE_FLOOR = contractSpecs[0];
         PRICE_CAP = contractSpecs[1];
         require(PRICE_CAP > PRICE_FLOOR, 'PRICE_CAP must be greater than PRICE_FLOOR');
@@ -85,14 +89,23 @@ contract MarketContract is Ownable {
 
         COLLATERAL_TOKEN_ADDRESS = baseAddresses[1];
         COLLATERAL_POOL_ADDRESS = baseAddresses[2];
-        COLLATERAL_PER_UNIT = MathLib.calculateTotalCollateral(PRICE_FLOOR, PRICE_CAP, QTY_MULTIPLIER);
+        COLLATERAL_PER_UNIT = MathLib.calculateTotalCollateral(
+            PRICE_FLOOR,
+            PRICE_CAP,
+            QTY_MULTIPLIER
+        );
         COLLATERAL_TOKEN_FEE_PER_UNIT = MathLib.calculateFeePerUnit(
             PRICE_FLOOR,
             PRICE_CAP,
             QTY_MULTIPLIER,
             contractSpecs[4]
         );
-        MKT_TOKEN_FEE_PER_UNIT = MathLib.calculateFeePerUnit(PRICE_FLOOR, PRICE_CAP, QTY_MULTIPLIER, contractSpecs[5]);
+        MKT_TOKEN_FEE_PER_UNIT = MathLib.calculateFeePerUnit(
+            PRICE_FLOOR,
+            PRICE_CAP,
+            QTY_MULTIPLIER,
+            contractSpecs[5]
+        );
 
         // create long and short tokens
         CONTRACT_NAME = contractNames[0].bytes32ToString();
@@ -120,7 +133,10 @@ contract MarketContract is Ownable {
     /// @notice called only by our collateral pool to create long and short position tokens
     /// @param qtyToMint    qty in base units of how many short and long tokens to mint
     /// @param minter       address of minter to receive tokens
-    function mintPositionTokens(uint256 qtyToMint, address minter) external onlyCollateralPool {
+    function mintPositionTokens(uint256 qtyToMint, address minter)
+        external
+        onlyCollateralPool
+    {
         // mint and distribute short and long position tokens to our caller
         PositionToken(LONG_POSITION_TOKEN).mintAndSendToken(qtyToMint, minter);
         PositionToken(SHORT_POSITION_TOKEN).mintAndSendToken(qtyToMint, minter);
@@ -129,7 +145,10 @@ contract MarketContract is Ownable {
     /// @notice called only by our collateral pool to redeem long position tokens
     /// @param qtyToRedeem  qty in base units of how many tokens to redeem
     /// @param redeemer     address of person redeeming tokens
-    function redeemLongToken(uint256 qtyToRedeem, address redeemer) external onlyCollateralPool {
+    function redeemLongToken(uint256 qtyToRedeem, address redeemer)
+        external
+        onlyCollateralPool
+    {
         // mint and distribute short and long position tokens to our caller
         PositionToken(LONG_POSITION_TOKEN).redeemToken(qtyToRedeem, redeemer);
     }
@@ -137,7 +156,10 @@ contract MarketContract is Ownable {
     /// @notice called only by our collateral pool to redeem short position tokens
     /// @param qtyToRedeem  qty in base units of how many tokens to redeem
     /// @param redeemer     address of person redeeming tokens
-    function redeemShortToken(uint256 qtyToRedeem, address redeemer) external onlyCollateralPool {
+    function redeemShortToken(uint256 qtyToRedeem, address redeemer)
+        external
+        onlyCollateralPool
+    {
         // mint and distribute short and long position tokens to our caller
         PositionToken(SHORT_POSITION_TOKEN).redeemToken(qtyToRedeem, redeemer);
     }
@@ -191,7 +213,10 @@ contract MarketContract is Ownable {
     /// @notice only able to be called directly by our collateral pool which controls the position tokens
     /// for this contract!
     modifier onlyCollateralPool {
-        require(msg.sender == COLLATERAL_POOL_ADDRESS, 'Only callable from the collateral pool');
+        require(
+            msg.sender == COLLATERAL_POOL_ADDRESS,
+            'Only callable from the collateral pool'
+        );
         _;
     }
 }
