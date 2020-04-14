@@ -1,4 +1,6 @@
 // This script simulates one life cycle with honey lemon + market protocol + 0x.
+// This is used to validate the interconnection of the layers and to check payouts
+// of tokens are what are expected.
 
 //Ox libs and tools
 const { RPCSubprovider, Web3ProviderEngine } = require('@0x/subproviders');
@@ -23,8 +25,9 @@ const {
   time
 } = require('@openzeppelin/test-helpers');
 
-// const AssetDataUtils = artifacts.require('AssetDataUtils');
-// const FakeToken = artifacts.require('FakeToken');
+// Data store with historic MRI values
+// const PayoutCalculator = require('./payout-calculator');
+// const pc = new PayoutCalculator();
 
 // Token mocks
 const CollateralToken = artifacts.require('CollateralToken'); // IMBTC
@@ -100,26 +103,30 @@ async function runExport() {
    ********************************************/
   console.log('0. Setting up proxy and deploying daily contract...');
 
+  let dayCounter = 0;
+
+  // Starting MRI value
   const currentMRIScaled = 1645;
 
   // expiration time in the future
-  const currentContractTime = (await marketContractProxy.getTime.call()).toNumber();
-  const contractDuration = (await marketContractProxy.CONTRACT_DURATION()).toNumber();
-  const expirationTime = currentContractTime + contractDuration;
+  let currentContractTime = (await marketContractProxy.getTime.call()).toNumber();
+  let contractDuration = (await marketContractProxy.CONTRACT_DURATION()).toNumber();
+  let expirationTime = currentContractTime + contractDuration;
 
   let contractSpecs = await marketContractProxy.generateContractSpecs.call(
     currentMRIScaled,
     expirationTime
   );
 
-  console.log('***payoutSpects', contractSpecs);
-  console.log('capPrice', contractSpecs[1].toString());
-
   // Create Todays market protocol contract
   await marketContractProxy.dailySettlement(
     0, // lookback index
     currentMRIScaled.toString(), // current index value
-    '20200501', // new market name
+    [
+      web3.utils.utf8ToHex('MRI-BTC-28D-20200501'),
+      web3.utils.utf8ToHex('MRI-BTC-28D-20200501-Long'),
+      web3.utils.utf8ToHex('MRI-BTC-28D-20200501-Short')
+    ], // new market name
     expirationTime.toString() // new market expiration
   );
 
@@ -136,8 +143,19 @@ async function runExport() {
   const marketContractPool = await MarketCollateralPool.at(deployedMarketContractPool);
 
   const longToken = await PositionToken.at(await marketContract.LONG_POSITION_TOKEN());
+  console.log(
+    'Long token deployed! Name:',
+    await longToken.name.call(),
+    '& symbol',
+    await longToken.symbol.call()
+  );
   const shortToken = await PositionToken.at(await marketContract.SHORT_POSITION_TOKEN());
-
+  console.log(
+    'Short token deployed! Name:',
+    await shortToken.name.call(),
+    '& symbol',
+    await shortToken.symbol.call()
+  );
   /*********************
    * Generate 0x order *
    *********************/
@@ -268,7 +286,8 @@ async function runExport() {
    * Advance time and settle market protocol oracle *
    **************************************************/
 
-  await time.increase(contractDuration + 1);
+  await time.increase(contractDuration);
+  dayCounter++;
 
   await marketContractProxy.settleMarketContract(1645, marketContract.address, {
     from: honeyLemonOracle
@@ -290,6 +309,23 @@ async function runExport() {
   });
 
   await printWalletBalances('6. After token redemptions');
+
+  /*************************************************
+   * Life cycle loop test over a number of markets *
+   *************************************************/
+  // expiration time in the future
+  currentContractTime = (await marketContractProxy.getTime.call()).toNumber();
+  contractDuration = (await marketContractProxy.CONTRACT_DURATION()).toNumber();
+  expirationTime = currentContractTime + contractDuration;
+
+  // deploy a new market contract
+
+  // await marketContractProxy.dailySettlement(
+  //   '0',
+  //   '1200',
+  //   '2020-02-02',
+  //   expirationTime.toString()
+  // );
 }
 
 run = async function(callback) {
