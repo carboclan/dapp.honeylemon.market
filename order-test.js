@@ -2,6 +2,8 @@
 // This is used to validate the interconnection of the layers and to check payouts
 // of tokens are what are expected.
 
+const { PayoutCalculator } = require('./payout-calculator');
+
 //Ox libs and tools
 const { RPCSubprovider, Web3ProviderEngine } = require('@0x/subproviders');
 const {
@@ -26,8 +28,7 @@ const {
 } = require('@openzeppelin/test-helpers');
 
 // Data store with historic MRI values
-// const PayoutCalculator = require('./payout-calculator');
-// const pc = new PayoutCalculator();
+const pc = new PayoutCalculator();
 
 // Token mocks
 const CollateralToken = artifacts.require('CollateralToken'); // IMBTC
@@ -103,10 +104,13 @@ async function runExport() {
    ********************************************/
   console.log('0. Setting up proxy and deploying daily contract...');
 
+  // start at day 0. From data set 2019-12-01
   let dayCounter = 0;
 
   // Starting MRI value
-  const currentMRIScaled = 1645;
+  const MRIInput = new BigNumber(pc.getMRIDataForDay(dayCounter).toString());
+  const currentMRIScaled = MRIInput.multipliedBy(new BigNumber('100000000')); //1e8
+  console.log('Starting MRI value scaled', currentMRIScaled);
 
   // expiration time in the future
   let currentContractTime = (await marketContractProxy.getTime.call()).toNumber();
@@ -182,7 +186,7 @@ async function runExport() {
     .callAsync();
 
   // Amounts are in Unit amounts, 0x requires base units (as many tokens use decimals)
-  const amountToMint = 100;
+  const amountToMint = new BigNumber('1000');
   const makerAssetAmount = Web3Wrapper.toBaseUnitAmount(new BigNumber(amountToMint), 0);
   const takerAssetAmount = Web3Wrapper.toBaseUnitAmount(new BigNumber(amountToMint), 0);
   const exchangeAddress = contractWrappers.exchange.address;
@@ -287,11 +291,19 @@ async function runExport() {
    **************************************************/
 
   await time.increase(contractDuration);
-  dayCounter++;
+  dayCounter = 28;
 
-  await marketContractProxy.settleMarketContract(1645, marketContract.address, {
-    from: honeyLemonOracle
-  });
+  const lockedBackMRI = new BigNumber(pc.getMRILookBackDataForDay(dayCounter).toString());
+  const lockedBackMRIScaled = lockedBackMRI.multipliedBy(new BigNumber('100000000')); //1e8
+  console.log('Ending average MRI value scaled', lockedBackMRIScaled.toFixed(0));
+
+  await marketContractProxy.settleMarketContract(
+    lockedBackMRIScaled.toFixed(0).toString(),
+    marketContract.address,
+    {
+      from: honeyLemonOracle
+    }
+  );
 
   /**********************************************
    * Redeem long and short tokens against market *
