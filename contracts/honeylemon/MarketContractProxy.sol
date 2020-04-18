@@ -91,8 +91,6 @@ contract MarketContractProxy is Ownable {
         // in the spec is says MarketCollateralPool allowance. however I think this should be the MINTER_BRIDGE_ADDRESS allowance?
         // MarketCollateralPool marketCollateralPool = getLatestMarketCollateralPool();
 
-        // TODO: replace this with the latest daily value
-        uint latestIndexValue = latestMri;
         ERC20 collateralToken = ERC20(COLLATERAL_TOKEN_ADDRESS);
 
         uint minerBalance = collateralToken.balanceOf(makerAddress);
@@ -105,7 +103,7 @@ contract MarketContractProxy is Ownable {
             ? minerBalance
             : minerAllowance;
 
-        return uintMinAllowanceBalance / (latestIndexValue * CONTRACT_DURATION_DAYS);
+        return uintMinAllowanceBalance / (latestMri * CONTRACT_DURATION_DAYS);
     }
 
     //TODO: refactor this to return an interface
@@ -118,11 +116,11 @@ contract MarketContractProxy is Ownable {
         uint contractsAdded = marketContracts.length;
 
         // If the marketContracts array has not had enough markets pushed into it to settle an old one then return 0x0.
-        if (contractsAdded < CONTRACT_DURATION_DAYS) {
+        if (contractsAdded <= CONTRACT_DURATION_DAYS) {
             return MarketContractMPX(address(0x0));
         }
         uint expiringIndex = contractsAdded - CONTRACT_DURATION_DAYS;
-        return MarketContractMPX(marketContracts[contractsAdded]);
+        return MarketContractMPX(marketContracts[expiringIndex]);
     }
 
     //TODO: refactor this to return an interface
@@ -250,11 +248,14 @@ contract MarketContractProxy is Ownable {
         public
         onlyHoneyLemonOracle
     {
-        require(mri != 0, 'The mri value can not be 0');
+        require(mri != 0, 'The mri loockback value can not be 0');
         require(marketContractAddress != address(0x0));
 
         MarketContractMPX marketContract = MarketContractMPX(marketContractAddress);
         marketContract.oracleCallBack(mri);
+
+        // Store the most recent mri value to use in fillable amount
+        latestMri = mri;
     }
 
     // Deploys the current day Market contract. `indexValue` is used to initialize collateral requirement in its constructor

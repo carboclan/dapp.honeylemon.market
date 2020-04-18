@@ -127,13 +127,24 @@ class PayoutCalculator {
   getMRILookBackDataForDay(n) {
     if (n < 28) {
       // looking to early in data set.
-      return null;
+      return 0;
     }
+    // Calculate average over last 28 days
     let averageMRI = 0;
     for (let i = n - 28; i < n + 1; i++) {
       averageMRI += this.data[i].mri;
     }
-    return averageMRI;
+    return averageMRI.toFixed(8); // we only have 8 decimals of precision. drop rounding error
+  }
+
+  getDateForDay(n) {
+    return this.data[n].timeStamp;
+  }
+
+  // MRI-BTC-28D-20200501
+  getTokenNameFor(n) {
+    // Regex to remove all `-` from timestamps
+    return 'MRI-BTC-28D-' + this.getDateForDay(n).replace(/\-/g, '');
   }
 }
 
