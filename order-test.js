@@ -204,7 +204,7 @@ async function runExport() {
 
   // Amounts are in Unit amounts, 0x requires base units (as many tokens use decimals)
   const makerAmountToMint = 1; // TH of mining over a 1 month duration sold by the miner.
-  const takerAmountToMint = 1 * 1e6; // USDC being sent from investor to miner.
+  const takerAmountToMint = 4 * 1e6; // USDC sent from investor to miner. $4 ~ 1 month of 1TH mining rewards @ btc = 7k
 
   console.table({
     'Maker trade amount(USDC)': {
@@ -369,6 +369,10 @@ async function runExport() {
   console.log('token value changes');
   console.table(balanceTracker);
 
+  /***********************************************************
+   * Validate Contract payouts from recorded balance changes *
+   ***********************************************************/
+
   console.log('6. Validating token balance transfers...');
   console.log('6.1 Correct imBTC collateral from maker👇');
   // Upper Bound = Miner Revenue Index * (1 + Necessary Collateral Ratio)
@@ -432,10 +436,6 @@ async function runExport() {
     balanceTracker['After 0x order']['Maker imBTC'];
   console.log('\t -> BTC redeemed for short token(Miner)', actualShortRedemption);
   assert.equal(Math.floor(expectedShortRedemption), actualShortRedemption);
-
-  /***********************************************************
-   * Validate Contract payouts from recorded balance changes *
-   ***********************************************************/
 
   /*************************************************
    * Life cycle loop test over a number of markets *
