@@ -53,6 +53,9 @@ const multiplier = 28; // contract duration in days
 const collateralDecimals = 1e8; // scaling for imBTC (8 decimal points)
 const paymentDecimals = 1e6; // scaling for USDT or USDC (6 decimals)
 
+// Config:
+const REAL_INPUT = false;
+
 const NULL_ADDRESS = '0x0000000000000000000000000000000000000000';
 
 async function runExport() {
@@ -118,8 +121,9 @@ async function runExport() {
   let dayCounter = 0;
 
   // Starting MRI value
-  // const MRIInput = new BigNumber(pc.getMRIDataForDay(dayCounter).toString());
-  const MRIInput = 0.00001; // nice input number to calculate expected payoffs.
+  let MRIInput;
+  if (REAL_INPUT) MRIInput = pc.getMRIDataForDay(dayCounter);
+  else MRIInput = 0.00001; // nice input number to calculate expected payoffs.
   const currentMRIScaled = new BigNumber(MRIInput).multipliedBy(
     new BigNumber('100000000')
   ); //1e8
@@ -276,7 +280,7 @@ async function runExport() {
     chainId
   };
 
-  console.log('3. signing 0x order...');
+  console.log('3. Signing 0x order...');
 
   // Generate the order hash and sign it
   const signedOrder = await signatureUtils.ecSignOrderAsync(
@@ -327,9 +331,9 @@ async function runExport() {
 
   await time.increase(contractDuration);
   dayCounter = 28;
-
-  // const lookedBackMRI = new BigNumber(pc.getMRILookBackDataForDay(dayCounter).toString());
-  const lookedBackMRI = MRIInput * 1.1 * 28; // input MRI, increased by 10%, over 28 days
+  let lookedBackMRI;
+  if (REAL_INPUT) lookedBackMRI = pc.getMRILookBackDataForDay(dayCounter);
+  else lookedBackMRI = MRIInput * 1.1 * 28; // input MRI, increased by 10%, over 28 days
   const lookedBackMRIScaled = new BigNumber(lookedBackMRI).multipliedBy(
     new BigNumber('100000000')
   ); //1e8
@@ -377,6 +381,7 @@ async function runExport() {
     balanceTracker['Before 0x order']['Maker imBTC'] -
     balanceTracker['After 0x order']['Maker imBTC'];
   console.log('\t -> imBTC Taken as collateral from miner', actualCollateralTaken);
+  console.log(expectedCollateralTaken);
 
   assert.equal(actualCollateralTaken, expectedCollateralTaken);
 
@@ -387,7 +392,7 @@ async function runExport() {
     balanceTracker['Before 0x order']['Taker USDC'] -
     balanceTracker['After 0x order']['Taker USDC'];
   console.log('\t -> USDC taken as payment from investor', actualUSDCTaken);
-  assert.equal(expectedUSDCTaken, actualUSDCTaken);
+  assert.equal(expectedUSDCTaken.toFixed(6), actualUSDCTaken.toFixed(6));
 
   console.log('6.3 Correct Long & Short token mint👇');
   // Long and short tokens are minted for investor and miner. Both should receive the number of tokens = to the
