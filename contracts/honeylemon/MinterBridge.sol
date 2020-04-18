@@ -81,7 +81,6 @@ contract MinterBridge is Ownable {
         // to: long & taker (investor)
         // from: short & maker (miner)
         marketContractProxy.mintPositionTokens(amount, to, from);
-        // TODO: transfer ERC20 tokens (DAI) from the investor (taker) to the miner (maker)
 
         return BRIDGE_SUCCESS;
     }

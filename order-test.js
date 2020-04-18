@@ -18,6 +18,7 @@ const { ContractWrappers } = require('@0x/contract-wrappers');
 const { Web3Wrapper } = require('@0x/web3-wrapper');
 const { BigNumber } = require('@0x/utils');
 
+// Helpers
 const {
   BN,
   constants,
@@ -26,6 +27,8 @@ const {
   ether,
   time
 } = require('@openzeppelin/test-helpers');
+const assert = require('assert').strict;
+const truffleAssert = require('truffle-assertions');
 
 // Data store with historic MRI values
 const pc = new PayoutCalculator();
@@ -78,6 +81,8 @@ async function runExport() {
     console.table(p);
   }
 
+  assert.equal(true, true);
+
   // params to init 0x setup
   const provider = web3.currentProvider;
 
@@ -108,7 +113,8 @@ async function runExport() {
   let dayCounter = 0;
 
   // Starting MRI value
-  const MRIInput = new BigNumber(pc.getMRIDataForDay(dayCounter).toString());
+  // const MRIInput = new BigNumber(pc.getMRIDataForDay(dayCounter).toString());
+  const MRIInput = new BigNumber('0.00001'); // nice input number to calculate expected payoffs.
   const currentMRIScaled = MRIInput.multipliedBy(new BigNumber('100000000')); //1e8
   console.log('Starting MRI value scaled', currentMRIScaled);
 
@@ -148,16 +154,16 @@ async function runExport() {
 
   const longToken = await PositionToken.at(await marketContract.LONG_POSITION_TOKEN());
   console.log(
-    'Long token deployed! Name:',
+    'Long token deployed!\t Name:',
     await longToken.name.call(),
-    '& symbol',
+    '\t& symbol:',
     await longToken.symbol.call()
   );
   const shortToken = await PositionToken.at(await marketContract.SHORT_POSITION_TOKEN());
   console.log(
-    'Short token deployed! Name:',
+    'Short token deployed!\t Name:',
     await shortToken.name.call(),
-    '& symbol',
+    '\t& symbol:',
     await shortToken.symbol.call()
   );
   /*********************
@@ -186,9 +192,16 @@ async function runExport() {
     .callAsync();
 
   // Amounts are in Unit amounts, 0x requires base units (as many tokens use decimals)
-  const amountToMint = new BigNumber('1000');
-  const makerAssetAmount = Web3Wrapper.toBaseUnitAmount(new BigNumber(amountToMint), 0);
-  const takerAssetAmount = Web3Wrapper.toBaseUnitAmount(new BigNumber(amountToMint), 0);
+  const makerAmountToMint = new BigNumber('1000'); // TH being sold by the miner.
+  const takerAmountToMint = new BigNumber('1000'); // USDC being sent from investor to miner
+  const makerAssetAmount = Web3Wrapper.toBaseUnitAmount(
+    new BigNumber(makerAmountToMint),
+    0
+  );
+  const takerAssetAmount = Web3Wrapper.toBaseUnitAmount(
+    new BigNumber(takerAmountToMint),
+    0
+  );
   const exchangeAddress = contractWrappers.exchange.address;
 
   // Approve the contract wrapper from 0x to pull USDC from the taker(investor)
@@ -293,7 +306,8 @@ async function runExport() {
   await time.increase(contractDuration);
   dayCounter = 28;
 
-  const lockedBackMRI = new BigNumber(pc.getMRILookBackDataForDay(dayCounter).toString());
+  // const lockedBackMRI = new BigNumber(pc.getMRILookBackDataForDay(dayCounter).toString());
+  const lockedBackMRI = new BigNumber('0.000011'); // 10% higher than the starting value for comparison
   const lockedBackMRIScaled = lockedBackMRI.multipliedBy(new BigNumber('100000000')); //1e8
   console.log('Ending average MRI value scaled', lockedBackMRIScaled.toFixed(0));
 
@@ -310,13 +324,17 @@ async function runExport() {
    ***********************************************/
   console.log('5. redeeming tokens...');
 
-  await longToken.approve(marketContract.address, amountToMint, { from: takerAddress });
-  await shortToken.approve(marketContract.address, amountToMint, { from: makerAddress });
-
-  await marketContractPool.settleAndClose(marketContract.address, amountToMint, 0, {
+  await longToken.approve(marketContract.address, takerAmountToMint, {
     from: takerAddress
   });
-  await marketContractPool.settleAndClose(marketContract.address, 0, amountToMint, {
+  await shortToken.approve(marketContract.address, makerAmountToMint, {
+    from: makerAddress
+  });
+
+  await marketContractPool.settleAndClose(marketContract.address, takerAmountToMint, 0, {
+    from: takerAddress
+  });
+  await marketContractPool.settleAndClose(marketContract.address, 0, makerAmountToMint, {
     from: makerAddress
   });
 
