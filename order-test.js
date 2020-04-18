@@ -2,6 +2,8 @@
 // This is used to validate the interconnection of the layers and to check payouts
 // of tokens are what are expected.
 
+const { PayoutCalculator } = require('./payout-calculator');
+
 //Ox libs and tools
 const { RPCSubprovider, Web3ProviderEngine } = require('@0x/subproviders');
 const {
@@ -16,6 +18,7 @@ const { ContractWrappers } = require('@0x/contract-wrappers');
 const { Web3Wrapper } = require('@0x/web3-wrapper');
 const { BigNumber } = require('@0x/utils');
 
+// Helpers
 const {
   BN,
   constants,
@@ -24,10 +27,11 @@ const {
   ether,
   time
 } = require('@openzeppelin/test-helpers');
+const assert = require('assert').strict;
+const truffleAssert = require('truffle-assertions');
 
 // Data store with historic MRI values
-// const PayoutCalculator = require('./payout-calculator');
-// const pc = new PayoutCalculator();
+const pc = new PayoutCalculator();
 
 // Token mocks
 const CollateralToken = artifacts.require('CollateralToken'); // IMBTC
@@ -43,39 +47,49 @@ const MarketContractProxy = artifacts.require('MarketContractProxy');
 const MarketContractMPX = artifacts.require('marketContractMPX');
 const MarketCollateralPool = artifacts.require('MarketCollateralPool');
 
+// Calculation constants
+const necessaryCollateralRatio = 0.35; // for 135% collateralization
+const multiplier = 28; // contract duration in days
+const collateralDecimals = 1e8; // scaling for imBTC (8 decimal points)
+const paymentDecimals = 1e6; // scaling for USDT or USDC (6 decimals)
+
+// Config:
+const REAL_INPUT = true;
+
 const NULL_ADDRESS = '0x0000000000000000000000000000000000000000';
 
 async function runExport() {
-  async function printWalletBalances(timeLabel) {
-    let p = [];
-    p[
-      'Miner(maker) --> imBTC(collateralToken) balance'
-    ] = (await collateralToken.balanceOf(makerAddress)).toString();
-    p['Miner(maker) --> USDC(paymentToken) balance'] = (await paymentToken.balanceOf(
+  console.log('🔥🔥🔥STARTING SCRIPT🔥🔥🔥');
+  let balanceTracker = {};
+  async function recordBalances(timeLabel) {
+    balanceTracker[timeLabel] = {};
+    balanceTracker[timeLabel]['Maker imBTC'] = (await collateralToken.balanceOf(
       makerAddress
     )).toString();
-    p['Miner(maker) --> Long Token'] = (await longToken.balanceOf(
+    balanceTracker[timeLabel]['Maker USDC'] = (await paymentToken.balanceOf(
       makerAddress
     )).toString();
-    p['Miner(maker) --> Short Token'] = (await shortToken.balanceOf(
+    balanceTracker[timeLabel]['Maker Long'] = (await longToken.balanceOf(
       makerAddress
     )).toString();
-    p['----'] = '----';
-    p[
-      'Investor(taker) --> imBTC(collateralToken) balance'
-    ] = (await collateralToken.balanceOf(takerAddress)).toString();
-    p['Investor(taker) --> USDC(paymentToken) balance'] = (await paymentToken.balanceOf(
+    balanceTracker[timeLabel]['Maker Short'] = (await shortToken.balanceOf(
+      makerAddress
+    )).toString();
+    balanceTracker[timeLabel]['Taker imBTC'] = (await collateralToken.balanceOf(
       takerAddress
     )).toString();
-    p['Investor(taker) --> Long Token'] = (await longToken.balanceOf(
+    balanceTracker[timeLabel]['Taker USDC'] = (await paymentToken.balanceOf(
       takerAddress
     )).toString();
-    p['Investor(taker) --> Short Token'] = (await shortToken.balanceOf(
+    balanceTracker[timeLabel]['Taker Long'] = (await longToken.balanceOf(
       takerAddress
     )).toString();
-    console.log('***', timeLabel, '***');
-    console.table(p);
+    balanceTracker[timeLabel]['Taker Short'] = (await shortToken.balanceOf(
+      takerAddress
+    )).toString();
   }
+
+  assert.equal(true, true);
 
   // params to init 0x setup
   const provider = web3.currentProvider;
@@ -103,11 +117,18 @@ async function runExport() {
    ********************************************/
   console.log('0. Setting up proxy and deploying daily contract...');
 
+  // start at day 0. From data set 2019-12-01
   let dayCounter = 0;
 
   // Starting MRI value
-  const currentMRIScaled = 1645;
-
+  let MRIInput;
+  if (REAL_INPUT) MRIInput = pc.getMRIDataForDay(dayCounter);
+  else MRIInput = 0.00001; // nice input number to calculate expected payoffs.
+  const currentMRIScaled = new BigNumber(MRIInput).multipliedBy(
+    new BigNumber('100000000')
+  ); //1e8
+  console.log('\t-> Starting MRI value', MRIInput);
+  console.log('\t * Representing 1 TH payout for 1 day, Denominated in BTC');
   // expiration time in the future
   let currentContractTime = (await marketContractProxy.getTime.call()).toNumber();
   let contractDuration = (await marketContractProxy.CONTRACT_DURATION()).toNumber();
@@ -144,16 +165,16 @@ async function runExport() {
 
   const longToken = await PositionToken.at(await marketContract.LONG_POSITION_TOKEN());
   console.log(
-    'Long token deployed! Name:',
+    'Long token deployed!\t Name:',
     await longToken.name.call(),
-    '& symbol',
+    '\t& symbol:',
     await longToken.symbol.call()
   );
   const shortToken = await PositionToken.at(await marketContract.SHORT_POSITION_TOKEN());
   console.log(
-    'Short token deployed! Name:',
+    'Short token deployed!\t Name:',
     await shortToken.name.call(),
-    '& symbol',
+    '\t& symbol:',
     await shortToken.symbol.call()
   );
   /*********************
@@ -182,9 +203,43 @@ async function runExport() {
     .callAsync();
 
   // Amounts are in Unit amounts, 0x requires base units (as many tokens use decimals)
-  const amountToMint = 100;
-  const makerAssetAmount = Web3Wrapper.toBaseUnitAmount(new BigNumber(amountToMint), 0);
-  const takerAssetAmount = Web3Wrapper.toBaseUnitAmount(new BigNumber(amountToMint), 0);
+  const makerAmountToMint = 1; // TH of mining over a 1 month duration sold by the miner.
+  const takerAmountToMint = 4 * 1e6; // USDC sent from investor to miner. $4 ~ 1 month of 1TH mining rewards @ btc = 7k
+
+  console.table({
+    'Maker trade amount(USDC)': {
+      Amount: makerAmountToMint,
+      Description: 'Number of TH sold over the day duration'
+    },
+    'Taker trade (USDC)': {
+      Amount: takerAmountToMint,
+      Description: 'Value in µUSDC sent to buy mining contract'
+    },
+    'Current MRI': {
+      Amount: MRIInput,
+      Description: 'Starting MRI input value'
+    },
+    'Max MRI': {
+      Amount: (MRIInput * (1 + necessaryCollateralRatio)).toFixed(8),
+      Description: 'Maximum MRI value that can be achieved in market'
+    },
+    'Taker expected long(imBTC)': {
+      Amount: (MRIInput * 28 * makerAmountToMint).toFixed(8),
+      Description: 'Long value in BTC if current MRI continues over contract duration'
+    },
+    'Maker required collateral(imBTC)': {
+      Amount: contractSpecs[1].toNumber() * makerAmountToMint,
+      Description: 'Satoshi the position will cost in collateral for the miner'
+    }
+  });
+  const makerAssetAmount = Web3Wrapper.toBaseUnitAmount(
+    new BigNumber(makerAmountToMint),
+    0
+  );
+  const takerAssetAmount = Web3Wrapper.toBaseUnitAmount(
+    new BigNumber(takerAmountToMint),
+    0
+  );
   const exchangeAddress = contractWrappers.exchange.address;
 
   // Approve the contract wrapper from 0x to pull USDC from the taker(investor)
@@ -204,11 +259,6 @@ async function runExport() {
       from: makerAddress
     }
   );
-
-  // expiration time in the future
-  // const currentContractTime = (await marketContractProxy.getTime.call()).toNumber();
-  // const contractDuration = (await marketContractProxy.CONTRACT_DURATION()).toNumber();
-  // const expirationTime = currentContractTime + contractDuration;
 
   // Generate the 0x order
   const order = {
@@ -230,7 +280,7 @@ async function runExport() {
     chainId
   };
 
-  console.log('3. signing 0x order...');
+  console.log('3. Signing 0x order...');
 
   // Generate the order hash and sign it
   const signedOrder = await signatureUtils.ecSignOrderAsync(
@@ -239,19 +289,11 @@ async function runExport() {
     makerAddress
   );
 
-  await printWalletBalances('Before 0x order fill');
+  await recordBalances('Before 0x order');
 
   /*****************
    * Fill 0x order *
    *****************/
-
-  console.log(
-    'fillableAmounts',
-    (await marketContractProxy.getFillableAmounts([
-      takerAddress,
-      makerAddress
-    ])).toString()
-  );
 
   console.log('4. Filling 0x order...');
 
@@ -271,7 +313,8 @@ async function runExport() {
     );
   } else {
     const txHash = await contractWrappers.exchange
-      .fillOrder(signedOrder, makerAssetAmount, signedOrder.signature)
+      .fillOrder(signedOrder, takerAssetAmount, signedOrder.signature)
+      // .fillOrder(signedOrder, makerAssetAmount, signedOrder.signature)
       .sendTransactionAsync({
         from: takerAddress,
         gas: 6700000,
@@ -280,43 +323,127 @@ async function runExport() {
     console.log('txHash:', txHash);
   }
 
-  await printWalletBalances('After 0x order fill');
+  await recordBalances('After 0x order');
 
   /**************************************************
    * Advance time and settle market protocol oracle *
    **************************************************/
 
   await time.increase(contractDuration);
-  dayCounter++;
+  dayCounter = 28;
+  let lookedBackMRI;
+  if (REAL_INPUT) lookedBackMRI = pc.getMRILookBackDataForDay(dayCounter);
+  else lookedBackMRI = MRIInput * 1.1 * 28; // input MRI, increased by 10%, over 28 days
+  const lookedBackMRIScaled = new BigNumber(lookedBackMRI).multipliedBy(
+    new BigNumber('100000000')
+  ); //1e8
 
-  await marketContractProxy.settleMarketContract(1645, marketContract.address, {
-    from: honeyLemonOracle
-  });
+  await marketContractProxy.settleMarketContract(
+    lookedBackMRIScaled.toFixed(0).toString(),
+    marketContract.address,
+    {
+      from: honeyLemonOracle
+    }
+  );
 
   /**********************************************
    * Redeem long and short tokens against market *
    ***********************************************/
   console.log('5. redeeming tokens...');
 
-  await longToken.approve(marketContract.address, amountToMint, { from: takerAddress });
-  await shortToken.approve(marketContract.address, amountToMint, { from: makerAddress });
-
-  await marketContractPool.settleAndClose(marketContract.address, amountToMint, 0, {
+  await longToken.approve(marketContract.address, takerAmountToMint, {
     from: takerAddress
   });
-  await marketContractPool.settleAndClose(marketContract.address, 0, amountToMint, {
+  await shortToken.approve(marketContract.address, makerAmountToMint, {
     from: makerAddress
   });
 
-  await printWalletBalances('6. After token redemptions');
+  await marketContractPool.settleAndClose(marketContract.address, makerAmountToMint, 0, {
+    from: takerAddress
+  });
+  await marketContractPool.settleAndClose(marketContract.address, 0, makerAmountToMint, {
+    from: makerAddress
+  });
+
+  await recordBalances('After redemption');
+  console.log('token value changes');
+  console.table(balanceTracker);
+
+  /***********************************************************
+   * Validate Contract payouts from recorded balance changes *
+   ***********************************************************/
+
+  console.log('6. Validating token balance transfers...');
+  console.log('6.1 Correct imBTC collateral from maker👇');
+  // Upper Bound = Miner Revenue Index * (1 + Necessary Collateral Ratio)
+  // Necessary Collateral = Upper Bound * Multiplier
+  const upperBound = MRIInput * (1 + necessaryCollateralRatio); //1 + 0.35
+  const necessaryCollateralPerMRI = upperBound * multiplier * collateralDecimals; // upper bound over contract duration
+  const expectedCollateralTaken = necessaryCollateralPerMRI * makerAmountToMint;
+
+  const actualCollateralTaken = // Difference in imBTC balance before and after 0x order
+    balanceTracker['Before 0x order']['Maker imBTC'] -
+    balanceTracker['After 0x order']['Maker imBTC'];
+  console.log('\t -> imBTC Taken as collateral from miner', actualCollateralTaken);
+
+  assert.equal(Math.floor(expectedCollateralTaken), actualCollateralTaken);
+
+  console.log('6.2 Correct USDC sent from taker👇');
+  // USDC value is sent from the investor to the miner. Value should be amount spesified in the original order.
+  const expectedUSDCTaken = takerAmountToMint;
+  const actualUSDCTaken =
+    balanceTracker['Before 0x order']['Taker USDC'] -
+    balanceTracker['After 0x order']['Taker USDC'];
+  console.log('\t -> USDC taken as payment from investor', actualUSDCTaken);
+  assert.equal(expectedUSDCTaken, actualUSDCTaken);
+
+  console.log('6.3 Correct Long & Short token mint👇');
+  // Long and short tokens are minted for investor and miner. Both should receive the number of tokens = to the
+  // number of TH sold (makerAmountToMint)
+  const teraHashSold = makerAmountToMint;
+
+  // LONG (tokens sent to miner)
+  const actualLongTokensMinted =
+    balanceTracker['After 0x order']['Taker Long'] -
+    balanceTracker['Before 0x order']['Taker Long'];
+  assert(teraHashSold, actualLongTokensMinted);
+  console.log('\t -> Long token minted(Investor)', actualLongTokensMinted);
+
+  // SHORT (tokens sent to investor)
+  const actualShortTokensMinted =
+    balanceTracker['After 0x order']['Maker Short'] -
+    balanceTracker['Before 0x order']['Maker Short'];
+  assert(teraHashSold, actualShortTokensMinted);
+  console.log('\t -> Short token minted(Miner)', actualShortTokensMinted);
+
+  console.log('6.4 Correct Long & short token redemption👇');
+  // Settlement ValueL the average of the Miner Revenue Index over settlement window t+1 => t+28 multiplied by 28.
+  // Long Token Redemption ValueL Settlement Value
+  // Short Token Redemption Value: Total Collateral Amount - Settlement Value
+
+  // LONG (investor holding tokens)
+  const expectedLongRedemption = teraHashSold * lookedBackMRI * collateralDecimals;
+  const actualLongRedemption =
+    balanceTracker['After redemption']['Taker imBTC'] -
+    balanceTracker['After 0x order']['Taker imBTC'];
+  console.log('\t -> BTC redeemed for long token(Investor)', actualUSDCTaken);
+  assert.equal(Math.floor(expectedLongRedemption), actualLongRedemption);
+
+  // SHORT (miner holding tokens)
+  const expectedShortRedemption = expectedCollateralTaken - expectedLongRedemption;
+  const actualShortRedemption =
+    balanceTracker['After redemption']['Maker imBTC'] -
+    balanceTracker['After 0x order']['Maker imBTC'];
+  console.log('\t -> BTC redeemed for short token(Miner)', actualShortRedemption);
+  assert.equal(Math.floor(expectedShortRedemption), actualShortRedemption);
 
   /*************************************************
    * Life cycle loop test over a number of markets *
    *************************************************/
   // expiration time in the future
-  currentContractTime = (await marketContractProxy.getTime.call()).toNumber();
-  contractDuration = (await marketContractProxy.CONTRACT_DURATION()).toNumber();
-  expirationTime = currentContractTime + contractDuration;
+  // currentContractTime = (await marketContractProxy.getTime.call()).toNumber();
+  // contractDuration = (await marketContractProxy.CONTRACT_DURATION()).toNumber();
+  // expirationTime = currentContractTime + contractDuration;
 
   // deploy a new market contract
 

@@ -21,7 +21,7 @@ contract MarketContractProxy is Ownable {
 
     uint public CONTRACT_DURATION_DAYS = 28;
 
-    uint public CONTRACT_DURATION = 10 * 60; // 28 days in seconds
+    uint public CONTRACT_DURATION = CONTRACT_DURATION_DAYS * 10; // 28 days in seconds
 
     uint public CONTRACT_COLLATERAL_RATIO = 135000000; //1.35e8; 1.35, with 8 decimal places
 
@@ -289,7 +289,9 @@ contract MarketContractProxy is Ownable {
         //TODO: replace elements in this array with the correct parms
         uint[7] memory todaysMarketContractSpecs = marketContractSpecs;
         // todaysMarketContractSpecs[1] = 100000; // capPrice
-        todaysMarketContractSpecs[1] = (currentMRI * (CONTRACT_COLLATERAL_RATIO)) / 1e8; // capPrice. div by 1e8 to correct scaling
+        todaysMarketContractSpecs[1] =
+            (CONTRACT_DURATION_DAYS * currentMRI * (CONTRACT_COLLATERAL_RATIO)) /
+            1e8; // capPrice. div by 1e8 to correct scaling
         todaysMarketContractSpecs[6] = expiration; // expirationTimeStamp. Fed in directly from oracle to ensure timing is exact, irrespective of block mining times
         return todaysMarketContractSpecs;
     }
