@@ -56,6 +56,7 @@ const paymentDecimals = 1e6; // scaling for USDT or USDC (6 decimals)
 const NULL_ADDRESS = '0x0000000000000000000000000000000000000000';
 
 async function runExport() {
+  console.log('🔥🔥🔥STARTING SCRIPT🔥🔥🔥');
   let balanceTracker = {};
   async function recordBalances(timeLabel) {
     balanceTracker[timeLabel] = {};
@@ -199,7 +200,7 @@ async function runExport() {
 
   // Amounts are in Unit amounts, 0x requires base units (as many tokens use decimals)
   const makerAmountToMint = 1; // TH of mining over a 1 month duration sold by the miner.
-  const takerAmountToMint = 1; // USDC being sent from investor to miner.
+  const takerAmountToMint = 1 * 1e6; // USDC being sent from investor to miner.
 
   console.table({
     'Maker trade amount(USDC)': {
@@ -235,7 +236,6 @@ async function runExport() {
     new BigNumber(takerAmountToMint),
     0
   );
-  console.log('takerAssetAmount', takerAssetAmount);
   const exchangeAddress = contractWrappers.exchange.address;
 
   // Approve the contract wrapper from 0x to pull USDC from the taker(investor)
@@ -309,8 +309,8 @@ async function runExport() {
     );
   } else {
     const txHash = await contractWrappers.exchange
-      // .fillOrder(signedOrder, takerAssetAmount, signedOrder.signature)
-      .fillOrder(signedOrder, makerAssetAmount, signedOrder.signature)
+      .fillOrder(signedOrder, takerAssetAmount, signedOrder.signature)
+      // .fillOrder(signedOrder, makerAssetAmount, signedOrder.signature)
       .sendTransactionAsync({
         from: takerAddress,
         gas: 6700000,
@@ -376,17 +376,58 @@ async function runExport() {
   const actualCollateralTaken = // Difference in imBTC balance before and after 0x order
     balanceTracker['Before 0x order']['Maker imBTC'] -
     balanceTracker['After 0x order']['Maker imBTC'];
-
-  console.log('\t -> imBTC Collateral Taken (Satoshi)', actualCollateralTaken);
+  console.log('\t -> imBTC Taken as collateral from miner', actualCollateralTaken);
 
   assert.equal(actualCollateralTaken, expectedCollateralTaken);
 
   console.log('6.2 Correct USDC sent from taker👇');
-  const expectedUSDCTaken = takerAmountToMint * paymentDecimals;
+  // USDC value is sent from the investor to the miner. Value should be amount spesified in the original order.
+  const expectedUSDCTaken = takerAmountToMint;
   const actualUSDCTaken =
     balanceTracker['Before 0x order']['Taker USDC'] -
     balanceTracker['After 0x order']['Taker USDC'];
-  // assert.equal(expectedUSDCTaken, actualUSDCTaken);
+  console.log('\t -> USDC taken as payment from investor', actualUSDCTaken);
+  assert.equal(expectedUSDCTaken, actualUSDCTaken);
+
+  console.log('6.3 Correct Long & Short token mint👇');
+  // Long and short tokens are minted for investor and miner. Both should receive the number of tokens = to the
+  // number of TH sold (makerAmountToMint)
+  const teraHashSold = makerAmountToMint;
+
+  // LONG (tokens sent to miner)
+  const actualLongTokensMinted =
+    balanceTracker['After 0x order']['Taker Long'] -
+    balanceTracker['Before 0x order']['Taker Long'];
+  assert(teraHashSold, actualLongTokensMinted);
+  console.log('\t -> Long token minted(Investor)', actualLongTokensMinted);
+
+  // SHORT (tokens sent to investor)
+  const actualShortTokensMinted =
+    balanceTracker['After 0x order']['Maker Short'] -
+    balanceTracker['Before 0x order']['Maker Short'];
+  assert(teraHashSold, actualShortTokensMinted);
+  console.log('\t -> Short token minted(Miner)', actualShortTokensMinted);
+
+  console.log('6.4 Correct Long & short token redemption👇');
+  // Settlement ValueL the average of the Miner Revenue Index over settlement window t+1 => t+28 multiplied by 28.
+  // Long Token Redemption ValueL Settlement Value
+  // Short Token Redemption Value: Total Collateral Amount - Settlement Value
+
+  // LONG (investor holding tokens)
+  const expectedLongRedemption = teraHashSold * lookedBackMRI * collateralDecimals;
+  const actualLongRedemption =
+    balanceTracker['After redemption']['Taker imBTC'] -
+    balanceTracker['After 0x order']['Taker imBTC'];
+  console.log('\t -> BTC redeemed for long token(Investor)', actualUSDCTaken);
+  assert.equal(expectedLongRedemption.toFixed(8), actualLongRedemption.toFixed(8));
+
+  // SHORT (miner holding tokens)
+  const expectedShortRedemption = expectedCollateralTaken - expectedLongRedemption;
+  const actualShortRedemption =
+    balanceTracker['After redemption']['Maker imBTC'] -
+    balanceTracker['After 0x order']['Maker imBTC'];
+  console.log('\t -> BTC redeemed for short token(Miner)', actualShortRedemption);
+  assert.equal(expectedShortRedemption.toFixed(8), actualShortRedemption.toFixed(8));
 
   /***********************************************************
    * Validate Contract payouts from recorded balance changes *
