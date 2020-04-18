@@ -2,16 +2,13 @@
 // This is used to validate the interconnection of the layers and to check payouts
 // of tokens are what are expected.
 
+// Helper libraries
 const { PayoutCalculator } = require('./payout-calculator');
 
 //Ox libs and tools
-const { RPCSubprovider, Web3ProviderEngine } = require('@0x/subproviders');
 const {
   generatePseudoRandomSalt,
-  Order,
-  orderHashUtils,
   signatureUtils,
-  SignedOrder,
   assetDataUtils
 } = require('@0x/order-utils');
 const { ContractWrappers } = require('@0x/contract-wrappers');
@@ -19,16 +16,8 @@ const { Web3Wrapper } = require('@0x/web3-wrapper');
 const { BigNumber } = require('@0x/utils');
 
 // Helpers
-const {
-  BN,
-  constants,
-  expectEvent,
-  expectRevert,
-  ether,
-  time
-} = require('@openzeppelin/test-helpers');
+const { time } = require('@openzeppelin/test-helpers');
 const assert = require('assert').strict;
-const truffleAssert = require('truffle-assertions');
 
 // Data store with historic MRI values
 const pc = new PayoutCalculator();
@@ -59,7 +48,7 @@ const REAL_INPUT = true;
 const NULL_ADDRESS = '0x0000000000000000000000000000000000000000';
 
 async function runExport() {
-  console.log('🔥🔥🔥STARTING SCRIPT🔥🔥🔥');
+  console.log('🔥🔥🔥STARTING SINGLE ITERATION SCRIPT🔥🔥🔥');
   let balanceTracker = {};
   async function recordBalances(timeLabel) {
     balanceTracker[timeLabel] = {};
@@ -89,8 +78,6 @@ async function runExport() {
     )).toString();
   }
 
-  assert.equal(true, true);
-
   // params to init 0x setup
   const provider = web3.currentProvider;
 
@@ -117,17 +104,15 @@ async function runExport() {
    ********************************************/
   console.log('0. Setting up proxy and deploying daily contract...');
 
-  // start at day 0. From data set 2019-12-01
-  let dayCounter = 0;
-
   // Starting MRI value
-  let MRIInput;
-  if (REAL_INPUT) MRIInput = pc.getMRIDataForDay(dayCounter);
-  else MRIInput = 0.00001; // nice input number to calculate expected payoffs.
-  const currentMRIScaled = new BigNumber(MRIInput).multipliedBy(
+  let mriInput;
+  if (REAL_INPUT) mriInput = pc.getMRIDataForDay(0);
+  // get MRI for day 0 in data set
+  else mriInput = 0.00001; // nice input number to calculate expected payoffs.
+  const currentMRIScaled = new BigNumber(mriInput).multipliedBy(
     new BigNumber('100000000')
   ); //1e8
-  console.log('\t-> Starting MRI value', MRIInput);
+  console.log('\t-> Starting MRI value', mriInput);
   console.log('\t * Representing 1 TH payout for 1 day, Denominated in BTC');
   // expiration time in the future
   let currentContractTime = (await marketContractProxy.getTime.call()).toNumber();
@@ -216,15 +201,15 @@ async function runExport() {
       Description: 'Value in µUSDC sent to buy mining contract'
     },
     'Current MRI': {
-      Amount: MRIInput,
+      Amount: mriInput,
       Description: 'Starting MRI input value'
     },
     'Max MRI': {
-      Amount: (MRIInput * (1 + necessaryCollateralRatio)).toFixed(8),
+      Amount: (mriInput * (1 + necessaryCollateralRatio)).toFixed(8),
       Description: 'Maximum MRI value that can be achieved in market'
     },
     'Taker expected long(imBTC)': {
-      Amount: (MRIInput * 28 * makerAmountToMint).toFixed(8),
+      Amount: (mriInput * 28 * makerAmountToMint).toFixed(8),
       Description: 'Long value in BTC if current MRI continues over contract duration'
     },
     'Maker required collateral(imBTC)': {
@@ -330,10 +315,10 @@ async function runExport() {
    **************************************************/
 
   await time.increase(contractDuration);
-  dayCounter = 28;
   let lookedBackMRI;
-  if (REAL_INPUT) lookedBackMRI = pc.getMRILookBackDataForDay(dayCounter);
-  else lookedBackMRI = MRIInput * 1.1 * 28; // input MRI, increased by 10%, over 28 days
+  if (REAL_INPUT) lookedBackMRI = pc.getMRILookBackDataForDay(28);
+  // get MRI for day 28 from data set
+  else lookedBackMRI = mriInput * 1.1 * 28; // input MRI, increased by 10%, over 28 days
   const lookedBackMRIScaled = new BigNumber(lookedBackMRI).multipliedBy(
     new BigNumber('100000000')
   ); //1e8
@@ -377,7 +362,7 @@ async function runExport() {
   console.log('6.1 Correct imBTC collateral from maker👇');
   // Upper Bound = Miner Revenue Index * (1 + Necessary Collateral Ratio)
   // Necessary Collateral = Upper Bound * Multiplier
-  const upperBound = MRIInput * (1 + necessaryCollateralRatio); //1 + 0.35
+  const upperBound = mriInput * (1 + necessaryCollateralRatio); //1 + 0.35
   const necessaryCollateralPerMRI = upperBound * multiplier * collateralDecimals; // upper bound over contract duration
   const expectedCollateralTaken = necessaryCollateralPerMRI * makerAmountToMint;
 
@@ -436,23 +421,6 @@ async function runExport() {
     balanceTracker['After 0x order']['Maker imBTC'];
   console.log('\t -> BTC redeemed for short token(Miner)', actualShortRedemption);
   assert.equal(Math.floor(expectedShortRedemption), actualShortRedemption);
-
-  /*************************************************
-   * Life cycle loop test over a number of markets *
-   *************************************************/
-  // expiration time in the future
-  // currentContractTime = (await marketContractProxy.getTime.call()).toNumber();
-  // contractDuration = (await marketContractProxy.CONTRACT_DURATION()).toNumber();
-  // expirationTime = currentContractTime + contractDuration;
-
-  // deploy a new market contract
-
-  // await marketContractProxy.dailySettlement(
-  //   '0',
-  //   '1200',
-  //   '2020-02-02',
-  //   expirationTime.toString()
-  // );
 }
 
 run = async function(callback) {
