@@ -54,7 +54,7 @@ const collateralDecimals = 1e8; // scaling for imBTC (8 decimal points)
 const paymentDecimals = 1e6; // scaling for USDT or USDC (6 decimals)
 
 // Config:
-const REAL_INPUT = false;
+const REAL_INPUT = true;
 
 const NULL_ADDRESS = '0x0000000000000000000000000000000000000000';
 
@@ -65,28 +65,28 @@ async function runExport() {
     balanceTracker[timeLabel] = {};
     balanceTracker[timeLabel]['Maker imBTC'] = (await collateralToken.balanceOf(
       makerAddress
-    )).toNumber();
+    )).toString();
     balanceTracker[timeLabel]['Maker USDC'] = (await paymentToken.balanceOf(
       makerAddress
-    )).toNumber();
+    )).toString();
     balanceTracker[timeLabel]['Maker Long'] = (await longToken.balanceOf(
       makerAddress
-    )).toNumber();
+    )).toString();
     balanceTracker[timeLabel]['Maker Short'] = (await shortToken.balanceOf(
       makerAddress
-    )).toNumber();
+    )).toString();
     balanceTracker[timeLabel]['Taker imBTC'] = (await collateralToken.balanceOf(
       takerAddress
-    )).toNumber();
+    )).toString();
     balanceTracker[timeLabel]['Taker USDC'] = (await paymentToken.balanceOf(
       takerAddress
-    )).toNumber();
+    )).toString();
     balanceTracker[timeLabel]['Taker Long'] = (await longToken.balanceOf(
       takerAddress
-    )).toNumber();
+    )).toString();
     balanceTracker[timeLabel]['Taker Short'] = (await shortToken.balanceOf(
       takerAddress
-    )).toNumber();
+    )).toString();
   }
 
   assert.equal(true, true);
@@ -381,9 +381,8 @@ async function runExport() {
     balanceTracker['Before 0x order']['Maker imBTC'] -
     balanceTracker['After 0x order']['Maker imBTC'];
   console.log('\t -> imBTC Taken as collateral from miner', actualCollateralTaken);
-  console.log(expectedCollateralTaken);
 
-  assert.equal(actualCollateralTaken, expectedCollateralTaken);
+  assert.equal(Math.floor(expectedCollateralTaken), actualCollateralTaken);
 
   console.log('6.2 Correct USDC sent from taker👇');
   // USDC value is sent from the investor to the miner. Value should be amount spesified in the original order.
@@ -392,7 +391,7 @@ async function runExport() {
     balanceTracker['Before 0x order']['Taker USDC'] -
     balanceTracker['After 0x order']['Taker USDC'];
   console.log('\t -> USDC taken as payment from investor', actualUSDCTaken);
-  assert.equal(expectedUSDCTaken.toFixed(6), actualUSDCTaken.toFixed(6));
+  assert.equal(expectedUSDCTaken, actualUSDCTaken);
 
   console.log('6.3 Correct Long & Short token mint👇');
   // Long and short tokens are minted for investor and miner. Both should receive the number of tokens = to the
@@ -424,7 +423,7 @@ async function runExport() {
     balanceTracker['After redemption']['Taker imBTC'] -
     balanceTracker['After 0x order']['Taker imBTC'];
   console.log('\t -> BTC redeemed for long token(Investor)', actualUSDCTaken);
-  assert.equal(expectedLongRedemption.toFixed(8), actualLongRedemption.toFixed(8));
+  assert.equal(Math.floor(expectedLongRedemption), actualLongRedemption);
 
   // SHORT (miner holding tokens)
   const expectedShortRedemption = expectedCollateralTaken - expectedLongRedemption;
@@ -432,7 +431,7 @@ async function runExport() {
     balanceTracker['After redemption']['Maker imBTC'] -
     balanceTracker['After 0x order']['Maker imBTC'];
   console.log('\t -> BTC redeemed for short token(Miner)', actualShortRedemption);
-  assert.equal(expectedShortRedemption.toFixed(8), actualShortRedemption.toFixed(8));
+  assert.equal(Math.floor(expectedShortRedemption), actualShortRedemption);
 
   /***********************************************************
    * Validate Contract payouts from recorded balance changes *
