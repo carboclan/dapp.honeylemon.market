@@ -1,6 +1,5 @@
 class PayoutCalculator {
   constructor() {
-    console.log('CONST');
     this.data = [
       { timeStamp: '2019-12-01', mri: 0.00001962 },
       { timeStamp: '2019-12-02', mri: 0.00001966 },

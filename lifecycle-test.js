@@ -1,16 +1,6 @@
-// This script simulates one life cycle with honey lemon + market protocol + 0x.
-// This is used to validate the interconnection of the layers and to check payouts
-// of tokens are what are expected.
-
 // Helper libraries
 const { PayoutCalculator } = require('./payout-calculator');
 
-//Ox libs and tools
-const {
-  generatePseudoRandomSalt,
-  signatureUtils,
-  assetDataUtils
-} = require('@0x/order-utils');
 const { ContractWrappers } = require('@0x/contract-wrappers');
 const { Web3Wrapper } = require('@0x/web3-wrapper');
 const { BigNumber } = require('@0x/utils');
@@ -25,27 +15,10 @@ const pc = new PayoutCalculator();
 // Token mocks
 const CollateralToken = artifacts.require('CollateralToken'); // IMBTC
 const PaymentToken = artifacts.require('PaymentToken'); // USDC
-const PositionToken = artifacts.require('PositionToken'); // To create the Long & Short tokens
 
 // Honey Lemon contracts
 const MinterBridge = artifacts.require('MinterBridge');
 const MarketContractProxy = artifacts.require('MarketContractProxy');
-
-// Market Protocol contracts
-// const MarketContract = artifacts.require('MarketContract');
-const MarketContractMPX = artifacts.require('marketContractMPX');
-const MarketCollateralPool = artifacts.require('MarketCollateralPool');
-
-// Calculation constants
-const necessaryCollateralRatio = 0.35; // for 135% collateralization
-const multiplier = 28; // contract duration in days
-const collateralDecimals = 1e8; // scaling for imBTC (8 decimal points)
-const paymentDecimals = 1e6; // scaling for USDT or USDC (6 decimals)
-
-// Config:
-const REAL_INPUT = true;
-
-const NULL_ADDRESS = '0x0000000000000000000000000000000000000000';
 
 async function runExport() {
   console.log('🔥🔥🔥STARTING LIFECYCLE SCRIPT🔥🔥🔥');
