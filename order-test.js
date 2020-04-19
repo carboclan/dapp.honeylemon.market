@@ -169,7 +169,7 @@ async function runExport() {
 
   // Taker token is imBTC sent to collateralize the contractWe use CollateralToken.
   // This is imBTC sent from the investor to the Market protocol contract
-  const takerToken = { address: paymentToken.address, decimals: 18 };
+  const takerToken = { address: paymentToken.address };
 
   // 0x sees the marketContractProxy as the maker token. This has a `balanceOf` method to get 0x
   // to think the order has processed.
@@ -188,11 +188,12 @@ async function runExport() {
     .callAsync();
 
   // Amounts are in Unit amounts, 0x requires base units (as many tokens use decimals)
-  const makerAmountToMint = 1; // TH of mining over a 1 month duration sold by the miner.
-  const takerAmountToMint = 4 * 1e6; // USDC sent from investor to miner. $4 ~ 1 month of 1TH mining rewards @ btc = 7k
+  const makerAmountToMint = 5000; // TH of mining over a 1 month duration sold by the miner.
+  const takerAmountToMint = 400 * 1e6; // USDC sent from investor to miner. $4 ~ 1 month of 1TH mining rewards @ btc = 7k
 
+  console.log('specs', contractSpecs[1].toString());
   console.table({
-    'Maker trade amount(USDC)': {
+    'Maker trade amount(TH)': {
       Amount: makerAmountToMint,
       Description: 'Number of TH sold over the day duration'
     },
