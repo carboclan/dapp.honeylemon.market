@@ -248,7 +248,7 @@ async function runExport() {
   // Approve the contract wrapper from 0x to pull USDC from the taker(investor)
   await paymentToken.approve(
     contractWrappers.contractAddresses.erc20Proxy,
-    new BigNumber(10).pow(256).minus(1),
+    new BigNumber(2).pow(256).minus(1),
     {
       from: takerAddress
     }
@@ -257,7 +257,7 @@ async function runExport() {
   // Approve the contract wrapper from 0x to pull imBTC from the maker(miner)
   await collateralToken.approve(
     minterBridge.address,
-    new BigNumber(10).pow(256).minus(1),
+    new BigNumber(2).pow(256).minus(1),
     {
       from: makerAddress
     }

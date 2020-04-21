@@ -24,7 +24,10 @@ module.exports = {
       host: process.env.KOVAN_API_URL,
       port: 443,
       network_id: '42',
-      provider: new HDWalletProvider(process.env.KOVAN_MNEMONIC, `https://${process.env.KOVAN_API_URL}`),
+      provider: new HDWalletProvider(
+        process.env.KOVAN_MNEMONIC,
+        `https://${process.env.KOVAN_API_URL}`
+      ),
       gas: 9990000
     }
   },
