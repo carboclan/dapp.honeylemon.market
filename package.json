@@ -1,7 +1,7 @@
 {
-  "name": "@marketprotocol/marketprotocol",
+  "name": "HoneyLemon",
   "version": "2.4.0",
-  "description": "Decentralized Derivatives Trading Protocol For The Ethereum Blockchain",
+  "description": "Decentralized Synthetic cloud mining contracts built on Ethereum",
   "main": "truffle-config.js",
   "directories": {
     "test": "test"
@@ -14,10 +14,10 @@
     "@0x/subproviders": "6.0.8",
     "@0x/utils": "5.4.1",
     "@0x/web3-wrapper": "7.0.7",
+    "@carboclan/mri": "file:../mri",
     "@chainsafe/truffle-plugin-abigen": "0.0.1",
     "@openzeppelin/test-helpers": "^0.5.5",
     "@truffle/contract": "4.1.13",
-    "ganache-time-traveler": "^1.0.14",
     "openzeppelin-solidity": "2.2.0",
     "prettier-plugin-solidity": "^1.0.0-alpha.47",
     "truffle": "5.1.18"
@@ -43,28 +43,5 @@
     "hooks": {
       "pre-commit": "npm run lint && git add ."
     }
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/MARKETProtocol/MARKETProtocol.git"
-  },
-  "keywords": [
-    "solidity",
-    "ethereum",
-    "derivatives",
-    "blockchain",
-    "erc20"
-  ],
-  "author": "Phil Elsasser <phil@marketprotocol.io>",
-  "license": "Apache-2.0",
-  "bugs": {
-    "url": "https://github.com/MARKETProtocol/MARKETProtocol/issues"
-  },
-  "homepage": "https://github.com/MARKETProtocol/MARKETProtocol#readme",
-  "engines": {
-    "node": ">=8.10.0"
-  },
-  "publishConfig": {
-    "access": "public"
   }
 }

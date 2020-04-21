@@ -20,9 +20,7 @@ contract MarketContractProxy is Ownable {
     string public ORACLE_STATISTIC = 'null';
 
     uint public CONTRACT_DURATION_DAYS = 28;
-
     uint public CONTRACT_DURATION = CONTRACT_DURATION_DAYS * 10; // 28 days in seconds
-
     uint public CONTRACT_COLLATERAL_RATIO = 135000000; //1.35e8; 1.35, with 8 decimal places
 
     uint[7] public marketContractSpecs = [
@@ -35,11 +33,14 @@ contract MarketContractProxy is Ownable {
         0 // expirationTimeStamp [updated before deployment]
     ];
 
+    // Array of all market contracts deployed
     address[] public marketContracts;
 
+    // Mapping of each market contract address to the associated array index
     mapping(address => uint256) addressToMarketId;
 
-    uint latestMri = 0;
+    // Stores the most recent MRI value
+    uint256 latestMri = 0;
 
     constructor(
         address _marketContractFactoryMPX,
@@ -86,11 +87,8 @@ contract MarketContractProxy is Ownable {
         return fillableAmounts;
     }
 
-    // What’s the TH amount that can currently be filled based on owner’s BTC balance and allowance
+    // The TH amount that can currently be filled based on owner’s BTC balance and allowance
     function getFillableAmount(address makerAddress) public view returns (uint256) {
-        // in the spec is says MarketCollateralPool allowance. however I think this should be the MINTER_BRIDGE_ADDRESS allowance?
-        // MarketCollateralPool marketCollateralPool = getLatestMarketCollateralPool();
-
         ERC20 collateralToken = ERC20(COLLATERAL_TOKEN_ADDRESS);
 
         uint minerBalance = collateralToken.balanceOf(makerAddress);
@@ -106,7 +104,6 @@ contract MarketContractProxy is Ownable {
         return uintMinAllowanceBalance / (latestMri * CONTRACT_DURATION_DAYS);
     }
 
-    //TODO: refactor this to return an interface
     function getLatestMarketContract() public view returns (MarketContractMPX) {
         uint lastIndex = marketContracts.length - 1;
         return MarketContractMPX(marketContracts[lastIndex]);
@@ -123,7 +120,6 @@ contract MarketContractProxy is Ownable {
         return MarketContractMPX(marketContracts[expiringIndex]);
     }
 
-    //TODO: refactor this to return an interface
     function getLatestMarketCollateralPool() public view returns (MarketCollateralPool) {
         MarketContract latestMarketContract = getLatestMarketContract();
         return MarketCollateralPool(latestMarketContract.COLLATERAL_POOL_ADDRESS());
@@ -185,8 +181,6 @@ contract MarketContractProxy is Ownable {
         address longTokenRecipient,
         address shortTokenRecipient
     ) public onlyMinterBridge {
-        // We need to call `mintPositionTo/*  */kens(CURRENT_CONTRACT_ADDRESS, amount, false)` on the
-        // MarketCollateralPool. We can get to the pool this way:
         uint collateralNeeded = calculateRequiredCollateral(qtyToMint);
 
         // Create instance of the latest market contract for today
@@ -258,9 +252,9 @@ contract MarketContractProxy is Ownable {
         latestMri = mri;
     }
 
-    // Deploys the current day Market contract. `indexValue` is used to initialize collateral requirement in its constructor
-    // Stores the new contract address, block it was deployed in, as well as the value of the index
-    // we’ll need easy access to the latest values of contract address and index.
+    // Deploys the current day Market contract. `indexValue` is used to initialize collateral requirement
+    // in its constructor. Stores the new contract address, block it was deployed in, as well as the value
+    // of the index we’ll need easy access to the latest values of contract address and index.
     // collateral requirement = indexValue * 28 * overcollateralization_factor
     // returns the address of the new contract
     function deployContract(
@@ -287,13 +281,13 @@ contract MarketContractProxy is Ownable {
         public
         returns (uint[7] memory)
     {
-        //TODO: replace elements in this array with the correct parms
-        uint[7] memory todaysMarketContractSpecs = marketContractSpecs;
-        // todaysMarketContractSpecs[1] = 100000; // capPrice
-        todaysMarketContractSpecs[1] =
+        uint[7] memory dailySpecs = marketContractSpecs;
+        // capPrice. div by 1e8 for correct scaling
+        dailySpecs[1] =
             (CONTRACT_DURATION_DAYS * currentMRI * (CONTRACT_COLLATERAL_RATIO)) /
-            1e8; // capPrice. div by 1e8 to correct scaling
-        todaysMarketContractSpecs[6] = expiration; // expirationTimeStamp. Fed in directly from oracle to ensure timing is exact, irrespective of block mining times
-        return todaysMarketContractSpecs;
+            1e8;
+        // expirationTimeStamp. Fed in directly from oracle to ensure timing is exact, irrespective of block mining times
+        dailySpecs[6] = expiration;
+        return dailySpecs;
     }
 }
