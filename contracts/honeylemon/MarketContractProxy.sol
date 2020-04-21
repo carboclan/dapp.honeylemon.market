@@ -252,10 +252,10 @@ contract MarketContractProxy is Ownable {
         latestMri = mri;
     }
 
-    // Deploys the current day Market contract. `indexValue` is used to initialize collateral requirement
-    // in its constructor. Stores the new contract address, block it was deployed in, as well as the value
-    // of the index we’ll need easy access to the latest values of contract address and index.
-    // collateral requirement = indexValue * 28 * overcollateralization_factor
+    // Deploys the current day Market contract. `indexValue` is used to initialize collateral
+    // requirement in its constructor. Stores the new contract address, block it was deployed in,
+    // as well as the value of the index we’ll need easy access to the latest values of contract
+    // address and index. collateral requirement = indexValue * 28 * overcollateralization_factor
     // returns the address of the new contract
     function deployContract(
         uint currentMRI,

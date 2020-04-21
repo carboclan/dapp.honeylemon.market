@@ -46,7 +46,7 @@ const paymentDecimals = 1e6; // scaling for USDT or USDC (6 decimals)
 const startingDay = 35; // Start date for day payout-calculator beginning contract date
 // Amounts are in Unit amounts, 0x requires base units (as many tokens use decimals)
 const makerAmountToMint = 1000; // TH of mining over a 1 month duration sold by the miner.
-const takerAmountToMint = 40000 * paymentDecimals; // USDC sent from investor to miner. $4 ~ 1 month of 1TH mining rewards @ btc = 7k
+const takerAmountToMint = 4000 * 1e6; // USDC sent from investor to miner. $4 ~ 1 month of 1TH mining rewards @ btc = 7k
 
 // Config:
 const REAL_INPUT = true;
@@ -209,7 +209,6 @@ async function runExport() {
   const takerAssetData = await contractWrappers.devUtils
     .encodeERC20AssetData(takerToken.address)
     .callAsync();
-  console.log('specs', contractSpecs[1].toString());
   console.table({
     'Maker trade amount(TH)': {
       Amount: makerAmountToMint,
