@@ -6,5 +6,5 @@ const CollateralToken = artifacts.require('CollateralToken');
 
 module.exports = async function(deployer, network, accounts) {
   await deployer.deploy(MinterBridge);
-  console.log('🤑Done Minter Bridge Migration!@');
+  console.log('🤑Done Minter Bridge Migration!');
 };
