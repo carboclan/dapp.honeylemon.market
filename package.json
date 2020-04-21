@@ -23,9 +23,12 @@
     "truffle": "5.1.18"
   },
   "devDependencies": {
+    "@truffle/hdwallet-provider": "^1.0.34",
     "bn.js": "^4.11.8",
     "coveralls": "^3.0.0",
+    "dotenv": "^8.2.0",
     "eslint": "^4.19.1",
+    "ganache-time-traveler": "^1.0.14",
     "husky": "^1.2.0",
     "prettier-eslint-cli": "^4.7.1",
     "solium": "^1.0.5",

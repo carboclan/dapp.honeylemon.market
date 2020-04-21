@@ -105,7 +105,7 @@ async function runExport() {
   const provider = web3.currentProvider;
 
   // Then use the provider
-  const chainId = 1337;
+  const chainId = await web3.eth.net.getId();
   const contractWrappers = new ContractWrappers(provider, { chainId });
   const web3Wrapper = new Web3Wrapper(provider);
 
