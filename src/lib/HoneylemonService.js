@@ -10,7 +10,7 @@ const { BigNumber } = require('@0x/utils');
 
 const NULL_ADDRESS = '0x0000000000000000000000000000000000000000';
 
-class OrderbookService {
+class HoneylemonService {
   constructor(
     apiUrl,
     minterBridgeAddress,
@@ -175,4 +175,4 @@ class OrderbookService {
   }
 }
 
-module.exports = OrderbookService;
+module.exports = HoneylemonService;

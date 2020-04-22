@@ -7,13 +7,13 @@ const MarketContractProxy = artifacts.require('MarketContractProxy');
 const CollateralToken = artifacts.require('CollateralToken'); // IMBTC
 const PaymentToken = artifacts.require('PaymentToken'); // USDC
 
-const OrderbookService = require('../../src/lib/OrderbookService');
+const HoneylemonService = require('../../src/lib/HoneylemonService');
 
 const web3Wrapper = new Web3Wrapper(web3.currentProvider);
 let accounts = null,
   makerAddress = null,
   takerAddress = null;
-let orderbookService = null;
+let honeylemonService = null;
 
 before(async function() {
   accounts = await web3Wrapper.getAvailableAddressesAsync();
@@ -25,7 +25,7 @@ before(async function() {
   const collateralToken = await CollateralToken.deployed();
   const paymentToken = await PaymentToken.deployed();
 
-  orderbookService = new OrderbookService(
+  honeylemonService = new HoneylemonService(
     process.env.SRA_URL,
     minterBridge.address,
     marketContractProxy.address,
@@ -36,22 +36,22 @@ before(async function() {
   );
 });
 
-describe('OrderbookService', () => {
+describe('HoneylemonService', () => {
   it('should give correct quote', async () => {
     const {
       price,
       resultOrders,
       ordersRemainingFillableMakerAssetAmounts,
       remainingFillAmount
-    } = await orderbookService.getQuoteForSize(new BigNumber(2));
+    } = await honeylemonService.getQuoteForSize(new BigNumber(2));
     assert.isTrue(price.eq(new BigNumber(0.5)), 'price is not correct');
   });
 
   it('should create and sign order', async () => {
     const sizeTh = new BigNumber(2),
       pricePerTh = new BigNumber(100);
-    const order = orderbookService.createOrder(makerAddress, sizeTh, pricePerTh);
-    const signedOrder = await orderbookService.signOrder(order);
+    const order = honeylemonService.createOrder(makerAddress, sizeTh, pricePerTh);
+    const signedOrder = await honeylemonService.signOrder(order);
 
     assert.isTrue(
       signedOrder.makerAssetAmount.eq(sizeTh),
@@ -68,9 +68,9 @@ describe('OrderbookService', () => {
 
   it('should report correct collateral token amounts', async () => {
     // First approve
-    await orderbookService.approveCollateralToken(makerAddress);
+    await honeylemonService.approveCollateralToken(makerAddress);
 
-    const { balance, allowance } = await orderbookService.getCollateralTokenAmounts(
+    const { balance, allowance } = await honeylemonService.getCollateralTokenAmounts(
       makerAddress
     );
     expect(allowance).to.eql(
@@ -82,9 +82,9 @@ describe('OrderbookService', () => {
 
   it('should report correct payment token amounts', async () => {
     // First approve
-    await orderbookService.approvePaymentToken(takerAddress);
+    await honeylemonService.approvePaymentToken(takerAddress);
 
-    const { balance, allowance } = await orderbookService.getPaymentTokenAmounts(
+    const { balance, allowance } = await honeylemonService.getPaymentTokenAmounts(
       takerAddress
     );
     expect(allowance).to.eql(
@@ -97,9 +97,9 @@ describe('OrderbookService', () => {
   it.skip('should submit order', async () => {
     const sizeTh = new BigNumber(2),
       pricePerTh = new BigNumber(100);
-    const order = orderbookService.createOrder(makerAddress, sizeTh, pricePerTh);
-    const signedOrder = await orderbookService.signOrder(order);
-    const result = await orderbookService.submitOrder(signedOrder);
+    const order = honeylemonService.createOrder(makerAddress, sizeTh, pricePerTh);
+    const signedOrder = await honeylemonService.signOrder(order);
+    const result = await honeylemonService.submitOrder(signedOrder);
     console.log(result);
   });
 });
