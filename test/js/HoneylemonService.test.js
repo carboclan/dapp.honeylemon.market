@@ -37,13 +37,23 @@ before(async function() {
 });
 
 describe('HoneylemonService', () => {
-  it('should give correct quote', async () => {
+  it('should give correct quote for size', async () => {
     const {
       price,
       resultOrders,
       ordersRemainingFillableMakerAssetAmounts,
       remainingFillAmount
     } = await honeylemonService.getQuoteForSize(new BigNumber(2));
+    assert.isTrue(price.eq(new BigNumber(0.5)), 'price is not correct');
+  });
+
+  it('should give correct quote for budget', async () => {
+    const {
+      price,
+      resultOrders,
+      ordersRemainingFillableTakerAssetAmounts,
+      remainingFillAmount
+    } = await honeylemonService.getQuoteForBudget(new BigNumber(2));
     assert.isTrue(price.eq(new BigNumber(0.5)), 'price is not correct');
   });
 

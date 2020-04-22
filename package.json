@@ -31,7 +31,6 @@
     "eslint": "^4.19.1",
     "ganache-time-traveler": "^1.0.14",
     "husky": "^1.2.0",
-    "jest": "^25.4.0",
     "prettier-eslint-cli": "^4.7.1",
     "solium": "^1.0.5",
     "truffle-assertions": "0.9.0",
@@ -42,7 +41,6 @@
   },
   "scripts": {
     "test": "truffle test",
-    "test:js": "jest",
     "lint": "prettier-eslint --write './**/*.js' './**/*.sol' --ignore './node_modules/**' --ignore './coverage/**'"
   },
   "husky": {

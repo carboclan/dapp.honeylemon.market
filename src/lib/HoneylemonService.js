@@ -85,6 +85,47 @@ class HoneylemonService {
     };
   }
 
+  async getQuoteForBudget(budget) {
+    const { asks } = await this.getOrderbook();
+    const orders = asks.records.map(r => r.order);
+    const remainingFillableTakerAssetAmounts = asks.records.map(
+      r => new BigNumber(r.metaData.remainingFillableTakerAssetAmount)
+    );
+    const {
+      resultOrders,
+      ordersRemainingFillableTakerAssetAmounts,
+      remainingFillAmount
+    } = marketUtils.findOrdersThatCoverTakerAssetFillAmount(orders, budget, {
+      remainingFillableTakerAssetAmounts
+    });
+
+    // Calculate total price
+    let totalMakerAssetAmount = new BigNumber(0);
+    let totalTakerAssetAmount = new BigNumber(0);
+    let remainingBudget = new BigNumber(budget);
+    for (let i = 0; i < resultOrders.length; i++) {
+      const order = resultOrders[i];
+      const takerAssetAmount = BigNumber.min(
+        ordersRemainingFillableTakerAssetAmounts[i],
+        remainingBudget
+      );
+      const makerAssetAmount = takerAssetAmount
+        .multipliedBy(order.makerAssetAmount)
+        .dividedBy(order.takerAssetAmount);
+      totalMakerAssetAmount = totalMakerAssetAmount.plus(makerAssetAmount);
+      totalTakerAssetAmount = totalTakerAssetAmount.plus(takerAssetAmount);
+      remainingBudget = remainingBudget.minus(takerAssetAmount);
+    }
+    const price = totalTakerAssetAmount.dividedBy(totalMakerAssetAmount);
+
+    return {
+      price,
+      resultOrders,
+      ordersRemainingFillableTakerAssetAmounts,
+      remainingFillAmount
+    };
+  }
+
   createOrder(makerAddress, sizeTh, pricePerTh) {
     sizeTh = new BigNumber(sizeTh);
     pricePerTh = new BigNumber(pricePerTh);
