@@ -4,6 +4,7 @@
 
 // Helper libraries
 const { PayoutCalculator } = require('./payout-calculator');
+const HoneylemonService = require('./src/lib/HoneylemonService');
 
 //Ox libs and tools
 const {
@@ -264,33 +265,25 @@ async function runExport() {
   );
 
   // Generate the 0x order
-  const order = {
-    makerAddress, // maker is the first address (miner)
-    takerAddress: NULL_ADDRESS, // taker is open and can be filled by anyone (when an investor comes along)
-    makerAssetAmount, // The maker asset amount
-    takerAssetAmount, // The taker asset amount
-    expirationTimeSeconds: new BigNumber(expirationTime), // Time when this order expires
-    makerFee: 0, // 0 maker fees
-    takerFee: 0, // 0 taker fees
-    feeRecipientAddress: NULL_ADDRESS, // No fee recipient
-    senderAddress: NULL_ADDRESS, // Sender address is open and can be submitted by anyone
-    salt: generatePseudoRandomSalt(), // Random value to provide uniqueness
-    makerAssetData,
-    takerAssetData,
-    exchangeAddress,
-    makerFeeAssetData: '0x',
-    takerFeeAssetData: '0x',
+  const honeylemonService = new HoneylemonService(
+    'http://localhost:3000',
+    minterBridge.address,
+    marketContractProxy.address,
+    collateralToken.address,
+    paymentToken.address,
+    provider,
     chainId
-  };
+  );
+
+  const order = honeylemonService.createOrder(
+    makerAddress,
+    makerAssetAmount,
+    takerAssetAmount.dividedBy(makerAssetAmount)
+  );
 
   console.log('3. Signing 0x order...');
 
-  // Generate the order hash and sign it
-  const signedOrder = await signatureUtils.ecSignOrderAsync(
-    provider,
-    order,
-    makerAddress
-  );
+  const signedOrder = await honeylemonService.signOrder(order);
 
   await recordBalances('Before 0x order');
 

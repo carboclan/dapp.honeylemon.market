@@ -18,7 +18,6 @@
     "@carboclan/mri": "file:../mri",
     "@chainsafe/truffle-plugin-abigen": "0.0.1",
     "@openzeppelin/test-helpers": "^0.5.5",
-    "@truffle/contract": "4.1.13",
     "openzeppelin-solidity": "2.2.0",
     "prettier-plugin-solidity": "^1.0.0-alpha.47",
     "truffle": "5.1.18"
@@ -32,6 +31,7 @@
     "ganache-time-traveler": "^1.0.14",
     "husky": "^1.2.0",
     "prettier-eslint-cli": "^4.7.1",
+    "sinon": "^9.0.2",
     "solium": "^1.0.5",
     "truffle-assertions": "0.9.0",
     "web3-core": "1.0.0-beta.55",

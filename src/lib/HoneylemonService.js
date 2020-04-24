@@ -3,12 +3,14 @@ const {
   marketUtils,
   generatePseudoRandomSalt,
   signatureUtils,
-  assetDataUtils
+  assetDataUtils,
+  orderCalculationUtils
 } = require('@0x/order-utils');
 const { ContractWrappers, ERC20TokenContract } = require('@0x/contract-wrappers');
 const { BigNumber } = require('@0x/utils');
 
 const NULL_ADDRESS = '0x0000000000000000000000000000000000000000';
+const ORDER_FILL_GAS = 150000;
 
 class HoneylemonService {
   constructor(
@@ -59,28 +61,33 @@ class HoneylemonService {
     });
 
     // Calculate total price
-    let totalMakerAssetAmount = new BigNumber(0);
-    let totalTakerAssetAmount = new BigNumber(0);
+    const takerAssetFillAmounts = [];
+    let totalMakerFillAmount = new BigNumber(0);
+    let totalTakerFillAmount = new BigNumber(0);
     let remainingSize = new BigNumber(sizeTh);
     for (let i = 0; i < resultOrders.length; i++) {
       const order = resultOrders[i];
-      const makerAssetAmount = BigNumber.min(
+      const makerFillAmount = BigNumber.min(
         ordersRemainingFillableMakerAssetAmounts[i],
         remainingSize
       );
-      const takerAssetAmount = makerAssetAmount
-        .multipliedBy(order.takerAssetAmount)
-        .dividedBy(order.makerAssetAmount);
-      totalMakerAssetAmount = totalMakerAssetAmount.plus(makerAssetAmount);
-      totalTakerAssetAmount = totalTakerAssetAmount.plus(takerAssetAmount);
-      remainingSize = remainingSize.minus(makerAssetAmount);
+      const takerFillAmount = orderCalculationUtils.getTakerFillAmount(
+        order,
+        makerFillAmount
+      );
+      totalMakerFillAmount = totalMakerFillAmount.plus(makerFillAmount);
+      totalTakerFillAmount = totalTakerFillAmount.plus(takerFillAmount);
+
+      takerAssetFillAmounts[i] = takerFillAmount;
+      remainingSize = remainingSize.minus(makerFillAmount);
     }
-    const price = totalTakerAssetAmount.dividedBy(totalMakerAssetAmount);
+    const price = totalTakerFillAmount.dividedBy(totalMakerFillAmount);
 
     return {
       price,
       resultOrders,
       ordersRemainingFillableMakerAssetAmounts,
+      takerAssetFillAmounts,
       remainingFillAmount
     };
   }
@@ -99,31 +106,70 @@ class HoneylemonService {
       remainingFillableTakerAssetAmounts
     });
 
-    // Calculate total price
-    let totalMakerAssetAmount = new BigNumber(0);
-    let totalTakerAssetAmount = new BigNumber(0);
+    // Calculate total price and takerAssetFillAmounts
+    const takerAssetFillAmounts = [];
+    let totalMakerFillAmount = new BigNumber(0);
+    let totalTakerFillAmount = new BigNumber(0);
     let remainingBudget = new BigNumber(budget);
     for (let i = 0; i < resultOrders.length; i++) {
       const order = resultOrders[i];
-      const takerAssetAmount = BigNumber.min(
+      const takerFillAmount = BigNumber.min(
         ordersRemainingFillableTakerAssetAmounts[i],
         remainingBudget
       );
-      const makerAssetAmount = takerAssetAmount
-        .multipliedBy(order.makerAssetAmount)
-        .dividedBy(order.takerAssetAmount);
-      totalMakerAssetAmount = totalMakerAssetAmount.plus(makerAssetAmount);
-      totalTakerAssetAmount = totalTakerAssetAmount.plus(takerAssetAmount);
-      remainingBudget = remainingBudget.minus(takerAssetAmount);
+      const makerFillAmount = orderCalculationUtils.getMakerFillAmount(
+        order,
+        takerFillAmount
+      );
+      totalMakerFillAmount = totalMakerFillAmount.plus(makerFillAmount);
+      totalTakerFillAmount = totalTakerFillAmount.plus(takerFillAmount);
+
+      takerAssetFillAmounts[i] = takerFillAmount;
+      remainingBudget = remainingBudget.minus(takerFillAmount);
     }
-    const price = totalTakerAssetAmount.dividedBy(totalMakerAssetAmount);
+    const price = totalTakerFillAmount.dividedBy(totalMakerFillAmount);
 
     return {
       price,
       resultOrders,
       ordersRemainingFillableTakerAssetAmounts,
+      takerAssetFillAmounts,
       remainingFillAmount
     };
+  }
+
+  async get0xFeeForOrderBatch(gasPrice, batchSize) {
+    const protocolFeeMultiplier = await this.contractWrappers.exchange
+      .protocolFeeMultiplier()
+      .callAsync();
+    return new BigNumber(protocolFeeMultiplier)
+      .multipliedBy(gasPrice)
+      .multipliedBy(batchSize);
+  }
+
+  async estimateGas(signedOrders, takerAssetFillAmounts, takerAddress) {
+    const signatures = signedOrders.map(o => o.signature);
+    const gasPrice = 10e9; // Set to 10GWEI
+    const value = await this.get0xFeeForOrderBatch(gasPrice, signedOrders.length);
+
+    const gas = await this.contractWrappers.exchange
+      .batchFillOrKillOrders(signedOrders, takerAssetFillAmounts, signatures)
+      .estimateGasAsync({ from: takerAddress, value, gasPrice });
+
+    return gas;
+  }
+
+  getFillOrdersTx(signedOrders, takerAssetFillAmounts) {
+    const signatures = signedOrders.map(o => o.signature);
+    return this.contractWrappers.exchange.batchFillOrKillOrders(
+      signedOrders,
+      takerAssetFillAmounts,
+      signatures
+    );
+  }
+
+  getCancelOrderTx(order) {
+    return this.contractWrappers.exchange.cancelOrder(order);
   }
 
   createOrder(makerAddress, sizeTh, pricePerTh) {
@@ -167,7 +213,6 @@ class HoneylemonService {
   }
 
   async submitOrder(signedOrder) {
-    // TODO: Verify that approval for collateral token is given
     return this.apiClient.submitOrderAsync(signedOrder);
   }
 
@@ -213,6 +258,26 @@ class HoneylemonService {
       quoteAssetData: this.takerAssetData
     };
     return this.apiClient.getOrderbookAsync(orderbookRequest);
+  }
+
+  async getOpenOrders(makerAddress) {
+    return this.apiClient.getOrdersAsync({ makerAddress });
+  }
+
+  async getOpenContracts(address) {
+    // TODO
+  }
+
+  async getRedeemableContracts(address) {
+    // TODO
+  }
+
+  async getClosedContracts(address) {
+    // TODO
+  }
+
+  async redeemContract(someContractIdentifier, address) {
+    // TODO
   }
 }
 
