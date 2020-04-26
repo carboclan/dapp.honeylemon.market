@@ -282,9 +282,8 @@ class HoneylemonService {
   }
 
   async getContracts(address) {
-    let contractsProcessed = [];
-    console.log(address);
-    const longTokensMinted = await this.marketContractProxy.getPastEvents(
+    // Get contract events where the address was the long trader
+    const longPositionTokensMintedEvents = await this.marketContractProxy.getPastEvents(
       'PositionTokensMinted',
       {
         filter: { longTokenRecipient: address },
@@ -292,32 +291,69 @@ class HoneylemonService {
         toBlock: 'latest'
       }
     );
-    console.log('longTokensMinted', longTokensMinted);
-    longTokensMinted.forEach(contract => {
-      console.log(contract);
+    // Process the returned events
+    const longContractsProcessed = this.processEventObjects(
+      'long',
+      longPositionTokensMintedEvents
+    );
+
+    // Get contract events where the address was the short trader
+    const shortPositionTokensMintedEvents = await this.marketContractProxy.getPastEvents(
+      'PositionTokensMinted',
+      {
+        filter: { shortTokenRecipient: address },
+        fromBlock: 0,
+        toBlock: 'latest'
+      }
+    );
+    // Process the returned events
+    const shortContractsProcessed = this.processEventObjects(
+      'long',
+      shortPositionTokensMintedEvents
+    );
+
+    return {
+      longContracts: longContractsProcessed,
+      shortContracts: shortContractsProcessed
+    };
+  }
+
+  async redeemContract(someContractIdentifier, address) {
+    // TODO
+  }
+
+  processEventObjects = (traderDirection, eventsArray) => {
+    let contractsProcessed = {};
+    eventsArray.forEach(contract => {
       // If the object does not exist init it
       if (!contractsProcessed[contract.returnValues.marketId]) {
         contractsProcessed[contract.returnValues.marketId] = {
           marketId: contract.returnValues.marketId,
+          contractName: contract.returnValues.contractName.replace(/[^ -~]+/g, ''),
           marketContractAddress: contract.returnValues.latestMarketContract,
-          position: 'long',
+          direction: traderDirection,
           totalQuantity: parseInt(contract.returnValues.qtyToMint),
           averagePrice: parseInt(web3.utils.hexToUtf8(contract.returnValues.bridgeData)),
           trades: [
             {
+              timeStamp: contract.returnValues.time,
               quantity: parseInt(contract.returnValues.qtyToMint),
               price: parseInt(web3.utils.hexToUtf8(contract.returnValues.bridgeData))
             }
           ],
           longTokenAddress: contract.returnValues.longTokenAddress,
           shortTokenAddress: contract.returnValues.shortTokenAddress,
-          counterparty: contract.returnValues.shortTokenRecipient,
+          counterParty:
+            traderDirection == 'long'
+              ? contract.returnValues.shortTokenRecipient
+              : contract.returnValues.longTokenRecipient,
           status: 'open' // will be changed if this spesific
         };
         // if the object already exists add the trade to the trades array
       } else {
         // Add the trade to the trades array
         contractsProcessed[contract.returnValues.marketId].trades.push({
+          timeStamp: contract.returnValues.time,
           quantity: parseInt(contract.returnValues.qtyToMint),
           price: parseInt(web3.utils.hexToUtf8(contract.returnValues.bridgeData))
         });
@@ -330,33 +366,15 @@ class HoneylemonService {
         // by finding total spent and the total TH bought.
         let totalSpent = 0;
         contractsProcessed[contract.returnValues.marketId].trades.forEach(trade => {
-          totalSpent = +trade.price * trade.quantity;
+          totalSpent = totalSpent + trade.price * trade.quantity;
         });
 
         contractsProcessed[contract.returnValues.marketId].averagePrice =
           totalSpent / contractsProcessed[contract.returnValues.marketId].totalQuantity;
       }
     });
-
-    console.log('contractsProcessed', contractsProcessed);
-    console.log('0th trades', contractsProcessed[0].trades);
-
-    const shortTokensMinted = await this.marketContractProxy.getPastEvents(
-      'PositionTokensMinted',
-      {
-        filter: { shortTokenRecipient: address },
-        fromBlock: 0,
-        toBlock: 'latest'
-      }
-    );
-    console.log('shortTokensMinted', shortTokensMinted);
-    console.log(this.marketContractProxy.address);
-    return 'null';
-  }
-
-  async redeemContract(someContractIdentifier, address) {
-    // TODO
-  }
+    return contractsProcessed;
+  };
 }
 
 module.exports = HoneylemonService;

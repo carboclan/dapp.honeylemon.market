@@ -56,10 +56,10 @@ contract MarketContractProxy is Ownable {
 
     event PositionTokensMinted(
         uint indexed marketId,
+        string contractName,
         address indexed longTokenRecipient,
         address indexed shortTokenRecipient,
         uint256 qtyToMint,
-        uint256 collateralNeeded,
         address latestMarketContract,
         address longTokenAddress,
         address shortTokenAddress,
@@ -231,10 +231,10 @@ contract MarketContractProxy is Ownable {
 
         emit PositionTokensMinted(
             addressToMarketId[address(latestMarketContract)], // MarketID
+            latestMarketContract.CONTRACT_NAME(),
             longTokenRecipient,
             shortTokenRecipient,
             qtyToMint,
-            collateralNeeded,
             address(latestMarketContract),
             address(longToken),
             address(shortToken),

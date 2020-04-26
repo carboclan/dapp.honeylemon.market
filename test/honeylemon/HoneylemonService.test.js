@@ -303,7 +303,7 @@ describe('HoneylemonService', () => {
 
     expect(txHash).to.not.be.null;
   });
-  it.only('Retrieve open contracts', async () => {
+  it('Retrieve open contracts', async () => {
     // Create positions for long and short token holder
     const fillSize = new BigNumber(1);
 
@@ -321,8 +321,17 @@ describe('HoneylemonService', () => {
 
     // Get contracts object from HoneyLemonService
     console.log('test');
-    const { contracts } = await honeylemonService.getContracts(takerAddress);
-    console.log('contracts', contracts);
+    const { longContracts, shortContracts } = await honeylemonService.getContracts(
+      takerAddress
+    );
+    console.log('longContracts', longContracts);
+    console.log('shortContracts', shortContracts);
+
+    const { longContracts2, shortContracts2 } = await honeylemonService.getContracts(
+      makerAddress
+    );
+    console.log('longContracts2', longContracts2);
+    console.log('shortContracts2', shortContracts2);
   });
 });
 async function fill0xOrderForAddresses(size, taker, maker) {
