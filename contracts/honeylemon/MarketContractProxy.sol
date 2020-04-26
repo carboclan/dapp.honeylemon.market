@@ -54,6 +54,18 @@ contract MarketContractProxy is Ownable {
         COLLATERAL_TOKEN_ADDRESS = _imBTCTokenAddress;
     }
 
+    event PositionTokensMinted(
+        uint indexed marketId,
+        address indexed longTokenRecipient,
+        address indexed shortTokenRecipient,
+        uint256 qtyToMint,
+        uint256 collateralNeeded,
+        address latestMarketContract,
+        address longTokenAddress,
+        address shortTokenAddress,
+        bytes bridgeData,
+        uint time
+    );
     //////////////////////////////////////
     //// PERMISSION SCOPING MODIFIERS ////
     //////////////////////////////////////
@@ -179,7 +191,8 @@ contract MarketContractProxy is Ownable {
     function mintPositionTokens(
         uint qtyToMint,
         address longTokenRecipient,
-        address shortTokenRecipient
+        address shortTokenRecipient,
+        bytes memory bridgeData
     ) public onlyMinterBridge {
         uint collateralNeeded = calculateRequiredCollateral(qtyToMint);
 
@@ -215,6 +228,19 @@ contract MarketContractProxy is Ownable {
         // Send the tokens
         longToken.transfer(longTokenRecipient, qtyToMint);
         shortToken.transfer(shortTokenRecipient, qtyToMint);
+
+        emit PositionTokensMinted(
+            addressToMarketId[address(latestMarketContract)], // MarketID
+            longTokenRecipient,
+            shortTokenRecipient,
+            qtyToMint,
+            collateralNeeded,
+            address(latestMarketContract),
+            address(longToken),
+            address(shortToken),
+            bridgeData,
+            getTime()
+        );
     }
 
     ////////////////////////////////////

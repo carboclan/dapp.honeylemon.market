@@ -19,17 +19,22 @@ class HoneylemonService {
     marketContractProxyAddress,
     collateralTokenAddress,
     paymentTokenAddress,
-    provider,
-    chainId
+    web3,
+    chainId,
+    marketContractProxyAbi,
+    MarketCollateralPoolAbi,
+    marketContractAbi
   ) {
     this.apiClient = new HttpClient(apiUrl);
     this.minterBridgeAddress = minterBridgeAddress;
     this.marketContractProxyAddress = marketContractProxyAddress;
     this.collateralTokenAddress = collateralTokenAddress;
     this.paymentTokenAddress = paymentTokenAddress;
-    this.provider = provider;
+    this.web3 = web3;
+
+    this.provider = this.web3.currentProvider;
     this.chainId = chainId;
-    this.contractWrappers = new ContractWrappers(provider, { chainId });
+    this.contractWrappers = new ContractWrappers(this.provider, { chainId });
 
     // Calculate asset data
     this.makerAssetData = assetDataUtils.encodeERC20BridgeAssetData(
@@ -40,8 +45,13 @@ class HoneylemonService {
     this.takerAssetData = assetDataUtils.encodeERC20AssetData(paymentTokenAddress);
 
     // Instantiate tokens
-    this.collateralToken = new ERC20TokenContract(collateralTokenAddress, provider);
-    this.paymentToken = new ERC20TokenContract(paymentTokenAddress, provider);
+    this.collateralToken = new ERC20TokenContract(collateralTokenAddress, this.provider);
+    this.paymentToken = new ERC20TokenContract(paymentTokenAddress, this.provider);
+
+    this.marketContractProxy = new web3.eth.Contract(
+      marketContractProxyAbi,
+      marketContractProxyAddress
+    );
   }
 
   async getQuoteForSize(sizeTh) {
@@ -180,6 +190,13 @@ class HoneylemonService {
     ); // 10 days
     const exchangeAddress = this.contractWrappers.exchange.address;
 
+    // Encode the price of the sale into the maker asset data feed. This is used to pass the price to the
+    // honey lemon market contract proxy to enrich the sale event to make retrieval easier on the front end.
+    const makerAddetDataIncludingPrice = assetDataUtils.encodeERC20BridgeAssetData(
+      this.marketContractProxyAddress,
+      this.minterBridgeAddress,
+      web3.utils.utf8ToHex(pricePerTh.toString()) // this is the sale price within the data feed for the minterbride
+    );
     const order = {
       makerAddress, // maker is the first address (miner)
       takerAddress: NULL_ADDRESS, // taker is open and can be filled by anyone (when an investor comes along)
@@ -191,7 +208,7 @@ class HoneylemonService {
       feeRecipientAddress: NULL_ADDRESS, // No fee recipient
       senderAddress: NULL_ADDRESS, // Sender address is open and can be submitted by anyone
       salt: generatePseudoRandomSalt(), // Random value to provide uniqueness
-      makerAssetData: this.makerAssetData,
+      makerAssetData: makerAddetDataIncludingPrice,
       takerAssetData: this.takerAssetData,
       exchangeAddress,
       makerFeeAssetData: '0x',
@@ -264,16 +281,77 @@ class HoneylemonService {
     return this.apiClient.getOrdersAsync({ makerAddress });
   }
 
-  async getOpenContracts(address) {
-    // TODO
-  }
+  async getContracts(address) {
+    let contractsProcessed = [];
+    console.log(address);
+    const longTokensMinted = await this.marketContractProxy.getPastEvents(
+      'PositionTokensMinted',
+      {
+        filter: { longTokenRecipient: address },
+        fromBlock: 0,
+        toBlock: 'latest'
+      }
+    );
+    console.log('longTokensMinted', longTokensMinted);
+    longTokensMinted.forEach(contract => {
+      console.log(contract);
+      // If the object does not exist init it
+      if (!contractsProcessed[contract.returnValues.marketId]) {
+        contractsProcessed[contract.returnValues.marketId] = {
+          marketId: contract.returnValues.marketId,
+          marketContractAddress: contract.returnValues.latestMarketContract,
+          position: 'long',
+          totalQuantity: parseInt(contract.returnValues.qtyToMint),
+          averagePrice: parseInt(web3.utils.hexToUtf8(contract.returnValues.bridgeData)),
+          trades: [
+            {
+              quantity: parseInt(contract.returnValues.qtyToMint),
+              price: parseInt(web3.utils.hexToUtf8(contract.returnValues.bridgeData))
+            }
+          ],
+          longTokenAddress: contract.returnValues.longTokenAddress,
+          shortTokenAddress: contract.returnValues.shortTokenAddress,
+          counterparty: contract.returnValues.shortTokenRecipient,
+          status: 'open' // will be changed if this spesific
+        };
+        // if the object already exists add the trade to the trades array
+      } else {
+        // Add the trade to the trades array
+        contractsProcessed[contract.returnValues.marketId].trades.push({
+          quantity: parseInt(contract.returnValues.qtyToMint),
+          price: parseInt(web3.utils.hexToUtf8(contract.returnValues.bridgeData))
+        });
+        // Update the total quantity for this contract for the given marketId
+        contractsProcessed[contract.returnValues.marketId].totalQuantity =
+          contractsProcessed[contract.returnValues.marketId].totalQuantity +
+          parseInt(contract.returnValues.qtyToMint);
 
-  async getRedeemableContracts(address) {
-    // TODO
-  }
+        // Calculate the average sale price for this contract for the given marketId
+        // by finding total spent and the total TH bought.
+        let totalSpent = 0;
+        contractsProcessed[contract.returnValues.marketId].trades.forEach(trade => {
+          totalSpent = +trade.price * trade.quantity;
+        });
 
-  async getClosedContracts(address) {
-    // TODO
+        contractsProcessed[contract.returnValues.marketId].averagePrice =
+          totalSpent / contractsProcessed[contract.returnValues.marketId].totalQuantity;
+      }
+    });
+
+    console.log('contractsProcessed', contractsProcessed);
+    console.log('0th trades', contractsProcessed[0].trades);
+
+    const shortTokensMinted = await this.marketContractProxy.getPastEvents(
+      'PositionTokensMinted',
+      {
+        filter: { shortTokenRecipient: address },
+        fromBlock: 0,
+        toBlock: 'latest'
+      }
+    );
+    console.log('shortTokensMinted', shortTokensMinted);
+    console.log(this.marketContractProxy.address);
+    return 'null';
   }
 
   async redeemContract(someContractIdentifier, address) {

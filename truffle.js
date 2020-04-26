@@ -19,16 +19,6 @@ module.exports = {
       host: 'localhost',
       port: 9545,
       network_id: '*' // Match any network id
-    },
-    kovan: {
-      host: process.env.KOVAN_API_URL,
-      port: 443,
-      network_id: '42',
-      provider: new HDWalletProvider(
-        process.env.KOVAN_MNEMONIC,
-        `https://${process.env.KOVAN_API_URL}`
-      ),
-      gas: 9990000
     }
   },
   compilers: {

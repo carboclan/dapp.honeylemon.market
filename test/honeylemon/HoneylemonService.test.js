@@ -1,8 +1,9 @@
-const sinon = require('sinon');
-
+// Helpers
 const { BigNumber } = require('@0x/utils');
 const { Web3Wrapper } = require('@0x/web3-wrapper');
 const { orderHashUtils } = require('@0x/order-utils');
+const sinon = require('sinon');
+const { time } = require('@openzeppelin/test-helpers');
 
 const MinterBridge = artifacts.require('MinterBridge');
 const MarketContractProxy = artifacts.require('MarketContractProxy');
@@ -10,26 +11,36 @@ const CollateralToken = artifacts.require('CollateralToken'); // IMBTC
 const PaymentToken = artifacts.require('PaymentToken'); // USDC
 const MarketContractMPX = artifacts.require('MarketContractMPX');
 const PositionToken = artifacts.require('PositionToken'); // Long & Short tokens
+const MarketCollateralPool = artifacts.require('MarketCollateralPool');
 
 const HoneylemonService = require('../../src/lib/HoneylemonService');
 
 const web3Wrapper = new Web3Wrapper(web3.currentProvider);
 let accounts = null,
-  makerAddress = null,
+  // addresses
+  makerAddress = [null],
   takerAddress = null,
+  randomAddress = null,
+  // contracts
   honeyLemonOracle = null,
-  longToken = null,
-  shortToken = null;
-let honeylemonService = null;
+  longToken = [null],
+  shortToken = [null],
+  marketContractProxy = null,
+  // variables
+  currentDayCounter = 0,
+  mriInput = null,
+  // tested service
+  honeylemonService = null;
 
 before(async function() {
   accounts = await web3Wrapper.getAvailableAddressesAsync();
   honeyLemonOracle = accounts[0];
   makerAddress = accounts[1];
   takerAddress = accounts[2];
+  randomAddress = accounts[3];
 
   const minterBridge = await MinterBridge.deployed();
-  const marketContractProxy = await MarketContractProxy.deployed();
+  marketContractProxy = await MarketContractProxy.deployed();
   const collateralToken = await CollateralToken.deployed();
   const paymentToken = await PaymentToken.deployed();
 
@@ -39,8 +50,11 @@ before(async function() {
     marketContractProxy.address,
     collateralToken.address,
     paymentToken.address,
-    web3.currentProvider,
-    await web3.eth.net.getId()
+    web3,
+    1337,
+    marketContractProxy.abi,
+    MarketCollateralPool.abi,
+    MarketContractMPX.abi
   );
 
   // Stub orders
@@ -87,7 +101,7 @@ before(async function() {
   const orderbookStub = sinon.stub(honeylemonService, 'getOrderbook').returns(stubData);
 
   // Starting MRI value
-  const mriInput = 0.00001833;
+  mriInput = 0.00001833;
   const currentMRIScaled = new BigNumber(mriInput).multipliedBy(
     new BigNumber('100000000')
   ); //1e8
@@ -116,10 +130,15 @@ before(async function() {
     }
   );
 
+  currentDayCounter = 0; //increment for diffrent contract deployments for sequential days
   const deployedMarketContract = await marketContractProxy.getLatestMarketContract();
   const marketContract = await MarketContractMPX.at(deployedMarketContract);
-  longToken = await PositionToken.at(await marketContract.LONG_POSITION_TOKEN());
-  shortToken = await PositionToken.at(await marketContract.SHORT_POSITION_TOKEN());
+  longToken[currentDayCounter] = await PositionToken.at(
+    await marketContract.LONG_POSITION_TOKEN()
+  );
+  shortToken[currentDayCounter] = await PositionToken.at(
+    await marketContract.SHORT_POSITION_TOKEN()
+  );
 });
 
 describe('HoneylemonService', () => {
@@ -266,8 +285,8 @@ describe('HoneylemonService', () => {
     expect(txHash).to.not.be.null;
 
     // Check position token balances
-    const longBalance = await longToken.balanceOf(takerAddress);
-    const shortBalance = await shortToken.balanceOf(makerAddress);
+    const longBalance = await longToken[currentDayCounter].balanceOf(takerAddress);
+    const shortBalance = await shortToken[currentDayCounter].balanceOf(makerAddress);
     expect(longBalance.toString()).to.eql(fillSize.toString());
     expect(shortBalance.toString()).to.eql(fillSize.toString());
   });
@@ -284,4 +303,100 @@ describe('HoneylemonService', () => {
 
     expect(txHash).to.not.be.null;
   });
+  it.only('Retrieve open contracts', async () => {
+    // Create positions for long and short token holder
+    const fillSize = new BigNumber(1);
+
+    // Create two contracts. taker participates as a taker in both. Maker is only involved
+    // in the first contract.
+    await fill0xOrderForAddresses(1, takerAddress, makerAddress);
+    // await time.increase(10); // increase by 10 seconds to signify 1 day
+    await fill0xOrderForAddresses(2, takerAddress, makerAddress);
+    // await time.increase(10); // increase by 10 seconds to signify 1 day
+    await fill0xOrderForAddresses(3, takerAddress, makerAddress);
+
+    await createNewMarketProtocolContract(0, mriInput, 'MRI-BTC-28D-20200502');
+
+    await fill0xOrderForAddresses(2, takerAddress, makerAddress);
+
+    // Get contracts object from HoneyLemonService
+    console.log('test');
+    const { contracts } = await honeylemonService.getContracts(takerAddress);
+    console.log('contracts', contracts);
+  });
 });
+async function fill0xOrderForAddresses(size, taker, maker) {
+  const fillSize = new BigNumber(size);
+  const longBalanceBefore = await longToken[currentDayCounter].balanceOf(taker);
+  const shortBalanceBefore = await shortToken[currentDayCounter].balanceOf(maker);
+
+  console.log('shortBalanceBefore.toNumber()', shortBalanceBefore.toNumber());
+  const { resultOrders, takerAssetFillAmounts } = await honeylemonService.getQuoteForSize(
+    fillSize
+  );
+  // console.log('resultOrders', resultOrders);
+  // console.log('takerAssetFillAmounts', takerAssetFillAmounts);
+  await honeylemonService.approveCollateralToken(maker);
+  await honeylemonService.approvePaymentToken(taker);
+  const gasPrice = 5e9; // 5 GWEI
+  const tx = await honeylemonService.getFillOrdersTx(resultOrders, takerAssetFillAmounts);
+  const value = await honeylemonService.get0xFeeForOrderBatch(
+    gasPrice,
+    resultOrders.length
+  );
+  const gas = await honeylemonService.estimateGas(
+    resultOrders,
+    takerAssetFillAmounts,
+    taker
+  );
+  const txHash = await tx.sendTransactionAsync({
+    from: taker,
+    gas,
+    gasPrice,
+    value
+  });
+  console.log('txHash', txHash);
+  expect(txHash).to.not.be.null;
+  // Check position token balances
+  const longBalanceAfter = await longToken[currentDayCounter].balanceOf(taker);
+  assert.equal(longBalanceAfter.toNumber() - longBalanceBefore.toNumber(), fillSize);
+
+  const shortBalanceAfter = await shortToken[currentDayCounter].balanceOf(maker);
+  console.log('shortBalanceAfter.toString', shortBalanceAfter.toString());
+
+  assert.equal(shortBalanceAfter.toNumber() - shortBalanceBefore.toNumber(), fillSize);
+}
+
+async function createNewMarketProtocolContract(lookbackIndex, mriInput, marketName) {
+  let currentContractTime = (await marketContractProxy.getTime.call()).toNumber();
+  let contractDuration = (await marketContractProxy.CONTRACT_DURATION()).toNumber();
+  let expirationTime = currentContractTime + contractDuration;
+
+  const currentMRIScaled = new BigNumber(mriInput).multipliedBy(
+    new BigNumber('100000000')
+  ); //1e8
+  await marketContractProxy.dailySettlement(
+    lookbackIndex,
+    currentMRIScaled.toString(), // current index value
+    [
+      web3.utils.utf8ToHex(marketName),
+      web3.utils.utf8ToHex(marketName + '-Long'),
+      web3.utils.utf8ToHex(marketName + '-Short')
+    ], // new market name
+    expirationTime.toString(), // new market expiration
+    {
+      from: honeyLemonOracle
+    }
+  );
+
+  currentDayCounter = +1; //increment for different contract deployments for sequential days
+  console.log(currentDayCounter);
+  const deployedMarketContract = await marketContractProxy.getLatestMarketContract();
+  const marketContract = await MarketContractMPX.at(deployedMarketContract);
+  longToken[currentDayCounter] = await PositionToken.at(
+    await marketContract.LONG_POSITION_TOKEN()
+  );
+  shortToken[currentDayCounter] = await PositionToken.at(
+    await marketContract.SHORT_POSITION_TOKEN()
+  );
+}

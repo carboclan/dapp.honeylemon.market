@@ -106,7 +106,7 @@ async function runExport() {
   const provider = web3.currentProvider;
 
   // Then use the provider
-  const chainId = await web3.eth.net.getId();
+  const chainId = 1337;
   const contractWrappers = new ContractWrappers(provider, { chainId });
   const web3Wrapper = new Web3Wrapper(provider);
 
@@ -271,8 +271,11 @@ async function runExport() {
     marketContractProxy.address,
     collateralToken.address,
     paymentToken.address,
-    provider,
-    chainId
+    web3,
+    chainId,
+    MarketContractProxy.abi,
+    MarketCollateralPool.abi,
+    MarketContractMPX.abi
   );
 
   const order = honeylemonService.createOrder(
