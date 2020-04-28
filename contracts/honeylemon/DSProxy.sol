@@ -6,7 +6,7 @@ contract DSNote {
         bytes4 indexed sig,
         address indexed guy,
         bytes32 indexed foo,
-        bytes32 indexed bar,
+        bytes32 bar,
         uint wad,
         bytes fax
     );
@@ -19,8 +19,7 @@ contract DSNote {
             foo := calldataload(4)
             bar := calldataload(36)
         }
-
-        LogNote(msg.sig, msg.sender, foo, bar, msg.value, msg.data);
+        emit LogNote(msg.sig, msg.sender, foo, bar, msg.value, msg.data);
 
         _;
     }
@@ -42,19 +41,19 @@ contract DSAuth is DSAuthEvents {
     DSAuthority public authority;
     address public owner;
 
-    function DSAuth() public {
+    constructor() public {
         owner = msg.sender;
-        LogSetOwner(msg.sender);
+        emit LogSetOwner(msg.sender);
     }
 
     function setOwner(address owner_) public auth {
         owner = owner_;
-        LogSetOwner(owner);
+        emit LogSetOwner(owner);
     }
 
     function setAuthority(DSAuthority authority_) public auth {
         authority = authority_;
-        LogSetAuthority(authority);
+        emit LogSetAuthority(address(authority));
     }
 
     modifier auth {
@@ -70,7 +69,7 @@ contract DSAuth is DSAuthEvents {
         } else if (authority == DSAuthority(0)) {
             return false;
         } else {
-            return authority.canCall(src, this, sig);
+            return authority.canCall(src, address(this), sig);
         }
     }
 }
@@ -140,7 +139,7 @@ contract DSProxy is DSAuth, DSNote {
     }
 
     //set new cache
-    function setCache(address _cacheAddr) public auth note returns (bool) {
+    function setCache(address _cacheAddr) public payable auth note returns (bool) {
         require(_cacheAddr != address(0), 'ds-proxy-cache-address-required');
         cache = DSProxyCache(_cacheAddr); // overwrite cache
         return true;
@@ -172,6 +171,7 @@ contract DSProxyFactory {
             msg.sender == marketContractProxy,
             'Only callable by MarketContractProxy'
         );
+        _;
     }
 
     // deploys a new proxy instance

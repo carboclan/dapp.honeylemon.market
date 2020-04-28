@@ -47,8 +47,11 @@ contract MarketContractProxy is Ownable {
     // DSProxy factory to create smart contract wallets for users to enable bulk redemption.
     DSProxyFactory dSProxyFactory;
 
-    // Mapping to link each user to their DSProxy address.
+    // Mapping to link each trader address to their DSProxy address.
     mapping(address => address) addressToDSProxy;
+
+    // Mapping to link each DSProxy address to their traders address.
+    mapping(address => address) dSProxyToAddress;
 
     constructor(
         address _marketContractFactoryMPX,
@@ -140,12 +143,12 @@ contract MarketContractProxy is Ownable {
     }
 
     function getLatestMarketCollateralPool() public view returns (MarketCollateralPool) {
-        MarketContract latestMarketContract = getLatestMarketContract();
+        MarketContractMPX latestMarketContract = getLatestMarketContract();
         return getCollateralPool(latestMarketContract);
     }
 
     function calculateRequiredCollateral(uint amount) public view returns (uint) {
-        MarketContract latestMarketContract = getLatestMarketContract();
+        MarketContractMPX latestMarketContract = getLatestMarketContract();
         return MathLib.multiply(amount, latestMarketContract.COLLATERAL_PER_UNIT());
     }
 
@@ -181,6 +184,7 @@ contract MarketContractProxy is Ownable {
     function createDSProxyWallet() public returns (address) {
         address payable dsProxyWallet = dSProxyFactory.build(msg.sender);
         addressToDSProxy[msg.sender] = dsProxyWallet;
+        dSProxyToAddress[dsProxyWallet] = msg.sender;
     }
 
     // Function called by a DsProxy wallet which passes control from the caller using delegatecal
@@ -188,20 +192,25 @@ contract MarketContractProxy is Ownable {
     // Note: only one side can be redeemed at a time. This is to simplify redemption as the same caller
     // will likely never be both long and short in the same contract.
     function batchRedeem(
-        address[] tokenAddresses, // Address of the long or short token to redeem
-        address[] marketAddresses, // Address of the market protocol
-        uint256[] tokensToRedeem, // the number of tokens to redeem
-        bool[] traderLong // if the trader is long or short
+        address[] memory tokenAddresses, // Address of the long or short token to redeem
+        address[] memory marketAddresses, // Address of the market protocol
+        uint256[] memory tokensToRedeem, // the number of tokens to redeem
+        bool[] memory traderLong // if the trader is long or short
     ) public {
         require(
-            tokenAddresses.length == marketsProtocol.length == tokensToRedeem.length,
+            tokenAddresses.length == marketAddresses.length &&
+                marketAddresses.length == tokensToRedeem.length,
             'Invalid input params'
+        );
+        require(
+            dSProxyToAddress[msg.sender] != address(0),
+            'Caller is not valid DSProxy'
         );
         // Loop through all tokens and preform redemption
         for (uint256 i = 0; i < tokenAddresses.length; i++) {
             MarketContractMPX marketInstance = MarketContractMPX(marketAddresses[i]);
             MarketCollateralPool marketCollateralPool = getCollateralPool(marketInstance);
-            ERC20 tokenInstance = ERC20(tokenAddress[i]);
+            ERC20 tokenInstance = ERC20(tokenAddresses[i]);
 
             tokenInstance.approve(address(marketInstance), tokensToRedeem[i]);
 
@@ -221,6 +230,14 @@ contract MarketContractProxy is Ownable {
                 );
             }
         }
+        // Finally redeem collateral back to user.
+        ERC20 collateralToken = ERC20(COLLATERAL_TOKEN_ADDRESS);
+
+        // DSProxy balance
+        uint dSProxyBalance = collateralToken.balanceOf(msg.sender);
+
+        // Move all redeemed tokens from DSProxy back to users wallet.
+        collateralToken.transfer(dSProxyToAddress[msg.sender], dSProxyBalance);
     }
 
     /////////////////////////////////////
