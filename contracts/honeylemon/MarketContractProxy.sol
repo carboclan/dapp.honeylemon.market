@@ -48,7 +48,7 @@ contract MarketContractProxy is Ownable {
     DSProxyFactory dSProxyFactory;
 
     // Mapping to link each user to their DSProxy address.
-    mapping(address => address) userAddressToDSProxy;
+    mapping(address => address) addressToDSProxy;
 
     constructor(
         address _marketContractFactoryMPX,
@@ -169,9 +169,9 @@ contract MarketContractProxy is Ownable {
     // If the user has a DSProxy wallet, return that address. Else, return their wallet address
     function getUserAddressOrDSProxy(address inputAddress) public returns (address) {
         return
-            userAddressToDSProxy[inputAddress] == address(0)
+            addressToDSProxy[inputAddress] == address(0)
                 ? inputAddress
-                : userAddressToDSProxy[inputAddress];
+                : addressToDSProxy[inputAddress];
     }
 
     ///////////////////////////
@@ -180,7 +180,7 @@ contract MarketContractProxy is Ownable {
 
     function createDSProxyWallet() public returns (address) {
         address payable dsProxyWallet = dSProxyFactory.build(msg.sender);
-        userAddressToDSProxy[msg.sender] = dsProxyWallet;
+        addressToDSProxy[msg.sender] = dsProxyWallet;
     }
 
     // Function called by a DsProxy wallet which passes control from the caller using delegatecal
