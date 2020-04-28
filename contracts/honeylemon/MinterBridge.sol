@@ -64,7 +64,7 @@ contract MinterBridge is Ownable {
         address to,
         uint256 amount,
         bytes calldata bridgeData
-    ) external onlyIfSetMarketContractProxy returns (bytes4 success) {
+    ) external onlyIfSetMarketContractProxy only0xBridgeProxy returns (bytes4 success) {
         // The proxy acts as the taker token to make 0x think that the appropriate amount
         // was transferred and accept the trade as passing. Under the hood the  marketContractProxy
         // has minted long and short tokens and sent them to the the investor and miner.
