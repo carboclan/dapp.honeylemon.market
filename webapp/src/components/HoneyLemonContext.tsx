@@ -1,8 +1,9 @@
 import * as React from 'react';
 import { useState, useEffect } from 'react';
+import HoneylemonService from '../../../src/lib/HoneylemonService';
 
 export type HoneyLemonContext = {
-  honeyLemonClient: any, //TODO update this when types exist
+  honeyLemonService: any, //TODO update this when types exist
 }
 
 export type HoneyLemonProviderProps = {
@@ -12,16 +13,17 @@ export type HoneyLemonProviderProps = {
 const HoneyLemonContext = React.createContext<HoneyLemonContext | undefined>(undefined);
 
 function HoneyLemonProvider({ children }: HoneyLemonProviderProps) {
-  const [honeyLemonClient, setHoneyLemonClient] = useState<any | undefined>(undefined)
+  const [honeyLemonService, setHoneyLemonService] = useState<any | undefined>(undefined)
 
   useEffect(() => {
     // TODO instantiate api client here
-    setHoneyLemonClient('test');
+    const honeyLemonService = new HoneylemonService()
+    setHoneyLemonService(honeyLemonService);
   }, [])
 
   return (
     <HoneyLemonContext.Provider value={{
-      honeyLemonClient
+      honeyLemonService
     }}>
       {children}
     </HoneyLemonContext.Provider>
