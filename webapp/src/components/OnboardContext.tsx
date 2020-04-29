@@ -78,6 +78,7 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
     setNotify(Notify({
       dappId: onboardProps.dappId,
       networkId: onboardProps.networkId,
+      darkMode: true,
     }));
 
   }, [onboardProps.dappId, onboardProps.networkId])
