@@ -4,6 +4,7 @@ import { MuiThemeProvider, CssBaseline, Container } from '@material-ui/core';
 import {Router} from 'react-router-dom';
 import ScrollToTop from './scrollToTop';
 import history from './history';
+import './App.css';
 
 import HoneyLemonApp from './components/HoneyLemonApp';
 

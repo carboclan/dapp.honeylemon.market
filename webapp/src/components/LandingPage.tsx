@@ -1,34 +1,29 @@
 import React from 'react';
 import { useOnboard } from './OnboardContext';
-import { networkName } from '../helpers/ethereumNetworkUtils';
+import { forwardTo } from '../history';
+import { Grid, Button } from '@material-ui/core';
+
+// const useStyles = makeStyles(theme => ({
+
+// }))
 
 const LandingPage: React.SFC = () => {
-  const { wallet, onboard, address, network, balance, notify } = useOnboard();
+  // const classes = useStyles()
+  const { wallet, onboard } = useOnboard();
   return (
-    <>
+    <Grid container justify='center' alignContent='center'>
       {!wallet?.provider && (
-        <button
-          className="bn-demo-button"
-          onClick={() => onboard?.walletSelect()}>
+        <Button onClick={() => onboard?.walletSelect()}>
           Select a Wallet
-        </button>
+        </Button>
       )}
 
       {wallet?.provider && (
-        <>
-          <div>Hi {address}</div>
-          <div>You are using {networkName(network)} network</div>
-          <div>You have {balance} eth</div>
-          <button className="bn-demo-button" onClick={() => {
-            notify.notification({
-              message: "Running wallet check"
-            })
-            onboard?.walletCheck()}}>
-            Wallet Checks
-          </button>
-        </>
+        <Button onClick={() => onboard?.walletCheck() && forwardTo('/home')}>
+          Connect Wallet
+        </Button>
       )}
-    </>
+    </Grid>
   )
 }
 

@@ -12,6 +12,7 @@ import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 
 import { ReactComponent as HoneyLemonLogo } from './../hl-logo1.svg';
 import { Typography } from '@material-ui/core';
+import { forwardTo } from '../history';
 
 const drawerWidth = 240;
 
@@ -40,6 +41,7 @@ const useStyles = makeStyles((theme) => ({
   },
   title: {
     flexGrow: 1,
+    cursor: 'pointer'
   },
   hide: {
     display: 'none',
@@ -100,7 +102,11 @@ function AppWrapper(props: {children: any}) {
       >
         <Toolbar>
           <HoneyLemonLogo className={classes.logo} />
-          <Typography className={classes.title}>honeylemon.market</Typography>
+          <Typography 
+            className={classes.title} 
+            onClick={() => forwardTo('/')}>
+              honeylemon.market
+          </Typography>
           <IconButton
             color="inherit"
             aria-label="open drawer"
