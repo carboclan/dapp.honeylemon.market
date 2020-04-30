@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import HoneylemonService from '../../../src/lib/HoneylemonService';
 
 export type HoneyLemonContext = {
-  honeyLemonService: any, //TODO update this when types exist
+  honeyLemonService: HoneylemonService, //TODO update this when types exist
 }
 
 export type HoneyLemonProviderProps = {
