@@ -185,6 +185,7 @@ contract MarketContractProxy is Ownable {
         address payable dsProxyWallet = dSProxyFactory.build(msg.sender);
         addressToDSProxy[msg.sender] = dsProxyWallet;
         dSProxyToAddress[dsProxyWallet] = msg.sender;
+        return dsProxyWallet;
     }
 
     // Function called by a DsProxy wallet which passes control from the caller using delegatecal
