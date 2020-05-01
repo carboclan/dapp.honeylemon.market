@@ -9,5 +9,5 @@ module.exports = async function(deployer, network, accounts) {
   // Give some payment token to investor
   await paymentToken.transfer(accounts[2], '10000000000');
 
-  console.log(' 💰Transferred balances');
+  console.log('💰 Transferred balances');
 };
