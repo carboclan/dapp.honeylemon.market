@@ -6,8 +6,8 @@ import { HoneyLemonProvider } from './HoneyLemonContext'
 import LandingPage from './LandingPage';
 import HomePage from './HomePage';
 import BuyContractPage from './BuyContractPage';
-
-const NotFoundRedirect = () => <Redirect to='/404' />
+import PortfolioPage from './PortfolioPage';
+import OfferContractPage from './OfferContractPage';
 
 const HoneyLemonApp: React.SFC = () => {
   const onboardInit = {
@@ -23,9 +23,12 @@ const HoneyLemonApp: React.SFC = () => {
             <Route exact path='/' component={LandingPage} />
             <Route exact path='/home' component={HomePage} />
             <Route exact path='/buy' component={BuyContractPage} />
+            <Route exact path='/offer' component={OfferContractPage} />
+            <Route exact path='/stats' component={BuyContractPage} />
+            <Route exact path='/portfolio' component={PortfolioPage} />
             <Route exact path='/404'>Not Found</Route>
             <Route exact path='/403'>You are not authorized to view this page</Route>
-            <Route component={NotFoundRedirect} />
+            <Route><Redirect to='/404' /></Route>
           </Switch>
         </AppWrapper >
       </HoneyLemonProvider>

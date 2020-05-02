@@ -1,16 +1,10 @@
 import React from 'react';
 import clsx from 'clsx';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
-import Drawer from '@material-ui/core/Drawer';
-import AppBar from '@material-ui/core/AppBar';
-import Toolbar from '@material-ui/core/Toolbar';
-import Divider from '@material-ui/core/Divider';
-import IconButton from '@material-ui/core/IconButton';
-import MenuIcon from '@material-ui/icons/Menu';
-import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
-import ChevronRightIcon from '@material-ui/icons/ChevronRight';
+import {Drawer, AppBar, Toolbar, Divider, IconButton} from '@material-ui/core';
+import {Menu, ChevronLeft, ChevronRight} from '@material-ui/icons';
 
-import { ReactComponent as HoneyLemonLogo } from './../hl-logo1.svg';
+import { ReactComponent as HoneyLemonLogo } from './../hl-logo.svg';
 import { Typography } from '@material-ui/core';
 import { forwardTo } from '../history';
 
@@ -37,14 +31,19 @@ const useStyles = makeStyles((theme) => ({
     marginRight: drawerWidth,
   },
   logo: {
-    flexGrow: 1,
+    flexGrow: 0,
   },
   title: {
     flexGrow: 1,
-    cursor: 'pointer'
+    cursor: 'pointer',
+    textAlign: 'center',
+    fontSize: 16,
   },
   hide: {
     display: 'none',
+  },
+  hamburger: {
+    color: theme.palette.secondary.main,
   },
   drawer: {
     width: drawerWidth,
@@ -98,8 +97,7 @@ function AppWrapper(props: {children: any}) {
         position="fixed"
         className={clsx(classes.appBar, {
           [classes.appBarShift]: open,
-        })}
-      >
+        })}>
         <Toolbar>
           <HoneyLemonLogo className={classes.logo} />
           <Typography 
@@ -108,13 +106,12 @@ function AppWrapper(props: {children: any}) {
               honeylemon.market
           </Typography>
           <IconButton
-            color="inherit"
             aria-label="open drawer"
             edge="end"
             onClick={handleDrawerOpen}
-            className={clsx(open && classes.hide)}
-          >
-            <MenuIcon />
+            className={clsx(classes.hamburger, 
+              {[classes.hide]: open})}>
+            <Menu fontSize='large' />
           </IconButton>
         </Toolbar>
       </AppBar>
@@ -137,7 +134,7 @@ function AppWrapper(props: {children: any}) {
       >
         <div className={classes.drawerHeader}>
           <IconButton onClick={handleDrawerClose}>
-            {theme.direction === 'rtl' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
+            {theme.direction === 'rtl' ? <ChevronLeft /> : <ChevronRight />}
           </IconButton>
         </div>
         <Divider />

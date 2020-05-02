@@ -13,6 +13,7 @@
     "react-dom": "^16.13.1",
     "react-router-dom": "^5.1.2",
     "react-scripts": "3.4.1",
+    "typeface-montserrat": "0.0.75",
     "web3": "^1.2.7"
   },
   "devDependencies": {

@@ -12,9 +12,15 @@ const theme = (createMuiTheme)({
     }
   },
   typography: {
-    fontFamily: ['Montserrat', 'Roboto'].join(',')
+    fontFamily: ['Montserrat'].join(',')
   },
   overrides: {
+    MuiButton: {
+      root: {
+        color: '#000',
+        backgroundColor: '#FFE500'
+      }
+    }
   }
 });
 

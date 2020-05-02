@@ -8,24 +8,24 @@ const useStyles = makeStyles(() => ({
   }
 }))
 
-const BuyContractPage: React.SFC = () => {
+const OfferContractPage: React.SFC = () => {
   // const { wallet, onboard, address, network, balance, notify } = useOnboard();
   const classes = useStyles();
   return (
     <Grid container alignItems='stretch' justify='center'>
       <Grid item xs={12}>
-        <Typography style={{fontWeight: 'bold'}}>Buy Mining Rewards</Typography>
+        <Typography variant='h6'>Buy Mining Rewards</Typography>
       </Grid>
       <Grid item xs={6}><Typography>PRICE</Typography></Grid>
-      <Grid item xs={6} className={classes.rightAlign}><Typography color='secondary'>$0.115 Th/day</Typography></Grid>
-      <Grid item xs={12}><Typography>ENTER BUDGET</Typography></Grid>
+      <Grid item xs={6} className={classes.rightAlign}><Typography>$0.115 Th/day</Typography></Grid>
+      <Grid item xs={6}><Typography>ENTER BUDGET</Typography></Grid>
       <Grid item xs={6} className={classes.rightAlign}>
         <InputNumber
           min={0}
           onChange={value => console.log(value)}
-          size='small' />
+          size='small'
+        />
       </Grid>
-      
       <Typography variant='h6'>31.06 Th for 28 days</Typography>
       <hr />
       <Button color="primary">BUY NOW</Button>
@@ -39,4 +39,4 @@ const BuyContractPage: React.SFC = () => {
   )
 }
 
-export default BuyContractPage;
+export default OfferContractPage;
