@@ -243,18 +243,18 @@ async function runExport() {
   );
   const exchangeAddress = contractWrappers.exchange.address;
 
-  // Create DSProxy contracts from the callers
+  // Create DSProxy contracts from the callers. Start with taker
   let takerDSProxyAddress = await marketContractProxy.createDSProxyWallet.call({
     from: takerAddress
   });
   await marketContractProxy.createDSProxyWallet({ from: takerAddress });
-  let makerDSProxy = await DSProxy.at(takerDSProxyAddress);
-
+  let takerDSProxy = await DSProxy.at(takerDSProxyAddress);
+  // next make one for the maker
   let makerDSProxyAddress = await marketContractProxy.createDSProxyWallet.call({
     from: makerAddress
   });
   await marketContractProxy.createDSProxyWallet({ from: makerAddress });
-  let takerDSProxy = await DSProxy.at(makerDSProxyAddress);
+  let makerDSProxy = await DSProxy.at(makerDSProxyAddress);
 
   console.log('takerDSProxyAddress', takerDSProxyAddress);
   console.log('makerDSProxyAddress', makerDSProxyAddress);
@@ -342,6 +342,12 @@ async function runExport() {
 
   await recordBalances('After 0x order');
 
+  const PositionTokensMintedEvent = await marketContractProxy.getPastEvents(
+    'PositionTokensMinted'
+  );
+
+  console.log('PositionTokensMintedEvent', PositionTokensMintedEvent);
+
   /**************************************************
    * Advance time and settle market protocol oracle *
    **************************************************/
@@ -368,26 +374,71 @@ async function runExport() {
    ***********************************************/
   console.log('5. redeeming tokens...');
 
-  // const addVotingAsTokenMinterTx = votingToken.contract.methods
-  //   .addMember(minter, voting.address)
-  //   .encodeABI();
+  // method1
+  // const unwindLongTokenTx = web3.eth.abi.encodeFunctionCall(
+  //   {
+  //     name: 'batchRedeem',
+  //     type: 'function',
+  //     inputs: [
+  //       {
+  //         name: 'tokenAddresses',
+  //         type: 'address'
+  //       },
+  //       {
+  //         name: 'marketAddresses',
+  //         type: 'address'
+  //       },
+  //       {
+  //         name: 'tokensToRedeem',
+  //         type: 'uint256'
+  //       },
+  //       {
+  //         name: 'traderLong',
+  //         type: 'bool'
+  //       }
+  //     ]
+  //   },
+  //   [shortToken.address, marketContract.address, makerAmountToMint.toString(), '1']
+  // );
 
+  // method 2
   const unwindLongTokenTx = marketContractProxy.contract.methods
-    .batchRedeem(
-      [shortToken.address],
-      [marketContract.address],
-      [makerAmountToMint],
-      [true]
-    )
+    .batchRedeem(longToken.address, marketContract.address, makerAmountToMint, '1')
     .encodeABI();
 
-  console.log('encoded call', unwindLongTokenTx);
+  // method3
+  // const unwindLongTokenTx = web3.eth.abi.encodeFunctionSignature(
+  //   'batchRedeem(address, address, uint256, bool)',
+  //   longToken.address,
+  //   marketContract.address,
+  //   makerAmountToMint,
+  //   '1'
+  // );
 
-  await takerDSProxy.execute(marketContractProxy.address, unwindLongTokenTx, {
-    from: takerAddress
-  });
+  console.log('encoded call', unwindLongTokenTx);
+  console.log('_target', marketContractProxy.address);
+  console.log('takerAddress', takerAddress);
+  console.log('takerDSProxy owner', await takerDSProxy.owner());
+
+  let txObject = await takerDSProxy.execute(
+    marketContractProxy.address,
+    unwindLongTokenTx,
+    {
+      from: takerAddress
+    }
+  );
 
   console.log('TAKER EXECUTED!');
+  console.log(txObject.receipt.logs);
+
+  let BatchTokensRedeemed = await marketContractProxy.getPastEvents(
+    'BatchTokensRedeemed',
+    {
+      fromBlock: 0,
+      toBlock: 'latest'
+    }
+  );
+  console.log('BatchTokensRedeemed', BatchTokensRedeemed);
   // await longToken.approve(marketContract.address, takerAmountToMint, {
   //   from: takerAddress
   // });

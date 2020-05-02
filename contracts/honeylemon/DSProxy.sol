@@ -90,19 +90,19 @@ contract DSProxy is DSAuth, DSNote {
     function() external payable {}
 
     // use the proxy to execute calldata _data on contract _code
-    function execute(bytes memory _code, bytes memory _data)
-        public
-        payable
-        returns (address target, bytes memory response)
-    {
-        target = cache.read(_code);
-        if (target == address(0)) {
-            // deploy contract & store its address in cache
-            target = cache.write(_code);
-        }
+    // function execute(bytes memory _code, bytes memory _data)
+    //     public
+    //     payable
+    //     returns (address target, bytes memory response)
+    // {
+    //     target = cache.read(_code);
+    //     if (target == address(0)) {
+    //         // deploy contract & store its address in cache
+    //         target = cache.write(_code);
+    //     }
 
-        response = execute(target, _data);
-    }
+    //     response = execute(target, _data);
+    // }
 
     function execute(address _target, bytes memory _data)
         public
