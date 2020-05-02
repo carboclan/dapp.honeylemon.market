@@ -66,7 +66,7 @@ const OfferContractPage: React.SFC = () => {
           when the hodler pays you.
         </Typography>
       </Grid>
-      <Grid item><Typography>See <Link href='#'>full contract specification here.</Link></Typography></Grid>
+      <Grid item xs={12}><Typography>See <Link href='#'>full contract specification here.</Link></Typography></Grid>
     </Grid>
   )
 }

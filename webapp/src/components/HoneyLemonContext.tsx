@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useState, useEffect } from 'react';
-// import HoneylemonService from '../api/HoneylemonService';
+import { HoneylemonService } from 'honeylemon/src/lib/HoneylemonService';
 
 export type HoneyLemonContext = {
   honeyLemonService: any, //TODO update this when types exist
@@ -17,7 +17,7 @@ function HoneyLemonProvider({ children }: HoneyLemonProviderProps) {
 
   useEffect(() => {
     // TODO instantiate api client here
-    // const honeyLemonService = new HoneylemonService()
+    const honeyLemonService = new HoneylemonService()
     setHoneyLemonService({foo: 'bar'});
   }, [])
 

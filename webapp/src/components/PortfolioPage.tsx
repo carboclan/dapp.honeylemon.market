@@ -7,12 +7,14 @@ const useStyles = makeStyles(({ spacing }) => ({
   },
   tabContent: {
     paddingTop: spacing(2)
-  }
+  },
 }))
 
 const PorfolioPage: React.SFC = () => {
   // const { wallet, onboard, address, network, balance, notify } = useOnboard();
   const [activeTab, setActiveTab] = useState<'active' | 'settled'>('active')
+  const [btcAmount, setBtcAmount] = useState(0);
+
 
   const handleSetActiveTab = (event: React.ChangeEvent<{}>, newValue: 'active' | 'settled') => {
     setActiveTab(newValue);
@@ -37,7 +39,7 @@ const PorfolioPage: React.SFC = () => {
         <div className={classes.tabContent}>
           {activeTab === 'active' ?
             <>
-              <Button>NEW OFFER</Button>
+              <Button fullWidth>NEW OFFER</Button>
               <Table>
                 <TableHead>
                   <TableRow>
@@ -54,7 +56,6 @@ const PorfolioPage: React.SFC = () => {
                   </TableRow>
                 </TableBody>
               </Table>
-
               <Typography variant='h5' style={{ fontWeight: 'bold' }} color='secondary'>Positions</Typography>    
               <Table>
                 <TableHead>
@@ -90,6 +91,7 @@ const PorfolioPage: React.SFC = () => {
                   </TableRow>
                 </TableBody>
               </Table>
+              <Button fullWidth>WITHDRAW ALL ({btcAmount} BTC)</Button>
             </>
           }
         </div>

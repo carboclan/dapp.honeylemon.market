@@ -8,6 +8,7 @@
     "bnc-notify": "^1.1.2",
     "bnc-onboard": "^1.7.7",
     "dotenv": "^8.2.0",
+    "honeylemon": "file:..",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-router-dom": "^5.1.2",
