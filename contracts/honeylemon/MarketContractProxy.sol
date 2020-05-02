@@ -85,7 +85,7 @@ contract MarketContractProxy is Ownable {
     //////////////////////////
 
     function getFillableAmounts(address[] memory makerAddresses)
-        public
+        external
         view
         returns (uint256[] memory fillableAmounts)
     {
@@ -142,12 +142,12 @@ contract MarketContractProxy is Ownable {
         return MathLib.multiply(amount, latestMarketContract.COLLATERAL_PER_UNIT());
     }
 
-    function getAllMarketContracts() public returns (address[] memory) {
+    function getAllMarketContracts() external returns (address[] memory) {
         return marketContracts;
     }
 
     // Return `balanceOf` for current day PositionTokenLong
-    function balanceOf(address _owner) public returns (uint) {
+    function balanceOf(address _owner) external returns (uint) {
         MarketContract latestMarketContract = getLatestMarketContract();
         ERC20 longToken = ERC20(latestMarketContract.LONG_POSITION_TOKEN());
         return longToken.balanceOf(_owner);
@@ -167,7 +167,7 @@ contract MarketContractProxy is Ownable {
         uint currentIndexValue,
         bytes32[3] memory marketAndsTokenNames,
         uint newMarketExpiration
-    ) public onlyHoneyLemonOracle {
+    ) external onlyHoneyLemonOracle {
         require(currentIndexValue != 0, 'Current MRI value cant be zero');
 
         // 1. Settle the past contract, if there is a price and contract exists.
@@ -193,7 +193,7 @@ contract MarketContractProxy is Ownable {
         address longTokenRecipient,
         address shortTokenRecipient,
         bytes memory bridgeData
-    ) public onlyMinterBridge {
+    ) external onlyMinterBridge {
         uint collateralNeeded = calculateRequiredCollateral(qtyToMint);
 
         // Create instance of the latest market contract for today
@@ -247,15 +247,15 @@ contract MarketContractProxy is Ownable {
     //// OWNER (DEPLOYER) FUNCTIONS ////
     ////////////////////////////////////
 
-    function setOracleAddress(address _honeyLemonOracleAddress) public onlyOwner {
+    function setOracleAddress(address _honeyLemonOracleAddress) external onlyOwner {
         HONEY_LEMON_ORACLE_ADDRESS = _honeyLemonOracleAddress;
     }
 
-    function setMinterBridgeAddress(address _minterBridgeAddress) public onlyOwner {
+    function setMinterBridgeAddress(address _minterBridgeAddress) external onlyOwner {
         MINTER_BRIDGE_ADDRESS = _minterBridgeAddress;
     }
 
-    function setMarketContractSpecs(uint[7] memory _params) public onlyOwner {
+    function setMarketContractSpecs(uint[7] memory _params) external onlyOwner {
         marketContractSpecs = _params;
     }
 

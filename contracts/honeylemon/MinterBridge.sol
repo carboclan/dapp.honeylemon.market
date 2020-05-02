@@ -25,14 +25,14 @@ contract MinterBridge is Ownable {
     address public ERC20_BRIDGE_PROXY_ADDRESS;
 
     function setMarketContractProxyAddress(address _marketContractProxyAddress)
-        public
+        external
         onlyOwner
     {
         MARKET_CONTRACT_PROXY_ADDRESS = _marketContractProxyAddress;
         marketContractProxy = MarketContractProxy(MARKET_CONTRACT_PROXY_ADDRESS);
     }
 
-    function set0xBridgeProxy(address _0xBridgeProxyAddress) public onlyOwner {
+    function set0xBridgeProxy(address _0xBridgeProxyAddress) external onlyOwner {
         ERC20_BRIDGE_PROXY_ADDRESS = _0xBridgeProxyAddress;
     }
 
