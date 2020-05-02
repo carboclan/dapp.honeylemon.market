@@ -47,7 +47,7 @@ module.exports = async function(deployer, network, accounts) {
                               return registryInstance
                                 .addFactoryAddress(factory.address)
                                 .then(function() {
-                                  console.log('💹Done Market Migration!');
+                                  console.log('💹 Done Market Migration!');
                                 });
                             });
                           });

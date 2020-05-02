@@ -1,3 +1,6 @@
+require('dotenv').config();
+const HDWalletProvider = require('@truffle/hdwallet-provider');
+
 module.exports = {
   networks: {
     development: {
@@ -27,5 +30,9 @@ module.exports = {
       }
     }
   },
-  plugins: ['@chainsafe/truffle-plugin-abigen']
+  plugins: ['@chainsafe/truffle-plugin-abigen'],
+  mocha: {
+    enableTimeouts: false,
+    before_timeout: 120000 // Here is 2min but can be whatever timeout is suitable for you.
+  }
 };

@@ -68,6 +68,18 @@ contract MarketContractProxy is Ownable {
         dSProxyFactory = new DSProxyFactory();
     }
 
+    event PositionTokensMinted(
+        uint indexed marketId,
+        string contractName,
+        address indexed longTokenRecipient,
+        address indexed shortTokenRecipient,
+        uint256 qtyToMint,
+        address latestMarketContract,
+        address longTokenAddress,
+        address shortTokenAddress,
+        bytes bridgeData,
+        uint time
+    );
     //////////////////////////////////////
     //// PERMISSION SCOPING MODIFIERS ////
     //////////////////////////////////////
@@ -275,7 +287,8 @@ contract MarketContractProxy is Ownable {
     function mintPositionTokens(
         uint qtyToMint,
         address longTokenRecipient,
-        address shortTokenRecipient
+        address shortTokenRecipient,
+        bytes memory bridgeData
     ) public onlyMinterBridge {
         uint collateralNeeded = calculateRequiredCollateral(qtyToMint);
 
@@ -312,6 +325,19 @@ contract MarketContractProxy is Ownable {
         // send it to their normal wallet address.
         longToken.transfer(getUserAddressOrDSProxy(longTokenRecipient), qtyToMint);
         shortToken.transfer(getUserAddressOrDSProxy(shortTokenRecipient), qtyToMint);
+
+        emit PositionTokensMinted(
+            addressToMarketId[address(latestMarketContract)], // MarketID
+            latestMarketContract.CONTRACT_NAME(),
+            longTokenRecipient,
+            shortTokenRecipient,
+            qtyToMint,
+            address(latestMarketContract),
+            address(longToken),
+            address(shortToken),
+            bridgeData,
+            getTime()
+        );
     }
 
     ////////////////////////////////////
