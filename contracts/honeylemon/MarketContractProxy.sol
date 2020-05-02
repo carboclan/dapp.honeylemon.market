@@ -48,10 +48,10 @@ contract MarketContractProxy is Ownable {
     DSProxyFactory dSProxyFactory;
 
     // Mapping to link each trader address to their DSProxy address.
-    mapping(address => address) addressToDSProxy;
+    mapping(address => address) public addressToDSProxy;
 
     // Mapping to link each DSProxy address to their traders address.
-    mapping(address => address) dSProxyToAddress;
+    mapping(address => address) public dSProxyToAddress;
 
     constructor(
         address _marketContractFactoryMPX,
@@ -214,21 +214,22 @@ contract MarketContractProxy is Ownable {
     // Note: only one side can be redeemed at a time. This is to simplify redemption as the same caller
     // will likely never be both long and short in the same contract.
     function batchRedeem(
-        address tokenAddresses, // Address of the long or short token to redeem
-        address marketAddresses, // Address of the market protocol
-        uint256 tokensToRedeem, // the number of tokens to redeem
-        bool traderLong // if the trader is long or short
-    ) public {
-        // require(
-        //     tokenAddresses.length == marketAddresses.length &&
-        //         marketAddresses.length == tokensToRedeem.length,
-        //     "Invalid input params"
-        // );
-        // require(
-        //     dSProxyToAddress[msg.sender] != address(0),
-        //     "Caller is not valid DSProxy"
-        // );
-        // // Loop through all tokens and preform redemption
+        address[] memory tokenAddresses, // Address of the long or short token to redeem
+        address[] memory marketAddresses, // Address of the market protocol
+        uint256[] memory tokensToRedeem, // the number of tokens to redeem
+        bool[] memory traderLong // if the trader is long or short
+    ) public returns (uint256) {
+        require(
+            tokenAddresses.length == marketAddresses.length &&
+                tokenAddresses.length == tokensToRedeem.length &&
+                tokenAddresses.length == traderLong.length,
+            'Invalid input params'
+        );
+        require(
+            dSProxyToAddress[address(this)] != address(0),
+            'Caller is not valid DSProxy'
+        );
+        // Loop through all tokens and preform redemption
         // for (uint256 i = 0; i < tokenAddresses.length; i++) {
         //     MarketContractMPX marketInstance = MarketContractMPX(marketAddresses[i]);
         //     MarketCollateralPool marketCollateralPool = getCollateralPool(marketInstance);
@@ -262,12 +263,12 @@ contract MarketContractProxy is Ownable {
         // collateralToken.transfer(dSProxyToAddress[msg.sender], dSProxyBalance);
 
         emit BatchTokensRedeemed(
-            tokenAddresses,
-            marketAddresses,
-            tokensToRedeem,
-            traderLong
+            tokenAddresses[0],
+            marketAddresses[0],
+            tokensToRedeem[0],
+            traderLong[0]
         );
-        emit Hello('this is it');
+        return 16;
     }
 
     /////////////////////////////////////

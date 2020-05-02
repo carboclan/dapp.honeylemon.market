@@ -259,6 +259,11 @@ async function runExport() {
   console.log('takerDSProxyAddress', takerDSProxyAddress);
   console.log('makerDSProxyAddress', makerDSProxyAddress);
 
+  console.log(
+    'addressToDSProxy',
+    await marketContractProxy.addressToDSProxy(takerAddress)
+  );
+
   // Approve the contract wrapper from 0x to pull USDC from the taker(investor)
   await paymentToken.approve(
     contractWrappers.contractAddresses.erc20Proxy,
@@ -403,7 +408,12 @@ async function runExport() {
 
   // method 2
   const unwindLongTokenTx = marketContractProxy.contract.methods
-    .batchRedeem(longToken.address, marketContract.address, makerAmountToMint, '1')
+    .batchRedeem(
+      [longToken.address],
+      [marketContract.address],
+      [makerAmountToMint],
+      ['1']
+    )
     .encodeABI();
 
   // method3
@@ -412,6 +422,15 @@ async function runExport() {
   //   longToken.address,
   //   marketContract.address,
   //   makerAmountToMint,
+  //   '1'
+  // );
+
+  //method 4
+  // const unwindLongTokenTx = web3.eth.abi.encodeWithSignature(
+  //   'batchRedeem(address, address, uint256, bool)',
+  //   longToken.address,
+  //   marketContract.address,
+  //   makerAmountToMint.toString(),
   //   '1'
   // );
 
@@ -429,15 +448,13 @@ async function runExport() {
   );
 
   console.log('TAKER EXECUTED!');
-  console.log(txObject.receipt.logs);
+  console.log(txObject);
+  // console.log(web3.utils.utf8ToHex('16'));
 
-  let BatchTokensRedeemed = await marketContractProxy.getPastEvents(
-    'BatchTokensRedeemed',
-    {
-      fromBlock: 0,
-      toBlock: 'latest'
-    }
-  );
+  let BatchTokensRedeemed = await takerDSProxy.getPastEvents('BatchTokensRedeemed', {
+    fromBlock: 0,
+    toBlock: 'latest'
+  });
   console.log('BatchTokensRedeemed', BatchTokensRedeemed);
   // await longToken.approve(marketContract.address, takerAmountToMint, {
   //   from: takerAddress
