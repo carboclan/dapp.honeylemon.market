@@ -134,7 +134,7 @@ function AppWrapper(props: {children: any}) {
       >
         <div className={classes.drawerHeader}>
           <IconButton onClick={handleDrawerClose}>
-            {theme.direction === 'rtl' ? <ChevronLeft /> : <ChevronRight />}
+            {theme.direction === 'rtl' ? <ChevronLeft fontSize='large' /> : <ChevronRight fontSize='large' />}
           </IconButton>
         </div>
         <Divider />

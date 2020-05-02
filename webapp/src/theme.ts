@@ -20,6 +20,11 @@ const theme = (createMuiTheme)({
         color: '#000',
         backgroundColor: '#FFE500'
       }
+    },
+    MuiAppBar: {
+      root: {
+        minHeight: '60px'
+      }
     }
   }
 });
