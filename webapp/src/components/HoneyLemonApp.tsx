@@ -8,6 +8,8 @@ import HomePage from './HomePage';
 import BuyContractPage from './BuyContractPage';
 import PortfolioPage from './PortfolioPage';
 import OfferContractPage from './OfferContractPage';
+import MiningStatsPage from './MiningStatsPage';
+
 
 const HoneyLemonApp: React.SFC = () => {
   const onboardInit = {
@@ -24,7 +26,7 @@ const HoneyLemonApp: React.SFC = () => {
             <Route exact path='/home' component={HomePage} />
             <Route exact path='/buy' component={BuyContractPage} />
             <Route exact path='/offer' component={OfferContractPage} />
-            <Route exact path='/stats' component={BuyContractPage} />
+            <Route exact path='/stats' component={MiningStatsPage} />
             <Route exact path='/portfolio' component={PortfolioPage} />
             <Route exact path='/404'>Not Found</Route>
             <Route exact path='/403'>You are not authorized to view this page</Route>

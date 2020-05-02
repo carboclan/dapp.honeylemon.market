@@ -1,40 +1,99 @@
-import React from 'react';
-import { Button, Typography, Grid, makeStyles } from '@material-ui/core';
-import { InputNumber } from 'antd';
+import React, { useState } from 'react';
+import { Typography, Grid, makeStyles, Tabs, Tab, Button, TableRow, TableHead, TableCell, Table, TableBody } from '@material-ui/core';
 
-const useStyles = makeStyles(() => ({
+const useStyles = makeStyles(({ spacing }) => ({
   rightAlign: {
     textAlign: 'end',
+  },
+  tabContent: {
+    paddingTop: spacing(2)
   }
 }))
 
 const PorfolioPage: React.SFC = () => {
   // const { wallet, onboard, address, network, balance, notify } = useOnboard();
+  const [activeTab, setActiveTab] = useState<'active' | 'settled'>('active')
+
+  const handleSetActiveTab = (event: React.ChangeEvent<{}>, newValue: 'active' | 'settled') => {
+    setActiveTab(newValue);
+  };
+
   const classes = useStyles();
   return (
-    <Grid container alignItems='stretch' justify='center'>
+    <Grid container>
       <Grid item xs={12}>
-        <Typography variant='h6'>Buy Mining Rewards</Typography>
+        <Typography variant='h5' style={{ fontWeight: 'bold', textAlign: 'center' }} color='secondary'>Portfolio</Typography>
       </Grid>
-      <Grid item xs={6}><Typography>PRICE</Typography></Grid>
-      <Grid item xs={6} className={classes.rightAlign}><Typography>$0.115 Th/day</Typography></Grid>
-      <Grid item xs={6}><Typography>ENTER BUDGET</Typography></Grid>
-      <Grid item xs={6} className={classes.rightAlign}>
-        <InputNumber
-          min={0}
-          onChange={value => console.log(value)}
-          size='small'
-        />
+      <Grid item xs={12}>
+        <Tabs
+          value={activeTab}
+          onChange={handleSetActiveTab}
+          indicatorColor="secondary"
+          textColor="secondary"
+          variant='fullWidth'>
+          <Tab label="Active" value='active' />
+          <Tab label="Settled" value='settled' />
+        </Tabs>
+        <div className={classes.tabContent}>
+          {activeTab === 'active' ?
+            <>
+              <Button>NEW OFFER</Button>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Quantity</TableCell>
+                    <TableCell>Price</TableCell>
+                    <TableCell></TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  <TableRow>
+                    <TableCell>13.23</TableCell>
+                    <TableCell>$0.115</TableCell>
+                    <TableCell><Button>Cancel</Button></TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+
+              <Typography variant='h5' style={{ fontWeight: 'bold' }} color='secondary'>Positions</Typography>    
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Swap</TableCell>
+                    <TableCell>Quantity</TableCell>
+                    <TableCell>Days</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  <TableRow>
+                    <TableCell>Swap Long-May04</TableCell>
+                    <TableCell>13.23</TableCell>
+                    <TableCell>14</TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>          
+            </> :
+            <>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Swap</TableCell>
+                    <TableCell>Position</TableCell>
+                    <TableCell>BTC</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  <TableRow>
+                    <TableCell>Swap Long-May04</TableCell>
+                    <TableCell>13.23</TableCell>
+                    <TableCell>0.043</TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </>
+          }
+        </div>
       </Grid>
-      <Typography variant='h6'>31.06 Th for 28 days</Typography>
-      <hr />
-      <Button color="primary">BUY NOW</Button>
-      <Typography variant='h6'>
-        You will pay $100 buy 31.05 Th of hasrate for 28 days for $0.115 Th/day.
-        You will receive the average value of the Mining Revenue Index over 28 days.
-        Representing 883.2 Th of mining power per day per contract.
-      </Typography>
-      <Typography variant='h6'>See full contract specification here.</Typography>
     </Grid>
   )
 }
