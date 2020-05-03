@@ -38,7 +38,7 @@ function HoneyLemonProvider({ children }: HoneyLemonProviderProps) {
     if (isReady && wallet && network) {
       const web3 = new Web3(wallet.provider);
 
-      const initHoneylemonInstances = async () => {
+      const initHoneyLemonService = async () => {
         MarketContractProxy.setProvider(wallet.provider);
         MinterBridge.setProvider(wallet.provider);
         CollateralToken.setProvider(wallet.provider);
@@ -60,11 +60,11 @@ function HoneyLemonProvider({ children }: HoneyLemonProviderProps) {
           MarketCollateralPool.abi,
           MarketContractMPX.abi
         );
-        // setHoneyLemonService(honeyLemonService);
+        setHoneyLemonService(honeyLemonService);
       };
-      initHoneylemonInstances();
+      initHoneyLemonService();
     }
-  }, [wallet, network, isReady, honeyLemonService]);
+  }, [wallet, network, isReady]);
 
   return (
     <HoneyLemonContext.Provider
