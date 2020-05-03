@@ -16,25 +16,25 @@ const HoneyLemonContext = React.createContext<HoneyLemonContext | undefined>(und
 
 function HoneyLemonProvider({ children }: HoneyLemonProviderProps) {
   const [honeyLemonService, setHoneyLemonService] = useState<any | undefined>(undefined)
-  const { wallet, network } = useOnboard();
+  const { wallet, network, isReady } = useOnboard();
   useEffect(() => {
-    if (wallet && network) {
+    if (isReady && wallet && network) {
       const web3 = new Web3(wallet.provider)
-      const honeyLemonService = new HoneyLemonService(
-        process.env.REACT_APP_SRA_URL,
-        undefined,//minterBridgeAddress, 
-        undefined,//marketContractProxyAddress,
-        undefined,//collateralTokenAddress,
-        undefined,//paymentTokenAddress,
-        web3,
-        network,
-        undefined,//marketContractProxyAbi,
-        undefined,//MarketCollateralPoolAbi,
-        undefined,//marketContractAbi
-      )
-      setHoneyLemonService(honeyLemonService);
+      // const honeyLemonService = new HoneyLemonService(
+      //   process.env.REACT_APP_SRA_URL,
+      //   undefined,//minterBridgeAddress, 
+      //   undefined,//marketContractProxyAddress,
+      //   undefined,//collateralTokenAddress,
+      //   undefined,//paymentTokenAddress,
+      //   web3,
+      //   network,
+      //   undefined,//marketContractProxyAbi,
+      //   undefined,//MarketCollateralPoolAbi,
+      //   undefined,//marketContractAbi
+      // )
+      // setHoneyLemonService(honeyLemonService);
     }
-  }, [wallet, network])
+  }, [wallet, network, isReady])
 
   return (
     <HoneyLemonContext.Provider value={{

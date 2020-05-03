@@ -18,6 +18,8 @@ export type OnboardContext = {
   balance?: number,
   wallet?: Wallet,
   notify?: any, //TODO update this when types exist
+  isReady: boolean,
+  checkIsReady(): Promise<boolean>,
 }
 
 function initOnboard(init: Initialization) {
@@ -51,6 +53,7 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
   const [balance, setBalance] = useState<number | undefined>(undefined)
   const [wallet, setWallet] = useState<Wallet | undefined>(undefined)
   const [onboard, setOnboard] = useState<API | undefined>(undefined)
+  const [isReady, setIsReady] = useState<boolean>(false);
   const [notify, setNotify] = useState(undefined)
 
   useEffect(() => {
@@ -66,6 +69,7 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
         },
         wallet: (wallet: Wallet) => {
           if (wallet.provider) {
+            wallet.name && localStorage.setItem('honeylemon.selectedWallet', wallet.name)
             setWallet(wallet)
           } else {
             setWallet(undefined)
@@ -74,6 +78,9 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
       }
     })
 
+    const savedWallet = localStorage.getItem('honeylemon.selectedWallet');
+    savedWallet && onboard.walletSelect(savedWallet);
+    
     setOnboard(onboard);
     setNotify(Notify({
       dappId: onboardProps.dappId,
@@ -83,6 +90,12 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
 
   }, [onboardProps.dappId, onboardProps.networkId])
 
+  const checkIsReady = async () => {
+    const isReady = await onboard?.walletCheck();
+    setIsReady(!!isReady);
+    return !!isReady;
+  }
+
   return (
     <OnboardContext.Provider value={{
       address: address,
@@ -91,6 +104,8 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
       wallet: wallet,
       onboard: onboard,
       notify: notify,
+      isReady: isReady,
+      checkIsReady,
     }}>
       {children}
     </OnboardContext.Provider>

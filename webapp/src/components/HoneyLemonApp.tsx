@@ -9,32 +9,45 @@ import BuyContractPage from './BuyContractPage';
 import PortfolioPage from './PortfolioPage';
 import OfferContractPage from './OfferContractPage';
 import MiningStatsPage from './MiningStatsPage';
+import { useOnboard } from '../contexts/OnboardContext';
 
+
+const ConditionalRoute: React.FC<any> = ({ component: Component, isAuthorized, redirectPath = '/403', ...rest }) => (
+  <Route
+    {...rest}
+    render={props => (
+      isAuthorized ? (
+        <Component {...props} />
+      ) : (
+          <Redirect
+            to={{
+              pathname: redirectPath,
+              state: { from: props.location },
+            }}
+          />
+        )
+      )
+    }
+  />
+);
 
 const HoneyLemonApp: React.SFC = () => {
-  const onboardInit = {
-    dappId: process.env.REACT_APP_BLOCKNATIVE_API_KEY || '',
-    networkId: Number.parseInt(process.env.REACT_APP_NETWORK_ID || '1'),
-  }
+  const {wallet, isReady} = useOnboard();
+  const isConnected = !!wallet?.provider;
   return (
-    //@ts-ignore
-    <OnboardProvider {...onboardInit}>
-      <HoneyLemonProvider>
-        <AppWrapper>
-          <Switch>
-            <Route exact path='/' component={LandingPage} />
-            <Route exact path='/home' component={HomePage} />
-            <Route exact path='/buy' component={BuyContractPage} />
-            <Route exact path='/offer' component={OfferContractPage} />
-            <Route exact path='/stats' component={MiningStatsPage} />
-            <Route exact path='/portfolio' component={PortfolioPage} />
-            <Route exact path='/404'>Not Found</Route>
-            <Route exact path='/403'>You are not authorized to view this page</Route>
-            <Route><Redirect to='/404' /></Route>
-          </Switch>
-        </AppWrapper >
-      </HoneyLemonProvider>
-    </OnboardProvider >
+    <AppWrapper>
+      <Switch>
+        <ConditionalRoute exact path='/' component={LandingPage} isAuthorized={!isReady} redirectPath='/home' />
+        <ConditionalRoute exact path='/home' component={HomePage} isAuthorized={isReady} redirectPath='/'/>
+        <ConditionalRoute exact path='/buy' component={BuyContractPage} />
+        <ConditionalRoute exact path='/offer' component={OfferContractPage} />
+        <Route exact path='/stats' component={MiningStatsPage} />
+        <ConditionalRoute exact path='/portfolio' component={PortfolioPage} />
+        <Route exact path='/404'>Not Found</Route>
+        <Route exact path='/403'>You are not authorized to view this page</Route>
+        <Route><Redirect to='/404' /></Route>
+      </Switch>
+    </AppWrapper >
   )
 }
 

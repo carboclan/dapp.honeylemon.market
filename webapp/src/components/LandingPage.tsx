@@ -1,5 +1,5 @@
 import React from 'react';
-import { useOnboard } from './OnboardContext';
+import { useOnboard } from '../contexts/OnboardContext';
 import { forwardTo } from '../history';
 import { Grid, Button } from '@material-ui/core';
 
@@ -9,7 +9,7 @@ import { Grid, Button } from '@material-ui/core';
 
 const LandingPage: React.SFC = () => {
   // const classes = useStyles()
-  const { wallet, onboard } = useOnboard();
+  const { wallet, onboard, checkIsReady } = useOnboard();
   return (
     <Grid container justify='center' alignContent='center'>
       {!wallet?.provider && (
@@ -19,7 +19,9 @@ const LandingPage: React.SFC = () => {
       )}
 
       {wallet?.provider && (
-        <Button onClick={() => onboard?.walletCheck() && forwardTo('/home')}>
+        <Button onClick={async () => {
+          const walletCheck = await checkIsReady();
+          if (walletCheck) {forwardTo('/home')}}}>
           Connect Wallet
         </Button>
       )}
