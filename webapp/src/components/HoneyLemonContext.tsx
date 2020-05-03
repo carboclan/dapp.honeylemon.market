@@ -1,6 +1,8 @@
 import * as React from 'react';
 import { useState, useEffect } from 'react';
-import {HoneyLemonService, MinterBridgeAbi} from 'honeylemon';
+import { HoneyLemonService, MinterBridgeAbi } from 'honeylemon';
+import { useOnboard } from './OnboardContext';
+import Web3 from 'web3'
 
 export type HoneyLemonContext = {
   honeyLemonService: any, //TODO update this when types exist
@@ -14,14 +16,27 @@ const HoneyLemonContext = React.createContext<HoneyLemonContext | undefined>(und
 
 function HoneyLemonProvider({ children }: HoneyLemonProviderProps) {
   const [honeyLemonService, setHoneyLemonService] = useState<any | undefined>(undefined)
-
+  const { wallet, network } = useOnboard();
   useEffect(() => {
-    const honeyLemonService = new HoneyLemonService(
-      process.env.REACT_APP_SRA_URL,
-      MinterBridgeAbi.
-    )
-    setHoneyLemonService({foo: 'bar'});
-  }, [])
+    if (wallet) {
+      const web3 = new Web3(wallet.provider)
+      console.log(network);
+      debugger;
+      const honeyLemonService = new HoneyLemonService(
+        process.env.REACT_APP_SRA_URL,
+        undefined,//minterBridgeAddress, 
+        undefined,//marketContractProxyAddress,
+        undefined,//collateralTokenAddress,
+        undefined,//paymentTokenAddress,
+        web3,
+        network,
+        undefined,//marketContractProxyAbi,
+        undefined,//MarketCollateralPoolAbi,
+        undefined,//marketContractAbi
+      )
+      setHoneyLemonService(honeyLemonService);
+    }
+  }, [wallet])
 
   return (
     <HoneyLemonContext.Provider value={{
