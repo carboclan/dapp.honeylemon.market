@@ -52,6 +52,7 @@ export default class HoneyLemonService {
       marketContractProxyAbi,
       marketContractProxyAddress
     );
+    console.log("Honeylemon service initiated!")
   }
 
   async getQuoteForSize(sizeTh) {
