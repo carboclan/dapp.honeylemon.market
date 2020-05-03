@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Typography, Grid, makeStyles, FilledInput, Link, InputAdornment } from '@material-ui/core';
 import { useHoneyLemon } from '../contexts/HoneyLemonContext';
+const { BigNumber } = require('@0x/utils');
 
 const useStyles = makeStyles(({ spacing }) => ({
   rightAlign: {
@@ -14,7 +15,7 @@ const useStyles = makeStyles(({ spacing }) => ({
 
 const BuyContractPage: React.SFC = () => {
   // const { wallet, onboard, address, network, balance, notify } = useOnboard();
-  const honeyLemonService = useHoneyLemon();
+  const {honeyLemonService} = useHoneyLemon();
   const classes = useStyles();
 
   const [totalPrice, setTotalPrice] = useState(0);
@@ -25,14 +26,15 @@ const BuyContractPage: React.SFC = () => {
   useEffect(() => {
     let cancelled = false;
     const fetchData = async () => {
-      const result = 0 //TODO Fetch the required amount of collateral from API
+      const result = await honeyLemonService.getQuoteForBudget(new BigNumber(totalPrice))
       if (!cancelled) {
-        // setTotalHashAmount(Number(result));
+        console.log(result);
+        //setTotalHashAmount(Number(result));
       }
     };
     fetchData();
     return () => { cancelled = true }
-  }, [hashPrice, hashAmount]);
+  }, [totalPrice, honeyLemonService]);
 
   return (
     <Grid container alignItems='stretch' justify='center' spacing={2}>

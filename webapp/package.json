@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@0x/utils": "^5.4.1",
     "@material-ui/core": "^4.9.12",
     "@material-ui/icons": "^4.9.1",
     "@truffle/contract": "^4.2.3",
