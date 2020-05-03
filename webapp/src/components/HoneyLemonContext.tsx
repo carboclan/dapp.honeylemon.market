@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useState, useEffect } from 'react';
-import { HoneylemonService } from 'honeylemon/src/lib/HoneylemonService';
+import {HoneyLemonService, MinterBridgeAbi} from 'honeylemon';
 
 export type HoneyLemonContext = {
   honeyLemonService: any, //TODO update this when types exist
@@ -16,8 +16,10 @@ function HoneyLemonProvider({ children }: HoneyLemonProviderProps) {
   const [honeyLemonService, setHoneyLemonService] = useState<any | undefined>(undefined)
 
   useEffect(() => {
-    // TODO instantiate api client here
-    const honeyLemonService = new HoneylemonService()
+    const honeyLemonService = new HoneyLemonService(
+      process.env.REACT_APP_SRA_URL,
+      MinterBridgeAbi.
+    )
     setHoneyLemonService({foo: 'bar'});
   }, [])
 
@@ -33,7 +35,7 @@ function HoneyLemonProvider({ children }: HoneyLemonProviderProps) {
 function useHoneyLemon() {
   const context = React.useContext(HoneyLemonContext)
   if (context === undefined) {
-    throw new Error('useOnboard must be used within a OnboardProvider')
+    throw new Error('useHoneyLemon must be used within a HoneyLemonProvider')
   }
   return context
 }

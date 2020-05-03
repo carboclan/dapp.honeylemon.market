@@ -8,7 +8,7 @@
     "bnc-notify": "^1.1.2",
     "bnc-onboard": "^1.7.7",
     "dotenv": "^8.2.0",
-    "honeylemon": "file:..",
+    "honeylemon": "file:../.",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-router-dom": "^5.1.2",
@@ -29,8 +29,8 @@
     "typescript": "~3.7.2"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
+    "start": "react-scripts --max_old_space_size=4096 start",
+    "build": "react-scripts --max_old_space_size=4096 build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

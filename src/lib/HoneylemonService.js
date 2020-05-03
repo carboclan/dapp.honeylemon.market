@@ -12,7 +12,7 @@ const { BigNumber } = require('@0x/utils');
 const NULL_ADDRESS = '0x0000000000000000000000000000000000000000';
 const ORDER_FILL_GAS = 150000;
 
-class HoneylemonService {
+export default class HoneyLemonService {
   constructor(
     apiUrl,
     minterBridgeAddress,
@@ -376,5 +376,3 @@ class HoneylemonService {
     return contractsProcessed;
   };
 }
-
-module.exports = HoneylemonService;

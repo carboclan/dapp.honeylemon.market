@@ -1,16 +1,21 @@
 const path = require('path');
 
 module.exports = {
+  mode: 'development',
   entry: './src/lib/index.js',
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: 'honeylemon.js',
+    filename: 'index.js',
     library: 'honeylemon',
+    libraryTarget: 'commonjs2',
+  },
+  optimization: {
+    minimize: false
   },
   module: {
     rules: [
       {
-        test: /\.m?js$/,
+        test: /\.js$/,
         exclude: /(node_modules|bower_components)/,
         use: {
           loader: 'babel-loader',
@@ -21,6 +26,9 @@ module.exports = {
         }
       }
     ]
+  },
+  resolve: {
+    modules: ['node_modules']
   },
   node: {
     fs: 'empty'
