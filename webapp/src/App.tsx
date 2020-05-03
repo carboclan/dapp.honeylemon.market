@@ -4,9 +4,6 @@ import { MuiThemeProvider, CssBaseline, Container } from '@material-ui/core';
 import { Router } from 'react-router-dom';
 import ScrollToTop from './helpers/scrollToTop';
 import history from './helpers/history';
-import 'typeface-montserrat';
-import './App.css';
-
 import HoneyLemonApp from './components/HoneyLemonApp';
 import { OnboardProvider } from './contexts/OnboardContext';
 import { HoneyLemonProvider } from './contexts/HoneyLemonContext';
