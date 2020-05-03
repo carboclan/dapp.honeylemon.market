@@ -1,12 +1,11 @@
 import React from 'react';
 import clsx from 'clsx';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
-import {Drawer, AppBar, Toolbar, Divider, IconButton} from '@material-ui/core';
-import {Menu, ChevronLeft, ChevronRight} from '@material-ui/icons';
+import { Drawer, AppBar, Toolbar, Divider, IconButton, Typography } from '@material-ui/core';
+import { Menu, ChevronLeft, ChevronRight } from '@material-ui/icons';
 
+import { forwardTo } from '../helpers/history';
 import { ReactComponent as HoneyLemonLogo } from './../hl-logo.svg';
-import { Typography } from '@material-ui/core';
-import { forwardTo } from '../history';
 
 const drawerWidth = 240;
 
@@ -79,7 +78,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function AppWrapper(props: {children: any}) {
+function AppWrapper(props: { children: any }) {
   const classes = useStyles();
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
@@ -101,17 +100,17 @@ function AppWrapper(props: {children: any}) {
         })}>
         <Toolbar>
           <HoneyLemonLogo className={classes.logo} />
-          <Typography 
-            className={classes.title} 
+          <Typography
+            className={classes.title}
             onClick={() => forwardTo('/')}>
-              honeylemon.market
+            honeylemon.market
           </Typography>
           <IconButton
             aria-label="open drawer"
             edge="end"
             onClick={handleDrawerOpen}
-            className={clsx(classes.hamburger, 
-              {[classes.hide]: open})}>
+            className={clsx(classes.hamburger,
+              { [classes.hide]: open })}>
             <Menu fontSize='large' />
           </IconButton>
         </Toolbar>

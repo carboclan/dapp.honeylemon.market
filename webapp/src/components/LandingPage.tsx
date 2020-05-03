@@ -1,7 +1,7 @@
 import React from 'react';
-import { useOnboard } from '../contexts/OnboardContext';
-import { forwardTo } from '../history';
 import { Grid, Button } from '@material-ui/core';
+import { forwardTo } from '../helpers/history';
+import { useOnboard } from '../contexts/OnboardContext';
 
 // const useStyles = makeStyles(theme => ({
 

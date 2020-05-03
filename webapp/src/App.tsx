@@ -2,8 +2,8 @@ import React from 'react';
 import theme from './theme';
 import { MuiThemeProvider, CssBaseline, Container } from '@material-ui/core';
 import { Router } from 'react-router-dom';
-import ScrollToTop from './scrollToTop';
-import history from './history';
+import ScrollToTop from './helpers/scrollToTop';
+import history from './helpers/history';
 import 'typeface-montserrat';
 import './App.css';
 

@@ -65,7 +65,9 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
         address: setAddress,
         network: setNetwork,
         balance: (balance: string) => {
-          setBalance(Number(fromWei(balance, 'ether')));
+          (balance) 
+            ? setBalance(Number(fromWei(balance, 'ether'))) 
+            : setBalance(0);
         },
         wallet: (wallet: Wallet) => {
           if (wallet.provider) {

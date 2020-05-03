@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, Button, Typography, makeStyles, Grid, Divider } from '@material-ui/core';
-import { forwardTo } from '../history';
+import { forwardTo } from '../helpers/history';
 
 const useStyles = makeStyles(({palette, spacing}) => ({
   button: {
