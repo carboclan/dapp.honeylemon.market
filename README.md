@@ -1,7 +1,9 @@
 ## Local development
-1. `make local-api` - to start docker containers. You might need to restart the `docker_api` container if it doesn't work on the first attempt.
-2. `make migrate` - to migrate Honeylemon & MarketProtocol contracts.
-3. `make deploy-daily-contract` - to deploy current day contract.
+
+Useful commands:
+* `make local-start` - to start docker containers and deploy all contracts. Sometimes you'd have to manually restart the `docker_api` container after, in case mesh didn't fully initialize before the api was started.
+* `make local-reset` - to clean all data and restart docker containers
+* `make deploy-daily-contract` - to deploy current day contract.
 
 API URL: http://localhost:3000/sra/v3/
 
