@@ -1,33 +1,24 @@
-# useful commands for MARKETProtocol/MARKETProtocol
+# useful commands for Honeylemon
 #
-
-# prerequisites
-#   mkdir $(DEV)/MARKETProtocol
-#   cd $(DEV)/MARKETProtocol
-#   git clone https://github.com/MARKETProtocol/MARKETProtocol.git
 
 # default target
 default:
 	pwd
 
-# install truffle
-install_truffle:
-	npm install -g truffle@4.1.15
+local-ganache:
+	docker-compose -f ./docker/docker-compose-local.yml up -d ganache
 
-# install required dependencies
-install_deps:
-	npm install # for MARKETProtocol
+local-api:
+	docker-compose -f ./docker/docker-compose-local.yml up -d
 
-install_deps_python2.7:
-	npm install --python=python2.7 # for MARKETProtocol with python 2.7
+local-stop:
+	docker-compose -f ./docker/docker-compose-local.yml down
 
-# open truffle console with a local development blockchain
-start_console:
-	truffle develop
+compile:
+	truffle compile
 
-#
-# truffle console commands
-#
-#   migrate
-#   test
-#
+migrate:
+	truffle migrate --reset
+
+deploy-daily-contract:
+	truffle exec deploy-daily-contract.js

@@ -287,6 +287,7 @@ async function runExport() {
   console.log('3. Signing 0x order...');
 
   const signedOrder = await honeylemonService.signOrder(order);
+  console.log('Order JSON: ', JSON.stringify(order, null, 4));
 
   await recordBalances('Before 0x order');
 
