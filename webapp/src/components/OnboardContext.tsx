@@ -60,10 +60,7 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
       networkId: onboardProps.networkId,
       subscriptions: {
         address: setAddress,
-        network: (networkId) => {
-          console.log(networkId);
-          setNetwork(networkId);
-        },
+        network: setNetwork,
         balance: (balance: string) => {
           setBalance(Number(fromWei(balance, 'ether')));
         },

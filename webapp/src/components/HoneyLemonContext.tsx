@@ -18,10 +18,8 @@ function HoneyLemonProvider({ children }: HoneyLemonProviderProps) {
   const [honeyLemonService, setHoneyLemonService] = useState<any | undefined>(undefined)
   const { wallet, network } = useOnboard();
   useEffect(() => {
-    if (wallet) {
+    if (wallet && network) {
       const web3 = new Web3(wallet.provider)
-      console.log(network);
-      debugger;
       const honeyLemonService = new HoneyLemonService(
         process.env.REACT_APP_SRA_URL,
         undefined,//minterBridgeAddress, 
@@ -36,7 +34,7 @@ function HoneyLemonProvider({ children }: HoneyLemonProviderProps) {
       )
       setHoneyLemonService(honeyLemonService);
     }
-  }, [wallet])
+  }, [wallet, network])
 
   return (
     <HoneyLemonContext.Provider value={{
