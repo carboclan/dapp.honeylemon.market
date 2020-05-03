@@ -1,7 +1,10 @@
-## How to run
-1. Setup local testnet with 0x contracts deployed: https://hub.docker.com/r/0xorg/ganache-cli
-2. `npm install`
-3. `truffle migrate --reset`
-4. `truffle exec order-test.js` - that's where the POC script is
+## Local development
 
-Relevant contracts are in `contracts/honeylemon`, the rest of the contracts are taken from the Market protocol repo.
+Useful commands:
+* `make local-start` - to start docker containers and deploy all contracts. Sometimes you'd have to manually restart the `docker_api` container after, in case mesh didn't fully initialize before the api was started.
+* `make local-reset` - to clean all data and restart docker containers
+* `make deploy-daily-contract` - to deploy current day contract.
+
+API URL: http://localhost:3000/sra/v3/
+
+Ganache URL: http://localhost:8545

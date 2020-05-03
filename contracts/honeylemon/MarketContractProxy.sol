@@ -113,7 +113,14 @@ contract MarketContractProxy is Ownable {
             ? minerBalance
             : minerAllowance;
 
-        return uintMinAllowanceBalance / (latestMri * CONTRACT_DURATION_DAYS);
+        MarketContract latestMarketContract = getLatestMarketContract();
+
+        return
+            MathLib.divideFractional(
+                1,
+                uintMinAllowanceBalance,
+                latestMarketContract.COLLATERAL_PER_UNIT()
+            );
     }
 
     function getLatestMarketContract() public view returns (MarketContractMPX) {

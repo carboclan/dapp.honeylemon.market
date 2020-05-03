@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { Button, Typography, Grid, makeStyles, FilledInput, Link } from '@material-ui/core';
+import React, { useState, useEffect } from 'react';
+import { Button, Typography, Grid, makeStyles, FilledInput, Link, InputAdornment } from '@material-ui/core';
+import { useHoneyLemon } from '../contexts/HoneyLemonContext';
 
 const useStyles = makeStyles(({ spacing }) => ({
   rightAlign: {
@@ -13,12 +14,26 @@ const useStyles = makeStyles(({ spacing }) => ({
 
 const BuyContractPage: React.SFC = () => {
   // const { wallet, onboard, address, network, balance, notify } = useOnboard();
+  const honeyLemonService = useHoneyLemon();
+  const classes = useStyles();
+
   const [totalPrice, setTotalPrice] = useState(0);
   const [hashAmount, setHashAmount] = useState(0);
   const [hashPrice, setTotalHashPrice] = useState(0);
   const [totalHashAmount, setTotalHashAmount] = useState(0);
 
-  const classes = useStyles();
+  useEffect(() => {
+    let cancelled = false;
+    const fetchData = async () => {
+      const result = 0 //TODO Fetch the required amount of collateral from API
+      if (!cancelled) {
+        // setTotalHashAmount(Number(result));
+      }
+    };
+    fetchData();
+    return () => { cancelled = true }
+  }, [hashPrice, hashAmount]);
+
   return (
     <Grid container alignItems='stretch' justify='center' spacing={2}>
       <Grid item xs={12}>
@@ -31,8 +46,24 @@ const BuyContractPage: React.SFC = () => {
         <FilledInput
           fullWidth
           disableUnderline
-          inputProps={{ className: classes.inputBase }}
-          onChange={e => setTotalPrice(Number.parseFloat(e.target.value))} />
+          inputProps={{
+            className: classes.inputBase,
+            min: 0,
+            // max: maxProjectContribution,
+            step: 1
+          }}
+          startAdornment={<InputAdornment position="start">$</InputAdornment>}
+          onChange={e => {
+            const newValueString = e.target.value;
+            if (!newValueString) {
+              setTotalPrice(0);
+              return;
+            }
+            const newValue = parseFloat(newValueString);
+            !isNaN(newValue) && setTotalPrice(newValue);
+          }}
+          value={totalPrice}
+          type='number' />
       </Grid>
       <Grid item xs={2} className={classes.rightAlign}>
         <Typography style={{ fontWeight: 'bold' }} color='secondary'>USDT</Typography>
@@ -41,7 +72,7 @@ const BuyContractPage: React.SFC = () => {
       <Button fullWidth>BUY NOW</Button><Grid item xs={12}></Grid>
       <Grid item xs={12}>
         <Typography>
-          You will pay ${totalPrice} buy {hashAmount} Th of hasrate for 28 days for ${hashPrice} Th/day.
+          You will pay ${totalPrice} to buy {hashAmount} Th of hasrate for 28 days for ${hashPrice} Th/day.
           You will receive the average value of the <Link href='#'>Mining Revenue Index</Link> over 28 days.
           Representing {totalHashAmount} Th of mining power per day per contract.
         </Typography>

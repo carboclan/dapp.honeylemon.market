@@ -1,6 +1,7 @@
 // This script simulates one life cycle with honey lemon + market protocol + 0x.
 // This is used to validate the interconnection of the layers and to check payouts
 // of tokens are what are expected.
+const readline = require('readline');
 
 // Helper libraries
 const { PayoutCalculator } = require('./payout-calculator');
@@ -287,15 +288,20 @@ async function runExport() {
   console.log('3. Signing 0x order...');
 
   const signedOrder = await honeylemonService.signOrder(order);
+  console.log('Order JSON: ', JSON.stringify(signedOrder, null, 4));
 
   await recordBalances('Before 0x order');
+
+  // Pause here in order to manually submit the order to the API
+  // await waitForInput('Press any key to fill the order...');
 
   /*****************
    * Fill 0x order *
    *****************/
 
-  console.log('4. Filling 0x order...');
-
+  const takerFillAmount = takerAssetAmount;
+  console.log(`4. Filling 0x order (takerFillAmount: ${takerFillAmount.toString()})...`);
+  // Partially fill the order to test 0x-mesh state updates
   const debug = false;
   if (debug) {
     // Call MinterBridge directly for debugging
@@ -312,7 +318,7 @@ async function runExport() {
     );
   } else {
     const txHash = await contractWrappers.exchange
-      .fillOrder(signedOrder, takerAssetAmount, signedOrder.signature)
+      .fillOrder(signedOrder, takerFillAmount, signedOrder.signature)
       // .fillOrder(signedOrder, makerAssetAmount, signedOrder.signature)
       .sendTransactionAsync({
         from: takerAddress,
@@ -471,6 +477,20 @@ async function runExport() {
   // assert.equal(Math.floor(expectedShortRedemption), actualShortRedemption);
 }
 
+function waitForInput(query) {
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+  });
+
+  return new Promise(resolve =>
+    rl.question(query, ans => {
+      rl.close();
+      resolve(ans);
+    })
+  );
+}
+
 run = async function(callback) {
   try {
     await runExport();
@@ -479,6 +499,7 @@ run = async function(callback) {
   }
   callback();
 };
+
 // Attach this function to the exported function
 // in order to allow the script to be executed through both truffle and a test runner.
 run.runExport = runExport;
