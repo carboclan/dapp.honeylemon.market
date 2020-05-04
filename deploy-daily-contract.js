@@ -4,7 +4,6 @@
 
 // Helper libraries
 const { PayoutCalculator } = require('./payout-calculator');
-const HoneylemonService = require('./src/lib/HoneylemonService');
 
 //Ox libs and tools
 const {

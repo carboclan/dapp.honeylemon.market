@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Typography, Grid, makeStyles, FilledInput, Link, InputAdornment } from '@material-ui/core';
 import { useHoneyLemon } from '../contexts/HoneyLemonContext';
+import { useOnboard } from '../contexts/OnboardContext';
 
 const useStyles = makeStyles(({ spacing }) => ({
   rightAlign: {
@@ -13,7 +14,8 @@ const useStyles = makeStyles(({ spacing }) => ({
 }))
 
 const OfferContractPage: React.SFC = () => {
-  const honeyLemonService = useHoneyLemon();
+  const {honeyLemonService} = useHoneyLemon();
+  const { address = '0x' } = useOnboard();
   const classes = useStyles();
 
   const [hashPrice, setHashPrice] = useState(0);
@@ -24,15 +26,25 @@ const OfferContractPage: React.SFC = () => {
   useEffect(() => {
     let cancelled = false;
     const fetchData = async () => {
-      const result = 0 //TODO Fetch the required amount of collateral from API
+      const result = await honeyLemonService.getCollateralForContract(hashAmount) //TODO Fetch the required amount of collateral from API
       if (!cancelled) {
-        setBtcAmount(Number(result));
+        setBtcAmount(Number(result)/10^8);
       }
     };
     fetchData();
     setTotalHashPrice(hashPrice * hashAmount * 28)
     return () => { cancelled = true }
-  }, [hashPrice, hashAmount]);
+  }, [hashPrice, hashAmount, honeyLemonService]);
+
+  const createOffer = async () => {
+    try {
+      const order = honeyLemonService.createOrder(address, hashAmount, hashPrice);
+      const signedOrder = await honeyLemonService.signOrder(order);
+      console.log(signedOrder);  
+    } catch (error) {
+     console.log('Something went wrong creating the offer'); 
+    }    
+  }
 
   return (
     <Grid container alignItems='flex-start' justify='flex-start' spacing={2}>
@@ -95,7 +107,7 @@ const OfferContractPage: React.SFC = () => {
       <Grid item xs={6}><Typography style={{ fontWeight: 'bold' }}>Total:</Typography></Grid>
       <Grid item xs={4} style={{ textAlign: 'center' }}><Typography style={{ fontWeight: 'bold' }}>${totalHashPrice}</Typography></Grid>
       <Grid item xs={12}><Typography style={{ fontStyle: 'italic', fontSize: 12 }}>${hashPrice} Th/day * 28 Days * {hashAmount} Contracts</Typography></Grid>
-      <Grid item xs={12}><Button fullWidth>BUY NOW</Button></Grid>
+      <Grid item xs={12}><Button fullWidth onClick={createOffer}>BUY NOW</Button></Grid>
       <Grid item xs={12}>
         <Typography>
           You will offer ${hashAmount} contracts at ${hashPrice} Th/day. 

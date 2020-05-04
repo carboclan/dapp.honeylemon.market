@@ -12,7 +12,7 @@ const { BigNumber } = require('@0x/utils');
 const NULL_ADDRESS = '0x0000000000000000000000000000000000000000';
 const ORDER_FILL_GAS = 150000;
 
-export default class HoneyLemonService {
+class HoneyLemonService {
   constructor(
     apiUrl,
     minterBridgeAddress,
@@ -53,6 +53,11 @@ export default class HoneyLemonService {
       marketContractProxyAddress
     );
     console.log("Honeylemon service initiated!")
+  }
+
+  async getCollateralForContract(sizeTh) {
+    const result = await this.marketContractProxy.methods.calculateRequiredCollateral(sizeTh).call();
+    return result;
   }
 
   async getQuoteForSize(sizeTh) {
@@ -377,3 +382,5 @@ export default class HoneyLemonService {
     return contractsProcessed;
   };
 }
+
+module.exports = HoneyLemonService;
