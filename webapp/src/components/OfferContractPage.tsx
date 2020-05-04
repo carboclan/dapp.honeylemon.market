@@ -28,7 +28,7 @@ const OfferContractPage: React.SFC = () => {
     const fetchData = async () => {
       const result = await honeyLemonService.getCollateralForContract(hashAmount) //TODO Fetch the required amount of collateral from API
       if (!cancelled) {
-        setBtcAmount(Number(result)/10^8);
+        setBtcAmount(Number(result)/(10**8)); //TODO: Confirm whether scaling here is correct
       }
     };
     fetchData();
@@ -43,6 +43,7 @@ const OfferContractPage: React.SFC = () => {
       console.log(signedOrder);  
     } catch (error) {
      console.log('Something went wrong creating the offer'); 
+     console.log(error);
     }    
   }
 
