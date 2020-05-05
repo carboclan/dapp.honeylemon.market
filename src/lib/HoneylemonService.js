@@ -281,6 +281,12 @@ class HoneylemonService {
     return this.apiClient.getOrdersAsync({ makerAddress });
   }
 
+  async calculateRequiredCollateral(amount) {
+    return await this.marketContractProxy.methods
+      .calculateRequiredCollateral(amount)
+      .call();
+  }
+
   async getContracts(address) {
     // Get contract events where the address was the long trader
     const longPositionTokensMintedEvents = await this.marketContractProxy.getPastEvents(
