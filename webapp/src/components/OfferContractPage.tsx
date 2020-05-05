@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Button, Typography, Grid, makeStyles, FilledInput, Link, InputAdornment } from '@material-ui/core';
 import { useHoneyLemon } from '../contexts/HoneyLemonContext';
 import { useOnboard } from '../contexts/OnboardContext';
+import { BigNumber } from '@0x/utils';
 
 const useStyles = makeStyles(({ spacing }) => ({
   rightAlign: {
@@ -38,9 +39,10 @@ const OfferContractPage: React.SFC = () => {
 
   const createOffer = async () => {
     try {
-      const order = honeyLemonService.createOrder(address, hashAmount, hashPrice);
+      const approval = await honeyLemonService.approveCollateralToken(address, new BigNumber(btcAmount));
+      const order = honeyLemonService.createOrder(address, new BigNumber(hashAmount), new BigNumber(hashPrice));
       const signedOrder = await honeyLemonService.signOrder(order);
-      console.log(signedOrder);  
+      const submittedOrder = await honeyLemonService.submitOrder(signedOrder);
     } catch (error) {
      console.log('Something went wrong creating the offer'); 
      console.log(error);

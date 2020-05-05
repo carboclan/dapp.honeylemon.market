@@ -33,7 +33,10 @@ class HoneyLemonService {
     this.paymentTokenAddress = paymentTokenAddress;
     this.web3 = web3;
 
-    this.provider = this.web3.currentProvider; //TODO This provider should be wrapped in the 0x/subprovider
+    // TODO: This should be more generic. DI the wrapped provider in from the webapp level
+    // Confirm with Chris whether this will break anything else upstream of the app
+    
+    this.provider = new MetamaskSubprovider(this.web3.currentProvider); 
     this.chainId = chainId;
     this.contractWrappers = new ContractWrappers(this.provider, { chainId });
 
