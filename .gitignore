@@ -9,3 +9,4 @@ abigenBindings/
 goBindings/
 .volumes/
 build/
+dist/

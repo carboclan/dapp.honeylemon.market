@@ -7,6 +7,7 @@ const {
   orderCalculationUtils
 } = require('@0x/order-utils');
 const { ContractWrappers, ERC20TokenContract } = require('@0x/contract-wrappers');
+const { MetamaskSubprovider } = require('@0x/subproviders');
 const { BigNumber } = require('@0x/utils');
 
 const NULL_ADDRESS = '0x0000000000000000000000000000000000000000';
@@ -32,7 +33,7 @@ class HoneyLemonService {
     this.paymentTokenAddress = paymentTokenAddress;
     this.web3 = web3;
 
-    this.provider = this.web3.currentProvider;
+    this.provider = this.web3.currentProvider; //TODO This provider should be wrapped in the 0x/subprovider
     this.chainId = chainId;
     this.contractWrappers = new ContractWrappers(this.provider, { chainId });
 
