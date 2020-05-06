@@ -12,6 +12,7 @@ const { BigNumber } = require('@0x/utils');
 
 const NULL_ADDRESS = '0x0000000000000000000000000000000000000000';
 const ORDER_FILL_GAS = 150000;
+const PAYMENT_TOKEN_DECIMALS = 18;
 
 class HoneyLemonService {
   constructor(
@@ -35,8 +36,8 @@ class HoneyLemonService {
 
     // TODO: This should be more generic. DI the wrapped provider in from the webapp level
     // Confirm with Chris whether this will break anything else upstream of the app
-    
-    this.provider = new MetamaskSubprovider(this.web3.currentProvider); 
+
+    this.provider = new MetamaskSubprovider(this.web3.currentProvider);
     this.chainId = chainId;
     this.contractWrappers = new ContractWrappers(this.provider, { chainId });
 
@@ -101,7 +102,7 @@ class HoneyLemonService {
       takerAssetFillAmounts[i] = takerFillAmount;
       remainingSize = remainingSize.minus(makerFillAmount);
     }
-    const price = totalTakerFillAmount.dividedBy(totalMakerFillAmount);
+    const price = totalTakerFillAmount.dividedBy(totalMakerFillAmount).shiftedBy(-PAYMENT_TOKEN_DECIMALS);
 
     return {
       price,
@@ -113,6 +114,7 @@ class HoneyLemonService {
   }
 
   async getQuoteForBudget(budget) {
+    budget = new BigNumber(budget).shiftedBy(PAYMENT_TOKEN_DECIMALS).integerValue();
     const { asks } = await this.getOrderbook();
     const orders = asks.records.map(r => r.order);
     const remainingFillableTakerAssetAmounts = asks.records.map(
@@ -147,7 +149,7 @@ class HoneyLemonService {
       takerAssetFillAmounts[i] = takerFillAmount;
       remainingBudget = remainingBudget.minus(takerFillAmount);
     }
-    const price = totalTakerFillAmount.dividedBy(totalMakerFillAmount);
+    const price = totalTakerFillAmount.dividedBy(totalMakerFillAmount).shiftedBy(-PAYMENT_TOKEN_DECIMALS);
 
     return {
       price,
@@ -211,7 +213,7 @@ class HoneyLemonService {
       makerAddress, // maker is the first address (miner)
       takerAddress: NULL_ADDRESS, // taker is open and can be filled by anyone (when an investor comes along)
       makerAssetAmount: sizeTh, // The maker asset amount
-      takerAssetAmount: sizeTh.multipliedBy(pricePerTh), // The taker asset amount
+      takerAssetAmount: sizeTh.multipliedBy(pricePerTh).shiftedBy(PAYMENT_TOKEN_DECIMALS).integerValue(), // The taker asset amount
       expirationTimeSeconds: new BigNumber(expirationTime), // Time when this order expires
       makerFee: new BigNumber(0), // 0 maker fees
       takerFee: new BigNumber(0), // 0 taker fees
