@@ -312,6 +312,7 @@ contract MarketContractProxy is Ownable {
 
     function generateContractSpecs(uint currentMRI, uint expiration)
         public
+        view
         returns (uint[7] memory)
     {
         uint[7] memory dailySpecs = marketContractSpecs;
