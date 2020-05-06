@@ -157,6 +157,37 @@ contract(
           'Expiration timestamp mismatch'
         );
       });
+
+      it('should revert deploying market contract from non-owner', async () => {
+        let _marketAndsTokenNames = [];
+        _marketAndsTokenNames.push(web3.utils.fromAscii('BTC'));
+        _marketAndsTokenNames.push(web3.utils.fromAscii('MRI-BTC-28D-00000000-Long'));
+        _marketAndsTokenNames.push(web3.utils.fromAscii('MRI-BTC-28D-00000000-Short'));
+
+        await expectRevert.unspecified(
+          marketContractProxy.deployContract(
+            _currentMRI,
+            _marketAndsTokenNames,
+            _expiration,
+            { from: random }
+          )
+        );
+      });
+
+      it('deploy market contract', async () => {
+        console.log(await marketContractProxy.getAllMarketContracts());
+
+        let _marketAndsTokenNames = [];
+        _marketAndsTokenNames.push(web3.utils.fromAscii('BTC'));
+        _marketAndsTokenNames.push(web3.utils.fromAscii('MRI-BTC-28D-00000000-Long'));
+        _marketAndsTokenNames.push(web3.utils.fromAscii('MRI-BTC-28D-00000000-Short'));
+
+        await marketContractProxy.deployContract(
+          _currentMRI,
+          _marketAndsTokenNames,
+          _expiration
+        );
+      });
     });
   }
 );
