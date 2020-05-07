@@ -6,7 +6,7 @@ import ScrollToTop from './helpers/scrollToTop';
 import history from './helpers/history';
 import HoneyLemonApp from './components/HoneyLemonApp';
 import { OnboardProvider } from './contexts/OnboardContext';
-import { HoneyLemonProvider } from './contexts/HoneyLemonContext';
+import { HoneylemonProvider } from './contexts/HoneyLemonContext';
 
 function App() {
   const onboardInit = {
@@ -19,11 +19,11 @@ function App() {
         <ScrollToTop>
           <CssBaseline />
           <OnboardProvider {...onboardInit}>
-            <HoneyLemonProvider>
+            <HoneylemonProvider>
               <Container maxWidth="sm">
                 <HoneyLemonApp />
               </Container>
-            </HoneyLemonProvider>
+            </HoneylemonProvider>
           </OnboardProvider >
         </ScrollToTop>
       </Router>

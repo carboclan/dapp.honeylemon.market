@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useOnboard } from "./OnboardContext";
 import Web3 from "web3";
 import {
-  HoneyLemonService,
+  HoneylemonService,
   MinterBridgeAbi,
   MarketContractProxyAbi,
   CollateralTokenAbi,
@@ -21,24 +21,24 @@ const PaymentToken = truffleContract(PaymentTokenAbi);
 const MarketCollateralPool = truffleContract(MarketCollateralPoolAbi);
 const MarketContractMPX = truffleContract(MarketContractMPXAbi);
 
-export type HoneyLemonContext = {
-  honeyLemonService: any; //TODO update this when types exist
+export type HoneylemonContext = {
+  honeylemonService: any; //TODO update this when types exist
 };
 
-export type HoneyLemonProviderProps = {
+export type HoneylemonProviderProps = {
   children: React.ReactNode;
 };
 
-const HoneyLemonContext = React.createContext<HoneyLemonContext | undefined>(undefined);
+const HoneylemonContext = React.createContext<HoneylemonContext | undefined>(undefined);
 
-function HoneyLemonProvider({ children }: HoneyLemonProviderProps) {
-  const [honeyLemonService, setHoneyLemonService] = useState<any | undefined>(undefined);
+function HoneylemonProvider({ children }: HoneylemonProviderProps) {
+  const [honeyLemonService, setHoneylemonService] = useState<any | undefined>(undefined);
   const { wallet, network, isReady } = useOnboard();
   useEffect(() => {
     if (isReady && wallet && network) {
       const web3 = new Web3(wallet.provider);
 
-      const initHoneyLemonService = async () => {
+      const initHoneylemonService = async () => {
         MarketContractProxy.setProvider(wallet.provider);
         MinterBridge.setProvider(wallet.provider);
         CollateralToken.setProvider(wallet.provider);
@@ -48,7 +48,7 @@ function HoneyLemonProvider({ children }: HoneyLemonProviderProps) {
         const collateralToken = await CollateralToken.deployed();
         const paymentToken = await PaymentToken.deployed();
 
-        const honeyLemonService = new HoneyLemonService(
+        const honeylemonService = new HoneylemonService(
           process.env.REACT_APP_SRA_URL,
           minterBridge.address,
           marketContractProxy.address,
@@ -60,29 +60,29 @@ function HoneyLemonProvider({ children }: HoneyLemonProviderProps) {
           MarketCollateralPool.abi,
           MarketContractMPX.abi
         );
-        setHoneyLemonService(honeyLemonService);
+        setHoneylemonService(honeylemonService);
       };
-      initHoneyLemonService();
+      initHoneylemonService();
     }
   }, [wallet, network, isReady]);
 
   return (
-    <HoneyLemonContext.Provider
+    <HoneylemonContext.Provider
       value={{
-        honeyLemonService
+        honeylemonService: honeyLemonService
       }}
     >
       {children}
-    </HoneyLemonContext.Provider>
+    </HoneylemonContext.Provider>
   );
 }
 
-function useHoneyLemon() {
-  const context = React.useContext(HoneyLemonContext);
+function useHoneylemon() {
+  const context = React.useContext(HoneylemonContext);
   if (context === undefined) {
     throw new Error("useHoneyLemon must be used within a HoneyLemonProvider");
   }
   return context;
 }
 
-export { HoneyLemonProvider, useHoneyLemon };
+export { HoneylemonProvider, useHoneylemon };

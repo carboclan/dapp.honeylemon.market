@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Typography, Grid, makeStyles, FilledInput, Link, InputAdornment } from '@material-ui/core';
-import { useHoneyLemon } from '../contexts/HoneyLemonContext';
+import { useHoneylemon } from '../contexts/HoneyLemonContext';
 import { useOnboard } from '../contexts/OnboardContext';
 import { BigNumber } from '@0x/utils';
 
@@ -15,7 +15,7 @@ const useStyles = makeStyles(({ spacing }) => ({
 }))
 
 const OfferContractPage: React.SFC = () => {
-  const {honeyLemonService} = useHoneyLemon();
+  const { honeylemonService } = useHoneylemon();
   const { address = '0x' } = useOnboard();
   const classes = useStyles();
 
@@ -27,26 +27,26 @@ const OfferContractPage: React.SFC = () => {
   useEffect(() => {
     let cancelled = false;
     const fetchData = async () => {
-      const result = await honeyLemonService.getCollateralForContract(hashAmount) //TODO Fetch the required amount of collateral from API
+      const result = await honeylemonService.getCollateralForContract(hashAmount) //TODO Fetch the required amount of collateral from API
       if (!cancelled) {
-        setBtcAmount(Number(result)/(10**8)); //TODO: Confirm whether scaling here is correct
+        setBtcAmount(Number(result) / (10 ** 8)); //TODO: Confirm whether scaling here is correct
       }
     };
     fetchData();
     setTotalHashPrice(hashPrice * hashAmount * 28)
     return () => { cancelled = true }
-  }, [hashPrice, hashAmount, honeyLemonService]);
+  }, [hashPrice, hashAmount, honeylemonService]);
 
   const createOffer = async () => {
     try {
-      const approval = await honeyLemonService.approveCollateralToken(address, new BigNumber(btcAmount));
-      const order = honeyLemonService.createOrder(address, new BigNumber(hashAmount), new BigNumber(hashPrice));
-      const signedOrder = await honeyLemonService.signOrder(order);
-      const submittedOrder = await honeyLemonService.submitOrder(signedOrder);
+      const approval = await honeylemonService.approveCollateralToken(address, new BigNumber(btcAmount));
+      const order = honeylemonService.createOrder(address, new BigNumber(hashAmount), new BigNumber(hashPrice));
+      const signedOrder = await honeylemonService.signOrder(order);
+      const submittedOrder = await honeylemonService.submitOrder(signedOrder);
     } catch (error) {
-     console.log('Something went wrong creating the offer'); 
-     console.log(error);
-    }    
+      console.log('Something went wrong creating the offer');
+      console.log(error);
+    }
   }
 
   return (
@@ -113,11 +113,11 @@ const OfferContractPage: React.SFC = () => {
       <Grid item xs={12}><Button fullWidth onClick={createOffer}>BUY NOW</Button></Grid>
       <Grid item xs={12}>
         <Typography>
-          You will offer ${hashAmount} contracts at ${hashPrice} Th/day. 
-          If a hodler buys your offer you will receive ${totalHashPrice} USDT. 
-          You will be asked to post the hodlers max win of {btcAmount} BTC as collateral. 
-          The amount of that collateral that the hodler receives will be determined 
-          by the average value of the <u>Mining Revenue Index</u> over the 28 days starting 
+          You will offer ${hashAmount} contracts at ${hashPrice} Th/day.
+          If a hodler buys your offer you will receive ${totalHashPrice} USDT.
+          You will be asked to post the hodlers max win of {btcAmount} BTC as collateral.
+          The amount of that collateral that the hodler receives will be determined
+          by the average value of the <u>Mining Revenue Index</u> over the 28 days starting
           when the hodler pays you.
         </Typography>
       </Grid>
