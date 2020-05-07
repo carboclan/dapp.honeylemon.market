@@ -6,7 +6,7 @@ import ScrollToTop from './helpers/scrollToTop';
 import history from './helpers/history';
 import HoneyLemonApp from './components/HoneyLemonApp';
 import { OnboardProvider } from './contexts/OnboardContext';
-import { HoneylemonProvider } from './contexts/HoneyLemonContext';
+import { HoneylemonProvider } from './contexts/HoneylemonContext';
 
 function App() {
   const onboardInit = {
