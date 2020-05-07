@@ -23,7 +23,7 @@ function HoneylemonProvider({ children }: HoneylemonProviderProps) {
       const initHoneylemonService = async () => {
         const honeylemonService = new HoneylemonService(
           process.env.REACT_APP_SRA_URL,
-          new MetamaskSubprovider(wallet.provider),
+          new MetamaskSubprovider(wallet.provider), //TODO Make this more generic
           network
         );
         setHoneylemonService(honeylemonService);
