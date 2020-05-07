@@ -47,15 +47,13 @@ before(async function() {
 
   honeylemonService = new HoneylemonService(
     process.env.SRA_URL,
+    web3.currentProvider,
+    1337,
     minterBridge.address,
     marketContractProxy.address,
     collateralToken.address,
     paymentToken.address,
-    web3,
-    1337,
     marketContractProxy.abi,
-    MarketCollateralPool.abi,
-    MarketContractMPX.abi
   );
 
   // Stub orders

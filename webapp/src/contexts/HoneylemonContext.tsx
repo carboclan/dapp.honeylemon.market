@@ -2,24 +2,8 @@ import * as React from "react";
 import { useState, useEffect } from "react";
 import { useOnboard } from "./OnboardContext";
 import Web3 from "web3";
-import {
-  HoneylemonService,
-  MinterBridgeAbi,
-  MarketContractProxyAbi,
-  CollateralTokenAbi,
-  PaymentTokenAbi,
-  MarketCollateralPoolAbi,
-  MarketContractMPXAbi
-} from "honeylemon";
-
-const truffleContract = require("@truffle/contract");
-
-const MinterBridge = truffleContract(MinterBridgeAbi);
-const MarketContractProxy = truffleContract(MarketContractProxyAbi);
-const CollateralToken = truffleContract(CollateralTokenAbi);
-const PaymentToken = truffleContract(PaymentTokenAbi);
-const MarketCollateralPool = truffleContract(MarketCollateralPoolAbi);
-const MarketContractMPX = truffleContract(MarketContractMPXAbi);
+import { HoneylemonService } from "honeylemon";
+import { MetamaskSubprovider } from '@0x/subproviders';
 
 export type HoneylemonContext = {
   honeylemonService: any; //TODO update this when types exist
@@ -36,29 +20,11 @@ function HoneylemonProvider({ children }: HoneylemonProviderProps) {
   const { wallet, network, isReady } = useOnboard();
   useEffect(() => {
     if (isReady && wallet && network) {
-      const web3 = new Web3(wallet.provider);
-
       const initHoneylemonService = async () => {
-        MarketContractProxy.setProvider(wallet.provider);
-        MinterBridge.setProvider(wallet.provider);
-        CollateralToken.setProvider(wallet.provider);
-        PaymentToken.setProvider(wallet.provider);
-        const minterBridge = await MinterBridge.deployed();
-        const marketContractProxy = await MarketContractProxy.deployed();
-        const collateralToken = await CollateralToken.deployed();
-        const paymentToken = await PaymentToken.deployed();
-
         const honeylemonService = new HoneylemonService(
           process.env.REACT_APP_SRA_URL,
-          minterBridge.address,
-          marketContractProxy.address,
-          collateralToken.address,
-          paymentToken.address,
-          web3,
-          network,
-          MarketContractProxy.abi,
-          MarketCollateralPool.abi,
-          MarketContractMPX.abi
+          new MetamaskSubprovider(wallet.provider),
+          network
         );
         setHoneylemonService(honeylemonService);
       };

@@ -1,4 +1,11 @@
-const { HttpClient, OrderbookRequest } = require('@0x/connect');
+import MinterBridgeArtefacts from '../../build/contracts/MinterBridge.json';
+import MarketContractProxyArtefacts from '../../build/contracts/MarketContractProxy.json';
+import CollateralTokenArtefacts from '../../build/contracts/CollateralToken.json';
+import PaymentTokenArtefacts from '../../build/contracts/PaymentToken.json';
+import {hexToUtf8} from 'web3-utils';
+
+var Web3 = require('web3');
+const { HttpClient } = require('@0x/connect');
 const {
   marketUtils,
   generatePseudoRandomSalt,
@@ -7,37 +14,29 @@ const {
   orderCalculationUtils
 } = require('@0x/order-utils');
 const { ContractWrappers, ERC20TokenContract } = require('@0x/contract-wrappers');
-const { MetamaskSubprovider } = require('@0x/subproviders');
 const { BigNumber } = require('@0x/utils');
 
 const NULL_ADDRESS = '0x0000000000000000000000000000000000000000';
-const ORDER_FILL_GAS = 150000;
 const PAYMENT_TOKEN_DECIMALS = 18;
 
 class HoneylemonService {
   constructor(
     apiUrl,
+    provider, //This should be a 0x Subprovider wrapped provider
+    chainId,
     minterBridgeAddress,
     marketContractProxyAddress,
     collateralTokenAddress,
     paymentTokenAddress,
-    web3,
-    chainId,
     marketContractProxyAbi,
-    MarketCollateralPoolAbi,
-    marketContractAbi
   ) {
     this.apiClient = new HttpClient(apiUrl);
-    this.minterBridgeAddress = minterBridgeAddress;
-    this.marketContractProxyAddress = marketContractProxyAddress;
-    this.collateralTokenAddress = collateralTokenAddress;
-    this.paymentTokenAddress = paymentTokenAddress;
-    this.web3 = web3;
-
-    // TODO: This should be more generic. DI the wrapped provider in from the webapp level
-    // Confirm with Chris whether this will break anything else upstream of the app
-    // this.provider = new MetamaskSubprovider(this.web3.currentProvider);
-    this.provider = this.web3.currentProvider;
+    this.minterBridgeAddress = minterBridgeAddress || MinterBridgeArtefacts.networks[chainId].address;
+    this.marketContractProxyAddress = marketContractProxyAddress || MarketContractProxyArtefacts.networks[chainId].address;
+    this.collateralTokenAddress = collateralTokenAddress || CollateralTokenArtefacts.networks[chainId].address;
+    this.paymentTokenAddress = paymentTokenAddress || PaymentTokenArtefacts.networks[chainId].address;
+    this.provider = provider;
+    this.web3 = new Web3(provider);
     this.chainId = chainId;
     this.contractWrappers = new ContractWrappers(this.provider, { chainId });
 
@@ -54,8 +53,8 @@ class HoneylemonService {
     this.paymentToken = new ERC20TokenContract(paymentTokenAddress, this.provider);
 
     this.marketContractProxy = new web3.eth.Contract(
-      marketContractProxyAbi,
-      marketContractProxyAddress
+      marketContractProxyAbi || MarketContractProxyArtefacts.abi,
+      this.marketContractProxyAddress
     );
     console.log("Honeylemon service initiated!")
   }
@@ -202,7 +201,7 @@ class HoneylemonService {
     const makerAddetDataIncludingPrice = assetDataUtils.encodeERC20BridgeAssetData(
       this.marketContractProxyAddress,
       this.minterBridgeAddress,
-      this.web3.utils.utf8ToHex(pricePerTh.toString()) // this is the sale price within the data feed for the minterbride
+      utf8ToHex(pricePerTh.toString()) // this is the sale price within the data feed for the minterbride
     );
     const order = {
       makerAddress, // maker is the first address (miner)
@@ -346,12 +345,12 @@ class HoneylemonService {
           marketContractAddress: contract.returnValues.latestMarketContract,
           direction: traderDirection,
           totalQuantity: parseInt(contract.returnValues.qtyToMint),
-          averagePrice: parseInt(web3.utils.hexToUtf8(contract.returnValues.bridgeData)),
+          averagePrice: parseInt(hexToUtf8(contract.returnValues.bridgeData)),
           trades: [
             {
               timeStamp: contract.returnValues.time,
               quantity: parseInt(contract.returnValues.qtyToMint),
-              price: parseInt(web3.utils.hexToUtf8(contract.returnValues.bridgeData))
+              price: parseInt(hexToUtf8(contract.returnValues.bridgeData))
             }
           ],
           longTokenAddress: contract.returnValues.longTokenAddress,
@@ -368,7 +367,7 @@ class HoneylemonService {
         contractsProcessed[contract.returnValues.marketId].trades.push({
           timeStamp: contract.returnValues.time,
           quantity: parseInt(contract.returnValues.qtyToMint),
-          price: parseInt(web3.utils.hexToUtf8(contract.returnValues.bridgeData))
+          price: parseInt(hexToUtf8(contract.returnValues.bridgeData))
         });
         // Update the total quantity for this contract for the given marketId
         contractsProcessed[contract.returnValues.marketId].totalQuantity =
