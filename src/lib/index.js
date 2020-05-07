@@ -1,4 +1,4 @@
-import HoneyLemonService from './HoneylemonService';
+import HoneylemonService from './HoneylemonService';
 import MinterBridgeAbi from '../../build/contracts/MinterBridge.json';
 import MarketContractProxyAbi from '../../build/contracts/MarketContractProxy.json';
 import CollateralTokenAbi from '../../build/contracts/CollateralToken.json';
@@ -7,7 +7,7 @@ import MarketCollateralPoolAbi from '../../build/contracts/MarketCollateralPool.
 import MarketContractMPXAbi from '../../build/contracts/MarketContractMPX.json';
 
 export { 
-    HoneyLemonService, 
+    HoneylemonService, 
     MinterBridgeAbi, 
     MarketContractProxyAbi, 
     CollateralTokenAbi, 

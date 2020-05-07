@@ -14,7 +14,7 @@ const NULL_ADDRESS = '0x0000000000000000000000000000000000000000';
 const ORDER_FILL_GAS = 150000;
 const PAYMENT_TOKEN_DECIMALS = 18;
 
-class HoneyLemonService {
+class HoneylemonService {
   constructor(
     apiUrl,
     minterBridgeAddress,
@@ -36,8 +36,8 @@ class HoneyLemonService {
 
     // TODO: This should be more generic. DI the wrapped provider in from the webapp level
     // Confirm with Chris whether this will break anything else upstream of the app
-
-    this.provider = new MetamaskSubprovider(this.web3.currentProvider);
+    // this.provider = new MetamaskSubprovider(this.web3.currentProvider);
+    this.provider = this.web3.currentProvider;
     this.chainId = chainId;
     this.contractWrappers = new ContractWrappers(this.provider, { chainId });
 
@@ -58,11 +58,6 @@ class HoneyLemonService {
       marketContractProxyAddress
     );
     console.log("Honeylemon service initiated!")
-  }
-
-  async getCollateralForContract(sizeTh) {
-    const result = await this.marketContractProxy.methods.calculateRequiredCollateral(sizeTh).call();
-    return result;
   }
 
   async getQuoteForSize(sizeTh) {
@@ -340,7 +335,7 @@ class HoneyLemonService {
     // TODO
   }
 
-  processEventObjects = (traderDirection, eventsArray) => {
+  processEventObjects(traderDirection, eventsArray) {
     let contractsProcessed = {};
     eventsArray.forEach(contract => {
       // If the object does not exist init it
@@ -395,4 +390,4 @@ class HoneyLemonService {
   };
 }
 
-module.exports = HoneyLemonService;
+module.exports = HoneylemonService;
