@@ -1,4 +1,4 @@
-
+mnemonic.js
 .env
 .idea/
 allFiredEvents
@@ -8,3 +8,4 @@ coverage/
 node_modules/
 abigenBindings/
 goBindings/
+.volumes/
