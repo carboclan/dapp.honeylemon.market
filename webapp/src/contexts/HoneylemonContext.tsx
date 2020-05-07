@@ -80,7 +80,7 @@ function HoneylemonProvider({ children }: HoneylemonProviderProps) {
 function useHoneylemon() {
   const context = React.useContext(HoneylemonContext);
   if (context === undefined) {
-    throw new Error("useHoneyLemon must be used within a HoneyLemonProvider");
+    throw new Error("useHoneylemon must be used within a HoneylemonProvider");
   }
   return context;
 }
