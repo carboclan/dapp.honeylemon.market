@@ -36,8 +36,8 @@ class HoneyLemonService {
 
     // TODO: This should be more generic. DI the wrapped provider in from the webapp level
     // Confirm with Chris whether this will break anything else upstream of the app
-
-    this.provider = new MetamaskSubprovider(this.web3.currentProvider);
+    // this.provider = new MetamaskSubprovider(this.web3.currentProvider);
+    this.provider = this.web3.currentProvider;
     this.chainId = chainId;
     this.contractWrappers = new ContractWrappers(this.provider, { chainId });
 
@@ -58,11 +58,6 @@ class HoneyLemonService {
       marketContractProxyAddress
     );
     console.log("Honeylemon service initiated!")
-  }
-
-  async getCollateralForContract(sizeTh) {
-    const result = await this.marketContractProxy.methods.calculateRequiredCollateral(sizeTh).call();
-    return result;
   }
 
   async getQuoteForSize(sizeTh) {

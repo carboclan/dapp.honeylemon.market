@@ -13,7 +13,7 @@ module.exports = async function(deployer, network, accounts) {
   const collateralToken = await CollateralToken.deployed();
   collateralToken.transfer(accounts[1], 1000000000000);
 
-  console.log('🕺Deployed Mock Collateral token');
+  console.log('🕺 Deployed Mock Collateral token');
 
   let registry = await MarketContractRegistry.deployed();
   let minterBridge = await MinterBridge.deployed();
@@ -28,7 +28,7 @@ module.exports = async function(deployer, network, accounts) {
     collateralToken.address
   );
 
-  console.log('👉Deployed Market Contract Proxy');
+  console.log('👉 Deployed Market Contract Proxy');
 
   // Transfer all appropriate rights from the deployed market protocol to marketContractProxy:
   // Point the 0x MinterBridge to the marketContractProxy
@@ -43,5 +43,5 @@ module.exports = async function(deployer, network, accounts) {
   // Ability for proxy to deploy new market protocol contracts
   await marketContractFactoryMPX.transferOwnership(marketContractProxy.address);
 
-  console.log('🙇‍♂️Transferred permissions to proxy');
+  console.log('🙇‍♂️ Transferred permissions to proxy');
 };
