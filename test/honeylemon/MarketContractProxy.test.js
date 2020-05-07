@@ -135,6 +135,10 @@ contract(
         new BigNumber('100000000')
       );
       const _expiration = Math.round(new Date().getTime() / 1000) + 3600 * 24 * 28;
+      const _marketAndsTokenNames = [];
+      _marketAndsTokenNames.push(web3.utils.fromAscii('BTC'));
+      _marketAndsTokenNames.push(web3.utils.fromAscii('MRI-BTC-28D-00000000-Long'));
+      _marketAndsTokenNames.push(web3.utils.fromAscii('MRI-BTC-28D-00000000-Short'));
 
       it('generate contract specs', async () => {
         let _capPrice = new BigNumber(28)
@@ -159,11 +163,6 @@ contract(
       });
 
       it('should revert deploying market contract from non-owner', async () => {
-        let _marketAndsTokenNames = [];
-        _marketAndsTokenNames.push(web3.utils.fromAscii('BTC'));
-        _marketAndsTokenNames.push(web3.utils.fromAscii('MRI-BTC-28D-00000000-Long'));
-        _marketAndsTokenNames.push(web3.utils.fromAscii('MRI-BTC-28D-00000000-Short'));
-
         await expectRevert.unspecified(
           marketContractProxy.deployContract(
             _currentMRI,
@@ -174,18 +173,55 @@ contract(
         );
       });
 
-      it('deploy market contract', async () => {
-        console.log(await marketContractProxy.getAllMarketContracts());
-
-        let _marketAndsTokenNames = [];
-        _marketAndsTokenNames.push(web3.utils.fromAscii('BTC'));
-        _marketAndsTokenNames.push(web3.utils.fromAscii('MRI-BTC-28D-00000000-Long'));
-        _marketAndsTokenNames.push(web3.utils.fromAscii('MRI-BTC-28D-00000000-Short'));
+      /*it('deploy market contract', async () => {
+        let marketArrayBefore = await marketContractProxy.getAllMarketContracts();
 
         await marketContractProxy.deployContract(
           _currentMRI,
           _marketAndsTokenNames,
           _expiration
+        );
+
+        let marketArrayAfter = await marketContractProxy.getAllMarketContracts();
+
+
+        assert.equal(marketArrayAfter.length-marketArrayBefore.length, 1, 'Market array length mismatch');
+      });*/
+
+      it('should revert daily settlement from address other than honeylemon oracle', async () => {
+        await expectRevert.unspecified(
+          marketContractProxy.dailySettlement(
+            0,
+            _currentMRI,
+            _marketAndsTokenNames,
+            _expiration,
+            { from: random }
+          )
+        );
+      });
+
+      it('should revert daily settlement when passed MRI equal to zero', async () => {
+        await expectRevert(
+          marketContractProxy.dailySettlement(0, 0, _marketAndsTokenNames, _expiration, {
+            from: honeyLemonOracle
+          }),
+          'Current MRI value cant be zero'
+        );
+      });
+
+      it('daily settlement', async () => {
+        await marketContractProxy.dailySettlement(
+          0,
+          _currentMRI,
+          _marketAndsTokenNames,
+          _expiration,
+          { from: honeyLemonOracle }
+        );
+
+        assert.equal(
+          (await marketContractProxy.getLatestMri()).toString(),
+          _currentMRI,
+          'latest MRI value mismatch'
         );
       });
     });

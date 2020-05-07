@@ -40,7 +40,7 @@ contract MarketContractProxy is Ownable {
     mapping(address => uint256) addressToMarketId;
 
     // Stores the most recent MRI value
-    uint256 latestMri = 0;
+    uint256 internal latestMri = 0;
 
     constructor(
         address _marketContractFactoryMPX,
@@ -83,6 +83,10 @@ contract MarketContractProxy is Ownable {
     //////////////////////////
     //// PUBLIC FUNCTIONS ////
     //////////////////////////
+
+    function getLatestMri() public view returns (uint256) {
+        return latestMri;
+    }
 
     function getFillableAmounts(address[] memory makerAddresses)
         public
