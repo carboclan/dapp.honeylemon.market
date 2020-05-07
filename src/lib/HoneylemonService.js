@@ -14,7 +14,7 @@ const NULL_ADDRESS = '0x0000000000000000000000000000000000000000';
 const ORDER_FILL_GAS = 150000;
 const PAYMENT_TOKEN_DECIMALS = 18;
 
-class HoneyLemonService {
+class HoneylemonService {
   constructor(
     apiUrl,
     minterBridgeAddress,
@@ -390,4 +390,4 @@ class HoneyLemonService {
   };
 }
 
-module.exports = HoneyLemonService;
+module.exports = HoneylemonService;
