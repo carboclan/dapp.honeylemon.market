@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Typography, Grid, makeStyles, FilledInput, Link, InputAdornment } from '@material-ui/core';
-import { useHoneylemon } from '../contexts/HoneyLemonContext';
+import { useHoneylemon } from '../contexts/HoneylemonContext';
 const { BigNumber } = require('@0x/utils');
 
 const useStyles = makeStyles(({ spacing }) => ({
