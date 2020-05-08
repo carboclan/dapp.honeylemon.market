@@ -158,13 +158,13 @@ contract MarketContractProxy is Ownable {
     }
 
     // Return `balanceOf` for current day PositionTokenLong
-    function balanceOf(address _owner) public returns (uint) {
+    function balanceOf(address _owner) public view returns (uint) {
         MarketContract latestMarketContract = getLatestMarketContract();
         ERC20 longToken = ERC20(latestMarketContract.LONG_POSITION_TOKEN());
         return longToken.balanceOf(_owner);
     }
 
-    function getTime() public returns (uint) {
+    function getTime() public view returns (uint) {
         return now;
     }
 
