@@ -210,6 +210,8 @@ contract(
       });
 
       it('daily settlement', async () => {
+        let allMarketContractsBefore = await marketContractProxy.getAllMarketContracts();
+
         await marketContractProxy.dailySettlement(
           0,
           _currentMRI,
@@ -218,10 +220,31 @@ contract(
           { from: honeyLemonOracle }
         );
 
+        let allMarketContractsAfter = await marketContractProxy.getAllMarketContracts();
+        let latestMarket = await marketContractProxy.getLatestMarketContract();
+        let marketCollateralPool = await (await MarketContractMPX.at(
+          latestMarket
+        )).COLLATERAL_POOL_ADDRESS();
+
         assert.equal(
           (await marketContractProxy.getLatestMri()).toString(),
           _currentMRI,
           'latest MRI value mismatch'
+        );
+        assert.equal(
+          allMarketContractsAfter.length - allMarketContractsBefore.length,
+          1,
+          'Market contracts array length mismatch'
+        );
+        assert.equal(
+          await marketContractProxy.getLatestMarketContract(),
+          allMarketContractsAfter[0],
+          'Latest market contract address mismatch'
+        );
+        assert.equal(
+          await marketContractProxy.getLatestMarketCollateralPool(),
+          marketCollateralPool,
+          'Latest market collateral pool address mismatch'
         );
       });
     });
