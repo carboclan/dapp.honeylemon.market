@@ -8,5 +8,6 @@ node_modules/
 abigenBindings/
 goBindings/
 .volumes/
+docker/.volumes/
 build/
 dist/

@@ -12,6 +12,8 @@ import {
   MarketContractMPXAbi
 } from "honeylemon";
 
+import { MetamaskSubprovider, SupportedProvider } from '@0x/subproviders';
+
 const truffleContract = require("@truffle/contract");
 
 const MinterBridge = truffleContract(MinterBridgeAbi);
@@ -37,6 +39,7 @@ function HoneyLemonProvider({ children }: HoneyLemonProviderProps) {
   useEffect(() => {
     if (isReady && wallet && network) {
       const web3 = new Web3(wallet.provider);
+      const provider = new MetamaskSubprovider(web3.currentProvider as SupportedProvider);
 
       const initHoneyLemonService = async () => {
         MarketContractProxy.setProvider(wallet.provider);
@@ -50,11 +53,12 @@ function HoneyLemonProvider({ children }: HoneyLemonProviderProps) {
 
         const honeyLemonService = new HoneyLemonService(
           process.env.REACT_APP_SRA_URL,
+          process.env.REACT_APP_SUBGRAPH_URL,
           minterBridge.address,
           marketContractProxy.address,
           collateralToken.address,
           paymentToken.address,
-          web3,
+          provider,
           network,
           MarketContractProxy.abi,
           MarketCollateralPool.abi,

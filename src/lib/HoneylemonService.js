@@ -1,3 +1,4 @@
+const { GraphQLClient } = require('graphql-request');
 const { HttpClient, OrderbookRequest } = require('@0x/connect');
 const {
   marketUtils,
@@ -7,37 +8,39 @@ const {
   orderCalculationUtils
 } = require('@0x/order-utils');
 const { ContractWrappers, ERC20TokenContract } = require('@0x/contract-wrappers');
-const { MetamaskSubprovider } = require('@0x/subproviders');
 const { BigNumber } = require('@0x/utils');
+const Web3 = require('web3');
+const web3 = new Web3(null); // This is just for encoding, etc.
 
 const NULL_ADDRESS = '0x0000000000000000000000000000000000000000';
 const ORDER_FILL_GAS = 150000;
-const PAYMENT_TOKEN_DECIMALS = 18;
+const PAYMENT_TOKEN_DECIMALS = 0; // USDC has 6 decimals
 
 class HoneyLemonService {
   constructor(
     apiUrl,
+    subgraphUrl,
     minterBridgeAddress,
     marketContractProxyAddress,
     collateralTokenAddress,
     paymentTokenAddress,
-    web3,
+    provider,
     chainId,
     marketContractProxyAbi,
     MarketCollateralPoolAbi,
     marketContractAbi
   ) {
     this.apiClient = new HttpClient(apiUrl);
+    this.subgraphClient = new GraphQLClient(subgraphUrl);
     this.minterBridgeAddress = minterBridgeAddress;
     this.marketContractProxyAddress = marketContractProxyAddress;
     this.collateralTokenAddress = collateralTokenAddress;
     this.paymentTokenAddress = paymentTokenAddress;
-    this.web3 = web3;
 
     // TODO: This should be more generic. DI the wrapped provider in from the webapp level
     // Confirm with Chris whether this will break anything else upstream of the app
 
-    this.provider = new MetamaskSubprovider(this.web3.currentProvider);
+    this.provider = provider;
     this.chainId = chainId;
     this.contractWrappers = new ContractWrappers(this.provider, { chainId });
 
@@ -57,11 +60,13 @@ class HoneyLemonService {
       marketContractProxyAbi,
       marketContractProxyAddress
     );
-    console.log("Honeylemon service initiated!")
+    console.log('Honeylemon service initiated!');
   }
 
   async getCollateralForContract(sizeTh) {
-    const result = await this.marketContractProxy.methods.calculateRequiredCollateral(sizeTh).call();
+    const result = await this.marketContractProxy.methods
+      .calculateRequiredCollateral(sizeTh)
+      .call();
     return result;
   }
 
@@ -102,7 +107,9 @@ class HoneyLemonService {
       takerAssetFillAmounts[i] = takerFillAmount;
       remainingSize = remainingSize.minus(makerFillAmount);
     }
-    const price = totalTakerFillAmount.dividedBy(totalMakerFillAmount).shiftedBy(-PAYMENT_TOKEN_DECIMALS);
+    const price = totalTakerFillAmount
+      .dividedBy(totalMakerFillAmount)
+      .shiftedBy(-PAYMENT_TOKEN_DECIMALS);
 
     return {
       price,
@@ -149,7 +156,9 @@ class HoneyLemonService {
       takerAssetFillAmounts[i] = takerFillAmount;
       remainingBudget = remainingBudget.minus(takerFillAmount);
     }
-    const price = totalTakerFillAmount.dividedBy(totalMakerFillAmount).shiftedBy(-PAYMENT_TOKEN_DECIMALS);
+    const price = totalTakerFillAmount
+      .dividedBy(totalMakerFillAmount)
+      .shiftedBy(-PAYMENT_TOKEN_DECIMALS);
 
     return {
       price,
@@ -207,13 +216,16 @@ class HoneyLemonService {
     const makerAddetDataIncludingPrice = assetDataUtils.encodeERC20BridgeAssetData(
       this.marketContractProxyAddress,
       this.minterBridgeAddress,
-      this.web3.utils.utf8ToHex(pricePerTh.toString()) // this is the sale price within the data feed for the minterbride
+      web3.utils.utf8ToHex(pricePerTh.toString()) // this is the sale price within the data feed for the minterbride
     );
     const order = {
       makerAddress, // maker is the first address (miner)
       takerAddress: NULL_ADDRESS, // taker is open and can be filled by anyone (when an investor comes along)
       makerAssetAmount: sizeTh, // The maker asset amount
-      takerAssetAmount: sizeTh.multipliedBy(pricePerTh).shiftedBy(PAYMENT_TOKEN_DECIMALS).integerValue(), // The taker asset amount
+      takerAssetAmount: sizeTh
+        .multipliedBy(pricePerTh)
+        .shiftedBy(PAYMENT_TOKEN_DECIMALS)
+        .integerValue(), // The taker asset amount
       expirationTimeSeconds: new BigNumber(expirationTime), // Time when this order expires
       makerFee: new BigNumber(0), // 0 maker fees
       takerFee: new BigNumber(0), // 0 taker fees
@@ -294,35 +306,11 @@ class HoneyLemonService {
   }
 
   async getContracts(address) {
-    // Get contract events where the address was the long trader
-    const longPositionTokensMintedEvents = await this.marketContractProxy.getPastEvents(
-      'PositionTokensMinted',
-      {
-        filter: { longTokenRecipient: address },
-        fromBlock: 0,
-        toBlock: 'latest'
-      }
-    );
-    // Process the returned events
-    const longContractsProcessed = this.processEventObjects(
-      'long',
-      longPositionTokensMintedEvents
-    );
+    const data = await this.subgraphClient.request(CONTRACTS_QUERY, { address });
 
-    // Get contract events where the address was the short trader
-    const shortPositionTokensMintedEvents = await this.marketContractProxy.getPastEvents(
-      'PositionTokensMinted',
-      {
-        filter: { shortTokenRecipient: address },
-        fromBlock: 0,
-        toBlock: 'latest'
-      }
-    );
-    // Process the returned events
-    const shortContractsProcessed = this.processEventObjects(
-      'long',
-      shortPositionTokensMintedEvents
-    );
+    // TODO: additional processing, calculate total price by iterating over fills
+    const shortContractsProcessed = data.user.contractsAsMaker;
+    const longContractsProcessed = data.user.contractsAsTaker;
 
     return {
       longContracts: longContractsProcessed,
@@ -333,60 +321,41 @@ class HoneyLemonService {
   async redeemContract(someContractIdentifier, address) {
     // TODO
   }
-
-  processEventObjects = (traderDirection, eventsArray) => {
-    let contractsProcessed = {};
-    eventsArray.forEach(contract => {
-      // If the object does not exist init it
-      if (!contractsProcessed[contract.returnValues.marketId]) {
-        contractsProcessed[contract.returnValues.marketId] = {
-          marketId: contract.returnValues.marketId,
-          contractName: contract.returnValues.contractName.replace(/[^ -~]+/g, ''),
-          marketContractAddress: contract.returnValues.latestMarketContract,
-          direction: traderDirection,
-          totalQuantity: parseInt(contract.returnValues.qtyToMint),
-          averagePrice: parseInt(web3.utils.hexToUtf8(contract.returnValues.bridgeData)),
-          trades: [
-            {
-              timeStamp: contract.returnValues.time,
-              quantity: parseInt(contract.returnValues.qtyToMint),
-              price: parseInt(web3.utils.hexToUtf8(contract.returnValues.bridgeData))
-            }
-          ],
-          longTokenAddress: contract.returnValues.longTokenAddress,
-          shortTokenAddress: contract.returnValues.shortTokenAddress,
-          counterParty:
-            traderDirection == 'long'
-              ? contract.returnValues.shortTokenRecipient
-              : contract.returnValues.longTokenRecipient,
-          status: 'open' // will be changed if this spesific
-        };
-        // if the object already exists add the trade to the trades array
-      } else {
-        // Add the trade to the trades array
-        contractsProcessed[contract.returnValues.marketId].trades.push({
-          timeStamp: contract.returnValues.time,
-          quantity: parseInt(contract.returnValues.qtyToMint),
-          price: parseInt(web3.utils.hexToUtf8(contract.returnValues.bridgeData))
-        });
-        // Update the total quantity for this contract for the given marketId
-        contractsProcessed[contract.returnValues.marketId].totalQuantity =
-          contractsProcessed[contract.returnValues.marketId].totalQuantity +
-          parseInt(contract.returnValues.qtyToMint);
-
-        // Calculate the average sale price for this contract for the given marketId
-        // by finding total spent and the total TH bought.
-        let totalSpent = 0;
-        contractsProcessed[contract.returnValues.marketId].trades.forEach(trade => {
-          totalSpent = totalSpent + trade.price * trade.quantity;
-        });
-
-        contractsProcessed[contract.returnValues.marketId].averagePrice =
-          totalSpent / contractsProcessed[contract.returnValues.marketId].totalQuantity;
-      }
-    });
-    return contractsProcessed;
-  };
 }
+
+const CONTRACTS_QUERY = /* GraphQL */ `
+  fragment ContractFragment on Contract {
+    id
+    createdAt
+    marketId
+    contractName
+    qtyToMint
+    latestMarketContract
+    time
+    contractName
+    longTokenAddress
+    shortTokenAddress
+    longTokenRecipient
+    shortTokenRecipient
+    transaction {
+      blockNumber
+      fills {
+        makerAssetFilledAmount
+        takerAssetFilledAmount
+      }
+    }
+  }
+
+  query($address: ID!) {
+    user(id: $address) {
+      contractsAsMaker {
+        ...ContractFragment
+      }
+      contractsAsTaker {
+        ...ContractFragment
+      }
+    }
+  }
+`;
 
 module.exports = HoneyLemonService;

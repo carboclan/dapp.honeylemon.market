@@ -355,9 +355,9 @@ contract('MarketCollateralPool', function(accounts) {
         });
 
         it('should not charge collateral fees', async function() {
-          const expectedCollateralTransfer = (await feeMarketContract.COLLATERAL_PER_UNIT()).mul(
-            qtyToMint
-          );
+          const expectedCollateralTransfer = (
+            await feeMarketContract.COLLATERAL_PER_UNIT()
+          ).mul(qtyToMint);
 
           const finalCollateralBalance = await collateralToken.balanceOf.call(
             accounts[0]
@@ -388,9 +388,9 @@ contract('MarketCollateralPool', function(accounts) {
 
         it('should charge correct collateralFees', async function() {
           const expectedCollateralFee = collateralFeePerUnit.mul(qtyToMint);
-          const expectedCollateralTransfer = (await feeMarketContract.COLLATERAL_PER_UNIT()).mul(
-            qtyToMint
-          );
+          const expectedCollateralTransfer = (
+            await feeMarketContract.COLLATERAL_PER_UNIT()
+          ).mul(qtyToMint);
 
           const finalCollateralBalance = await collateralToken.balanceOf.call(
             accounts[0]
@@ -467,9 +467,9 @@ contract('MarketCollateralPool', function(accounts) {
         });
 
         it('should not charge collateral fees', async function() {
-          const expectedCollateralTransfer = (await mktFeeMarketContract.COLLATERAL_PER_UNIT()).mul(
-            qtyToMint
-          );
+          const expectedCollateralTransfer = (
+            await mktFeeMarketContract.COLLATERAL_PER_UNIT()
+          ).mul(qtyToMint);
 
           const finalCollateralBalance = await collateralToken.balanceOf.call(
             accounts[0]
@@ -558,9 +558,9 @@ contract('MarketCollateralPool', function(accounts) {
 
         it('should still charge correct collateralFees', async function() {
           const expectedCollateralFee = collateralFeePerUnit.mul(qtyToMint);
-          const expectedCollateralTransfer = (await collateralFeeMarketContract.COLLATERAL_PER_UNIT()).mul(
-            qtyToMint
-          );
+          const expectedCollateralTransfer = (
+            await collateralFeeMarketContract.COLLATERAL_PER_UNIT()
+          ).mul(qtyToMint);
 
           const finalCollateralBalance = await collateralToken.balanceOf.call(
             accounts[0]
@@ -607,9 +607,9 @@ contract('MarketCollateralPool', function(accounts) {
 
         it('should still charge correct collateralFees', async function() {
           const expectedCollateralFee = collateralFeePerUnit.mul(qtyToMint);
-          const expectedCollateralTransfer = (await collateralFeeMarketContract.COLLATERAL_PER_UNIT()).mul(
-            qtyToMint
-          );
+          const expectedCollateralTransfer = (
+            await collateralFeeMarketContract.COLLATERAL_PER_UNIT()
+          ).mul(qtyToMint);
 
           const finalCollateralBalance = await collateralToken.balanceOf.call(
             accounts[0]
@@ -853,9 +853,9 @@ contract('MarketCollateralPool', function(accounts) {
       );
 
       // 3. attempt to redeem too much long tokens
-      const longTokenQtyToRedeem = (await longPositionToken.balanceOf.call(
-        accounts[0]
-      )).add(new BN('1'));
+      const longTokenQtyToRedeem = (
+        await longPositionToken.balanceOf.call(accounts[0])
+      ).add(new BN('1'));
       try {
         await collateralPool.settleAndClose(
           marketContract.address,
@@ -876,9 +876,9 @@ contract('MarketCollateralPool', function(accounts) {
 
       // 4. attempt to redeem too much short tokens
       error = null;
-      const shortTokenQtyToRedeem = (await shortPositionToken.balanceOf.call(
-        accounts[0]
-      )).add(new BN('1'));
+      const shortTokenQtyToRedeem = (
+        await shortPositionToken.balanceOf.call(accounts[0])
+      ).add(new BN('1'));
       try {
         await collateralPool.settleAndClose(
           marketContract.address,

@@ -46,11 +46,12 @@ before(async function() {
 
   honeylemonService = new HoneylemonService(
     process.env.SRA_URL,
+    process.env.SUBGRAPH_URL,
     minterBridge.address,
     marketContractProxy.address,
     collateralToken.address,
     paymentToken.address,
-    web3,
+    web3.currentProvider,
     1337,
     marketContractProxy.abi,
     MarketCollateralPool.abi,

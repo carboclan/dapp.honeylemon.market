@@ -7,7 +7,7 @@ module.exports = {
     path: path.resolve(__dirname, 'dist'),
     filename: 'index.js',
     library: 'honeylemon',
-    libraryTarget: 'commonjs2',
+    libraryTarget: 'commonjs2'
   },
   optimization: {
     minimize: false

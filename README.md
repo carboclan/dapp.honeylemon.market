@@ -7,4 +7,6 @@ Useful commands:
 
 API URL: http://localhost:3000/sra/v3/
 
+Subgraph URL: http://localhost:8000/subgraphs/name/honeylemon/honeylemon-graph
+
 Ganache URL: http://localhost:8545

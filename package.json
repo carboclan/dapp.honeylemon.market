@@ -17,6 +17,7 @@
     "@0x/web3-wrapper": "7.0.7",
     "@chainsafe/truffle-plugin-abigen": "0.0.1",
     "@openzeppelin/test-helpers": "^0.5.5",
+    "graphql-request": "^1.8.2",
     "openzeppelin-solidity": "2.2.0",
     "truffle": "5.1.18"
   },
@@ -49,12 +50,10 @@
   },
   "scripts": {
     "test": "truffle test",
-    "lint": "prettier-eslint --write './**/*.js' './**/*.sol' --ignore './node_modules/**' --ignore './coverage/**' --ignore ./build/** --ignore ./webapp/**",
+    "lint": "prettier-eslint --write \"$(pwd)/**/*.js\" \"$(pwd)/**/*.sol\" --ignore './node_modules/**' --ignore './coverage/**' --ignore './build/**' --ignore './webapp/**' --ignore './dist/**'",
     "build": "webpack --config webpack.config.js --color -p --progress --hide-modules --display-optimization-bailout"
   },
   "husky": {
-    "hooks": {
-      "pre-commit": "npm run lint && git add ."
-    }
+    "hooks": {}
   }
 }
