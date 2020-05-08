@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Typography, Grid, makeStyles, FilledInput, Link, InputAdornment } from '@material-ui/core';
-import { useHoneyLemon } from '../contexts/HoneyLemonContext';
+import { useHoneylemon } from '../contexts/HoneyLemonContext';
 const { BigNumber } = require('@0x/utils');
 
 const useStyles = makeStyles(({ spacing }) => ({
@@ -15,7 +15,7 @@ const useStyles = makeStyles(({ spacing }) => ({
 
 const BuyContractPage: React.SFC = () => {
   // const { wallet, onboard, address, network, balance, notify } = useOnboard();
-  const {honeyLemonService} = useHoneyLemon();
+  const {honeylemonService} = useHoneylemon()
   const classes = useStyles();
 
   const [totalPrice, setTotalPrice] = useState(0);
@@ -26,7 +26,7 @@ const BuyContractPage: React.SFC = () => {
   useEffect(() => {
     let cancelled = false;
     const fetchData = async () => {
-      const result = await honeyLemonService.getQuoteForBudget(new BigNumber(totalPrice))
+      const result = await honeylemonService.getQuoteForBudget(new BigNumber(totalPrice))
       if (!cancelled) {
         console.log(result);
         //setTotalHashAmount(Number(result));
@@ -34,7 +34,7 @@ const BuyContractPage: React.SFC = () => {
     };
     fetchData();
     return () => { cancelled = true }
-  }, [totalPrice, honeyLemonService]);
+  }, [totalPrice, honeylemonService]);
 
   return (
     <Grid container alignItems='stretch' justify='center' spacing={2}>

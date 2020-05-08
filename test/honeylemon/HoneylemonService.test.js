@@ -29,6 +29,7 @@ let accounts = null,
   // variables
   currentDayCounter = 0,
   mriInput = null,
+  currentMRIScaled = null,
   // tested service
   honeylemonService = null;
 
@@ -47,15 +48,12 @@ before(async function() {
   honeylemonService = new HoneylemonService(
     process.env.SRA_URL,
     process.env.SUBGRAPH_URL,
+    web3.currentProvider,
+    1337,
     minterBridge.address,
     marketContractProxy.address,
     collateralToken.address,
-    paymentToken.address,
-    web3.currentProvider,
-    1337,
-    marketContractProxy.abi,
-    MarketCollateralPool.abi,
-    MarketContractMPX.abi
+    paymentToken.address
   );
 
   // Stub orders
@@ -103,9 +101,7 @@ before(async function() {
 
   // Starting MRI value
   mriInput = 0.00001833;
-  const currentMRIScaled = new BigNumber(mriInput).multipliedBy(
-    new BigNumber('100000000')
-  ); //1e8
+  currentMRIScaled = new BigNumber(mriInput).multipliedBy(new BigNumber('100000000')); //1e8
   // expiration time in the future
   let currentContractTime = (await marketContractProxy.getTime.call()).toNumber();
   let contractDuration = (await marketContractProxy.CONTRACT_DURATION()).toNumber();
@@ -304,36 +300,64 @@ describe('HoneylemonService', () => {
 
     expect(txHash).to.not.be.null;
   });
-  it('Retrieve open contracts', async () => {
-    // Create positions for long and short token holder
-    const fillSize = new BigNumber(1);
+  it('Calculate required Collateral', async () => {
+    const amount = new BigNumber(1000);
+    // Expected collateral requirement is defined by the CFD cap price (found by the currentMRI),
+    // the contract duration and the collateral requirement %. This defines the market protocol's
+    // COLLATERAL_PER_UNIT value.
+    const expectedCollateralRequirement = amount
+      .multipliedBy(currentMRIScaled)
+      .multipliedBy(new BigNumber(28))
+      .multipliedBy(new BigNumber(1.35));
+    console.log('expected', expectedCollateralRequirement.toString());
 
-    // Create two contracts. taker participates as a taker in both. Maker is only involved
-    // in the first contract.
-    await fill0xOrderForAddresses(1, takerAddress, makerAddress);
-    // await time.increase(10); // increase by 10 seconds to signify 1 day
-    await fill0xOrderForAddresses(2, takerAddress, makerAddress);
-    // await time.increase(10); // increase by 10 seconds to signify 1 day
-    await fill0xOrderForAddresses(3, takerAddress, makerAddress);
-
-    await createNewMarketProtocolContract(0, mriInput, 'MRI-BTC-28D-20200502');
-
-    await fill0xOrderForAddresses(2, takerAddress, makerAddress);
-
-    // Get contracts object from HoneyLemonService
-    console.log('test');
-    const { longContracts, shortContracts } = await honeylemonService.getContracts(
-      takerAddress
+    const actualCollateralRequirement = await honeylemonService.calculateRequiredCollateral(
+      amount.toString()
     );
-    console.log('longContracts', longContracts);
-    console.log('shortContracts', shortContracts);
 
-    const { longContracts2, shortContracts2 } = await honeylemonService.getContracts(
-      makerAddress
+    const absoluteDriftErrorNumerator = new BigNumber(actualCollateralRequirement).minus(
+      new BigNumber(expectedCollateralRequirement)
     );
-    console.log('longContracts2', longContracts2);
-    console.log('shortContracts2', shortContracts2);
-  });
+    const absoluteDriftError = absoluteDriftErrorNumerator
+      .dividedBy(new BigNumber(expectedCollateralRequirement))
+      .multipliedBy(new BigNumber(100))
+      .absoluteValue();
+
+    // Due to the rounding in the contracts as a result of the number of decimal points of precision
+    // there is a small amount of error introduced. This check ensures that the rounding is less than
+    // 0.001% as an absolute error. This amounts to about 577.3 satoshi per bitcoin traded on the platform.
+    assert.equal(absoluteDriftError.lt(new BigNumber(0.001)), true);
+  }),
+    it('Retrieve open contracts', async () => {
+      // Create positions for long and short token holder
+      const fillSize = new BigNumber(1);
+
+      // Create two contracts. taker participates as a taker in both. Maker is only involved
+      // in the first contract.
+      await fill0xOrderForAddresses(1, takerAddress, makerAddress);
+      // await time.increase(10); // increase by 10 seconds to signify 1 day
+      await fill0xOrderForAddresses(2, takerAddress, makerAddress);
+      // await time.increase(10); // increase by 10 seconds to signify 1 day
+      await fill0xOrderForAddresses(3, takerAddress, makerAddress);
+
+      await createNewMarketProtocolContract(0, mriInput, 'MRI-BTC-28D-20200502');
+
+      await fill0xOrderForAddresses(2, takerAddress, makerAddress);
+
+      // Get contracts object from HoneyLemonService
+      console.log('test');
+      const { longContracts, shortContracts } = await honeylemonService.getContracts(
+        takerAddress
+      );
+      console.log('longContracts', longContracts);
+      console.log('shortContracts', shortContracts);
+
+      const { longContracts2, shortContracts2 } = await honeylemonService.getContracts(
+        makerAddress
+      );
+      console.log('longContracts2', longContracts2);
+      console.log('shortContracts2', shortContracts2);
+    });
 });
 async function fill0xOrderForAddresses(size, taker, maker) {
   const fillSize = new BigNumber(size);
