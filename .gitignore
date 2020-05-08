@@ -10,4 +10,4 @@ goBindings/
 .volumes/
 docker/.volumes/
 build/
-dist/
+dist/*

@@ -1,5 +1,10 @@
 const { GraphQLClient } = require('graphql-request');
 const { HttpClient, OrderbookRequest } = require('@0x/connect');
+const MinterBridgeArtefacts = require('../../build/contracts/MinterBridge.json');
+const MarketContractProxyArtefacts = require('../../build/contracts/MarketContractProxy.json');
+const CollateralTokenArtefacts = require('../../build/contracts/CollateralToken.json');
+const PaymentTokenArtefacts = require('../../build/contracts/PaymentToken.json');
+
 const {
   marketUtils,
   generatePseudoRandomSalt,
@@ -16,49 +21,42 @@ const NULL_ADDRESS = '0x0000000000000000000000000000000000000000';
 const ORDER_FILL_GAS = 150000;
 const PAYMENT_TOKEN_DECIMALS = 0; // USDC has 6 decimals
 
-class HoneyLemonService {
+class HoneylemonService {
   constructor(
     apiUrl,
     subgraphUrl,
+    provider, //This should be a 0x Subprovider wrapped provider
+    chainId,
     minterBridgeAddress,
     marketContractProxyAddress,
     collateralTokenAddress,
-    paymentTokenAddress,
-    provider,
-    chainId,
-    marketContractProxyAbi,
-    MarketCollateralPoolAbi,
-    marketContractAbi
+    paymentTokenAddress
   ) {
     this.apiClient = new HttpClient(apiUrl);
     this.subgraphClient = new GraphQLClient(subgraphUrl);
-    this.minterBridgeAddress = minterBridgeAddress;
-    this.marketContractProxyAddress = marketContractProxyAddress;
-    this.collateralTokenAddress = collateralTokenAddress;
-    this.paymentTokenAddress = paymentTokenAddress;
-
-    // TODO: This should be more generic. DI the wrapped provider in from the webapp level
-    // Confirm with Chris whether this will break anything else upstream of the app
-
+    this.minterBridgeAddress = minterBridgeAddress || MinterBridgeArtefacts.networks[chainId].address;
+    this.marketContractProxyAddress = marketContractProxyAddress || MarketContractProxyArtefacts.networks[chainId].address;
+    this.collateralTokenAddress = collateralTokenAddress || CollateralTokenArtefacts.networks[chainId].address;
+    this.paymentTokenAddress = paymentTokenAddress || PaymentTokenArtefacts.networks[chainId].address;
     this.provider = provider;
     this.chainId = chainId;
     this.contractWrappers = new ContractWrappers(this.provider, { chainId });
 
     // Calculate asset data
     this.makerAssetData = assetDataUtils.encodeERC20BridgeAssetData(
-      marketContractProxyAddress,
-      minterBridgeAddress,
+      this.marketContractProxyAddress,
+      this.minterBridgeAddress,
       '0x0000'
     );
-    this.takerAssetData = assetDataUtils.encodeERC20AssetData(paymentTokenAddress);
+    this.takerAssetData = assetDataUtils.encodeERC20AssetData(this.paymentTokenAddress);
 
     // Instantiate tokens
-    this.collateralToken = new ERC20TokenContract(collateralTokenAddress, this.provider);
-    this.paymentToken = new ERC20TokenContract(paymentTokenAddress, this.provider);
+    this.collateralToken = new ERC20TokenContract(this.collateralTokenAddress, this.provider);
+    this.paymentToken = new ERC20TokenContract(this.paymentTokenAddress, this.provider);
 
     this.marketContractProxy = new web3.eth.Contract(
-      marketContractProxyAbi,
-      marketContractProxyAddress
+      MarketContractProxyArtefacts.abi,
+      this.marketContractProxyAddress
     );
     console.log('Honeylemon service initiated!');
   }
@@ -305,6 +303,12 @@ class HoneyLemonService {
     return this.apiClient.getOrdersAsync({ makerAddress });
   }
 
+  async calculateRequiredCollateral(amount) {
+    return await this.marketContractProxy.methods
+      .calculateRequiredCollateral(amount)
+      .call();
+  }
+
   async getContracts(address) {
     const data = await this.subgraphClient.request(CONTRACTS_QUERY, { address });
 
@@ -358,4 +362,4 @@ const CONTRACTS_QUERY = /* GraphQL */ `
   }
 `;
 
-module.exports = HoneyLemonService;
+module.exports = HoneylemonService;

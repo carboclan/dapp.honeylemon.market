@@ -269,15 +269,8 @@ async function runExport() {
   const honeylemonService = new HoneylemonService(
     'http://localhost:3000',
     'http://localhost:8000/subgraphs/name/honeylemon/honeylemon-graph',
-    minterBridge.address,
-    marketContractProxy.address,
-    collateralToken.address,
-    paymentToken.address,
     web3.currentProvider,
-    chainId,
-    MarketContractProxy.abi,
-    MarketCollateralPool.abi,
-    MarketContractMPX.abi
+    chainId
   );
 
   const order = honeylemonService.createOrder(
