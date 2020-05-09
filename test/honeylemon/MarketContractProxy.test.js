@@ -26,7 +26,9 @@ contract(
       marketContractMPX,
       sToken,
       lToken,
-      marketCollateralPool;
+      marketCollateralPool,
+      _currentMri,
+      _expiration;
 
     before(async () => {
       // get deployed collateral token
@@ -39,6 +41,12 @@ contract(
       minterBridge = await MinterBridge.deployed();
       // get deployed MarketContractProxy
       marketContractProxy = await MarketContractProxy.deployed();
+
+      const pc = new PayoutCalculator();
+      _currentMri = new BigNumber(pc.getMRIDataForDay(0)).multipliedBy(
+        new BigNumber(1e8)
+      );
+      _expiration = Math.round(new Date().getTime() / 1000) + 3600 * 24 * 28;
     });
 
     describe('Check deployment config', () => {
@@ -130,11 +138,6 @@ contract(
     });
 
     describe('deploy new market contract', async () => {
-      const pc = new PayoutCalculator();
-      const _currentMRI = new BigNumber(pc.getMRIDataForDay(0)).multipliedBy(
-        new BigNumber('100000000')
-      );
-      const _expiration = Math.round(new Date().getTime() / 1000) + 3600 * 24 * 28;
       const _marketAndsTokenNames = [];
       _marketAndsTokenNames.push(web3.utils.fromAscii('BTC'));
       _marketAndsTokenNames.push(web3.utils.fromAscii('MRI-BTC-28D-00000000-Long'));
@@ -142,11 +145,11 @@ contract(
 
       it('generate contract specs', async () => {
         let _capPrice = new BigNumber(28)
-          .multipliedBy(_currentMRI)
+          .multipliedBy(_currentMri)
           .multipliedBy(1.35e8)
           .dividedBy(1e8);
         let dailySpecs = await marketContractProxy.generateContractSpecs(
-          _currentMRI,
+          _currentMri,
           _expiration
         );
 
@@ -165,7 +168,7 @@ contract(
       it('should revert deploying market contract from non-owner', async () => {
         await expectRevert.unspecified(
           marketContractProxy.deployContract(
-            _currentMRI,
+            _currentMri,
             _marketAndsTokenNames,
             _expiration,
             { from: random }
@@ -177,7 +180,7 @@ contract(
         let marketArrayBefore = await marketContractProxy.getAllMarketContracts();
 
         await marketContractProxy.deployContract(
-          _currentMRI,
+          _currentMri,
           _marketAndsTokenNames,
           _expiration
         );
@@ -192,7 +195,7 @@ contract(
         await expectRevert.unspecified(
           marketContractProxy.dailySettlement(
             0,
-            _currentMRI,
+            _currentMri,
             _marketAndsTokenNames,
             _expiration,
             { from: random }
@@ -214,7 +217,7 @@ contract(
 
         await marketContractProxy.dailySettlement(
           0,
-          _currentMRI,
+          _currentMri,
           _marketAndsTokenNames,
           _expiration,
           { from: honeyLemonOracle }
@@ -228,7 +231,7 @@ contract(
 
         assert.equal(
           (await marketContractProxy.getLatestMri()).toString(),
-          _currentMRI,
+          _currentMri,
           'latest MRI value mismatch'
         );
         assert.equal(
@@ -245,6 +248,33 @@ contract(
           await marketContractProxy.getLatestMarketCollateralPool(),
           marketCollateralPool,
           'Latest market collateral pool address mismatch'
+        );
+      });
+    });
+
+    describe('Collateral requirement', () => {
+      it('calculate required collateral', async () => {
+        let amount = new BigNumber(100);
+        let expectedCollateralRequirement = amount
+          .multipliedBy(_currentMri)
+          .multipliedBy(28)
+          .multipliedBy(1.35);
+        let collateralRequired = await marketContractProxy.calculateRequiredCollateral(
+          amount.toString()
+        );
+
+        let absoluteDriftErrorNumerator = new BigNumber(collateralRequired).minus(
+          new BigNumber(expectedCollateralRequirement)
+        );
+        let absoluteDriftError = absoluteDriftErrorNumerator
+          .dividedBy(new BigNumber(expectedCollateralRequirement))
+          .multipliedBy(new BigNumber(100))
+          .absoluteValue();
+
+        assert.equal(
+          absoluteDriftError.lt(new BigNumber(0.001)),
+          true,
+          'collateral required mismatch'
         );
       });
     });
