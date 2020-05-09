@@ -1,7 +1,7 @@
 version: "3"
 services:
     ganache:
-        image: "0xorg/ganache-cli:istanbul"
+        image: "0xorg/ganache-cli"
         ports:
             - "8545:8545"
         environment:
@@ -49,7 +49,7 @@ services:
         depends_on:
             - postgres
             - mesh
-        image: 0xorg/0x-api:latest
+        image: 0xorg/0x-api:latest@sha256:54aa7a7f8b8ab8ad84a403ac8eb1ff995e5e5066ce4d45c2aa700e8b115406e3
         restart: on-failure
         environment:
             ETHEREUM_RPC_URL: "http://ganache:8545"
