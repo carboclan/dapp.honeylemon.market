@@ -27,15 +27,18 @@ const OfferContractPage: React.SFC = () => {
   useEffect(() => {
     let cancelled = false;
     const fetchData = async () => {
-      const result = await honeylemonService.getCollateralForContract(hashAmount) //TODO Fetch the required amount of collateral from API
+      const result = await honeylemonService.getCollateralForContract(hashAmount)
       if (!cancelled) {
         setBtcAmount(Number(result) / (10 ** 8)); //TODO: Confirm whether scaling here is correct
       }
     };
     fetchData();
-    setTotalHashPrice(hashPrice * hashAmount * 28)
     return () => { cancelled = true }
-  }, [hashPrice, hashAmount, honeylemonService]);
+  }, [hashAmount, honeylemonService]);
+
+  useEffect(() => {
+    setTotalHashPrice(hashPrice * hashAmount * 28)
+  }, [hashPrice, hashAmount])
 
   const createOffer = async () => {
     try {
@@ -70,6 +73,7 @@ const OfferContractPage: React.SFC = () => {
             const newValueString = e.target.value;
             if (!newValueString) {
               setHashPrice(0);
+              setTotalHashPrice(0);
               return;
             }
             const newValue = parseFloat(newValueString);
@@ -113,12 +117,12 @@ const OfferContractPage: React.SFC = () => {
       <Grid item xs={12}><Button fullWidth onClick={createOffer}>BUY NOW</Button></Grid>
       <Grid item xs={12}>
         <Typography>
-          You will offer ${hashAmount} contracts at ${hashPrice} Th/day.
+          You will offer {hashAmount} contracts at ${hashPrice} Th/day.
           If a hodler buys your offer you will receive ${totalHashPrice} USDT.
           You will be asked to post the hodlers max win of {btcAmount} BTC as collateral.
           The amount of that collateral that the hodler receives will be determined
-          by the average value of the <u>Mining Revenue Index</u> over the 28 days starting
-          when the hodler pays you.
+          by the average value of the <Link href='#'>Mining Revenue Index</Link> over the 
+          28 days starting when the hodler pays you.
         </Typography>
       </Grid>
       <Grid item xs={12}><Typography>See <Link href='#'>full contract specification here.</Link></Typography></Grid>

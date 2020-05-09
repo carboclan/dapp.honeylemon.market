@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Typography, Grid, makeStyles, FilledInput, Link, InputAdornment } from '@material-ui/core';
 import { useHoneylemon } from '../contexts/HoneylemonContext';
+import { useOnboard } from '../contexts/OnboardContext';
 const { BigNumber } = require('@0x/utils');
 
 const useStyles = makeStyles(({ spacing }) => ({
@@ -14,8 +15,8 @@ const useStyles = makeStyles(({ spacing }) => ({
 }))
 
 const BuyContractPage: React.SFC = () => {
-  // const { wallet, onboard, address, network, balance, notify } = useOnboard();
-  const {honeylemonService} = useHoneylemon()
+  const { address } = useOnboard();
+  const { honeylemonService } = useHoneylemon()
   const classes = useStyles();
 
   const [totalPrice, setTotalPrice] = useState(0);
@@ -35,6 +36,18 @@ const BuyContractPage: React.SFC = () => {
     fetchData();
     return () => { cancelled = true }
   }, [totalPrice, honeylemonService]);
+
+  const createOffer = async () => {
+    try {
+      const approval = await honeylemonService.approveCollateralToken(address, new BigNumber(btcAmount));
+      const order = honeylemonService.createOrder(address, new BigNumber(hashAmount), new BigNumber(hashPrice));
+      const signedOrder = await honeylemonService.signOrder(order);
+      const submittedOrder = await honeylemonService.submitOrder(signedOrder);
+    } catch (error) {
+      console.log('Something went wrong creating the offer');
+      console.log(error);
+    }
+  }
 
   return (
     <Grid container alignItems='stretch' justify='center' spacing={2}>
