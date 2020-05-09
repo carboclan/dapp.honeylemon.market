@@ -59,7 +59,7 @@ class HoneylemonService {
       MarketContractProxyArtefacts.abi,
       this.marketContractProxyAddress
     );
-    
+
     this.marketContractProxy.setProvider(this.provider);
     console.log('Honeylemon service initiated!');
   }
@@ -212,13 +212,6 @@ class HoneylemonService {
     ); // 10 days
     const exchangeAddress = this.contractWrappers.exchange.address;
 
-    // Encode the price of the sale into the maker asset data feed. This is used to pass the price to the
-    // honey lemon market contract proxy to enrich the sale event to make retrieval easier on the front end.
-    const makerAddetDataIncludingPrice = assetDataUtils.encodeERC20BridgeAssetData(
-      this.marketContractProxyAddress,
-      this.minterBridgeAddress,
-      web3.utils.utf8ToHex(pricePerTh.toString()) // this is the sale price within the data feed for the minterbride
-    );
     const order = {
       makerAddress, // maker is the first address (miner)
       takerAddress: NULL_ADDRESS, // taker is open and can be filled by anyone (when an investor comes along)
@@ -233,7 +226,7 @@ class HoneylemonService {
       feeRecipientAddress: NULL_ADDRESS, // No fee recipient
       senderAddress: NULL_ADDRESS, // Sender address is open and can be submitted by anyone
       salt: generatePseudoRandomSalt(), // Random value to provide uniqueness
-      makerAssetData: makerAddetDataIncludingPrice,
+      makerAssetData: this.makerAssetData,
       takerAssetData: this.takerAssetData,
       exchangeAddress,
       makerFeeAssetData: '0x',
