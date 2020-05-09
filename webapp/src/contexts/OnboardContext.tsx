@@ -3,7 +3,8 @@ import { useState, useEffect } from 'react';
 import Onboard from 'bnc-onboard';
 
 import Notify from 'bnc-notify';
-import { API, Wallet } from 'bnc-onboard/dist/src/interfaces';
+import { API as OnboardApi, Wallet } from 'bnc-onboard/dist/src/interfaces';
+import { API as NotifyApi } from 'bnc-notify/dist/src/interfaces';
 import { fromWei } from 'web3-utils';
 
 export type OnboardProviderProps = {
@@ -13,12 +14,12 @@ export type OnboardProviderProps = {
 }
 
 export type OnboardContext = {
-  onboard?: API,
+  onboard?: OnboardApi,
   address?: string,
   network?: number,
   balance?: number,
   wallet?: Wallet,
-  notify?: any, //TODO update this when types exist
+  notify?: NotifyApi,
   isReady: boolean,
   checkIsReady(): Promise<boolean>,
 }
@@ -30,13 +31,13 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
   const [network, setNetwork] = useState<number | undefined>(undefined)
   const [balance, setBalance] = useState<number | undefined>(undefined)
   const [wallet, setWallet] = useState<Wallet | undefined>(undefined)
-  const [onboard, setOnboard] = useState<API | undefined>(undefined)
+  const [onboard, setOnboard] = useState<OnboardApi | undefined>(undefined)
   const [isReady, setIsReady] = useState<boolean>(false);
-  const [notify, setNotify] = useState(undefined)
+  const [notify, setNotify] = useState<NotifyApi | undefined>(undefined)
 
   useEffect(() => {
     const onboard = Onboard({
-      dappId: onboardProps.networkId !== 1337 ? onboardProps.dappId : undefined,
+      // dappId: onboardProps.networkId !== 1337 ? onboardProps.dappId : undefined,
       networkId: onboardProps.networkId,
       darkMode: true,
       walletSelect: {
@@ -54,8 +55,8 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
         address: setAddress,
         network: setNetwork,
         balance: (balance: string) => {
-          (balance) 
-            ? setBalance(Number(fromWei(balance, 'ether'))) 
+          (balance)
+            ? setBalance(Number(fromWei(balance, 'ether')))
             : setBalance(0);
         },
         wallet: (wallet: Wallet) => {
@@ -71,13 +72,17 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
 
     const savedWallet = localStorage.getItem('honeylemon.selectedWallet');
     savedWallet && onboard.walletSelect(savedWallet);
-    
+
     setOnboard(onboard);
-    setNotify(Notify({
-      dappId: onboardProps.dappId,
-      networkId: onboardProps.networkId,
-      darkMode: true,
-    }));
+
+    if (onboardProps.networkId !== 1337) {
+      setNotify(Notify({
+        dappId: onboardProps.dappId,
+        networkId: onboardProps.networkId,
+        darkMode: true,
+      }));
+
+    }
 
   }, [onboardProps.dappId, onboardProps.networkId])
 

@@ -21,15 +21,18 @@ const BuyContractPage: React.SFC = () => {
 
   const [totalPrice, setTotalPrice] = useState(0);
   const [hashAmount, setHashAmount] = useState(0);
-  const [hashPrice, setTotalHashPrice] = useState(0);
+  const [hashPrice, setHashPrice] = useState(0);
   const [totalHashAmount, setTotalHashAmount] = useState(0);
+  const [isValid, setIsValid] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
     const fetchData = async () => {
       const result = await honeylemonService.getQuoteForBudget(new BigNumber(totalPrice))
       if (!cancelled) {
-        console.log(result);
+        const isLiquid = !!(Number(result.remainingFillAmount.toString()) === 0)
+        setIsValid(isLiquid);
+        setHashPrice(Number(result.price.toString()));
         //setTotalHashAmount(Number(result));
       }
     };
@@ -37,12 +40,14 @@ const BuyContractPage: React.SFC = () => {
     return () => { cancelled = true }
   }, [totalPrice, honeylemonService]);
 
-  const createOffer = async () => {
+  const buyOffer = async () => {
     try {
-      const approval = await honeylemonService.approveCollateralToken(address, new BigNumber(btcAmount));
-      const order = honeylemonService.createOrder(address, new BigNumber(hashAmount), new BigNumber(hashPrice));
-      const signedOrder = await honeylemonService.signOrder(order);
-      const submittedOrder = await honeylemonService.submitOrder(signedOrder);
+      console.log('Buying');
+      // const order = await honeylemonService.createOrder(makerAddress, sizeTh, pricePerTh);
+      // const approval = await honeylemonService.approveCollateralToken(address, new BigNumber(btcAmount));
+      // const order = honeylemonService.createOrder(address, new BigNumber(hashAmount), new BigNumber(hashPrice));
+      // const signedOrder = await honeylemonService.signOrder(order);
+      // const submittedOrder = await honeylemonService.submitOrder(signedOrder);
     } catch (error) {
       console.log('Something went wrong creating the offer');
       console.log(error);
@@ -55,7 +60,7 @@ const BuyContractPage: React.SFC = () => {
         <Typography style={{ fontWeight: 'bold' }}>Buy Mining Rewards</Typography>
       </Grid>
       <Grid item xs={6}><Typography style={{ fontWeight: 'bold' }}>PRICE</Typography></Grid>
-      <Grid item xs={6} className={classes.rightAlign}><Typography color='secondary'>$0.115 Th/day</Typography></Grid>
+      <Grid item xs={6} className={classes.rightAlign}><Typography color='secondary'>${hashPrice} Th/day</Typography></Grid>
       <Grid item xs={12}><Typography style={{ fontWeight: 'bold' }}>ENTER BUDGET</Typography></Grid>
       <Grid item xs={10} className={classes.rightAlign}>
         <FilledInput
@@ -84,7 +89,7 @@ const BuyContractPage: React.SFC = () => {
         <Typography style={{ fontWeight: 'bold' }} color='secondary'>USDT</Typography>
       </Grid>
       <Grid item xs={12}><Typography className={classes.rightAlign}>31.06 Th for 28 days</Typography></Grid>
-      <Button fullWidth>BUY NOW</Button><Grid item xs={12}></Grid>
+      <Button fullWidth onClick={() => buyOffer()} disabled={!isValid}>BUY NOW</Button><Grid item xs={12}></Grid>
       <Grid item xs={12}>
         <Typography>
           You will pay ${totalPrice} to buy {hashAmount} Th of hasrate for 28 days for ${hashPrice} Th/day.
