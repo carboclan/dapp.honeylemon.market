@@ -7,8 +7,8 @@ const CollateralToken = artifacts.require('CollateralToken'); // IMBTC
 const PaymentToken = artifacts.require('PaymentToken'); // USDC
 const MarketContractFactoryMPX = artifacts.require('MarketContractFactoryMPX');
 const MarketContractMPX = artifacts.require('MarketContractMPX');
-const PositionToken = artifacts.require('PositionToken'); // Long & Short tokens
 const MarketCollateralPool = artifacts.require('MarketCollateralPool');
+const PositionToken = artifacts.require('PositionToken'); // Long & Short tokens
 
 // Helper libraries
 const { PayoutCalculator } = require('../../payout-calculator');
@@ -18,17 +18,7 @@ const ADDRESS_ZERO = '0x0000000000000000000000000000000000000000';
 contract(
   'MarketContractProxy',
   ([honeyLemonOracle, makerAddress, takerAddress, , , , , , _0xBridgeProxy, random]) => {
-    let minterBridge,
-      marketContractProxy,
-      imbtc,
-      usdc,
-      marketContractFactory,
-      marketContractMPX,
-      sToken,
-      lToken,
-      marketCollateralPool,
-      _currentMri,
-      _expiration;
+    let minterBridge, marketContractProxy, imbtc, usdc, _currentMri, _expiration;
 
     before(async () => {
       // get deployed collateral token
@@ -275,6 +265,117 @@ contract(
           absoluteDriftError.lt(new BigNumber(0.001)),
           true,
           'collateral required mismatch'
+        );
+      });
+    });
+
+    describe('Mint positions token', () => {
+      const amount = new BigNumber(100);
+      let neededCollateral;
+
+      before(async () => {
+        // set minter bridge address (for testing purpose)
+        await marketContractProxy.setMinterBridgeAddress(_0xBridgeProxy, {
+          from: honeyLemonOracle
+        });
+
+        // calculate needed collateral token
+        neededCollateral = await marketContractProxy.calculateRequiredCollateral(
+          amount.toString()
+        );
+        await imbtc.transfer(_0xBridgeProxy, neededCollateral.toString());
+
+        // approve token transfer from makerAddress
+        await imbtc.approve(
+          marketContractProxy.address,
+          new BigNumber(2).pow(256).minus(1),
+          { from: _0xBridgeProxy }
+        );
+      });
+
+      it('should revert minting positions tokens if caller is not minter bridge contract', async () => {
+        await expectRevert(
+          marketContractProxy.mintPositionTokens(
+            amount.toString(),
+            takerAddress,
+            makerAddress,
+            '0x0000',
+            { from: random }
+          ),
+          'Only Minter Bridge'
+        );
+      });
+
+      it('mint positions tokens', async () => {
+        // get market contract
+        let latestMarketContractAddr = await marketContractProxy.getLatestMarketContract();
+        let latestMarketContract = await MarketContractMPX.at(latestMarketContractAddr);
+        // get market collateral pool
+        let latestMarketCollateralPoolAddr = await marketContractProxy.getLatestMarketCollateralPool();
+        let marketCollateralPool = await MarketCollateralPool.at(
+          latestMarketCollateralPoolAddr
+        );
+        // get long & short token
+        let lToken = await PositionToken.at(
+          await latestMarketContract.LONG_POSITION_TOKEN()
+        );
+        let sToken = await PositionToken.at(
+          await latestMarketContract.SHORT_POSITION_TOKEN()
+        );
+
+        let makerLongTokenBalanceBefore = new BigNumber(
+          (await lToken.balanceOf(makerAddress)).toString()
+        );
+        let takerLongTokenBalanceBefore = new BigNumber(
+          (await lToken.balanceOf(takerAddress)).toString()
+        );
+        let makerShortTokenBalanceBefore = new BigNumber(
+          (await sToken.balanceOf(makerAddress)).toString()
+        );
+        let takerShortTokenBalanceBefore = new BigNumber(
+          (await sToken.balanceOf(takerAddress)).toString()
+        );
+
+        await marketContractProxy.mintPositionTokens(
+          amount.toString(),
+          takerAddress,
+          makerAddress,
+          '0x0000',
+          { from: _0xBridgeProxy }
+        );
+
+        assert.equal(
+          new BigNumber((await lToken.balanceOf(makerAddress)).toString())
+            .minus(makerLongTokenBalanceBefore)
+            .toString(),
+          0,
+          'Miner long token balance mismatch'
+        );
+        assert.equal(
+          new BigNumber((await lToken.balanceOf(takerAddress)).toString())
+            .minus(takerLongTokenBalanceBefore)
+            .toString(),
+          amount.toString(),
+          'Investor long token balance mismatch'
+        );
+        assert.equal(
+          new BigNumber((await sToken.balanceOf(makerAddress)).toString())
+            .minus(makerShortTokenBalanceBefore)
+            .toString(),
+          amount.toString(),
+          'Miner short token balance mismatch'
+        );
+        assert.equal(
+          new BigNumber((await sToken.balanceOf(takerAddress)).toString())
+            .minus(takerShortTokenBalanceBefore)
+            .toString(),
+          0,
+          'Investor short token balance mismatch'
+        );
+        assert.equal(
+          (await imbtc.balanceOf(marketCollateralPool.address)).toString(),
+          neededCollateral.toString(),
+          'Market collateral pool balance mismatch'
         );
       });
     });
