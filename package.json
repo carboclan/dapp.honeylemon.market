@@ -17,6 +17,7 @@
     "@0x/web3-wrapper": "7.0.7",
     "@chainsafe/truffle-plugin-abigen": "0.0.1",
     "@openzeppelin/test-helpers": "^0.5.5",
+    "eslint-cli": "^1.1.1",
     "openzeppelin-solidity": "2.2.0",
     "prettier-plugin-solidity": "^1.0.0-alpha.47",
     "truffle": "5.1.18"
@@ -40,11 +41,11 @@
   },
   "scripts": {
     "test": "truffle test",
-    "lint": "prettier-eslint --write './**/*.js' './**/*.sol' --ignore './node_modules/**' --ignore './coverage/**'"
+    "lint": "prettier-eslint --write $PWD/'./src/*.js' $PWD/'./contracts/*.sol'"
   },
   "husky": {
     "hooks": {
-      "pre-commit": "npm run lint && git add ."
+      "pre-commit": "npm run lint"
     }
   }
 }
