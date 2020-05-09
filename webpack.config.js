@@ -10,7 +10,7 @@ module.exports = {
     libraryTarget: 'commonjs2'
   },
   optimization: {
-    minimize: false,
+    minimize: true,
   },
   module: {
     rules: [
@@ -21,7 +21,6 @@ module.exports = {
           loader: 'babel-loader',
           options: {
             presets: ['@babel/preset-env'],
-            plugins: ['@babel/plugin-proposal-class-properties']
           }
         }
       }

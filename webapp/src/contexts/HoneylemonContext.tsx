@@ -2,7 +2,8 @@ import * as React from "react";
 import { useState, useEffect } from "react";
 import { useOnboard } from "./OnboardContext";
 import { HoneylemonService } from "honeylemon";
-import { MetamaskSubprovider } from '@0x/subproviders';
+import { MetamaskSubprovider, Web3JsProvider } from '@0x/subproviders';
+import Web3 from 'web3'
 
 export type HoneylemonContext = {
   honeylemonService: any; //TODO update this when types exist
@@ -20,9 +21,20 @@ function HoneylemonProvider({ children }: HoneylemonProviderProps) {
   useEffect(() => {
     if (isReady && wallet && network) {
       const initHoneylemonService = async () => {
+        let wrappedSubprovider;
+        const web3 = new Web3(wallet.provider)
+        switch (wallet.name) {
+          case 'MetaMask':
+            wrappedSubprovider = new MetamaskSubprovider(web3.currentProvider as Web3JsProvider);
+            break;
+          default:
+            wrappedSubprovider = wallet.provider;
+        }
+
         const honeylemonService = new HoneylemonService(
           process.env.REACT_APP_SRA_URL,
-          new MetamaskSubprovider(wallet.provider), //TODO Make this more generic
+          process.env.REACT_APP_SUBGRAPH_URL,
+          wrappedSubprovider,
           network
         );
         setHoneylemonService(honeylemonService);

@@ -40,6 +40,7 @@ class HoneylemonService {
     this.paymentTokenAddress = paymentTokenAddress || PaymentTokenArtefacts.networks[chainId].address;
     this.provider = provider;
     this.chainId = chainId;
+
     this.contractWrappers = new ContractWrappers(this.provider, { chainId });
 
     // Calculate asset data
@@ -58,6 +59,8 @@ class HoneylemonService {
       MarketContractProxyArtefacts.abi,
       this.marketContractProxyAddress
     );
+    
+    this.marketContractProxy.setProvider(this.provider);
     console.log('Honeylemon service initiated!');
   }
 

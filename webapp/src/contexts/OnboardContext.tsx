@@ -18,7 +18,7 @@ export type OnboardContext = {
   network?: number,
   balance?: number,
   wallet?: Wallet,
-  notify?: any, //TODO update this when types exist
+  // notify?: any, //TODO update this when types exist
   isReady: boolean,
   checkIsReady(): Promise<boolean>,
 }
@@ -32,11 +32,11 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
   const [wallet, setWallet] = useState<Wallet | undefined>(undefined)
   const [onboard, setOnboard] = useState<API | undefined>(undefined)
   const [isReady, setIsReady] = useState<boolean>(false);
-  const [notify, setNotify] = useState(undefined)
+  // const [notify, setNotify] = useState(undefined)
 
   useEffect(() => {
     const onboard = Onboard({
-      dappId: onboardProps.dappId,
+      dappId: onboardProps.networkId !== 1337 ? onboardProps.dappId : undefined,
       networkId: onboardProps.networkId,
       darkMode: true,
       walletSelect: {
@@ -48,7 +48,7 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
         { checkName: 'connect' },
         { checkName: 'accounts' },
         { checkName: 'network' },
-        { checkName: 'balance', minimumBalance: '100000' }
+        { checkName: 'balance', minimumBalance: '0' }
       ],
       subscriptions: {
         address: setAddress,
@@ -73,11 +73,11 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
     savedWallet && onboard.walletSelect(savedWallet);
     
     setOnboard(onboard);
-    setNotify(Notify({
-      dappId: onboardProps.dappId,
-      networkId: onboardProps.networkId,
-      darkMode: true,
-    }));
+    // setNotify(Notify({
+    //   dappId: onboardProps.dappId,
+    //   networkId: onboardProps.networkId,
+    //   darkMode: true,
+    // }));
 
   }, [onboardProps.dappId, onboardProps.networkId])
 
@@ -94,7 +94,7 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
       balance: balance,
       wallet: wallet,
       onboard: onboard,
-      notify: notify,
+      // notify: notify,
       isReady: isReady,
       checkIsReady,
     }}>
