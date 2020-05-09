@@ -221,8 +221,8 @@ describe('HoneylemonService', () => {
       pricePerTh = new BigNumber(100);
     const order = honeylemonService.createOrder(makerAddress, sizeTh, pricePerTh);
     const signedOrder = await honeylemonService.signOrder(order);
+    console.log('signedOrder', JSON.stringify(signedOrder, 4));
     const result = await honeylemonService.submitOrder(signedOrder);
-    console.log(result);
   });
 
   it('estimates 0x fees', async () => {
@@ -244,7 +244,7 @@ describe('HoneylemonService', () => {
       takerAssetFillAmounts,
       takerAddress
     );
-    expect(gas).to.eq(570624);
+    expect(gas).to.be.within(500000, 600000);
   });
 
   it('fills orders', async () => {
@@ -309,7 +309,6 @@ describe('HoneylemonService', () => {
       .multipliedBy(currentMRIScaled)
       .multipliedBy(new BigNumber(28))
       .multipliedBy(new BigNumber(1.35));
-    console.log('expected', expectedCollateralRequirement.toString());
 
     const actualCollateralRequirement = await honeylemonService.calculateRequiredCollateral(
       amount.toString()
@@ -345,18 +344,13 @@ describe('HoneylemonService', () => {
       await fill0xOrderForAddresses(2, takerAddress, makerAddress);
 
       // Get contracts object from HoneyLemonService
-      console.log('test');
       const { longContracts, shortContracts } = await honeylemonService.getContracts(
         takerAddress
       );
-      console.log('longContracts', longContracts);
-      console.log('shortContracts', shortContracts);
 
       const { longContracts2, shortContracts2 } = await honeylemonService.getContracts(
         makerAddress
       );
-      console.log('longContracts2', longContracts2);
-      console.log('shortContracts2', shortContracts2);
     });
 });
 async function fill0xOrderForAddresses(size, taker, maker) {
@@ -364,12 +358,9 @@ async function fill0xOrderForAddresses(size, taker, maker) {
   const longBalanceBefore = await longToken[currentDayCounter].balanceOf(taker);
   const shortBalanceBefore = await shortToken[currentDayCounter].balanceOf(maker);
 
-  console.log('shortBalanceBefore.toNumber()', shortBalanceBefore.toNumber());
   const { resultOrders, takerAssetFillAmounts } = await honeylemonService.getQuoteForSize(
     fillSize
   );
-  // console.log('resultOrders', resultOrders);
-  // console.log('takerAssetFillAmounts', takerAssetFillAmounts);
   await honeylemonService.approveCollateralToken(maker);
   await honeylemonService.approvePaymentToken(taker);
   const gasPrice = 5e9; // 5 GWEI
@@ -389,14 +380,12 @@ async function fill0xOrderForAddresses(size, taker, maker) {
     gasPrice,
     value
   });
-  console.log('txHash', txHash);
   expect(txHash).to.not.be.null;
   // Check position token balances
   const longBalanceAfter = await longToken[currentDayCounter].balanceOf(taker);
   assert.equal(longBalanceAfter.toNumber() - longBalanceBefore.toNumber(), fillSize);
 
   const shortBalanceAfter = await shortToken[currentDayCounter].balanceOf(maker);
-  console.log('shortBalanceAfter.toString', shortBalanceAfter.toString());
 
   assert.equal(shortBalanceAfter.toNumber() - shortBalanceBefore.toNumber(), fillSize);
 }
@@ -424,7 +413,6 @@ async function createNewMarketProtocolContract(lookbackIndex, mriInput, marketNa
   );
 
   currentDayCounter = +1; //increment for different contract deployments for sequential days
-  console.log(currentDayCounter);
   const deployedMarketContract = await marketContractProxy.getLatestMarketContract();
   const marketContract = await MarketContractMPX.at(deployedMarketContract);
   longToken[currentDayCounter] = await PositionToken.at(
