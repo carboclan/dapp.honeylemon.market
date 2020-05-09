@@ -88,6 +88,7 @@ class HoneylemonService {
     });
 
     // Calculate total price
+    const makerAssetFillAmounts = [];
     const takerAssetFillAmounts = [];
     let totalMakerFillAmount = new BigNumber(0);
     let totalTakerFillAmount = new BigNumber(0);
@@ -105,6 +106,7 @@ class HoneylemonService {
       totalMakerFillAmount = totalMakerFillAmount.plus(makerFillAmount);
       totalTakerFillAmount = totalTakerFillAmount.plus(takerFillAmount);
 
+      makerAssetFillAmounts[i] = makerFillAmount;
       takerAssetFillAmounts[i] = takerFillAmount;
       remainingSize = remainingSize.minus(makerFillAmount);
     }
@@ -116,8 +118,11 @@ class HoneylemonService {
       price,
       resultOrders,
       ordersRemainingFillableMakerAssetAmounts,
+      makerAssetFillAmounts,
       takerAssetFillAmounts,
-      remainingFillAmount
+      remainingMakerFillAmount: remainingFillAmount,
+      totalMakerFillAmount,
+      totalTakerFillAmount
     };
   }
 
@@ -137,6 +142,7 @@ class HoneylemonService {
     });
 
     // Calculate total price and takerAssetFillAmounts
+    const makerAssetFillAmounts = [];
     const takerAssetFillAmounts = [];
     let totalMakerFillAmount = new BigNumber(0);
     let totalTakerFillAmount = new BigNumber(0);
@@ -154,6 +160,7 @@ class HoneylemonService {
       totalMakerFillAmount = totalMakerFillAmount.plus(makerFillAmount);
       totalTakerFillAmount = totalTakerFillAmount.plus(takerFillAmount);
 
+      makerAssetFillAmounts[i] = makerFillAmount;
       takerAssetFillAmounts[i] = takerFillAmount;
       remainingBudget = remainingBudget.minus(takerFillAmount);
     }
@@ -166,7 +173,10 @@ class HoneylemonService {
       resultOrders,
       ordersRemainingFillableTakerAssetAmounts,
       takerAssetFillAmounts,
-      remainingFillAmount
+      makerAssetFillAmounts,
+      remainingTakerFillAmount: remainingFillAmount,
+      totalMakerFillAmount,
+      totalTakerFillAmount
     };
   }
 

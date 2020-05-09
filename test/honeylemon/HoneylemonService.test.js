@@ -144,29 +144,47 @@ describe('HoneylemonService', () => {
       price,
       resultOrders,
       ordersRemainingFillableMakerAssetAmounts,
+      makerAssetFillAmounts,
       takerAssetFillAmounts,
-      remainingFillAmount
+      remainingMakerFillAmount,
+      totalMakerFillAmount,
+      totalTakerFillAmount
     } = await honeylemonService.getQuoteForSize(new BigNumber(1600));
 
     expect(price).to.eql(new BigNumber(363.75));
+    expect(makerAssetFillAmounts).to.eql([new BigNumber(1000), new BigNumber(600)]);
     expect(takerAssetFillAmounts).to.eql([new BigNumber(360000), new BigNumber(222000)]);
+    expect(totalMakerFillAmount).to.eql(new BigNumber(1600));
+    expect(totalTakerFillAmount).to.eql(new BigNumber(582000));
+    expect(remainingMakerFillAmount).to.eql(new BigNumber(0));
   });
 
   it('should give correct quote for budget', async () => {
     const {
       price,
       resultOrders,
-      ordersRemainingFillableTakerAssetAmounts,
+      ordersRemainingFillableMakerAssetAmounts,
+      makerAssetFillAmounts,
       takerAssetFillAmounts,
-      remainingFillAmount
+      remainingTakerFillAmount,
+      totalMakerFillAmount,
+      totalTakerFillAmount
     } = await honeylemonService.getQuoteForBudget(new BigNumber(1000000));
 
     expect(price.sd(5)).to.eql(new BigNumber('370.1'));
+    expect(makerAssetFillAmounts).to.eql([
+      new BigNumber(1000),
+      new BigNumber(1200),
+      new BigNumber(502)
+    ]);
     expect(takerAssetFillAmounts).to.eql([
       new BigNumber(360000),
       new BigNumber(444000),
       new BigNumber(196000)
     ]);
+    expect(totalMakerFillAmount).to.eql(new BigNumber(2702));
+    expect(totalTakerFillAmount).to.eql(new BigNumber(1000000));
+    expect(remainingTakerFillAmount).to.eql(new BigNumber(0));
   });
 
   it('should create and sign order', async () => {

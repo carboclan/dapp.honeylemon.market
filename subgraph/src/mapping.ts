@@ -95,7 +95,7 @@ function _createContract(event: PositionTokensMintedEvent): Contract {
     let contract = new Contract(id);
     let params = event.params;
     contract.marketId = params.marketId;
-    contract.contractName = 'test'; //TODO: use params.contractName;
+    contract.contractName = 'test'; // TODO: params.contractName.replace('0x00', '');
     contract.longTokenRecipient = params.longTokenRecipient.toHex();
     contract.shortTokenRecipient = params.shortTokenRecipient.toHex();
     contract.qtyToMint = params.qtyToMint;
