@@ -1,0 +1,16 @@
+=============== May 9, 2020 (UTC) ===============
+10:15:06.581477 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
+10:15:06.588640 db@open opening
+10:15:06.591268 version@stat F·[] S·0B[] Sc·[]
+10:15:06.600158 db@janitor F·2 G·0
+10:15:06.600473 db@open done T·11.5991ms
+=============== May 9, 2020 (UTC) ===============
+10:15:10.885820 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
+10:15:10.894292 version@stat F·[] S·0B[] Sc·[]
+10:15:10.894982 db@open opening
+10:15:10.896623 journal@recovery F·1
+10:15:10.897235 journal@recovery recovering @1
+10:15:10.902484 memdb@flush created L0@2 N·2 S·279B "/pe..riv,v1":"/pe..pub,v2"
+10:15:10.905020 version@stat F·[1] S·279B[279B] Sc·[0.25]
+10:15:10.918770 db@janitor F·3 G·0
+10:15:10.919078 db@open done T·23.6098ms

@@ -195,7 +195,7 @@ class HoneylemonService {
     const makerAddetDataIncludingPrice = assetDataUtils.encodeERC20BridgeAssetData(
       this.marketContractProxyAddress,
       this.minterBridgeAddress,
-      web3.utils.utf8ToHex(pricePerTh.toString()) // this is the sale price within the data feed for the minterbride
+      this.web3.utils.utf8ToHex(pricePerTh.toString()) // this is the sale price within the data feed for the minterbride
     );
     const order = {
       makerAddress, // maker is the first address (miner)
