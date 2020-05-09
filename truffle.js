@@ -6,7 +6,7 @@ module.exports = {
     development: {
       host: process.env.TRUFFLE_DEVELOP_HOST || 'localhost',
       port: process.env.TRUFFLE_DEVELOP_PORT || 8545,
-      network_id: '*' // Match any network id
+      network_id: '1337' // Match any network id
     },
     coverage: {
       host: 'truffle-coverage',
