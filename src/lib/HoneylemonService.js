@@ -335,24 +335,17 @@ const CONTRACTS_QUERY = /* GraphQL */ `
     contractName
     longTokenAddress
     shortTokenAddress
-    longTokenRecipient
-    shortTokenRecipient
+    longTokenRecipient {
+      id
+    }
+    shortTokenRecipient {
+      id
+    }
     transaction {
       blockNumber
       fills {
         makerAssetFilledAmount
         takerAssetFilledAmount
-      }
-    }
-  }
-
-  query($address: ID!) {
-    user(id: $address) {
-      contractsAsMaker {
-        ...ContractFragment
-      }
-      contractsAsTaker {
-        ...ContractFragment
       }
     }
   }

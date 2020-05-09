@@ -325,6 +325,7 @@ async function runExport() {
 
   await recordBalances('After 0x order');
 
+  return;
   /**************************************************
    * Advance time and settle market protocol oracle *
    **************************************************/
