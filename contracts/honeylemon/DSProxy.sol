@@ -87,6 +87,8 @@ contract DSProxy is DSAuth, DSNote {
         setCache(_cacheAddr);
     }
 
+    event LogEvent(address msgsender, address addressthis, uint param,address tokenAddress);
+
     function() external payable {}
 
     // use the proxy to execute calldata _data on contract _code
@@ -111,7 +113,7 @@ contract DSProxy is DSAuth, DSNote {
         note
         returns (bytes memory response)
     {
-        require(_target != address(0), 'ds-proxy-target-address-required');
+        require(_target != address(0), "ds-proxy-target-address-required");
 
         // call contract in current context
         assembly {
@@ -136,11 +138,12 @@ contract DSProxy is DSAuth, DSNote {
                     revert(add(response, 0x20), size)
                 }
         }
+        // emit LogEvent(msg.sender, address(this));
     }
 
     //set new cache
     function setCache(address _cacheAddr) public payable auth note returns (bool) {
-        require(_cacheAddr != address(0), 'ds-proxy-cache-address-required');
+        require(_cacheAddr != address(0), "ds-proxy-cache-address-required");
         cache = DSProxyCache(_cacheAddr); // overwrite cache
         return true;
     }
@@ -169,7 +172,7 @@ contract DSProxyFactory {
     modifier onlyMarketContractProxy() {
         require(
             msg.sender == marketContractProxy,
-            'Only callable by MarketContractProxy'
+            "Only callable by MarketContractProxy"
         );
         _;
     }

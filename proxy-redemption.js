@@ -256,8 +256,16 @@ async function runExport() {
   await marketContractProxy.createDSProxyWallet({ from: makerAddress });
   let makerDSProxy = await DSProxy.at(makerDSProxyAddress);
 
+  console.log('takerAddress', takerAddress);
+  console.log('makerAddress', makerAddress);
+
   console.log('takerDSProxyAddress', takerDSProxyAddress);
   console.log('makerDSProxyAddress', makerDSProxyAddress);
+
+  console.log(
+    'taker getUserAddressOrDSProxy',
+    await marketContractProxy.getUserAddressOrDSProxy.call(takerAddress)
+  );
 
   console.log(
     'addressToDSProxy',
@@ -406,16 +414,6 @@ async function runExport() {
   //   [shortToken.address, marketContract.address, makerAmountToMint.toString(), '1']
   // );
 
-  // method 2
-  const unwindLongTokenTx = marketContractProxy.contract.methods
-    .batchRedeem(
-      [longToken.address],
-      [marketContract.address],
-      [makerAmountToMint],
-      ['1']
-    )
-    .encodeABI();
-
   // method3
   // const unwindLongTokenTx = web3.eth.abi.encodeFunctionSignature(
   //   'batchRedeem(address, address, uint256, bool)',
@@ -434,10 +432,33 @@ async function runExport() {
   //   '1'
   // );
 
+  // method 2
+  const unwindLongTokenTx = marketContractProxy.contract.methods
+    .batchRedeem(
+      [longToken.address],
+      [marketContract.address],
+      [makerAmountToMint],
+      ['1']
+    )
+    .encodeABI();
+
   console.log('encoded call', unwindLongTokenTx);
   console.log('_target', marketContractProxy.address);
   console.log('takerAddress', takerAddress);
   console.log('takerDSProxy owner', await takerDSProxy.owner());
+
+  // await marketContractProxy.batchRedeem(
+  //   [longToken.address],
+  //   [marketContract.address],
+  //   [makerAmountToMint],
+  //   ['1'],
+  //   { from: takerAddress }
+  // );
+
+  console.log(
+    'CollateralToken balance before',
+    (await collateralToken.balanceOf(takerAddress)).toString()
+  );
 
   let txObject = await takerDSProxy.execute(
     marketContractProxy.address,
@@ -447,15 +468,42 @@ async function runExport() {
     }
   );
 
+  console.log(
+    'CollateralToken balance after',
+    (await collateralToken.balanceOf(takerAddress)).toString()
+  );
   console.log('TAKER EXECUTED!');
-  console.log(txObject);
+  // console.log(txObject);
   // console.log(web3.utils.utf8ToHex('16'));
 
-  let BatchTokensRedeemed = await takerDSProxy.getPastEvents('BatchTokensRedeemed', {
+  let BatchTokensRedeemed = await marketContractProxy.getPastEvents(
+    'BatchTokensRedeemed',
+    {
+      fromBlock: 0,
+      toBlock: 'latest'
+    }
+  );
+  console.log('BatchTokensRedeemed', BatchTokensRedeemed);
+
+  let takerLogNote = await takerDSProxy.getPastEvents('LogNote', {
     fromBlock: 0,
     toBlock: 'latest'
   });
-  console.log('BatchTokensRedeemed', BatchTokensRedeemed);
+  console.log('takerLogNote', takerLogNote);
+  console.log('takerLogNote.length', takerLogNote.length);
+
+  let takerLogEvent1 = await marketContractProxy.getPastEvents('LogEvent', {
+    fromBlock: 0,
+    toBlock: 'latest'
+  });
+  console.log(' marketContractProxy takerLogEvent1', takerLogEvent1);
+
+  let takerLogEvent2 = await takerDSProxy.getPastEvents('LogEvent', {
+    fromBlock: 0,
+    toBlock: 'latest'
+  });
+  console.log('DSPRoxy takerLogEvent2', takerLogEvent2);
+
   // await longToken.approve(marketContract.address, takerAmountToMint, {
   //   from: takerAddress
   // });
