@@ -19,8 +19,8 @@ const assert = require('assert').strict;
 const pc = new PayoutCalculator();
 
 // Token mocks
-const CollateralToken = artifacts.require('CollateralToken'); // IMBTC
-const PaymentToken = artifacts.require('PaymentToken'); // USDC
+const CollateralToken = artifacts.require('CollateralToken'); // BTC
+const PaymentToken = artifacts.require('PaymentToken'); // USD
 const PositionToken = artifacts.require('PositionToken'); // To create the Long & Short tokens
 
 // Honey Lemon contracts
@@ -37,14 +37,14 @@ const MarketCollateralPool = artifacts.require('MarketCollateralPool');
 // Calculation constants
 const necessaryCollateralRatio = 0.35; // for 135% collateralization
 const multiplier = 28; // contract duration in days
-const collateralDecimals = 1e8; // scaling for imBTC (8 decimal points)
-const paymentDecimals = 1e6; // scaling for USDT or USDC (6 decimals)
+const collateralDecimals = 1e8; // scaling for BTC (8 decimal points)
+const paymentDecimals = 1e6; // scaling for USDT or USD (6 decimals)
 
 // simulation inputs
 const startingDay = 35; // Start date for day payout-calculator beginning contract date
 // Amounts are in Unit amounts, 0x requires base units (as many tokens use decimals)
 const makerAmountToMint = 1000; // TH of mining over a 1 month duration sold by the miner.
-const takerAmountToMint = 4000 * 1e6; // USDC sent from investor to miner. $4 ~ 1 month of 1TH mining rewards @ btc = 7k
+const takerAmountToMint = 4000 * 1e6; // USD sent from investor to miner. $4 ~ 1 month of 1TH mining rewards @ btc = 7k
 
 // Config:
 const REAL_INPUT = true;
@@ -56,10 +56,10 @@ async function runExport() {
   let balanceTracker = {};
   async function recordBalances(timeLabel) {
     balanceTracker[timeLabel] = {};
-    balanceTracker[timeLabel]['Maker imBTC'] = (await collateralToken.balanceOf(
+    balanceTracker[timeLabel]['Maker BTC'] = (await collateralToken.balanceOf(
       makerAddress
     )).toString();
-    balanceTracker[timeLabel]['Maker USDC'] = (await paymentToken.balanceOf(
+    balanceTracker[timeLabel]['Maker USD'] = (await paymentToken.balanceOf(
       makerAddress
     )).toString();
     balanceTracker[timeLabel]['Maker Long'] = (await longToken.balanceOf(
@@ -68,10 +68,16 @@ async function runExport() {
     balanceTracker[timeLabel]['Maker Short'] = (await shortToken.balanceOf(
       makerAddress
     )).toString();
-    balanceTracker[timeLabel]['Taker imBTC'] = (await collateralToken.balanceOf(
+    balanceTracker[timeLabel]['Maker DSProxy Long'] = (await longToken.balanceOf(
+      makerDSProxyAddress
+    )).toString();
+    balanceTracker[timeLabel]['Maker DSProxy Short'] = (await shortToken.balanceOf(
+      makerDSProxyAddress
+    )).toString();
+    balanceTracker[timeLabel]['Taker BTC'] = (await collateralToken.balanceOf(
       takerAddress
     )).toString();
-    balanceTracker[timeLabel]['Taker USDC'] = (await paymentToken.balanceOf(
+    balanceTracker[timeLabel]['Taker USD'] = (await paymentToken.balanceOf(
       takerAddress
     )).toString();
     balanceTracker[timeLabel]['Taker Long'] = (await longToken.balanceOf(
@@ -79,6 +85,12 @@ async function runExport() {
     )).toString();
     balanceTracker[timeLabel]['Taker Short'] = (await shortToken.balanceOf(
       takerAddress
+    )).toString();
+    balanceTracker[timeLabel]['Taker DSProxy Long'] = (await longToken.balanceOf(
+      takerDSProxyAddress
+    )).toString();
+    balanceTracker[timeLabel]['Taker DSProxy Short'] = (await shortToken.balanceOf(
+      takerDSProxyAddress
     )).toString();
   }
   function printDriftAndError(expectedCollateralTaken, actualCollateralTaken) {
@@ -188,8 +200,8 @@ async function runExport() {
    *********************/
   console.log('2. Generating 0x order...');
 
-  // Taker token is imBTC sent to collateralize the contractWe use CollateralToken.
-  // This is imBTC sent from the investor to the Market protocol contract
+  // Taker token is BTC sent to collateralize the contractWe use CollateralToken.
+  // This is BTC sent from the investor to the Market protocol contract
   const takerToken = { address: paymentToken.address };
 
   // 0x sees the marketContractProxy as the maker token. This has a `balanceOf` method to get 0x
@@ -224,11 +236,11 @@ async function runExport() {
       Amount: (mriInput * (1 + necessaryCollateralRatio)).toFixed(8),
       Description: 'Maximum MRI value that can be achieved in market'
     },
-    'Taker expected long(imBTC)': {
+    'Taker expected long(BTC)': {
       Amount: (mriInput * 28 * makerAmountToMint).toFixed(8),
       Description: 'Long value in BTC if current MRI continues over contract duration'
     },
-    'Maker required collateral(imBTC)': {
+    'Maker required collateral(BTC)': {
       Amount: contractSpecs[1].toNumber() * makerAmountToMint,
       Description: 'Satoshi the position will cost in collateral for the miner'
     }
@@ -244,35 +256,19 @@ async function runExport() {
   const exchangeAddress = contractWrappers.exchange.address;
 
   // Create DSProxy contracts from the callers. Start with taker
-  let takerDSProxyAddress = await marketContractProxy.createDSProxyWallet.call({
+  const takerDSProxyAddress = await marketContractProxy.createDSProxyWallet.call({
     from: takerAddress
   });
   await marketContractProxy.createDSProxyWallet({ from: takerAddress });
-  let takerDSProxy = await DSProxy.at(takerDSProxyAddress);
+  const takerDSProxy = await DSProxy.at(takerDSProxyAddress);
   // next make one for the maker
-  let makerDSProxyAddress = await marketContractProxy.createDSProxyWallet.call({
+  const makerDSProxyAddress = await marketContractProxy.createDSProxyWallet.call({
     from: makerAddress
   });
   await marketContractProxy.createDSProxyWallet({ from: makerAddress });
-  let makerDSProxy = await DSProxy.at(makerDSProxyAddress);
+  const makerDSProxy = await DSProxy.at(makerDSProxyAddress);
 
-  console.log('takerAddress', takerAddress);
-  console.log('makerAddress', makerAddress);
-
-  console.log('takerDSProxyAddress', takerDSProxyAddress);
-  console.log('makerDSProxyAddress', makerDSProxyAddress);
-
-  console.log(
-    'taker getUserAddressOrDSProxy',
-    await marketContractProxy.getUserAddressOrDSProxy.call(takerAddress)
-  );
-
-  console.log(
-    'addressToDSProxy',
-    await marketContractProxy.addressToDSProxy(takerAddress)
-  );
-
-  // Approve the contract wrapper from 0x to pull USDC from the taker(investor)
+  // Approve the contract wrapper from 0x to pull USD from the taker(investor)
   await paymentToken.approve(
     contractWrappers.contractAddresses.erc20Proxy,
     new BigNumber(10).pow(256).minus(1),
@@ -281,7 +277,7 @@ async function runExport() {
     }
   );
 
-  // Approve the contract wrapper from 0x to pull imBTC from the maker(miner)
+  // Approve the contract wrapper from 0x to pull BTC from the maker(miner)
   await collateralToken.approve(
     minterBridge.address,
     new BigNumber(10).pow(256).minus(1),
@@ -350,16 +346,10 @@ async function runExport() {
         gas: 6700000,
         value: 3000000000000000
       }); // value is required to pay 0x fees
-    console.log('txHash:', txHash);
+    // console.log('Filled 0x order txHash:', txHash);
   }
 
   await recordBalances('After 0x order');
-
-  const PositionTokensMintedEvent = await marketContractProxy.getPastEvents(
-    'PositionTokensMinted'
-  );
-
-  console.log('PositionTokensMintedEvent', PositionTokensMintedEvent);
 
   /**************************************************
    * Advance time and settle market protocol oracle *
@@ -387,136 +377,35 @@ async function runExport() {
    ***********************************************/
   console.log('5. redeeming tokens...');
 
-  // method1
-  // const unwindLongTokenTx = web3.eth.abi.encodeFunctionCall(
-  //   {
-  //     name: 'batchRedeem',
-  //     type: 'function',
-  //     inputs: [
-  //       {
-  //         name: 'tokenAddresses',
-  //         type: 'address'
-  //       },
-  //       {
-  //         name: 'marketAddresses',
-  //         type: 'address'
-  //       },
-  //       {
-  //         name: 'tokensToRedeem',
-  //         type: 'uint256'
-  //       },
-  //       {
-  //         name: 'traderLong',
-  //         type: 'bool'
-  //       }
-  //     ]
-  //   },
-  //   [shortToken.address, marketContract.address, makerAmountToMint.toString(), '1']
-  // );
-
-  // method3
-  // const unwindLongTokenTx = web3.eth.abi.encodeFunctionSignature(
-  //   'batchRedeem(address, address, uint256, bool)',
-  //   longToken.address,
-  //   marketContract.address,
-  //   makerAmountToMint,
-  //   '1'
-  // );
-
-  //method 4
-  // const unwindLongTokenTx = web3.eth.abi.encodeWithSignature(
-  //   'batchRedeem(address, address, uint256, bool)',
-  //   longToken.address,
-  //   marketContract.address,
-  //   makerAmountToMint.toString(),
-  //   '1'
-  // );
-
-  // method 2
+  // Create the unwind transactions by encoding the logic sent to the DS Proxy.
+  // This works by forwarding the call to the using Delegate call.
+  // batchRedeem script within the `marketContractProxy`
   const unwindLongTokenTx = marketContractProxy.contract.methods
     .batchRedeem(
       [longToken.address],
       [marketContract.address],
       [makerAmountToMint],
-      ['1']
+      [true] // to indicate the token is long
     )
     .encodeABI();
 
-  console.log('encoded call', unwindLongTokenTx);
-  console.log('_target', marketContractProxy.address);
-  console.log('takerAddress', takerAddress);
-  console.log('takerDSProxy owner', await takerDSProxy.owner());
-
-  // await marketContractProxy.batchRedeem(
-  //   [longToken.address],
-  //   [marketContract.address],
-  //   [makerAmountToMint],
-  //   ['1'],
-  //   { from: takerAddress }
-  // );
-
-  console.log(
-    'CollateralToken balance before',
-    (await collateralToken.balanceOf(takerAddress)).toString()
-  );
-
-  let txObject = await takerDSProxy.execute(
-    marketContractProxy.address,
-    unwindLongTokenTx,
-    {
-      from: takerAddress
-    }
-  );
-
-  console.log(
-    'CollateralToken balance after',
-    (await collateralToken.balanceOf(takerAddress)).toString()
-  );
-  console.log('TAKER EXECUTED!');
-  // console.log(txObject);
-  // console.log(web3.utils.utf8ToHex('16'));
-
-  let BatchTokensRedeemed = await marketContractProxy.getPastEvents(
-    'BatchTokensRedeemed',
-    {
-      fromBlock: 0,
-      toBlock: 'latest'
-    }
-  );
-  console.log('BatchTokensRedeemed', BatchTokensRedeemed);
-
-  let takerLogNote = await takerDSProxy.getPastEvents('LogNote', {
-    fromBlock: 0,
-    toBlock: 'latest'
+  await takerDSProxy.execute(marketContractProxy.address, unwindLongTokenTx, {
+    from: takerAddress
   });
-  console.log('takerLogNote', takerLogNote);
-  console.log('takerLogNote.length', takerLogNote.length);
 
-  let takerLogEvent1 = await marketContractProxy.getPastEvents('LogEvent', {
-    fromBlock: 0,
-    toBlock: 'latest'
+  // Also create the token for the short side to redeem.
+  const unwindShortTokenTx = marketContractProxy.contract.methods
+    .batchRedeem(
+      [shortToken.address],
+      [marketContract.address],
+      [makerAmountToMint],
+      [false] // to indicate the token is short
+    )
+    .encodeABI();
+
+  await makerDSProxy.execute(marketContractProxy.address, unwindShortTokenTx, {
+    from: makerAddress
   });
-  console.log(' marketContractProxy takerLogEvent1', takerLogEvent1);
-
-  let takerLogEvent2 = await takerDSProxy.getPastEvents('LogEvent', {
-    fromBlock: 0,
-    toBlock: 'latest'
-  });
-  console.log('DSPRoxy takerLogEvent2', takerLogEvent2);
-
-  // await longToken.approve(marketContract.address, takerAmountToMint, {
-  //   from: takerAddress
-  // });
-  // await shortToken.approve(marketContract.address, makerAmountToMint, {
-  //   from: makerAddress
-  // });
-
-  // await marketContractPool.settleAndClose(marketContract.address, makerAmountToMint, 0, {
-  //   from: takerAddress
-  // });
-  // await marketContractPool.settleAndClose(marketContract.address, 0, makerAmountToMint, {
-  //   from: makerAddress
-  // });
 
   await recordBalances('After redemption');
   console.log('token value changes');
@@ -527,7 +416,7 @@ async function runExport() {
    ***********************************************************/
 
   console.log('6. Validating token balance transfers...');
-  console.log('6.1 Correct imBTC collateral from maker👇');
+  console.log('6.1 Correct BTC collateral from maker👇');
   // Upper Bound = Miner Revenue Index * (1 + Necessary Collateral Ratio)
   // Necessary Collateral = Upper Bound * Multiplier
   const upperBound = mriInput * (1 + necessaryCollateralRatio); //1 + 0.35
@@ -538,12 +427,12 @@ async function runExport() {
     .multipliedBy(new BigNumber(collateralDecimals))
     .multipliedBy(new BigNumber(makerAmountToMint));
 
-  const actualCollateralTaken = // Difference in imBTC balance before and after 0x order
-    balanceTracker['Before 0x order']['Maker imBTC'] -
-    balanceTracker['After 0x order']['Maker imBTC'];
-  console.log('\t -> Actual imBTC Taken as collateral from miner', actualCollateralTaken);
+  const actualCollateralTaken = // Difference in BTC balance before and after 0x order
+    balanceTracker['Before 0x order']['Maker BTC'] -
+    balanceTracker['After 0x order']['Maker BTC'];
+  console.log('\t -> Actual BTC Taken as collateral from miner', actualCollateralTaken);
   console.log(
-    '\t -> expected imBTC Taken as collateral from miner',
+    '\t -> expected BTC Taken as collateral from miner',
     expectedCollateralTaken
   );
 
@@ -551,36 +440,36 @@ async function runExport() {
 
   // assert.equal(expectedCollateralTaken.toString(), actualCollateralTaken.toString());
 
-  console.log('6.2 Correct USDC sent from taker👇');
-  // USDC value is sent from the investor to the miner. Value should be amount spesified in the original order.
+  console.log('6.2 Correct USD sent from taker👇');
+  // USD value is sent from the investor to the miner. Value should be amount spesified in the original order.
   const expectedUSDCTaken = takerAmountToMint;
   const actualUSDCTaken =
-    balanceTracker['Before 0x order']['Taker USDC'] -
-    balanceTracker['After 0x order']['Taker USDC'];
-  console.log('\t -> Actual USDC taken as payment from investor', actualUSDCTaken);
-  console.log('\t -> Expected USDC taken as payment from investor', expectedUSDCTaken);
+    balanceTracker['Before 0x order']['Taker USD'] -
+    balanceTracker['After 0x order']['Taker USD'];
+  console.log('\t -> Actual USD taken as payment from investor', actualUSDCTaken);
+  console.log('\t -> Expected USD taken as payment from investor', expectedUSDCTaken);
 
   printDriftAndError(expectedUSDCTaken, actualUSDCTaken);
 
   // assert.equal(expectedUSDCTaken, actualUSDCTaken);
 
-  console.log('6.3 Correct Long & Short token mint👇');
+  console.log('6.3 Correct Long & Short token mint & sent to the respective DSProxies👇');
   // Long and short tokens are minted for investor and miner. Both should receive the number of tokens = to the
   // number of TH sold (makerAmountToMint)
   const teraHashSold = makerAmountToMint;
 
   // LONG (tokens sent to miner)
   const actualLongTokensMinted =
-    balanceTracker['After 0x order']['Taker Long'] -
-    balanceTracker['Before 0x order']['Taker Long'];
+    balanceTracker['After 0x order']['Taker DSProxy Long'] -
+    balanceTracker['Before 0x order']['Taker DSProxy Long'];
   assert(teraHashSold, actualLongTokensMinted);
   console.log('\t -> Long token minted(Investor)', actualLongTokensMinted);
   printDriftAndError(teraHashSold, actualLongTokensMinted);
 
   // SHORT (tokens sent to investor)
   const actualShortTokensMinted =
-    balanceTracker['After 0x order']['Maker Short'] -
-    balanceTracker['Before 0x order']['Maker Short'];
+    balanceTracker['After 0x order']['Maker DSProxy Short'] -
+    balanceTracker['Before 0x order']['Maker DSProxy Short'];
   assert(teraHashSold, actualShortTokensMinted);
   console.log('\t -> Short token minted(Miner)', actualShortTokensMinted);
   printDriftAndError(teraHashSold, actualLongTokensMinted);
@@ -595,8 +484,8 @@ async function runExport() {
     .multipliedBy(new BigNumber(lookedBackMRI))
     .multipliedBy(new BigNumber(collateralDecimals));
   const actualLongRedemption =
-    balanceTracker['After redemption']['Taker imBTC'] -
-    balanceTracker['After 0x order']['Taker imBTC'];
+    balanceTracker['After redemption']['Taker BTC'] -
+    balanceTracker['After 0x order']['Taker BTC'];
   console.log('\t -> Actual BTC redeemed for long token(Investor)', actualLongRedemption);
   console.log(
     '\t -> Expected BTC redeemed for long token(Investor)',
@@ -612,8 +501,8 @@ async function runExport() {
   // SHORT (miner holding tokens)
   const expectedShortRedemption = expectedCollateralTaken - expectedLongRedemption;
   const actualShortRedemption =
-    balanceTracker['After redemption']['Maker imBTC'] -
-    balanceTracker['After 0x order']['Maker imBTC'];
+    balanceTracker['After redemption']['Maker BTC'] -
+    balanceTracker['After 0x order']['Maker BTC'];
   console.log('\t -> Actual BTC redeemed for short token(Miner)', actualShortRedemption);
   console.log(
     '\t -> Expected BTC redeemed for short token(Miner)',
