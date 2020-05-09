@@ -11,6 +11,8 @@ Subgraph URL: http://localhost:8000/subgraphs/name/honeylemon/honeylemon-graph
 
 Ganache URL: http://localhost:8545
 
+If running the order-test.js script, restart the local ganache instance
+
 Ganache Accounts:
 0 - Deployer - 0x5409ED021D9299bf6814279A6A1411A7e866A631 - 0xf2f48ee19680706196e2e339e5da3491186e0c4c5030670656b0e0164837257d
 1 - Miner - 0x6Ecbe1DB9EF729CBe972C83Fb886247691Fb6beb - 0x5d862464fe9303452126c8bc94274b8c5f9874cbd219789b3eb2128075a76f72

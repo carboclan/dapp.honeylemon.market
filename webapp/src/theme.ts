@@ -19,6 +19,9 @@ const theme = (createMuiTheme)({
       root: {
         color: '#000',
         backgroundColor: '#FFE500'
+      },
+      disabled: {
+        backgroundColor: '#4a4622'
       }
     },
     MuiAppBar: {
