@@ -16,6 +16,9 @@ const MarketCollateralPool = artifacts.require('MarketCollateralPool');
 const HoneylemonService = require('../../src/lib/HoneylemonService');
 
 const web3Wrapper = new Web3Wrapper(web3.currentProvider);
+
+const PAYMENT_TOKEN_DECIMALS = 6; // USDC has 6 decimals
+
 let accounts = null,
   // addresses
   makerAddress = [null],
@@ -60,15 +63,15 @@ before(async function () {
   const orderParams = [
     {
       sizeTh: new BigNumber(1000),
-      pricePerTh: new BigNumber(360)
+      pricePerTh: new BigNumber(3.6)
     },
     {
       sizeTh: new BigNumber(1200),
-      pricePerTh: new BigNumber(370)
+      pricePerTh: new BigNumber(3.7)
     },
     {
       sizeTh: new BigNumber(3600),
-      pricePerTh: new BigNumber(390)
+      pricePerTh: new BigNumber(3.9)
     }
   ];
   const orders = orderParams.map(p =>
@@ -151,11 +154,14 @@ describe('HoneylemonService', () => {
       totalTakerFillAmount
     } = await honeylemonService.getQuoteForSize(new BigNumber(1600));
 
-    expect(price).to.eql(new BigNumber(363.75));
+    expect(price).to.eql(new BigNumber(3.6375));
     expect(makerAssetFillAmounts).to.eql([new BigNumber(1000), new BigNumber(600)]);
-    expect(takerAssetFillAmounts).to.eql([new BigNumber(360000), new BigNumber(222000)]);
+    expect(takerAssetFillAmounts).to.eql([
+      new BigNumber(3600).shiftedBy(PAYMENT_TOKEN_DECIMALS),
+      new BigNumber(2220).shiftedBy(PAYMENT_TOKEN_DECIMALS)
+    ]);
     expect(totalMakerFillAmount).to.eql(new BigNumber(1600));
-    expect(totalTakerFillAmount).to.eql(new BigNumber(582000));
+    expect(totalTakerFillAmount).to.eql(new BigNumber(5820).shiftedBy(PAYMENT_TOKEN_DECIMALS));
     expect(remainingMakerFillAmount).to.eql(new BigNumber(0));
   });
 
@@ -169,21 +175,21 @@ describe('HoneylemonService', () => {
       remainingTakerFillAmount,
       totalMakerFillAmount,
       totalTakerFillAmount
-    } = await honeylemonService.getQuoteForBudget(new BigNumber(1000000));
+    } = await honeylemonService.getQuoteForBudget(new BigNumber(10000));
 
-    expect(price.sd(5)).to.eql(new BigNumber('370.1'));
+    expect(price.sd(5)).to.eql(new BigNumber('3.701'));
     expect(makerAssetFillAmounts).to.eql([
       new BigNumber(1000),
       new BigNumber(1200),
       new BigNumber(502)
     ]);
     expect(takerAssetFillAmounts).to.eql([
-      new BigNumber(360000),
-      new BigNumber(444000),
-      new BigNumber(196000)
+      new BigNumber(3600).shiftedBy(PAYMENT_TOKEN_DECIMALS),
+      new BigNumber(4440).shiftedBy(PAYMENT_TOKEN_DECIMALS),
+      new BigNumber(1960).shiftedBy(PAYMENT_TOKEN_DECIMALS)
     ]);
     expect(totalMakerFillAmount).to.eql(new BigNumber(2702));
-    expect(totalTakerFillAmount).to.eql(new BigNumber(1000000));
+    expect(totalTakerFillAmount).to.eql(new BigNumber(10000).shiftedBy(PAYMENT_TOKEN_DECIMALS));
     expect(remainingTakerFillAmount).to.eql(new BigNumber(0));
   });
 
@@ -193,16 +199,8 @@ describe('HoneylemonService', () => {
     const order = honeylemonService.createOrder(makerAddress, sizeTh, pricePerTh);
     const signedOrder = await honeylemonService.signOrder(order);
 
-    assert.isTrue(
-      signedOrder.makerAssetAmount.eq(sizeTh),
-      'makerAssetAmount is not correct'
-    );
-
-    assert.isTrue(
-      signedOrder.takerAssetAmount.eq(sizeTh.multipliedBy(pricePerTh)),
-      'takerAssetAmount is not correct'
-    );
-
+    expect(signedOrder.makerAssetAmount).to.eql(sizeTh);
+    expect(signedOrder.takerAssetAmount).to.eql(sizeTh.multipliedBy(pricePerTh).shiftedBy(6));
     expect(signedOrder.signature).to.not.be.empty;
   });
 
@@ -346,10 +344,10 @@ describe('HoneylemonService', () => {
     assert.equal(absoluteDriftError.lt(new BigNumber(0.001)), true);
   });
 
-  it('Gets contracts', async() => {
+  it.skip('Gets contracts', async() => {
     const { longContracts, shortContracts } = await honeylemonService.getContracts(makerAddress);
 
-    console.log('shortContracts:', shortContracts);
+    //console.log('shortContracts:', shortContracts);
   });
 
   it('Retrieve open contracts', async () => {

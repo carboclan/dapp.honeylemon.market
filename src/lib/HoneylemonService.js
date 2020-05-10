@@ -19,8 +19,9 @@ const web3 = new Web3(null); // This is just for encoding, etc.
 
 const NULL_ADDRESS = '0x0000000000000000000000000000000000000000';
 const ORDER_FILL_GAS = 150000;
-const TH_DECIMALS = 0; // TH has 0 decimals
-const PAYMENT_TOKEN_DECIMALS = 0; // USDC has 6 decimals
+const TH_DECIMALS = 0; // TH has 6 decimals
+const PAYMENT_TOKEN_DECIMALS = 6; // USDC has 6 decimals
+const SHIFT_PRICE_BY = TH_DECIMALS - PAYMENT_TOKEN_DECIMALS;
 
 class HoneylemonService {
   constructor(
@@ -113,7 +114,7 @@ class HoneylemonService {
     }
     const price = totalTakerFillAmount
       .dividedBy(totalMakerFillAmount)
-      .shiftedBy(-PAYMENT_TOKEN_DECIMALS);
+      .shiftedBy(SHIFT_PRICE_BY);
 
     return {
       price,
@@ -128,7 +129,7 @@ class HoneylemonService {
   }
 
   async getQuoteForBudget(budget) {
-    budget = new BigNumber(budget).shiftedBy(PAYMENT_TOKEN_DECIMALS).integerValue();
+    budget = new BigNumber(budget).shiftedBy(-SHIFT_PRICE_BY).integerValue();
     const { asks } = await this.getOrderbook();
     const orders = asks.records.map(r => r.order);
     const remainingFillableTakerAssetAmounts = asks.records.map(
@@ -167,7 +168,7 @@ class HoneylemonService {
     }
     const price = totalTakerFillAmount
       .dividedBy(totalMakerFillAmount)
-      .shiftedBy(-PAYMENT_TOKEN_DECIMALS);
+      .shiftedBy(SHIFT_PRICE_BY);
 
     return {
       price,
@@ -229,7 +230,7 @@ class HoneylemonService {
       makerAssetAmount: sizeTh, // The maker asset amount
       takerAssetAmount: sizeTh
         .multipliedBy(pricePerTh)
-        .shiftedBy(PAYMENT_TOKEN_DECIMALS)
+        .shiftedBy(-SHIFT_PRICE_BY)
         .integerValue(), // The taker asset amount
       expirationTimeSeconds: new BigNumber(expirationTime), // Time when this order expires
       makerFee: new BigNumber(0), // 0 maker fees
@@ -266,7 +267,7 @@ class HoneylemonService {
     amount = amount || new BigNumber(2).pow(256).minus(1);
 
     const allowance = BigNumber(await this.collateralToken.allowance(this.minterBridgeAddress, ownerAddress));
-    
+
     return !!(allowance.isGreaterThanOrEqualTo(amount));
   }
 
@@ -283,7 +284,7 @@ class HoneylemonService {
     amount = amount || new BigNumber(2).pow(256).minus(1);
 
     const allowance = BigNumber(await this.paymentToken.allowance(this.minterBridgeAddress, ownerAddress));
-    
+
     return !!(allowance.isGreaterThanOrEqualTo(amount));
   }
 
@@ -360,7 +361,7 @@ class HoneylemonService {
       }
       contract.price = totalTakerAssetFilledAmount
         .dividedBy(totalMakerAssetFilledAmount)
-        .shiftedBy(-PAYMENT_TOKEN_DECIMALS);
+        .shiftedBy(SHIFT_PRICE_BY);
     }
 
     return data;

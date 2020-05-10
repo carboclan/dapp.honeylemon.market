@@ -276,7 +276,7 @@ async function runExport() {
   const order = honeylemonService.createOrder(
     makerAddress,
     makerAssetAmount,
-    takerAssetAmount.dividedBy(makerAssetAmount)
+    takerAssetAmount.dividedBy(makerAssetAmount).shiftedBy(-6)
   );
 
   console.log('3. Signing 0x order...');
