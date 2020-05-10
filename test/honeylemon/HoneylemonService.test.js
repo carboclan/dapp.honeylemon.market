@@ -33,7 +33,7 @@ let accounts = null,
   // tested service
   honeylemonService = null;
 
-before(async function() {
+before(async function () {
   accounts = await web3Wrapper.getAvailableAddressesAsync();
   honeyLemonOracle = accounts[0];
   makerAddress = accounts[1];
@@ -344,32 +344,39 @@ describe('HoneylemonService', () => {
     // there is a small amount of error introduced. This check ensures that the rounding is less than
     // 0.001% as an absolute error. This amounts to about 577.3 satoshi per bitcoin traded on the platform.
     assert.equal(absoluteDriftError.lt(new BigNumber(0.001)), true);
-  }),
-    it('Retrieve open contracts', async () => {
-      // Create positions for long and short token holder
-      const fillSize = new BigNumber(1);
+  });
 
-      // Create two contracts. taker participates as a taker in both. Maker is only involved
-      // in the first contract.
-      await fill0xOrderForAddresses(1, takerAddress, makerAddress);
-      // await time.increase(10); // increase by 10 seconds to signify 1 day
-      await fill0xOrderForAddresses(2, takerAddress, makerAddress);
-      // await time.increase(10); // increase by 10 seconds to signify 1 day
-      await fill0xOrderForAddresses(3, takerAddress, makerAddress);
+  it('Gets contracts', async() => {
+    const { longContracts, shortContracts } = await honeylemonService.getContracts(makerAddress);
 
-      await createNewMarketProtocolContract(0, mriInput, 'MRI-BTC-28D-20200502');
+    console.log('shortContracts:', shortContracts);
+  });
 
-      await fill0xOrderForAddresses(2, takerAddress, makerAddress);
+  it('Retrieve open contracts', async () => {
+    // Create positions for long and short token holder
+    const fillSize = new BigNumber(1);
 
-      // Get contracts object from HoneyLemonService
-      const { longContracts, shortContracts } = await honeylemonService.getContracts(
-        takerAddress
-      );
+    // Create two contracts. taker participates as a taker in both. Maker is only involved
+    // in the first contract.
+    await fill0xOrderForAddresses(1, takerAddress, makerAddress);
+    // await time.increase(10); // increase by 10 seconds to signify 1 day
+    await fill0xOrderForAddresses(2, takerAddress, makerAddress);
+    // await time.increase(10); // increase by 10 seconds to signify 1 day
+    await fill0xOrderForAddresses(3, takerAddress, makerAddress);
 
-      const { longContracts2, shortContracts2 } = await honeylemonService.getContracts(
-        makerAddress
-      );
-    });
+    await createNewMarketProtocolContract(0, mriInput, 'MRI-BTC-28D-20200502');
+
+    await fill0xOrderForAddresses(2, takerAddress, makerAddress);
+
+    // Get contracts object from HoneyLemonService
+    const { longContracts, shortContracts } = await honeylemonService.getContracts(
+      takerAddress
+    );
+
+    const { longContracts2, shortContracts2 } = await honeylemonService.getContracts(
+      makerAddress
+    );
+  });
 });
 async function fill0xOrderForAddresses(size, taker, maker) {
   const fillSize = new BigNumber(size);
