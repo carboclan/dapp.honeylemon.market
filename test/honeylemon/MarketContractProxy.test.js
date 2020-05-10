@@ -171,7 +171,8 @@ contract(
 
       it('should revert deploying market contract from non-owner', async () => {
         await expectRevert.unspecified(
-          marketContractProxy.deployContract(
+          marketContractProxy.dailySettlement(
+            '0',
             _currentMri,
             _marketAndsTokenNames,
             _expiration,
@@ -179,21 +180,6 @@ contract(
           )
         );
       });
-
-      /*it('deploy market contract', async () => {
-        let marketArrayBefore = await marketContractProxy.getAllMarketContracts();
-
-        await marketContractProxy.deployContract(
-          _currentMri,
-          _marketAndsTokenNames,
-          _expiration
-        );
-
-        let marketArrayAfter = await marketContractProxy.getAllMarketContracts();
-
-
-        assert.equal(marketArrayAfter.length-marketArrayBefore.length, 1, 'Market array length mismatch');
-      });*/
 
       it('should revert daily settlement from address other than honeylemon oracle', async () => {
         await expectRevert.unspecified(
