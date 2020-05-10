@@ -1,6 +1,7 @@
 // This script simulates one life cycle with honey lemon + market protocol + 0x.
 // This is used to validate the interconnection of the layers and to check payouts
-// of tokens are what are expected.
+// of tokens are what are expected. It is run as a truffle test script. Execution
+// Assumes all docker containers are setup to initiate the 0x contract
 const readline = require('readline');
 
 // Helper libraries
@@ -50,12 +51,7 @@ const startingDay = 35; // Start date for day payout-calculator beginning contra
 const makerAmountToMint = 1000; // TH of mining over a 1 month duration sold by the miner.
 const takerAmountToMint = 4000 * 1e6; // USDC sent from investor to miner. $4 ~ 1 month of 1TH mining rewards @ btc = 7k
 
-// Config:
-const REAL_INPUT = true;
-
-const NULL_ADDRESS = '0x0000000000000000000000000000000000000000';
-
-async function runExport() {
+contract('Full integration order lifecycle',()=>{
   console.log('🔥🔥🔥STARTING SINGLE ITERATION SCRIPT🔥🔥🔥');
   let balanceTracker = {};
   async function recordBalances(timeLabel) {

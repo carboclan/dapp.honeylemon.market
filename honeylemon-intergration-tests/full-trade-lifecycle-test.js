@@ -1,5 +1,5 @@
 // Helper libraries
-const { PayoutCalculator } = require('./payout-calculator');
+const { PayoutCalculator } = require('../test/helpers/payout-calculator');
 
 const { ContractWrappers } = require('@0x/contract-wrappers');
 const { Web3Wrapper } = require('@0x/web3-wrapper');

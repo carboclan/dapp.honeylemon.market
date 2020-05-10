@@ -3,8 +3,8 @@
 // of tokens are what are expected.
 
 // Helper libraries
-const { PayoutCalculator } = require('./payout-calculator');
-const HoneylemonService = require('./src/lib/HoneylemonService');
+const { PayoutCalculator } = require('../test/helpers/payout-calculator');
+const HoneylemonService = require('../src/lib/HoneylemonService');
 
 //Ox libs and tools
 const {
