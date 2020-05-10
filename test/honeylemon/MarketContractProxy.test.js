@@ -15,6 +15,23 @@ const { PayoutCalculator } = require('../../payout-calculator');
 
 const ADDRESS_ZERO = '0x0000000000000000000000000000000000000000';
 
+const checkContractToSettle = (contractsLength, contractDay) => {
+  for (let i = 0; i < contractsLength; i++) {
+    let contractPushed = i + 1;
+
+    contractPushed <= 28
+      ? console.log('not settling')
+      : console.log('settling contract index: ', contractPushed - contractDay);
+  }
+};
+
+const calculateCapPrice = (duration, mri) => {
+  return new BigNumber(duration)
+    .multipliedBy(mri)
+    .multipliedBy(1.35e8)
+    .dividedBy(1e8);
+};
+
 contract(
   'MarketContractProxy',
   ([honeyLemonOracle, makerAddress, takerAddress, , , , , , _0xBridgeProxy, random]) => {
@@ -134,10 +151,7 @@ contract(
       _marketAndsTokenNames.push(web3.utils.fromAscii('MRI-BTC-28D-00000000-Short'));
 
       it('generate contract specs', async () => {
-        let _capPrice = new BigNumber(28)
-          .multipliedBy(_currentMri)
-          .multipliedBy(1.35e8)
-          .dividedBy(1e8);
+        let _capPrice = calculateCapPrice(28, _currentMri);
         let dailySpecs = await marketContractProxy.generateContractSpecs(
           _currentMri,
           _expiration
@@ -379,5 +393,7 @@ contract(
         );
       });
     });
+
+    describe('Contract settlement', () => {});
   }
 );
