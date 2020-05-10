@@ -19,6 +19,7 @@ const web3 = new Web3(null); // This is just for encoding, etc.
 
 const NULL_ADDRESS = '0x0000000000000000000000000000000000000000';
 const ORDER_FILL_GAS = 150000;
+const TH_DECIMALS = 0; // TH has 0 decimals
 const PAYMENT_TOKEN_DECIMALS = 0; // USDC has 6 decimals
 
 class HoneylemonService {
@@ -316,16 +317,37 @@ class HoneylemonService {
   }
 
   async getContracts(address) {
+    address = address.toLowerCase();
     const data = await this.subgraphClient.request(CONTRACTS_QUERY, { address });
 
     // TODO: additional processing, calculate total price by iterating over fills
-    const shortContractsProcessed = data.user.contractsAsMaker;
-    const longContractsProcessed = data.user.contractsAsTaker;
+    const shortContractsProcessed = this._processContractsData(data.user.contractsAsMaker)
+    const longContractsProcessed = this._processContractsData(data.user.contractsAsTaker);
 
     return {
       longContracts: longContractsProcessed,
       shortContracts: shortContractsProcessed
     };
+  }
+
+  _processContractsData(data) {
+    for (let i = 0; i < data.length; i++) {
+      const contract = data[i];
+
+      let totalMakerAssetFilledAmount = new BigNumber(0);
+      let totalTakerAssetFilledAmount = new BigNumber(0);
+      for (let j = 0; j < contract.transaction.fills.length; j++) {
+        const makerAssetFilledAmount = new BigNumber(contract.transaction.fills[j].makerAssetFilledAmount);
+        const takerAssetFilledAmount = new BigNumber(contract.transaction.fills[j].takerAssetFilledAmount);
+        totalMakerAssetFilledAmount = totalMakerAssetFilledAmount.plus(makerAssetFilledAmount);
+        totalTakerAssetFilledAmount = totalTakerAssetFilledAmount.plus(takerAssetFilledAmount);
+      }
+      contract.price = totalTakerAssetFilledAmount
+        .dividedBy(totalMakerAssetFilledAmount)
+        .shiftedBy(-PAYMENT_TOKEN_DECIMALS);
+    }
+
+    return data;
   }
 
   async redeemContract(someContractIdentifier, address) {
@@ -356,6 +378,17 @@ const CONTRACTS_QUERY = /* GraphQL */ `
       fills {
         makerAssetFilledAmount
         takerAssetFilledAmount
+      }
+    }
+  }
+
+  query($address: ID!) {
+    user(id: $address) {
+      contractsAsMaker {
+        ...ContractFragment
+      }
+      contractsAsTaker {
+        ...ContractFragment
       }
     }
   }
