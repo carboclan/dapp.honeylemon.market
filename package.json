@@ -51,7 +51,8 @@
   "scripts": {
     "test": "truffle test",
     "lint": "prettier-eslint --write \"$(pwd)/**/*.js\" \"$(pwd)/**/*.sol\" --ignore './node_modules/**' --ignore './coverage/**' --ignore './build/**' --ignore './webapp/**' --ignore './dist/**'",
-    "build": "webpack --config webpack.config.js --color -p --progress --hide-modules --display-optimization-bailout"
+    "build": "webpack --config webpack.config.js --color -p --progress --hide-modules --display-optimization-bailout",
+    "postinstall": "npm run build"
   },
   "husky": {
     "hooks": {}

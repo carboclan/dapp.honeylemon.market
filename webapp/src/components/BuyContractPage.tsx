@@ -20,20 +20,25 @@ const BuyContractPage: React.SFC = () => {
   const classes = useStyles();
 
   const [totalPrice, setTotalPrice] = useState(0);
-  const [hashAmount, setHashAmount] = useState(0);
   const [hashPrice, setHashPrice] = useState(0);
   const [totalHashAmount, setTotalHashAmount] = useState(0);
   const [isValid, setIsValid] = useState(false);
+
+  const [resultOrders, setResultOrders] = useState([]);
+  const [takerAssetFillAmounts, setTakerFillAmounts] = useState([]);
 
   useEffect(() => {
     let cancelled = false;
     const fetchData = async () => {
       const result = await honeylemonService.getQuoteForBudget(new BigNumber(totalPrice))
       if (!cancelled) {
-        const isLiquid = !!(Number(result.remainingFillAmount.toString()) === 0)
+        console.log(result);
+        const isLiquid = !!(Number(result?.remainingTakerFillAmount?.toString() || -1) === 0)
         setIsValid(isLiquid);
-        setHashPrice(Number(result.price.toString()));
-        //setTotalHashAmount(Number(result));
+        setHashPrice(Number(result?.price?.toString()) || 0);
+        setTotalHashAmount(Number(result?.totalTakerFillAmount?.toString()) || 0);
+        setResultOrders(result.resultOrders);
+        setTakerFillAmounts(result.takerAssetFillAmounts);
       }
     };
     fetchData();
@@ -41,13 +46,32 @@ const BuyContractPage: React.SFC = () => {
   }, [totalPrice, honeylemonService]);
 
   const buyOffer = async () => {
+    debugger;
     try {
       console.log('Buying');
-      // const order = await honeylemonService.createOrder(makerAddress, sizeTh, pricePerTh);
-      // const approval = await honeylemonService.approveCollateralToken(address, new BigNumber(btcAmount));
-      // const order = honeylemonService.createOrder(address, new BigNumber(hashAmount), new BigNumber(hashPrice));
-      // const signedOrder = await honeylemonService.signOrder(order);
-      // const submittedOrder = await honeylemonService.submitOrder(signedOrder);
+      const gasPrice = 5e9; // 5 GWEI
+
+      const tx = await honeylemonService.getFillOrdersTx(
+        resultOrders,
+        takerAssetFillAmounts
+      );
+      const value = await honeylemonService.get0xFeeForOrderBatch(
+        gasPrice,
+        resultOrders.length
+      );
+      const gas = await honeylemonService.estimateGas(
+        resultOrders,
+        takerAssetFillAmounts,
+        address,
+      );
+      const txHash = await tx.sendTransactionAsync({
+        from: address,
+        gas,
+        gasPrice,
+        value
+      });
+
+
     } catch (error) {
       console.log('Something went wrong creating the offer');
       console.log(error);
@@ -92,7 +116,7 @@ const BuyContractPage: React.SFC = () => {
       <Button fullWidth onClick={() => buyOffer()} disabled={!isValid}>BUY NOW</Button><Grid item xs={12}></Grid>
       <Grid item xs={12}>
         <Typography>
-          You will pay ${totalPrice} to buy {hashAmount} Th of hasrate for 28 days for ${hashPrice} Th/day.
+          You will pay ${totalPrice} to buy {totalHashAmount} Th of hasrate for 28 days for ${hashPrice} Th/day.
           You will receive the average value of the <Link href='#'>Mining Revenue Index</Link> over 28 days.
           Representing {totalHashAmount} Th of mining power per day per contract.
         </Typography>

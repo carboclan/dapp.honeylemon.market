@@ -18,11 +18,11 @@ const theme = (createMuiTheme)({
     MuiButton: {
       root: {
         color: '#000',
-        backgroundColor: '#FFE500'
+        backgroundColor: '#FFE500',
+        "&$disabled": {
+          "backgroundColor": "#4a4622"
+        }
       },
-      disabled: {
-        backgroundColor: '#4a4622'
-      }
     },
     MuiAppBar: {
       root: {
