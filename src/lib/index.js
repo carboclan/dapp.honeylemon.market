@@ -1,5 +1,3 @@
 import HoneylemonService from './HoneylemonService';
 
-export {
-    HoneylemonService
-}
+export { HoneylemonService };

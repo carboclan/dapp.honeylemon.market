@@ -36,7 +36,7 @@ let accounts = null,
   // tested service
   honeylemonService = null;
 
-before(async function () {
+before(async function() {
   accounts = await web3Wrapper.getAvailableAddressesAsync();
   honeyLemonOracle = accounts[0];
   makerAddress = accounts[1];
@@ -161,7 +161,9 @@ describe('HoneylemonService', () => {
       new BigNumber(2220).shiftedBy(PAYMENT_TOKEN_DECIMALS)
     ]);
     expect(totalMakerFillAmount).to.eql(new BigNumber(1600));
-    expect(totalTakerFillAmount).to.eql(new BigNumber(5820).shiftedBy(PAYMENT_TOKEN_DECIMALS));
+    expect(totalTakerFillAmount).to.eql(
+      new BigNumber(5820).shiftedBy(PAYMENT_TOKEN_DECIMALS)
+    );
     expect(remainingMakerFillAmount).to.eql(new BigNumber(0));
   });
 
@@ -189,7 +191,9 @@ describe('HoneylemonService', () => {
       new BigNumber(1960).shiftedBy(PAYMENT_TOKEN_DECIMALS)
     ]);
     expect(totalMakerFillAmount).to.eql(new BigNumber(2702));
-    expect(totalTakerFillAmount).to.eql(new BigNumber(10000).shiftedBy(PAYMENT_TOKEN_DECIMALS));
+    expect(totalTakerFillAmount).to.eql(
+      new BigNumber(10000).shiftedBy(PAYMENT_TOKEN_DECIMALS)
+    );
     expect(remainingTakerFillAmount).to.eql(new BigNumber(0));
   });
 
@@ -200,7 +204,9 @@ describe('HoneylemonService', () => {
     const signedOrder = await honeylemonService.signOrder(order);
 
     expect(signedOrder.makerAssetAmount).to.eql(sizeTh);
-    expect(signedOrder.takerAssetAmount).to.eql(sizeTh.multipliedBy(pricePerTh).shiftedBy(6));
+    expect(signedOrder.takerAssetAmount).to.eql(
+      sizeTh.multipliedBy(pricePerTh).shiftedBy(6)
+    );
     expect(signedOrder.signature).to.not.be.empty;
   });
 
@@ -344,8 +350,10 @@ describe('HoneylemonService', () => {
     assert.equal(absoluteDriftError.lt(new BigNumber(0.001)), true);
   });
 
-  it.skip('Gets contracts', async() => {
-    const { longContracts, shortContracts } = await honeylemonService.getContracts(makerAddress);
+  it.skip('Gets contracts', async () => {
+    const { longContracts, shortContracts } = await honeylemonService.getContracts(
+      makerAddress
+    );
 
     //console.log('shortContracts:', shortContracts);
   });

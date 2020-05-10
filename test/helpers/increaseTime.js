@@ -1,7 +1,6 @@
 // const latestTime = require('./latestTime');
 const latestTime = Date.now;
 
-
 // Increases testrpc time by the passed duration in seconds
 module.exports.increaseTime = duration => {
   const id = Date.now();

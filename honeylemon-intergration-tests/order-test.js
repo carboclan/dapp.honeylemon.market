@@ -59,30 +59,30 @@ async function runExport() {
   let balanceTracker = {};
   async function recordBalances(timeLabel) {
     balanceTracker[timeLabel] = {};
-    balanceTracker[timeLabel]['Maker imBTC'] = (
-      await collateralToken.balanceOf(makerAddress)
-    ).toString();
-    balanceTracker[timeLabel]['Maker USDC'] = (
-      await paymentToken.balanceOf(makerAddress)
-    ).toString();
-    balanceTracker[timeLabel]['Maker Long'] = (
-      await longToken.balanceOf(makerAddress)
-    ).toString();
-    balanceTracker[timeLabel]['Maker Short'] = (
-      await shortToken.balanceOf(makerAddress)
-    ).toString();
-    balanceTracker[timeLabel]['Taker imBTC'] = (
-      await collateralToken.balanceOf(takerAddress)
-    ).toString();
-    balanceTracker[timeLabel]['Taker USDC'] = (
-      await paymentToken.balanceOf(takerAddress)
-    ).toString();
-    balanceTracker[timeLabel]['Taker Long'] = (
-      await longToken.balanceOf(takerAddress)
-    ).toString();
-    balanceTracker[timeLabel]['Taker Short'] = (
-      await shortToken.balanceOf(takerAddress)
-    ).toString();
+    balanceTracker[timeLabel]['Maker imBTC'] = (await collateralToken.balanceOf(
+      makerAddress
+    )).toString();
+    balanceTracker[timeLabel]['Maker USDC'] = (await paymentToken.balanceOf(
+      makerAddress
+    )).toString();
+    balanceTracker[timeLabel]['Maker Long'] = (await longToken.balanceOf(
+      makerAddress
+    )).toString();
+    balanceTracker[timeLabel]['Maker Short'] = (await shortToken.balanceOf(
+      makerAddress
+    )).toString();
+    balanceTracker[timeLabel]['Taker imBTC'] = (await collateralToken.balanceOf(
+      takerAddress
+    )).toString();
+    balanceTracker[timeLabel]['Taker USDC'] = (await paymentToken.balanceOf(
+      takerAddress
+    )).toString();
+    balanceTracker[timeLabel]['Taker Long'] = (await longToken.balanceOf(
+      takerAddress
+    )).toString();
+    balanceTracker[timeLabel]['Taker Short'] = (await shortToken.balanceOf(
+      takerAddress
+    )).toString();
   }
   function printDriftAndError(expectedCollateralTaken, actualCollateralTaken) {
     const drift = new BigNumber(expectedCollateralTaken).minus(
