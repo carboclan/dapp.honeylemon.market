@@ -275,10 +275,7 @@ contract MarketContractProxy is Ownable {
     ////////////////////////////
 
     // function called daily to settle the current expiring 28 day contract.
-    function settleMarketContract(uint mri, address marketContractAddress)
-        public
-        onlyHoneyLemonOracle
-    {
+    function settleMarketContract(uint mri, address marketContractAddress) internal {
         require(mri != 0, 'The mri loockback value can not be 0');
         require(marketContractAddress != address(0x0));
 
@@ -298,7 +295,7 @@ contract MarketContractProxy is Ownable {
         uint currentMRI,
         bytes32[3] memory marketAndsTokenNames,
         uint expiration
-    ) public onlyOwner returns (address) {
+    ) internal returns (address) {
         address contractAddress = marketContractFactoryMPX.deployMarketContractMPX(
             marketAndsTokenNames,
             COLLATERAL_TOKEN_ADDRESS,
