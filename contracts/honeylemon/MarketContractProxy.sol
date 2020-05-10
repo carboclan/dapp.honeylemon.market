@@ -80,16 +80,44 @@ contract MarketContractProxy is Ownable {
         _;
     }
 
-    //////////////////////////
-    //// PUBLIC FUNCTIONS ////
-    //////////////////////////
+    ////////////////////////////////////
+    //// EXTERNAL FUNCTIONS ////////////
+    ////////////////////////////////////
 
-    function getLatestMri() public view returns (uint256) {
-        return latestMri;
+    /**
+     * @notice Set oracle address
+     * @dev can only be called by owner
+     * @param _honeyLemonOracleAddress oracle address
+     */
+    function setOracleAddress(address _honeyLemonOracleAddress) external onlyOwner {
+        HONEY_LEMON_ORACLE_ADDRESS = _honeyLemonOracleAddress;
     }
 
-    function getFillableAmounts(address[] memory makerAddresses)
-        public
+    /**
+     * @notice Set minter bridge address
+     * @dev can only be called by owner
+     * @param _minterBridgeAddress 0x minter bridge address
+     */
+    function setMinterBridgeAddress(address _minterBridgeAddress) external onlyOwner {
+        MINTER_BRIDGE_ADDRESS = _minterBridgeAddress;
+    }
+
+    /**
+     * @notice Set market contract specs
+     * @dev can only be called by owner
+     * @param _params array of specs
+     */
+    function setMarketContractSpecs(uint[7] calldata _params) external onlyOwner {
+        marketContractSpecs = _params;
+    }
+
+    /**
+     * @notice get amounts of TH that can be filled
+     * @param makerAddresses list of makers addresses
+     * @return array of fillable amounts
+     */
+    function getFillableAmounts(address[] calldata makerAddresses)
+        external
         view
         returns (uint256[] memory fillableAmounts)
     {
@@ -102,6 +130,26 @@ contract MarketContractProxy is Ownable {
 
         return fillableAmounts;
     }
+
+    /**
+     * @notice get latest MRI value
+     * @return latestMri
+     */
+    function getLatestMri() external view returns (uint256) {
+        return latestMri;
+    }
+
+    /**
+     * @notice get all market contarcts
+     * @return marketContracts
+     */
+    function getAllMarketContracts() public view returns (address[] memory) {
+        return marketContracts;
+    }
+
+    //////////////////////////
+    //// PUBLIC FUNCTIONS ////
+    //////////////////////////
 
     // The TH amount that can currently be filled based on owner’s BTC balance and allowance
     function getFillableAmount(address makerAddress) public view returns (uint256) {
@@ -151,10 +199,6 @@ contract MarketContractProxy is Ownable {
     function calculateRequiredCollateral(uint amount) public view returns (uint) {
         MarketContract latestMarketContract = getLatestMarketContract();
         return MathLib.multiply(amount, latestMarketContract.COLLATERAL_PER_UNIT());
-    }
-
-    function getAllMarketContracts() public view returns (address[] memory) {
-        return marketContracts;
     }
 
     // Return `balanceOf` for current day PositionTokenLong
@@ -252,22 +296,6 @@ contract MarketContractProxy is Ownable {
             bridgeData,
             getTime()
         );
-    }
-
-    ////////////////////////////////////
-    //// OWNER (DEPLOYER) FUNCTIONS ////
-    ////////////////////////////////////
-
-    function setOracleAddress(address _honeyLemonOracleAddress) public onlyOwner {
-        HONEY_LEMON_ORACLE_ADDRESS = _honeyLemonOracleAddress;
-    }
-
-    function setMinterBridgeAddress(address _minterBridgeAddress) public onlyOwner {
-        MINTER_BRIDGE_ADDRESS = _minterBridgeAddress;
-    }
-
-    function setMarketContractSpecs(uint[7] memory _params) public onlyOwner {
-        marketContractSpecs = _params;
     }
 
     ////////////////////////////
