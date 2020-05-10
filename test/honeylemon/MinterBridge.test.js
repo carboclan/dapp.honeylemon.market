@@ -76,7 +76,8 @@ contract(
         let _expiration = Math.round(new Date().getTime() / 1000) + 3600 * 24 * 28;
 
         // deploy Market
-        await marketContractProxy.deployContract(
+        await marketContractProxy.dailySettlement(
+          '0',
           _currentMRI,
           _marketAndsTokenNames,
           _expiration
