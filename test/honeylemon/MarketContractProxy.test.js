@@ -19,7 +19,7 @@ const checkContractToSettle = (contractsLength, contractDay) => {
   for (let i = 0; i < contractsLength; i++) {
     let contractPushed = i + 1;
 
-    contractPushed <= 28
+    contractPushed < contractDay
       ? console.log('not settling')
       : console.log('settling contract index: ', contractPushed - contractDay);
   }
