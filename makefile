@@ -8,18 +8,22 @@ default:
 local-ganache:
 	docker-compose -f ./docker/docker-compose-local.yml up -d ganache
 
-local-api:
+local-ganache-wait:
+	waitForGanache () { until printf 'POST /\r\nContent-Length: 26\r\n\r\n{\"method\":\"net_listening\"}' | nc localhost 8545 | grep true; do continue; done }; waitForGanache
+
+local-docker:
 	docker-compose -f ./docker/docker-compose-local.yml up -d
 
-local-start: local-api
-	waitForGanache () { until printf 'POST /\r\nContent-Length: 26\r\n\r\n{\"method\":\"net_listening\"}' | nc localhost 8545 | grep true; do continue; done }; waitForGanache
-	truffle migrate --reset
+local-subgraph-deploy:
+	cd subgraph && yarn; yarn build && yarn create-local; yarn deploy-local
+
+local-start: local-docker local-ganache-wait migrate local-subgraph-deploy
 
 local-stop:
 	docker-compose -f ./docker/docker-compose-local.yml down
 
 local-clean: local-stop
-	rm -rf .volumes
+	rm -rf docker/.volumes
 
 local-reset: local-clean local-start
 

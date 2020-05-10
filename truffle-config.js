@@ -1,5 +1,7 @@
 require('dotenv').config();
 const HDWalletProvider = require('@truffle/hdwallet-provider');
+const infuraApikey = '9542ce9f96be4ae08225dcde36ff1638';
+let mnemonic = ''; //require('./mnemonic');
 
 module.exports = {
   networks: {
@@ -19,6 +21,17 @@ module.exports = {
       host: 'localhost',
       port: 9545,
       network_id: '*' // Match any network id
+    },
+    kovan: {
+      provider: function() {
+        return new HDWalletProvider(
+          mnemonic,
+          `https://kovan.infura.io/v3/${infuraApikey}`
+        );
+      },
+      network_id: 42,
+      gas: 6500000, // default = 4712388
+      gasPrice: 10000000000 // default = 100 gwei = 100000000000
     }
   },
   compilers: {
@@ -33,6 +46,6 @@ module.exports = {
   plugins: ['@chainsafe/truffle-plugin-abigen'],
   mocha: {
     enableTimeouts: false,
-    before_timeout: 120000 // Here is 2min but can be whatever timeout is suitable for you.
+    before_timeout: 120000
   }
 };

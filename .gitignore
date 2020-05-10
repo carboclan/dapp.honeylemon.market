@@ -2,11 +2,12 @@ mnemonic.js
 .env
 .idea/
 allFiredEvents
-build/
 coverage.json
 coverage/
 node_modules/
 abigenBindings/
 goBindings/
-.docker-volumes/
-.volumes
+.volumes/
+docker/.volumes/
+build/
+dist/*
