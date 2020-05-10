@@ -80,7 +80,7 @@ contract MinterBridge is Ownable {
 
         // to: long & taker (investor)
         // from: short & maker (miner)
-        marketContractProxy.mintPositionTokens(amount, to, from, bridgeData);
+        marketContractProxy.mintPositionTokens(amount, to, from);
 
         return BRIDGE_SUCCESS;
     }

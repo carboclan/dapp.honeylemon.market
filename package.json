@@ -15,7 +15,13 @@
     "@0x/subproviders": "6.0.8",
     "@0x/utils": "5.4.1",
     "@0x/web3-wrapper": "7.0.7",
-    "graphql-request": "^1.8.2"
+    "graphql-request": "^1.8.2",
+    "@chainsafe/truffle-plugin-abigen": "0.0.1",
+    "@openzeppelin/test-helpers": "^0.5.5",
+    "eslint-cli": "^1.1.1",
+    "openzeppelin-solidity": "2.2.0",
+    "prettier-plugin-solidity": "^1.0.0-alpha.47",
+    "truffle": "5.1.18"
   },
   "devDependencies": {
     "@babel/core": "^7.9.6",
@@ -55,6 +61,8 @@
     "postinstall": "npm run build"
   },
   "husky": {
-    "hooks": {}
+    "hooks": {
+      "pre-commit": "npm run lint"
+    }
   }
 }

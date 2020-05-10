@@ -1,8 +1,8 @@
 import React from 'react';
 import clsx from 'clsx';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
-import { Drawer, AppBar, Toolbar, Divider, IconButton, Typography } from '@material-ui/core';
-import { Menu, ChevronLeft, ChevronRight } from '@material-ui/icons';
+import { Drawer, AppBar, Toolbar, Divider, IconButton, Typography, ListItem, ListItemIcon, ListItemText, List } from '@material-ui/core';
+import { Menu, ChevronLeft, ChevronRight, AccountBalance } from '@material-ui/icons';
 
 import { forwardTo } from '../helpers/history';
 import { ReactComponent as HoneyLemonLogo } from './../hl-logo.svg';
@@ -137,6 +137,13 @@ function AppWrapper(props: { children: any }) {
             {theme.direction === 'rtl' ? <ChevronLeft fontSize='large' /> : <ChevronRight fontSize='large' />}
           </IconButton>
         </div>
+        <Divider />
+        <List>
+          <ListItem button onClick={() => forwardTo('/portfolio')}>
+            <ListItemIcon><AccountBalance /></ListItemIcon>
+            <ListItemText primary="Portfolio" />
+          </ListItem>
+        </List>
         <Divider />
       </Drawer>
     </div>
