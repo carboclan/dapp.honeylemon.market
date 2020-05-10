@@ -136,7 +136,7 @@ contract MarketContractProxy is Ownable {
         uint contractsAdded = marketContracts.length;
 
         // If the marketContracts array has not had enough markets pushed into it to settle an old one then return 0x0.
-        if (contractsAdded <= CONTRACT_DURATION_DAYS) {
+        if (contractsAdded < CONTRACT_DURATION_DAYS) {
             return MarketContractMPX(address(0x0));
         }
         uint expiringIndex = contractsAdded - CONTRACT_DURATION_DAYS;
