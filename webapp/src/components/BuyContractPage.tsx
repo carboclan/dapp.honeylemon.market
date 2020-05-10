@@ -46,9 +46,9 @@ const BuyContractPage: React.SFC = () => {
   }, [totalPrice, honeylemonService]);
 
   const buyOffer = async () => {
-    debugger;
     try {
-      console.log('Buying');
+      await honeylemonService.approvePaymentToken(address);
+
       const gasPrice = 5e9; // 5 GWEI
 
       const tx = await honeylemonService.getFillOrdersTx(
@@ -59,6 +59,7 @@ const BuyContractPage: React.SFC = () => {
         gasPrice,
         resultOrders.length
       );
+
       const gas = await honeylemonService.estimateGas(
         resultOrders,
         takerAssetFillAmounts,
