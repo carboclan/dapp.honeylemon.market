@@ -42,10 +42,12 @@ const OfferContractPage: React.SFC = () => {
 
   const createOffer = async () => {
     try {
-      const approval = await honeylemonService.approveCollateralToken(address, new BigNumber(btcAmount));
+      if (await !honeylemonService.checkCollateralTokenApproval(address, new BigNumber(btcAmount))) {
+        await honeylemonService.approveCollateralToken(address, new BigNumber(btcAmount));
+      }
       const order = honeylemonService.createOrder(address, new BigNumber(hashAmount), new BigNumber(hashPrice));
       const signedOrder = await honeylemonService.signOrder(order);
-      const submittedOrder = await honeylemonService.submitOrder(signedOrder);
+      await honeylemonService.submitOrder(signedOrder);
     } catch (error) {
       console.log('Something went wrong creating the offer');
       console.log(error);

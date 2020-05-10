@@ -262,6 +262,14 @@ class HoneylemonService {
     return this.apiClient.submitOrderAsync(signedOrder);
   }
 
+  async checkCollateralTokenApproval(ownerAddress, amount) {
+    amount = amount || new BigNumber(2).pow(256).minus(1);
+
+    const allowance = BigNumber(await this.collateralToken.allowance(this.minterBridgeAddress, ownerAddress));
+    
+    return !!(allowance.isGreaterThanOrEqualTo(amount));
+  }
+
   async approveCollateralToken(makerAddress, amount) {
     amount = amount || new BigNumber(2).pow(256).minus(1);
     return this.collateralToken
@@ -269,6 +277,14 @@ class HoneylemonService {
       .sendTransactionAsync({
         from: makerAddress
       });
+  }
+
+  async checkPaymentTokenApproval(ownerAddress, amount) {
+    amount = amount || new BigNumber(2).pow(256).minus(1);
+
+    const allowance = BigNumber(await this.paymentToken.allowance(this.minterBridgeAddress, ownerAddress));
+    
+    return !!(allowance.isGreaterThanOrEqualTo(amount));
   }
 
   async approvePaymentToken(takerAddress, amount) {

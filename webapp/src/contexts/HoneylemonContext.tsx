@@ -16,7 +16,7 @@ export type HoneylemonProviderProps = {
 const HoneylemonContext = React.createContext<HoneylemonContext | undefined>(undefined);
 
 function HoneylemonProvider({ children }: HoneylemonProviderProps) {
-  const { wallet, network, isReady } = useOnboard();
+  const { wallet, network, isReady, address } = useOnboard();
   const [honeylemonService, setHoneylemonService] = useState<any | undefined>(undefined);
   useEffect(() => {
     if (isReady && wallet && network) {
@@ -41,7 +41,7 @@ function HoneylemonProvider({ children }: HoneylemonProviderProps) {
       };
       initHoneylemonService();
     }
-  }, [wallet, network, isReady]);
+  }, [wallet, network, isReady, address]);
 
   return (
     <HoneylemonContext.Provider

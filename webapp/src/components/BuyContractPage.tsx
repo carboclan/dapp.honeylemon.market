@@ -32,7 +32,6 @@ const BuyContractPage: React.SFC = () => {
     const fetchData = async () => {
       const result = await honeylemonService.getQuoteForBudget(new BigNumber(totalPrice))
       if (!cancelled) {
-        console.log(result);
         const isLiquid = !!(Number(result?.remainingTakerFillAmount?.toString() || -1) === 0)
         setIsValid(isLiquid);
         setHashPrice(Number(result?.price?.toString()) || 0);
@@ -47,7 +46,9 @@ const BuyContractPage: React.SFC = () => {
 
   const buyOffer = async () => {
     try {
-      await honeylemonService.approvePaymentToken(address);
+      if (await !honeylemonService.checkPaymentTokenApproval(address)) {
+        await honeylemonService.approvePaymentToken(address);
+      }
 
       const gasPrice = 5e9; // 5 GWEI
 
@@ -55,6 +56,7 @@ const BuyContractPage: React.SFC = () => {
         resultOrders,
         takerAssetFillAmounts
       );
+
       const value = await honeylemonService.get0xFeeForOrderBatch(
         gasPrice,
         resultOrders.length
@@ -65,14 +67,13 @@ const BuyContractPage: React.SFC = () => {
         takerAssetFillAmounts,
         address,
       );
+
       const txHash = await tx.sendTransactionAsync({
         from: address,
         gas,
         gasPrice,
         value
       });
-
-
     } catch (error) {
       console.log('Something went wrong creating the offer');
       console.log(error);
