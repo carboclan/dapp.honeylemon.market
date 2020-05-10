@@ -1,60 +1,87 @@
-version: '3'
+version: "3"
 services:
     ganache:
-        image: '0xorg/ganache-cli:istanbul'
+        image: "0xorg/ganache-cli"
         ports:
-            - '8545:8545'
+            - "8545:8545"
         environment:
             VERSION: 6.2.4
             NETWORK_ID: 1337
     postgres:
-        image: postgres:9.6
+        image: postgres:11.5
+        command: ["postgres", "-cshared_preload_libraries=pg_stat_statements"]
         environment:
-            - POSTGRES_USER=api
-            - POSTGRES_PASSWORD=api
-            - POSTGRES_DB=api
+            - POSTGRES_USER=root
+            - POSTGRES_PASSWORD=password
+            - POSTGRES_MULTIPLE_DATABASES=api,"graph-node"
         # persist the postgres data to disk so we don't lose it
         # on rebuilds.
         volumes:
-            - ../.volumes/postgres:/var/lib/postgresql/data
+        #     - ../.volumes/postgres:/var/lib/postgresql/data
+            - ./docker-postgresql-multiple-databases:/docker-entrypoint-initdb.d
         ports:
-            - '5432:5432'
+            - "5432:5432"
     mesh:
         image: docker.pkg.github.com/carboclan/0x-mesh/0x-mesh:1.1
         depends_on:
             - ganache
         restart: on-failure
         environment:
-            ETHEREUM_RPC_URL: 'http://ganache:8545'
-            ETHEREUM_CHAIN_ID: '1337'
-            USE_BOOTSTRAP_LIST: 'false'
+            ETHEREUM_RPC_URL: "http://ganache:8545"
+            ETHEREUM_CHAIN_ID: "1337"
+            USE_BOOTSTRAP_LIST: "false"
             VERBOSITY: 5
-            PRIVATE_KEY_PATH: ''
-            WS_RPC_ADDR: '0.0.0.0:60557'
-            HTTP_RPC_ADDR: '0.0.0.0:60556'
-            BLOCK_POLLING_INTERVAL: '2s'
-            ETHEREUM_RPC_MAX_REQUESTS_PER_24_HR_UTC: '150000'
+            PRIVATE_KEY_PATH: ""
+            WS_RPC_ADDR: "0.0.0.0:60557"
+            HTTP_RPC_ADDR: "0.0.0.0:60556"
+            BLOCK_POLLING_INTERVAL: "2s"
+            ETHEREUM_RPC_MAX_REQUESTS_PER_24_HR_UTC: "150000"
         volumes:
-            - ../.volumes/0x_mesh:/usr/mesh/0x_mesh
+            - .volumes/0x_mesh:/usr/mesh/0x_mesh
         ports:
-            - '60556:60556'
-            - '60557:60557'
-            - '60558:60558'
-            - '60559:60559'
+            - "60556:60556"
+            - "60557:60557"
+            - "60558:60558"
+            - "60559:60559"
         command: |
             sh -c "waitForGanache () { until printf 'POST /\r\nContent-Length: 26\r\n\r\n{\"method\":\"net_listening\"}' | nc localhost 8545 | grep true; do continue; done }; waitForGanache && ./mesh"
     api:
         depends_on:
             - postgres
             - mesh
-        image: 0xorg/0x-api:latest
+        image: 0xorg/0x-api:latest@sha256:54aa7a7f8b8ab8ad84a403ac8eb1ff995e5e5066ce4d45c2aa700e8b115406e3
         restart: on-failure
         environment:
-            ETHEREUM_RPC_URL: 'http://ganache:8545'
-            CHAIN_ID: '1337'
-            MESH_WEBSOCKET_URI: 'http://mesh:60557'
-            MESH_HTTP_URI: 'http://mesh:60556'
-            POSTGRES_URI: 'postgresql://api:api@postgres/api'
-            WHITELIST_ALL_TOKENS: '*'
+            ETHEREUM_RPC_URL: "http://ganache:8545"
+            CHAIN_ID: "1337"
+            MESH_WEBSOCKET_URI: "http://mesh:60557"
+            MESH_HTTP_URI: "http://mesh:60556"
+            POSTGRES_URI: "postgresql://api:password@postgres/api"
+            WHITELIST_ALL_TOKENS: "*"
         ports:
-            - '3000:3000'
+            - "3000:3000"
+    graph-node:
+        image: graphprotocol/graph-node
+        ports:
+            - "8000:8000"
+            - "8001:8001"
+            - "8020:8020"
+            - "8030:8030"
+            - "8040:8040"
+        depends_on:
+            - ipfs
+            - postgres
+        environment:
+            postgres_host: postgres:5432
+            postgres_user: graph-node
+            postgres_pass: password
+            postgres_db: graph-node
+            ipfs: "ipfs:5001"
+            ethereum: "mainnet:http://ganache:8545"
+            RUST_LOG: info
+    ipfs:
+        image: ipfs/go-ipfs:v0.4.23
+        ports:
+            - "5001:5001"
+        volumes:
+            - .volumes/ipfs:/data/ipfs

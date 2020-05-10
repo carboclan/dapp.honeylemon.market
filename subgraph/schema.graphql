@@ -1,0 +1,67 @@
+type User @entity {
+    id: ID! # ethereum address
+    fillsAsTaker: [Fill!] @derivedFrom(field: "taker")
+    fillsAsMaker: [Fill!] @derivedFrom(field: "maker")
+    orders: [Order!] @derivedFrom(field: "maker")
+    contractsAsMaker: [Contract!] @derivedFrom(field: "shortTokenRecipient")
+    contractsAsTaker: [Contract!] @derivedFrom(field: "longTokenRecipient")
+#    cancelled: [CancelledOrder!] @derivedFrom(field: "maker")
+#    validatorsApproved: [Bytes!] # event SignatureValidationApproval - allows me to give any other address the ability to sign for me # TODO: why are these all null?
+}
+
+type Transaction @entity {
+    id: ID! # tx hash
+    blockNumber: BigInt!
+    gasUsed: BigInt!
+    gasPrice: BigInt!
+    fills: [Fill!] @derivedFrom(field: "transactionHash")
+    from: Bytes!
+    to: Bytes!
+}
+
+type Fill @entity {
+    id: ID! # orderHash-blockNumber-logIndex
+    createdAt: BigInt!
+    transaction: Transaction!
+    transactionHash: Transaction!
+    order: Order!
+    maker: User!
+    taker: User!
+    orderHash: Order!
+    makerFeePaid: BigInt!
+    takerFeePaid: BigInt!
+    makerAssetFilledAmount: BigInt!
+    takerAssetFilledAmount: BigInt!
+    sender: Bytes!
+}
+
+type Order @entity {
+    id: ID! # orderHash
+    createdAt: BigInt!
+    maker: User!
+    feeRecipient: Bytes!
+    makerAssetData: Bytes!
+    takerAssetData: Bytes!
+    fills: [Fill!] @derivedFrom(field: "orderHash")
+}
+
+type CancelledOrder @entity {
+    id: ID! # orderHash
+    maker: Bytes! # some reason this cancels on null
+}
+
+type Contract @entity {
+    id: ID! # orderHash-blockNumber-logIndex
+    createdAt: BigInt!
+    transaction: Transaction!
+    transactionHash: Transaction!
+    marketId: BigInt!
+    contractName: String!
+    longTokenRecipient: User!
+    shortTokenRecipient: User!
+    qtyToMint: BigInt!
+    latestMarketContract: Bytes!
+    longTokenAddress: Bytes!
+    shortTokenAddress: Bytes!
+    time: BigInt!
+}

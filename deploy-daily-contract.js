@@ -4,7 +4,6 @@
 
 // Helper libraries
 const { PayoutCalculator } = require('./payout-calculator');
-const HoneylemonService = require('./src/lib/HoneylemonService');
 
 //Ox libs and tools
 const {
@@ -88,9 +87,7 @@ async function runExport() {
   if (REAL_INPUT) mriInput = pc.getMRIDataForDay(startingDay);
   // get MRI for day 0 in data set
   else mriInput = 0.00001; // nice input number to calculate expected payoffs.
-  const currentMRIScaled = new BigNumber(mriInput).multipliedBy(
-    new BigNumber('100000000')
-  ); //1e8
+  const currentMRIScaled = new BigNumber(mriInput).multipliedBy(new BigNumber('1e8')); //1e8
   console.log('\t-> Starting MRI value', mriInput);
   console.log('\t * Representing 1 TH payout for 1 day, Denominated in BTC');
   // expiration time in the future
