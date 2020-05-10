@@ -1,12 +1,14 @@
 pragma solidity 0.5.2;
 
-import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
+import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
-import '../marketprotocol/MarketCollateralPool.sol';
-import '../marketprotocol/mpx/MarketContractFactoryMPX.sol';
-import '../marketprotocol/mpx/MarketContractMPX.sol';
+import "../marketprotocol/MarketCollateralPool.sol";
+import "../marketprotocol/mpx/MarketContractFactoryMPX.sol";
+import "../marketprotocol/mpx/MarketContractMPX.sol";
 
-import '../libraries/MathLib.sol';
+import "../libraries/MathLib.sol";
+
+import "./DSProxy.sol";
 
 
 contract MarketContractProxy is Ownable {
@@ -16,11 +18,11 @@ contract MarketContractProxy is Ownable {
     address public MINTER_BRIDGE_ADDRESS;
     address public COLLATERAL_TOKEN_ADDRESS; //imBTC
 
-    string public ORACLE_URL = 'null';
-    string public ORACLE_STATISTIC = 'null';
+    string public ORACLE_URL = "null";
+    string public ORACLE_STATISTIC = "null";
 
     uint public CONTRACT_DURATION_DAYS = 28;
-    uint public CONTRACT_DURATION = CONTRACT_DURATION_DAYS * 10; // 28 days in seconds
+    uint public CONTRACT_DURATION = CONTRACT_DURATION_DAYS * 24 * 60 * 60; // 28 days in seconds
     uint public CONTRACT_COLLATERAL_RATIO = 135000000; //1.35e8; 1.35, with 8 decimal places
 
     uint[7] public marketContractSpecs = [
@@ -42,6 +44,15 @@ contract MarketContractProxy is Ownable {
     // Stores the most recent MRI value
     uint256 latestMri = 0;
 
+    // DSProxy factory to create smart contract wallets for users to enable bulk redemption.
+    DSProxyFactory dSProxyFactory;
+
+    // Mapping to link each trader address to their DSProxy address.
+    mapping(address => address) public addressToDSProxy;
+
+    // Mapping to link each DSProxy address to their traders address.
+    mapping(address => address) public dSProxyToAddress;
+
     constructor(
         address _marketContractFactoryMPX,
         address _honeyLemonOracle,
@@ -52,31 +63,50 @@ contract MarketContractProxy is Ownable {
         HONEY_LEMON_ORACLE_ADDRESS = _honeyLemonOracle;
         MINTER_BRIDGE_ADDRESS = _minterBridge;
         COLLATERAL_TOKEN_ADDRESS = _imBTCTokenAddress;
+
+        //Deploy a new DSProxyFactory instance to faciliate hot wallet creation
+        dSProxyFactory = new DSProxyFactory();
     }
 
     event PositionTokensMinted(
         uint indexed marketId,
         string contractName,
         address indexed longTokenRecipient,
+        address longTokenDSProxy,
         address indexed shortTokenRecipient,
+        address shortTokenDSProxy,
         uint256 qtyToMint,
         address latestMarketContract,
         address longTokenAddress,
         address shortTokenAddress,
-        bytes bridgeData,
         uint time
     );
+
+    event BatchTokensRedeemed(
+        address tokenAddresses,
+        address marketAddresses,
+        uint tokensToRedeem,
+        bool traderLong
+    );
+
+    event LogEvent(
+        address msgsender,
+        address addressthis,
+        uint param,
+        address tokenAddress
+    );
+
     //////////////////////////////////////
     //// PERMISSION SCOPING MODIFIERS ////
     //////////////////////////////////////
 
     modifier onlyHoneyLemonOracle() {
-        require(msg.sender == HONEY_LEMON_ORACLE_ADDRESS, 'Only Honey Lemon Oracle');
+        require(msg.sender == HONEY_LEMON_ORACLE_ADDRESS, "Only Honey Lemon Oracle");
         _;
     }
 
     modifier onlyMinterBridge() {
-        require(msg.sender == MINTER_BRIDGE_ADDRESS, 'Only Minter Bridge');
+        require(msg.sender == MINTER_BRIDGE_ADDRESS, "Only Minter Bridge");
         _;
     }
 
@@ -132,20 +162,28 @@ contract MarketContractProxy is Ownable {
         uint contractsAdded = marketContracts.length;
 
         // If the marketContracts array has not had enough markets pushed into it to settle an old one then return 0x0.
-        if (contractsAdded <= CONTRACT_DURATION_DAYS) {
+        if (contractsAdded < CONTRACT_DURATION_DAYS) {
             return MarketContractMPX(address(0x0));
         }
         uint expiringIndex = contractsAdded - CONTRACT_DURATION_DAYS;
         return MarketContractMPX(marketContracts[expiringIndex]);
     }
 
+    function getCollateralPool(MarketContractMPX market)
+        public
+        view
+        returns (MarketCollateralPool)
+    {
+        return MarketCollateralPool(market.COLLATERAL_POOL_ADDRESS());
+    }
+
     function getLatestMarketCollateralPool() public view returns (MarketCollateralPool) {
-        MarketContract latestMarketContract = getLatestMarketContract();
-        return MarketCollateralPool(latestMarketContract.COLLATERAL_POOL_ADDRESS());
+        MarketContractMPX latestMarketContract = getLatestMarketContract();
+        return getCollateralPool(latestMarketContract);
     }
 
     function calculateRequiredCollateral(uint amount) public view returns (uint) {
-        MarketContract latestMarketContract = getLatestMarketContract();
+        MarketContractMPX latestMarketContract = getLatestMarketContract();
         return MathLib.multiply(amount, latestMarketContract.COLLATERAL_PER_UNIT());
     }
 
@@ -153,15 +191,98 @@ contract MarketContractProxy is Ownable {
         return marketContracts;
     }
 
-    // Return `balanceOf` for current day PositionTokenLong
-    function balanceOf(address _owner) public returns (uint) {
+    // Return `balanceOf` for current day PositionTokenLong. This is used to prove to
+    // 0x that the wallet balance was correctly transferred.
+    function balanceOf(address owner) public returns (uint) {
+        address addressToCheck = getUserAddressOrDSProxy(owner);
         MarketContract latestMarketContract = getLatestMarketContract();
         ERC20 longToken = ERC20(latestMarketContract.LONG_POSITION_TOKEN());
-        return longToken.balanceOf(_owner);
+        return longToken.balanceOf(addressToCheck);
     }
 
     function getTime() public returns (uint) {
         return now;
+    }
+
+    // If the user has a DSProxy wallet, return that address. Else, return their wallet address
+    function getUserAddressOrDSProxy(address inputAddress) public view returns (address) {
+        return
+            addressToDSProxy[inputAddress] == address(0)
+                ? inputAddress
+                : addressToDSProxy[inputAddress];
+    }
+
+    ///////////////////////////
+    //// DSPROXY FUNCTIONS ////
+    ///////////////////////////
+
+    function createDSProxyWallet() public returns (address) {
+        // Create a new DSProxy for the caller.
+        address payable dsProxyWallet = dSProxyFactory.build(msg.sender);
+        addressToDSProxy[msg.sender] = dsProxyWallet;
+        dSProxyToAddress[dsProxyWallet] = msg.sender;
+        return dsProxyWallet;
+    }
+
+    // Function called by a DsProxy wallet which passes control from the caller using delegatecal
+    // to enable the caller to redeem bulk tokens in one tx. Parameters are parallel arrays.
+    // Note: only one side can be redeemed at a time. This is to simplify redemption as the same caller
+    // will likely never be both long and short in the same contract.
+    function batchRedeem(
+        address[] memory tokenAddresses, // Address of the long or short token to redeem
+        address[] memory marketAddresses, // Address of the market protocol
+        uint256[] memory tokensToRedeem, // the number of tokens to redeem
+        bool[] memory traderLong // if the trader is long or short
+    ) public {
+        require(
+            tokenAddresses.length == marketAddresses.length &&
+                tokenAddresses.length == tokensToRedeem.length &&
+                tokenAddresses.length == traderLong.length,
+            "Invalid input params"
+        );
+        require(this.owner() == msg.sender,"You don't own this DSProxy GTFO");
+        MarketContractMPX marketInstance;
+        MarketCollateralPool marketCollateralPool;
+        ERC20 tokenInstance;
+        // Loop through all tokens and preform redemption
+        for (uint256 i = 0; i < tokenAddresses.length; i++) {
+            marketInstance = MarketContractMPX(marketAddresses[i]);
+            marketCollateralPool = getCollateralPool(marketInstance);
+            tokenInstance = ERC20(tokenAddresses[i]);
+
+            tokenInstance.approve(address(marketInstance), tokensToRedeem[i]);
+
+            if (traderLong[i]) {
+                // redeem n long tokens and 0 short tokens
+                marketCollateralPool.settleAndClose(
+                    address(marketInstance),
+                    tokensToRedeem[i],
+                    0
+                );
+            } else {
+                // redeem 0 long tokens and n short tokens
+                marketCollateralPool.settleAndClose(
+                    address(marketInstance),
+                    0,
+                    tokensToRedeem[i]
+                );
+            }
+        }
+        // Finally redeem collateral back to user.
+        ERC20 collateralToken = ERC20(marketInstance.COLLATERAL_TOKEN_ADDRESS());
+
+        // DSProxy balance. address(this) is the DSProxy contract address that will redeem the tokens.
+        uint dSProxyBalance = collateralToken.balanceOf(address(this));
+
+        // Move all redeemed tokens from DSProxy back to users wallet. msg.sender is the owner of the DSProxy.
+        collateralToken.transfer(msg.sender, dSProxyBalance);
+
+        emit BatchTokensRedeemed(
+            tokenAddresses[0],
+            marketAddresses[0],
+            tokensToRedeem[0],
+            traderLong[0]
+        );
     }
 
     /////////////////////////////////////
@@ -175,7 +296,7 @@ contract MarketContractProxy is Ownable {
         bytes32[3] memory marketAndsTokenNames,
         uint newMarketExpiration
     ) public onlyHoneyLemonOracle {
-        require(currentIndexValue != 0, 'Current MRI value cant be zero');
+        require(currentIndexValue != 0, "Current MRI value cant be zero");
 
         // 1. Settle the past contract, if there is a price and contract exists.
         MarketContractMPX expiringMarketContract = getExpiringMarketContract();
@@ -198,8 +319,7 @@ contract MarketContractProxy is Ownable {
     function mintPositionTokens(
         uint qtyToMint,
         address longTokenRecipient,
-        address shortTokenRecipient,
-        bytes memory bridgeData
+        address shortTokenRecipient
     ) public onlyMinterBridge {
         uint collateralNeeded = calculateRequiredCollateral(qtyToMint);
 
@@ -232,20 +352,22 @@ contract MarketContractProxy is Ownable {
             false
         );
 
-        // Send the tokens
-        longToken.transfer(longTokenRecipient, qtyToMint);
-        shortToken.transfer(shortTokenRecipient, qtyToMint);
+        // Send the tokens. If the user has a DSProxy wallet then send it to there, else
+        // send it to their normal wallet address.
+        longToken.transfer(getUserAddressOrDSProxy(longTokenRecipient), qtyToMint);
+        shortToken.transfer(getUserAddressOrDSProxy(shortTokenRecipient), qtyToMint);
 
         emit PositionTokensMinted(
             addressToMarketId[address(latestMarketContract)], // MarketID
             latestMarketContract.CONTRACT_NAME(),
             longTokenRecipient,
+            getUserAddressOrDSProxy(longTokenRecipient),
             shortTokenRecipient,
+            getUserAddressOrDSProxy(shortTokenRecipient),
             qtyToMint,
             address(latestMarketContract),
             address(longToken),
             address(shortToken),
-            bridgeData,
             getTime()
         );
     }
@@ -275,7 +397,7 @@ contract MarketContractProxy is Ownable {
         public
         onlyHoneyLemonOracle
     {
-        require(mri != 0, 'The mri loockback value can not be 0');
+        require(mri != 0, "The mri loockback value can not be 0");
         require(marketContractAddress != address(0x0));
 
         MarketContractMPX marketContract = MarketContractMPX(marketContractAddress);

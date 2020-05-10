@@ -42,7 +42,6 @@ const MarketCollateralPool = artifacts.require('MarketCollateralPool');
 const necessaryCollateralRatio = 0.35; // for 135% collateralization
 const multiplier = 28; // contract duration in days
 const collateralDecimals = 1e8; // scaling for imBTC (8 decimal points)
-const paymentDecimals = 1e6; // scaling for USDT or USDC (6 decimals)
 
 // simulation inputs
 const startingDay = 35; // Start date for day payout-calculator beginning contract date
@@ -60,30 +59,30 @@ async function runExport() {
   let balanceTracker = {};
   async function recordBalances(timeLabel) {
     balanceTracker[timeLabel] = {};
-    balanceTracker[timeLabel]['Maker imBTC'] = (await collateralToken.balanceOf(
-      makerAddress
-    )).toString();
-    balanceTracker[timeLabel]['Maker USDC'] = (await paymentToken.balanceOf(
-      makerAddress
-    )).toString();
-    balanceTracker[timeLabel]['Maker Long'] = (await longToken.balanceOf(
-      makerAddress
-    )).toString();
-    balanceTracker[timeLabel]['Maker Short'] = (await shortToken.balanceOf(
-      makerAddress
-    )).toString();
-    balanceTracker[timeLabel]['Taker imBTC'] = (await collateralToken.balanceOf(
-      takerAddress
-    )).toString();
-    balanceTracker[timeLabel]['Taker USDC'] = (await paymentToken.balanceOf(
-      takerAddress
-    )).toString();
-    balanceTracker[timeLabel]['Taker Long'] = (await longToken.balanceOf(
-      takerAddress
-    )).toString();
-    balanceTracker[timeLabel]['Taker Short'] = (await shortToken.balanceOf(
-      takerAddress
-    )).toString();
+    balanceTracker[timeLabel]['Maker imBTC'] = (
+      await collateralToken.balanceOf(makerAddress)
+    ).toString();
+    balanceTracker[timeLabel]['Maker USDC'] = (
+      await paymentToken.balanceOf(makerAddress)
+    ).toString();
+    balanceTracker[timeLabel]['Maker Long'] = (
+      await longToken.balanceOf(makerAddress)
+    ).toString();
+    balanceTracker[timeLabel]['Maker Short'] = (
+      await shortToken.balanceOf(makerAddress)
+    ).toString();
+    balanceTracker[timeLabel]['Taker imBTC'] = (
+      await collateralToken.balanceOf(takerAddress)
+    ).toString();
+    balanceTracker[timeLabel]['Taker USDC'] = (
+      await paymentToken.balanceOf(takerAddress)
+    ).toString();
+    balanceTracker[timeLabel]['Taker Long'] = (
+      await longToken.balanceOf(takerAddress)
+    ).toString();
+    balanceTracker[timeLabel]['Taker Short'] = (
+      await shortToken.balanceOf(takerAddress)
+    ).toString();
   }
   function printDriftAndError(expectedCollateralTaken, actualCollateralTaken) {
     const drift = new BigNumber(expectedCollateralTaken).minus(
@@ -246,6 +245,7 @@ async function runExport() {
     0
   );
   const exchangeAddress = contractWrappers.exchange.address;
+  console.log('exchangeAddress', exchangeAddress);
 
   // Approve the contract wrapper from 0x to pull USDC from the taker(investor)
   await paymentToken.approve(
@@ -268,21 +268,15 @@ async function runExport() {
   // Generate the 0x order
   const honeylemonService = new HoneylemonService(
     'http://localhost:3000',
-    minterBridge.address,
-    marketContractProxy.address,
-    collateralToken.address,
-    paymentToken.address,
-    web3,
-    chainId,
-    MarketContractProxy.abi,
-    MarketCollateralPool.abi,
-    MarketContractMPX.abi
+    'http://localhost:8000/subgraphs/name/honeylemon/honeylemon-graph',
+    web3.currentProvider,
+    chainId
   );
 
   const order = honeylemonService.createOrder(
     makerAddress,
     makerAssetAmount,
-    takerAssetAmount.dividedBy(makerAssetAmount)
+    takerAssetAmount.dividedBy(makerAssetAmount).shiftedBy(-6)
   );
 
   console.log('3. Signing 0x order...');
@@ -292,6 +286,7 @@ async function runExport() {
 
   await recordBalances('Before 0x order');
 
+  // return
   // Pause here in order to manually submit the order to the API
   // await waitForInput('Press any key to fill the order...');
 
@@ -330,6 +325,7 @@ async function runExport() {
 
   await recordBalances('After 0x order');
 
+  return;
   /**************************************************
    * Advance time and settle market protocol oracle *
    **************************************************/

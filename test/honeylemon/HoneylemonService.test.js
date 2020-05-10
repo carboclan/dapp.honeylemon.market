@@ -16,6 +16,9 @@ const MarketCollateralPool = artifacts.require('MarketCollateralPool');
 const HoneylemonService = require('../../src/lib/HoneylemonService');
 
 const web3Wrapper = new Web3Wrapper(web3.currentProvider);
+
+const PAYMENT_TOKEN_DECIMALS = 6; // USDC has 6 decimals
+
 let accounts = null,
   // addresses
   makerAddress = [null],
@@ -33,7 +36,7 @@ let accounts = null,
   // tested service
   honeylemonService = null;
 
-before(async function() {
+before(async function () {
   accounts = await web3Wrapper.getAvailableAddressesAsync();
   honeyLemonOracle = accounts[0];
   makerAddress = accounts[1];
@@ -47,30 +50,28 @@ before(async function() {
 
   honeylemonService = new HoneylemonService(
     process.env.SRA_URL,
+    process.env.SUBGRAPH_URL,
+    web3.currentProvider,
+    1337,
     minterBridge.address,
     marketContractProxy.address,
     collateralToken.address,
-    paymentToken.address,
-    web3,
-    1337,
-    marketContractProxy.abi,
-    MarketCollateralPool.abi,
-    MarketContractMPX.abi
+    paymentToken.address
   );
 
   // Stub orders
   const orderParams = [
     {
       sizeTh: new BigNumber(1000),
-      pricePerTh: new BigNumber(360)
+      pricePerTh: new BigNumber(3.6)
     },
     {
       sizeTh: new BigNumber(1200),
-      pricePerTh: new BigNumber(370)
+      pricePerTh: new BigNumber(3.7)
     },
     {
       sizeTh: new BigNumber(3600),
-      pricePerTh: new BigNumber(390)
+      pricePerTh: new BigNumber(3.9)
     }
   ];
   const orders = orderParams.map(p =>
@@ -146,29 +147,50 @@ describe('HoneylemonService', () => {
       price,
       resultOrders,
       ordersRemainingFillableMakerAssetAmounts,
+      makerAssetFillAmounts,
       takerAssetFillAmounts,
-      remainingFillAmount
+      remainingMakerFillAmount,
+      totalMakerFillAmount,
+      totalTakerFillAmount
     } = await honeylemonService.getQuoteForSize(new BigNumber(1600));
 
-    expect(price).to.eql(new BigNumber(363.75));
-    expect(takerAssetFillAmounts).to.eql([new BigNumber(360000), new BigNumber(222000)]);
+    expect(price).to.eql(new BigNumber(3.6375));
+    expect(makerAssetFillAmounts).to.eql([new BigNumber(1000), new BigNumber(600)]);
+    expect(takerAssetFillAmounts).to.eql([
+      new BigNumber(3600).shiftedBy(PAYMENT_TOKEN_DECIMALS),
+      new BigNumber(2220).shiftedBy(PAYMENT_TOKEN_DECIMALS)
+    ]);
+    expect(totalMakerFillAmount).to.eql(new BigNumber(1600));
+    expect(totalTakerFillAmount).to.eql(new BigNumber(5820).shiftedBy(PAYMENT_TOKEN_DECIMALS));
+    expect(remainingMakerFillAmount).to.eql(new BigNumber(0));
   });
 
   it('should give correct quote for budget', async () => {
     const {
       price,
       resultOrders,
-      ordersRemainingFillableTakerAssetAmounts,
+      ordersRemainingFillableMakerAssetAmounts,
+      makerAssetFillAmounts,
       takerAssetFillAmounts,
-      remainingFillAmount
-    } = await honeylemonService.getQuoteForBudget(new BigNumber(1000000));
+      remainingTakerFillAmount,
+      totalMakerFillAmount,
+      totalTakerFillAmount
+    } = await honeylemonService.getQuoteForBudget(new BigNumber(10000));
 
-    expect(price.sd(5)).to.eql(new BigNumber('370.1'));
-    expect(takerAssetFillAmounts).to.eql([
-      new BigNumber(360000),
-      new BigNumber(444000),
-      new BigNumber(196000)
+    expect(price.sd(5)).to.eql(new BigNumber('3.701'));
+    expect(makerAssetFillAmounts).to.eql([
+      new BigNumber(1000),
+      new BigNumber(1200),
+      new BigNumber(502)
     ]);
+    expect(takerAssetFillAmounts).to.eql([
+      new BigNumber(3600).shiftedBy(PAYMENT_TOKEN_DECIMALS),
+      new BigNumber(4440).shiftedBy(PAYMENT_TOKEN_DECIMALS),
+      new BigNumber(1960).shiftedBy(PAYMENT_TOKEN_DECIMALS)
+    ]);
+    expect(totalMakerFillAmount).to.eql(new BigNumber(2702));
+    expect(totalTakerFillAmount).to.eql(new BigNumber(10000).shiftedBy(PAYMENT_TOKEN_DECIMALS));
+    expect(remainingTakerFillAmount).to.eql(new BigNumber(0));
   });
 
   it('should create and sign order', async () => {
@@ -177,16 +199,8 @@ describe('HoneylemonService', () => {
     const order = honeylemonService.createOrder(makerAddress, sizeTh, pricePerTh);
     const signedOrder = await honeylemonService.signOrder(order);
 
-    assert.isTrue(
-      signedOrder.makerAssetAmount.eq(sizeTh),
-      'makerAssetAmount is not correct'
-    );
-
-    assert.isTrue(
-      signedOrder.takerAssetAmount.eq(sizeTh.multipliedBy(pricePerTh)),
-      'takerAssetAmount is not correct'
-    );
-
+    expect(signedOrder.makerAssetAmount).to.eql(sizeTh);
+    expect(signedOrder.takerAssetAmount).to.eql(sizeTh.multipliedBy(pricePerTh).shiftedBy(6));
     expect(signedOrder.signature).to.not.be.empty;
   });
 
@@ -223,8 +237,8 @@ describe('HoneylemonService', () => {
       pricePerTh = new BigNumber(100);
     const order = honeylemonService.createOrder(makerAddress, sizeTh, pricePerTh);
     const signedOrder = await honeylemonService.signOrder(order);
+    console.log('signedOrder', JSON.stringify(signedOrder, 4));
     const result = await honeylemonService.submitOrder(signedOrder);
-    console.log(result);
   });
 
   it('estimates 0x fees', async () => {
@@ -246,7 +260,7 @@ describe('HoneylemonService', () => {
       takerAssetFillAmounts,
       takerAddress
     );
-    expect(gas).to.eq(570624);
+    expect(gas).to.be.within(500000, 600000);
   });
 
   it('fills orders', async () => {
@@ -311,7 +325,6 @@ describe('HoneylemonService', () => {
       .multipliedBy(currentMRIScaled)
       .multipliedBy(new BigNumber(28))
       .multipliedBy(new BigNumber(1.35));
-    console.log('expected', expectedCollateralRequirement.toString());
 
     const actualCollateralRequirement = await honeylemonService.calculateRequiredCollateral(
       amount.toString()
@@ -329,49 +342,48 @@ describe('HoneylemonService', () => {
     // there is a small amount of error introduced. This check ensures that the rounding is less than
     // 0.001% as an absolute error. This amounts to about 577.3 satoshi per bitcoin traded on the platform.
     assert.equal(absoluteDriftError.lt(new BigNumber(0.001)), true);
-  }),
-    it('Retrieve open contracts', async () => {
-      // Create positions for long and short token holder
-      const fillSize = new BigNumber(1);
+  });
 
-      // Create two contracts. taker participates as a taker in both. Maker is only involved
-      // in the first contract.
-      await fill0xOrderForAddresses(1, takerAddress, makerAddress);
-      // await time.increase(10); // increase by 10 seconds to signify 1 day
-      await fill0xOrderForAddresses(2, takerAddress, makerAddress);
-      // await time.increase(10); // increase by 10 seconds to signify 1 day
-      await fill0xOrderForAddresses(3, takerAddress, makerAddress);
+  it.skip('Gets contracts', async() => {
+    const { longContracts, shortContracts } = await honeylemonService.getContracts(makerAddress);
 
-      await createNewMarketProtocolContract(0, mriInput, 'MRI-BTC-28D-20200502');
+    //console.log('shortContracts:', shortContracts);
+  });
 
-      await fill0xOrderForAddresses(2, takerAddress, makerAddress);
+  it('Retrieve open contracts', async () => {
+    // Create positions for long and short token holder
+    const fillSize = new BigNumber(1);
 
-      // Get contracts object from HoneyLemonService
-      console.log('test');
-      const { longContracts, shortContracts } = await honeylemonService.getContracts(
-        takerAddress
-      );
-      console.log('longContracts', longContracts);
-      console.log('shortContracts', shortContracts);
+    // Create two contracts. taker participates as a taker in both. Maker is only involved
+    // in the first contract.
+    await fill0xOrderForAddresses(1, takerAddress, makerAddress);
+    // await time.increase(10); // increase by 10 seconds to signify 1 day
+    await fill0xOrderForAddresses(2, takerAddress, makerAddress);
+    // await time.increase(10); // increase by 10 seconds to signify 1 day
+    await fill0xOrderForAddresses(3, takerAddress, makerAddress);
 
-      const { longContracts2, shortContracts2 } = await honeylemonService.getContracts(
-        makerAddress
-      );
-      console.log('longContracts2', longContracts2);
-      console.log('shortContracts2', shortContracts2);
-    });
+    await createNewMarketProtocolContract(0, mriInput, 'MRI-BTC-28D-20200502');
+
+    await fill0xOrderForAddresses(2, takerAddress, makerAddress);
+
+    // Get contracts object from HoneyLemonService
+    const { longContracts, shortContracts } = await honeylemonService.getContracts(
+      takerAddress
+    );
+
+    const { longContracts2, shortContracts2 } = await honeylemonService.getContracts(
+      makerAddress
+    );
+  });
 });
 async function fill0xOrderForAddresses(size, taker, maker) {
   const fillSize = new BigNumber(size);
   const longBalanceBefore = await longToken[currentDayCounter].balanceOf(taker);
   const shortBalanceBefore = await shortToken[currentDayCounter].balanceOf(maker);
 
-  console.log('shortBalanceBefore.toNumber()', shortBalanceBefore.toNumber());
   const { resultOrders, takerAssetFillAmounts } = await honeylemonService.getQuoteForSize(
     fillSize
   );
-  // console.log('resultOrders', resultOrders);
-  // console.log('takerAssetFillAmounts', takerAssetFillAmounts);
   await honeylemonService.approveCollateralToken(maker);
   await honeylemonService.approvePaymentToken(taker);
   const gasPrice = 5e9; // 5 GWEI
@@ -391,14 +403,12 @@ async function fill0xOrderForAddresses(size, taker, maker) {
     gasPrice,
     value
   });
-  console.log('txHash', txHash);
   expect(txHash).to.not.be.null;
   // Check position token balances
   const longBalanceAfter = await longToken[currentDayCounter].balanceOf(taker);
   assert.equal(longBalanceAfter.toNumber() - longBalanceBefore.toNumber(), fillSize);
 
   const shortBalanceAfter = await shortToken[currentDayCounter].balanceOf(maker);
-  console.log('shortBalanceAfter.toString', shortBalanceAfter.toString());
 
   assert.equal(shortBalanceAfter.toNumber() - shortBalanceBefore.toNumber(), fillSize);
 }
@@ -426,7 +436,6 @@ async function createNewMarketProtocolContract(lookbackIndex, mriInput, marketNa
   );
 
   currentDayCounter = +1; //increment for different contract deployments for sequential days
-  console.log(currentDayCounter);
   const deployedMarketContract = await marketContractProxy.getLatestMarketContract();
   const marketContract = await MarketContractMPX.at(deployedMarketContract);
   longToken[currentDayCounter] = await PositionToken.at(

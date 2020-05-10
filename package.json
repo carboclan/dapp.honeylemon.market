@@ -1,8 +1,8 @@
 {
-  "name": "HoneyLemon",
+  "name": "honeylemon",
   "version": "2.4.0",
   "description": "Decentralized Synthetic cloud mining contracts built on Ethereum",
-  "main": "truffle-config.js",
+  "module": "dist/index.js",
   "directories": {
     "test": "test"
   },
@@ -15,36 +15,54 @@
     "@0x/subproviders": "6.0.8",
     "@0x/utils": "5.4.1",
     "@0x/web3-wrapper": "7.0.7",
+    "graphql-request": "^1.8.2",
     "@chainsafe/truffle-plugin-abigen": "0.0.1",
     "@openzeppelin/test-helpers": "^0.5.5",
+    "eslint-cli": "^1.1.1",
     "openzeppelin-solidity": "2.2.0",
     "prettier-plugin-solidity": "^1.0.0-alpha.47",
     "truffle": "5.1.18"
   },
   "devDependencies": {
+    "@babel/core": "^7.9.6",
+    "@babel/plugin-proposal-class-properties": "^7.8.3",
+    "@babel/plugin-syntax-class-properties": "^7.8.3",
+    "@babel/preset-env": "^7.9.6",
+    "@chainsafe/truffle-plugin-abigen": "0.0.1",
+    "@openzeppelin/test-helpers": "^0.5.5",
     "@truffle/hdwallet-provider": "^1.0.34",
+    "babel-loader": "^8.1.0",
     "bn.js": "^4.11.8",
     "coveralls": "^3.0.0",
     "dotenv": "^8.2.0",
-    "eslint": "^4.19.1",
+    "eslint": "^6.8.0",
     "ganache-time-traveler": "^1.0.14",
-    "husky": "^1.2.0",
-    "prettier-eslint-cli": "^4.7.1",
+    "husky": "^1.3.1",
+    "json-loader": "^0.5.7",
+    "openzeppelin-solidity": "2.2.0",
+    "prettier-eslint": "^9.0.1",
+    "prettier-eslint-cli": "5.0.0",
+    "prettier-plugin-solidity": "^1.0.0-alpha.47",
     "sinon": "^9.0.2",
     "solium": "^1.0.5",
+    "truffle": "5.1.18",
     "truffle-assertions": "0.9.0",
     "web3-core": "^1.2.7",
     "web3-core-helpers": "^1.2.7",
     "web3-core-method": "^1.2.7",
-    "web3-utils": "^1.2.7"
+    "web3-utils": "^1.2.7",
+    "webpack": "4.42.0",
+    "webpack-cli": "^3.3.11"
   },
   "scripts": {
     "test": "truffle test",
-    "lint": "prettier-eslint --write './**/*.js' './**/*.sol' --ignore './node_modules/**' --ignore './coverage/**'"
+    "lint": "prettier-eslint --write \"$(pwd)/**/*.js\" \"$(pwd)/**/*.sol\" --ignore './node_modules/**' --ignore './coverage/**' --ignore './build/**' --ignore './webapp/**' --ignore './dist/**'",
+    "build": "webpack --config webpack.config.js --color -p --progress --hide-modules --display-optimization-bailout",
+    "postinstall": "npm run build"
   },
   "husky": {
     "hooks": {
-      "pre-commit": "npm run lint && git add ."
+      "pre-commit": "npm run lint"
     }
   }
 }

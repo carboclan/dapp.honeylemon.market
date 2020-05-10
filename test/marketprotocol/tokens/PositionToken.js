@@ -2,7 +2,7 @@ const MarketCollateralPool = artifacts.require('MarketCollateralPool');
 const MarketContractRegistry = artifacts.require('MarketContractRegistry');
 const CollateralToken = artifacts.require('CollateralToken');
 const PositionToken = artifacts.require('PositionToken');
-const utility = require('../utility.js');
+const utility = require('../../utility');
 
 // basic tests to ensure PositionToken works and is set up to allow minting and redeeming tokens
 contract('PositionToken', function(accounts) {
