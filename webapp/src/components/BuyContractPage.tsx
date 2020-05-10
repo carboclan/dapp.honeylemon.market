@@ -46,8 +46,10 @@ const BuyContractPage: React.SFC = () => {
 
   const buyOffer = async () => {
     try {
-      if (await !honeylemonService.checkPaymentTokenApproval(address)) {
-        await honeylemonService.approvePaymentToken(address);
+      const approval = await honeylemonService.checkPaymentTokenApproval(address) 
+      if (!approval) {
+        const approvalTx = await honeylemonService.approvePaymentToken(address);
+        console.log(approvalTx);
       }
 
       const gasPrice = 5e9; // 5 GWEI
@@ -68,7 +70,7 @@ const BuyContractPage: React.SFC = () => {
         address,
       );
 
-      const txHash = await tx.sendTransactionAsync({
+      const txHash = await tx.awaitTransactionSuccessAsync({
         from: address,
         gas,
         gasPrice,

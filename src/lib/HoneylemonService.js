@@ -273,9 +273,9 @@ class HoneylemonService {
 
   async approveCollateralToken(makerAddress, amount) {
     amount = amount || new BigNumber(2).pow(256).minus(1);
-    return this.collateralToken
+    return await this.collateralToken
       .approve(this.minterBridgeAddress, amount)
-      .sendTransactionAsync({
+      .awaitTransactionSuccessAsync({
         from: makerAddress
       });
   }
@@ -290,9 +290,9 @@ class HoneylemonService {
 
   async approvePaymentToken(takerAddress, amount) {
     amount = amount || new BigNumber(2).pow(256).minus(1);
-    return this.paymentToken
+    return await this.paymentToken
       .approve(this.contractWrappers.contractAddresses.erc20Proxy, amount)
-      .sendTransactionAsync({
+      .awaitTransactionSuccessAsync({
         from: takerAddress
       });
   }
