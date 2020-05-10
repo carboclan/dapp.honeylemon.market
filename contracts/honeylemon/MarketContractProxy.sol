@@ -212,6 +212,21 @@ contract MarketContractProxy is Ownable {
         return now;
     }
 
+    function generateContractSpecs(uint currentMRI, uint expiration)
+        public
+        view
+        returns (uint[7] memory)
+    {
+        uint[7] memory dailySpecs = marketContractSpecs;
+        // capPrice. div by 1e8 for correct scaling
+        dailySpecs[1] =
+            (CONTRACT_DURATION_DAYS * currentMRI * (CONTRACT_COLLATERAL_RATIO)) /
+            1e8;
+        // expirationTimeStamp. Fed in directly from oracle to ensure timing is exact, irrespective of block mining times
+        dailySpecs[6] = expiration;
+        return dailySpecs;
+    }
+
     /////////////////////////////////////
     //// ORACLE PRIVILEGED FUNCTIONS ////
     /////////////////////////////////////
@@ -337,20 +352,5 @@ contract MarketContractProxy is Ownable {
         addressToMarketId[contractAddress] = index;
         return (contractAddress);
         //TODO: emit event
-    }
-
-    function generateContractSpecs(uint currentMRI, uint expiration)
-        public
-        view
-        returns (uint[7] memory)
-    {
-        uint[7] memory dailySpecs = marketContractSpecs;
-        // capPrice. div by 1e8 for correct scaling
-        dailySpecs[1] =
-            (CONTRACT_DURATION_DAYS * currentMRI * (CONTRACT_COLLATERAL_RATIO)) /
-            1e8;
-        // expirationTimeStamp. Fed in directly from oracle to ensure timing is exact, irrespective of block mining times
-        dailySpecs[6] = expiration;
-        return dailySpecs;
     }
 }

@@ -13,16 +13,8 @@ const PositionToken = artifacts.require('PositionToken'); // Long & Short tokens
 // Helper libraries
 const { PayoutCalculator } = require('../../payout-calculator');
 
-const ADDRESS_ZERO = '0x0000000000000000000000000000000000000000';
-
-const checkContractToSettle = (contractsLength, contractDay) => {
-  for (let i = 0; i < contractsLength; i++) {
-    let contractPushed = i + 1;
-
-    contractPushed < contractDay
-      ? console.log('not settling')
-      : console.log('settling contract index: ', contractPushed - contractDay);
-  }
+const isMarketExpired = (contractIndex, contractDay) => {
+  return contractIndex < contractDay ? false : true;
 };
 
 const calculateCapPrice = (duration, mri) => {
@@ -32,10 +24,12 @@ const calculateCapPrice = (duration, mri) => {
     .dividedBy(1e8);
 };
 
+const ADDRESS_ZERO = '0x0000000000000000000000000000000000000000';
+
 contract(
   'MarketContractProxy',
   ([honeyLemonOracle, makerAddress, takerAddress, , , , , , _0xBridgeProxy, random]) => {
-    let minterBridge, marketContractProxy, imbtc, usdc, _currentMri, _expiration;
+    let minterBridge, marketContractProxy, imbtc, usdc, pc, _currentMri, _expiration;
 
     before(async () => {
       // get deployed collateral token
@@ -49,7 +43,7 @@ contract(
       // get deployed MarketContractProxy
       marketContractProxy = await MarketContractProxy.deployed();
 
-      const pc = new PayoutCalculator();
+      pc = new PayoutCalculator();
       _currentMri = new BigNumber(pc.getMRIDataForDay(0)).multipliedBy(
         new BigNumber(1e8)
       );
@@ -380,6 +374,47 @@ contract(
       });
     });
 
-    describe('Contract settlement', () => {});
+    describe('Contract settlement', () => {
+      before(async () => {
+        // deploy 27 more contract to get expired ones
+        let targetLength = new BigNumber(
+          await marketContractProxy.CONTRACT_DURATION_DAYS()
+        ).toFixed();
+        let currentLength = (await marketContractProxy.getAllMarketContracts()).length;
+
+        for (let i = 0; i < targetLength - currentLength - 1; i++) {
+          let _marketAndsTokenNames = [];
+          _marketAndsTokenNames.push(web3.utils.fromAscii('BTC'));
+          _marketAndsTokenNames.push(web3.utils.fromAscii('MRI-BTC-28D-00000000-Long'));
+          _marketAndsTokenNames.push(web3.utils.fromAscii('MRI-BTC-28D-00000000-Short'));
+          let _mri = new BigNumber(pc.getMRIDataForDay(i + 1)).multipliedBy(
+            new BigNumber(1e8)
+          );
+          let _expiration = Math.round(new Date().getTime() / 1000) + 3600 * 24 * 28;
+
+          marketContractProxy.dailySettlement(
+            _mri,
+            _mri,
+            _marketAndsTokenNames,
+            _expiration,
+            { from: honeyLemonOracle }
+          );
+
+          // make sure no contract expired for now
+          assert.equal(
+            (await marketContractProxy.getExpiringMarketContract()).toString(),
+            ADDRESS_ZERO
+          );
+        }
+
+        assert.equal(
+          new BigNumber(await marketContractProxy.CONTRACT_DURATION_DAYS()).toFixed(),
+          targetLength,
+          'market length mismatch'
+        );
+      });
+
+      it('deploy new contract and settle contract #1', async () => {});
+    });
   }
 );
