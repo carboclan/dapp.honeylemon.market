@@ -266,7 +266,7 @@ class HoneylemonService {
   async checkCollateralTokenApproval(ownerAddress, amount) {
     amount = amount || new BigNumber(2).pow(256).minus(1);
 
-    const allowance = BigNumber(await this.collateralToken.allowance(this.minterBridgeAddress, ownerAddress));
+    const allowance = BigNumber(await this.collateralToken.allowance(this.minterBridgeAddress, ownerAddress).callAsync());
 
     return !!(allowance.isGreaterThanOrEqualTo(amount));
   }
@@ -283,7 +283,7 @@ class HoneylemonService {
   async checkPaymentTokenApproval(ownerAddress, amount) {
     amount = amount || new BigNumber(2).pow(256).minus(1);
 
-    const allowance = BigNumber(await this.paymentToken.allowance(this.minterBridgeAddress, ownerAddress));
+    const allowance = BigNumber(await this.paymentToken.allowance(this.minterBridgeAddress, ownerAddress).callAsync());
 
     return !!(allowance.isGreaterThanOrEqualTo(amount));
   }

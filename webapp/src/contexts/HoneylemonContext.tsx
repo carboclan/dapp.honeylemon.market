@@ -2,7 +2,7 @@ import * as React from "react";
 import { useState, useEffect } from "react";
 import { useOnboard } from "./OnboardContext";
 import { HoneylemonService } from "honeylemon";
-import { MetamaskSubprovider, Web3JsProvider } from '@0x/subproviders';
+import { MetamaskSubprovider, Web3JsProvider, SignerSubprovider } from '@0x/subproviders';
 import Web3 from 'web3'
 
 export type HoneylemonContext = {
@@ -27,8 +27,14 @@ function HoneylemonProvider({ children }: HoneylemonProviderProps) {
           case 'MetaMask':
             wrappedSubprovider = new MetamaskSubprovider(web3.currentProvider as Web3JsProvider);
             break;
+          case 'Portis':
+            wrappedSubprovider = new MetamaskSubprovider(web3.currentProvider as Web3JsProvider);
+            break;
+          case 'imToken':
+            wrappedSubprovider = new MetamaskSubprovider(web3.currentProvider as Web3JsProvider);
+            break;
           default:
-            wrappedSubprovider = wallet.provider;
+            wrappedSubprovider = new SignerSubprovider(web3.currentProvider as Web3JsProvider);
         }
 
         const honeylemonService = new HoneylemonService(
