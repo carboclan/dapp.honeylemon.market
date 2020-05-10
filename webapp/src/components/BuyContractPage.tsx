@@ -75,7 +75,7 @@ const BuyContractPage: React.SFC = () => {
         value
       });
     } catch (error) {
-      console.log('Something went wrong creating the offer');
+      console.log('Something went wrong buying this contract');
       console.log(error);
     }
   }
