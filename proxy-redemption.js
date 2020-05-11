@@ -56,42 +56,42 @@ async function runExport() {
   let balanceTracker = {};
   async function recordBalances(timeLabel) {
     balanceTracker[timeLabel] = {};
-    balanceTracker[timeLabel]['Maker BTC'] = (await collateralToken.balanceOf(
-      makerAddress
-    )).toString();
-    balanceTracker[timeLabel]['Maker USD'] = (await paymentToken.balanceOf(
-      makerAddress
-    )).toString();
-    balanceTracker[timeLabel]['Maker Long'] = (await longToken.balanceOf(
-      makerAddress
-    )).toString();
-    balanceTracker[timeLabel]['Maker Short'] = (await shortToken.balanceOf(
-      makerAddress
-    )).toString();
-    balanceTracker[timeLabel]['Maker DSProxy Long'] = (await longToken.balanceOf(
-      makerDSProxyAddress
-    )).toString();
-    balanceTracker[timeLabel]['Maker DSProxy Short'] = (await shortToken.balanceOf(
-      makerDSProxyAddress
-    )).toString();
-    balanceTracker[timeLabel]['Taker BTC'] = (await collateralToken.balanceOf(
-      takerAddress
-    )).toString();
-    balanceTracker[timeLabel]['Taker USD'] = (await paymentToken.balanceOf(
-      takerAddress
-    )).toString();
-    balanceTracker[timeLabel]['Taker Long'] = (await longToken.balanceOf(
-      takerAddress
-    )).toString();
-    balanceTracker[timeLabel]['Taker Short'] = (await shortToken.balanceOf(
-      takerAddress
-    )).toString();
-    balanceTracker[timeLabel]['Taker DSProxy Long'] = (await longToken.balanceOf(
-      takerDSProxyAddress
-    )).toString();
-    balanceTracker[timeLabel]['Taker DSProxy Short'] = (await shortToken.balanceOf(
-      takerDSProxyAddress
-    )).toString();
+    balanceTracker[timeLabel]['Maker BTC'] = (
+      await collateralToken.balanceOf(makerAddress)
+    ).toString();
+    balanceTracker[timeLabel]['Maker USD'] = (
+      await paymentToken.balanceOf(makerAddress)
+    ).toString();
+    balanceTracker[timeLabel]['Maker Long'] = (
+      await longToken.balanceOf(makerAddress)
+    ).toString();
+    balanceTracker[timeLabel]['Maker Short'] = (
+      await shortToken.balanceOf(makerAddress)
+    ).toString();
+    balanceTracker[timeLabel]['Maker DSProxy Long'] = (
+      await longToken.balanceOf(makerDSProxyAddress)
+    ).toString();
+    balanceTracker[timeLabel]['Maker DSProxy Short'] = (
+      await shortToken.balanceOf(makerDSProxyAddress)
+    ).toString();
+    balanceTracker[timeLabel]['Taker BTC'] = (
+      await collateralToken.balanceOf(takerAddress)
+    ).toString();
+    balanceTracker[timeLabel]['Taker USD'] = (
+      await paymentToken.balanceOf(takerAddress)
+    ).toString();
+    balanceTracker[timeLabel]['Taker Long'] = (
+      await longToken.balanceOf(takerAddress)
+    ).toString();
+    balanceTracker[timeLabel]['Taker Short'] = (
+      await shortToken.balanceOf(takerAddress)
+    ).toString();
+    balanceTracker[timeLabel]['Taker DSProxy Long'] = (
+      await longToken.balanceOf(takerDSProxyAddress)
+    ).toString();
+    balanceTracker[timeLabel]['Taker DSProxy Short'] = (
+      await shortToken.balanceOf(takerDSProxyAddress)
+    ).toString();
   }
   function printDriftAndError(expectedCollateralTaken, actualCollateralTaken) {
     const drift = new BigNumber(expectedCollateralTaken).minus(

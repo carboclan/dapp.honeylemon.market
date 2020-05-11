@@ -628,6 +628,40 @@ export class Contract extends Entity {
     this.set("shortTokenAddress", Value.fromBytes(value));
   }
 
+  get longTokenDSProxy(): Bytes | null {
+    let value = this.get("longTokenDSProxy");
+    if (value === null) {
+      return null;
+    } else {
+      return value.toBytes();
+    }
+  }
+
+  set longTokenDSProxy(value: Bytes | null) {
+    if (value === null) {
+      this.unset("longTokenDSProxy");
+    } else {
+      this.set("longTokenDSProxy", Value.fromBytes(value as Bytes));
+    }
+  }
+
+  get shortTokenDSProxy(): Bytes | null {
+    let value = this.get("shortTokenDSProxy");
+    if (value === null) {
+      return null;
+    } else {
+      return value.toBytes();
+    }
+  }
+
+  set shortTokenDSProxy(value: Bytes | null) {
+    if (value === null) {
+      this.unset("shortTokenDSProxy");
+    } else {
+      this.set("shortTokenDSProxy", Value.fromBytes(value as Bytes));
+    }
+  }
+
   get time(): BigInt {
     let value = this.get("time");
     return value.toBigInt();

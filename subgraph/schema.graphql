@@ -63,5 +63,7 @@ type Contract @entity {
     latestMarketContract: Bytes!
     longTokenAddress: Bytes!
     shortTokenAddress: Bytes!
+    longTokenDSProxy: Bytes
+    shortTokenDSProxy: Bytes
     time: BigInt!
 }
