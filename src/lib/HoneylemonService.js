@@ -410,6 +410,8 @@ const CONTRACTS_QUERY = /* GraphQL */ `
     contractName
     longTokenAddress
     shortTokenAddress
+    longTokenDSProxy
+    shortTokenDSProxy
     longTokenRecipient {
       id
     }

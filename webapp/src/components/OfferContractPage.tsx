@@ -22,14 +22,14 @@ const OfferContractPage: React.SFC = () => {
   const [hashPrice, setHashPrice] = useState(0);
   const [hashAmount, setHashAmount] = useState(0);
   const [totalHashPrice, setTotalHashPrice] = useState(0);
-  const [btcAmount, setBtcAmount] = useState(0);
+  const [btcAmount, setBtcAmount] = useState(new BigNumber(0));
 
   useEffect(() => {
     let cancelled = false;
     const fetchData = async () => {
       const result = await honeylemonService.getCollateralForContract(hashAmount)
       if (!cancelled) {
-        setBtcAmount(Number(result) / (10 ** 8)); //TODO: Confirm whether scaling here is correct
+        setBtcAmount(new BigNumber(result)); //TODO: Confirm whether scaling here is correct
       }
     };
     fetchData();
@@ -42,9 +42,10 @@ const OfferContractPage: React.SFC = () => {
 
   const createOffer = async () => {
     try {
-      const approval = await honeylemonService.checkCollateralTokenApproval(address, new BigNumber(btcAmount)) 
+      const approval = await honeylemonService.checkCollateralTokenApproval(address, btcAmount)
       if (!approval) {
-        await honeylemonService.approveCollateralToken(address, new BigNumber(btcAmount));
+        console.log('btcAmount', btcAmount.toString());
+        await honeylemonService.approveCollateralToken(address, btcAmount);
       }
       const order = honeylemonService.createOrder(address, new BigNumber(hashAmount), new BigNumber(hashPrice));
       const signedOrder = await honeylemonService.signOrder(order);
@@ -53,6 +54,10 @@ const OfferContractPage: React.SFC = () => {
       console.log('Something went wrong creating the offer');
       console.log(error);
     }
+  }
+
+  const getFormattedBtcAmount = () => {
+    return btcAmount.shiftedBy(-8).toString();
   }
 
   return (
@@ -122,9 +127,9 @@ const OfferContractPage: React.SFC = () => {
         <Typography>
           You will offer {hashAmount} contracts at ${hashPrice} Th/day.
           If a hodler buys your offer you will receive ${totalHashPrice} USDT.
-          You will be asked to post the hodlers max win of {btcAmount} BTC as collateral.
+          You will be asked to post the hodlers max win of {getFormattedBtcAmount()} BTC as collateral.
           The amount of that collateral that the hodler receives will be determined
-          by the average value of the <Link href='#'>Mining Revenue Index</Link> over the 
+          by the average value of the <Link href='#'>Mining Revenue Index</Link> over the
           28 days starting when the hodler pays you.
         </Typography>
       </Grid>
