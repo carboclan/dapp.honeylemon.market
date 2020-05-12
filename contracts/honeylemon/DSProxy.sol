@@ -1,3 +1,13 @@
+// This is the DS proxy implementation taken from: https://github.com/dapphub/ds-proxy
+// This contract and it's deployment along with the HoneyLemon Market Contract Proxy
+// enable bulk redemption of long or short tokens by traders. At position creation
+// the miner and investor's tokens are sent to the DSProxy. This proxy acts as a wallet
+// for the miner and investor which only they can access (think smart contract wallet).
+// At redemption time the user can use the DSProxy to execute batch transaction on their
+// behalf by calling a `script` within the `MarketContractProxy`. DSProxy uses delegate
+// call and as such this function execution can modify state within the DSProxy, without
+// the DSProxy needing to story the logic for unwinding.
+
 pragma solidity 0.5.2;
 
 
@@ -118,7 +128,7 @@ contract DSProxy is DSAuth, DSNote {
         note
         returns (bytes memory response)
     {
-        require(_target != address(0), 'ds-proxy-target-address-required');
+        require(_target != address(0), "ds-proxy-target-address-required");
 
         // call contract in current context
         assembly {
@@ -148,7 +158,7 @@ contract DSProxy is DSAuth, DSNote {
 
     //set new cache
     function setCache(address _cacheAddr) public payable auth note returns (bool) {
-        require(_cacheAddr != address(0), 'ds-proxy-cache-address-required');
+        require(_cacheAddr != address(0), "ds-proxy-cache-address-required");
         cache = DSProxyCache(_cacheAddr); // overwrite cache
         return true;
     }
@@ -177,7 +187,7 @@ contract DSProxyFactory {
     modifier onlyMarketContractProxy() {
         require(
             msg.sender == marketContractProxy,
-            'Only callable by MarketContractProxy'
+            "Only callable by MarketContractProxy"
         );
         _;
     }

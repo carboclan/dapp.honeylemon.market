@@ -1,4 +1,6 @@
-// This script simulates tests creation of DSProxy based positions against the HoneyLemon proxy
+// This script simulates tests creation of DSProxy based positions against the HoneyLemon proxy.
+// it follows the same logic in the `full-order-redemption-test` and intentionally re-creates
+// much of that logic to ensure that the same functionality works via a DS proxy.
 const { PayoutCalculator } = require('./payout-calculator');
 
 //Ox libs and tools

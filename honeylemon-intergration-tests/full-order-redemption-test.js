@@ -1,10 +1,18 @@
 // This script simulates one life cycle with honey lemon + market protocol + 0x.
 // This is used to validate the interconnection of the layers and to check payouts
-// of tokens are what are expected.
+// of tokens are what are expected. The script primarily validate the connections
+// through logging the state changes. A number of assertions are at the end. 
+
+//Note these are not unit tests. They are aim to show the connection of each layer
+// to showcase a full end to end connection of the smart contracts and diffrent layers.
+
+// To run this script start the 0x docker container and then run the script as follows
+// $docker run -it -p 8545:8545 0xorg/ganache-cli:latest
+// $truffle migrate --reset && truffle exec ./honeylemon-intergration-tests/full-order-redemption-test.js
 const readline = require('readline');
 
 // Helper libraries
-const { PayoutCalculator } = require('../test/helpers/payout-calculator');
+const { PayoutCalculator } = require('./helpers/payout-calculator');
 const HoneylemonService = require('../src/lib/HoneylemonService');
 
 //Ox libs and tools
@@ -325,7 +333,6 @@ async function runExport() {
 
   await recordBalances('After 0x order');
 
-  return;
   /**************************************************
    * Advance time and settle market protocol oracle *
    **************************************************/
