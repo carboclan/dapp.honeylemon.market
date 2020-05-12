@@ -1,7 +1,7 @@
 // This script simulates one life cycle with honey lemon + market protocol + 0x.
 // This is used to validate the interconnection of the layers and to check payouts
 // of tokens are what are expected. The script primarily validate the connections
-// through logging the state changes. A number of assertions are at the end. 
+// through logging the state changes. A number of assertions are at the end.
 
 //Note these are not unit tests. They are aim to show the connection of each layer
 // to showcase a full end to end connection of the smart contracts and diffrent layers.
