@@ -73,6 +73,7 @@ const BuyContractPage: React.SFC = () => {
       setTakerFillAmounts(result?.takerAssetFillAmounts || undefined);      
     } catch (error) {
       console.log('Error getting the current liquidity')
+      console.log(error);
       setIsValid(false);
     }
   }
@@ -96,6 +97,7 @@ const BuyContractPage: React.SFC = () => {
       setTakerFillAmounts(result.takerAssetFillAmounts || undefined);      
     } catch (error) {
       console.log('Error getting the current liquidity')
+      console.log(error);
       setIsValid(false);
     }
   }

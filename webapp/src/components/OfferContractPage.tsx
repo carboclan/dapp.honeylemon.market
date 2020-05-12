@@ -44,7 +44,6 @@ const OfferContractPage: React.SFC = () => {
     try {
       const approval = await honeylemonService.checkCollateralTokenApproval(address, btcAmount)
       if (!approval) {
-        console.log('btcAmount', btcAmount.toString());
         await honeylemonService.approveCollateralToken(address, btcAmount);
       }
       const order = honeylemonService.createOrder(address, new BigNumber(hashAmount), new BigNumber(hashPrice));
@@ -73,7 +72,6 @@ const OfferContractPage: React.SFC = () => {
           inputProps={{
             className: classes.inputBase,
             min: 0,
-            // max: maxProjectContribution,
             step: 0.0001
           }}
           startAdornment={<InputAdornment position="start">$</InputAdornment>}
@@ -101,7 +99,7 @@ const OfferContractPage: React.SFC = () => {
           inputProps={{
             className: classes.inputBase,
             min: 0,
-            // max: maxProjectContribution,
+            // max: User imBTC balance,
             step: 1
           }}
           onChange={e => {
