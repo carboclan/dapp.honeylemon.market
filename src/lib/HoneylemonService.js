@@ -36,10 +36,15 @@ class HoneylemonService {
   ) {
     this.apiClient = new HttpClient(apiUrl);
     this.subgraphClient = new GraphQLClient(subgraphUrl);
-    this.minterBridgeAddress = minterBridgeAddress || MinterBridgeArtefacts.networks[chainId].address;
-    this.marketContractProxyAddress = marketContractProxyAddress || MarketContractProxyArtefacts.networks[chainId].address;
-    this.collateralTokenAddress = collateralTokenAddress || CollateralTokenArtefacts.networks[chainId].address;
-    this.paymentTokenAddress = paymentTokenAddress || PaymentTokenArtefacts.networks[chainId].address;
+    this.minterBridgeAddress =
+      minterBridgeAddress || MinterBridgeArtefacts.networks[chainId].address;
+    this.marketContractProxyAddress =
+      marketContractProxyAddress ||
+      MarketContractProxyArtefacts.networks[chainId].address;
+    this.collateralTokenAddress =
+      collateralTokenAddress || CollateralTokenArtefacts.networks[chainId].address;
+    this.paymentTokenAddress =
+      paymentTokenAddress || PaymentTokenArtefacts.networks[chainId].address;
     this.provider = provider;
     this.chainId = chainId;
 
@@ -54,7 +59,10 @@ class HoneylemonService {
     this.takerAssetData = assetDataUtils.encodeERC20AssetData(this.paymentTokenAddress);
 
     // Instantiate tokens
-    this.collateralToken = new ERC20TokenContract(this.collateralTokenAddress, this.provider);
+    this.collateralToken = new ERC20TokenContract(
+      this.collateralTokenAddress,
+      this.provider
+    );
     this.paymentToken = new ERC20TokenContract(this.paymentTokenAddress, this.provider);
 
     this.marketContractProxy = new web3.eth.Contract(
@@ -266,9 +274,13 @@ class HoneylemonService {
   async checkCollateralTokenApproval(ownerAddress, amount) {
     amount = amount || new BigNumber(2).pow(256).minus(1);
 
-    const allowance = BigNumber(await this.collateralToken.allowance(this.minterBridgeAddress, ownerAddress).callAsync());
+    const allowance = BigNumber(
+      await this.collateralToken
+        .allowance(this.minterBridgeAddress, ownerAddress)
+        .callAsync()
+    );
 
-    return !!(allowance.isGreaterThanOrEqualTo(amount));
+    return !!allowance.isGreaterThanOrEqualTo(amount);
   }
 
   async approveCollateralToken(makerAddress, amount) {
@@ -283,9 +295,13 @@ class HoneylemonService {
   async checkPaymentTokenApproval(ownerAddress, amount) {
     amount = amount || new BigNumber(2).pow(256).minus(1);
 
-    const allowance = BigNumber(await this.paymentToken.allowance(this.minterBridgeAddress, ownerAddress).callAsync());
+    const allowance = BigNumber(
+      await this.paymentToken
+        .allowance(this.minterBridgeAddress, ownerAddress)
+        .callAsync()
+    );
 
-    return !!(allowance.isGreaterThanOrEqualTo(amount));
+    return !!allowance.isGreaterThanOrEqualTo(amount);
   }
 
   async approvePaymentToken(takerAddress, amount) {
@@ -338,7 +354,9 @@ class HoneylemonService {
     const data = await this.subgraphClient.request(CONTRACTS_QUERY, { address });
 
     // TODO: additional processing, calculate total price by iterating over fills
-    const shortContractsProcessed = this._processContractsData(data.user.contractsAsMaker)
+    const shortContractsProcessed = this._processContractsData(
+      data.user.contractsAsMaker
+    );
     const longContractsProcessed = this._processContractsData(data.user.contractsAsTaker);
 
     return {
@@ -354,10 +372,18 @@ class HoneylemonService {
       let totalMakerAssetFilledAmount = new BigNumber(0);
       let totalTakerAssetFilledAmount = new BigNumber(0);
       for (let j = 0; j < contract.transaction.fills.length; j++) {
-        const makerAssetFilledAmount = new BigNumber(contract.transaction.fills[j].makerAssetFilledAmount);
-        const takerAssetFilledAmount = new BigNumber(contract.transaction.fills[j].takerAssetFilledAmount);
-        totalMakerAssetFilledAmount = totalMakerAssetFilledAmount.plus(makerAssetFilledAmount);
-        totalTakerAssetFilledAmount = totalTakerAssetFilledAmount.plus(takerAssetFilledAmount);
+        const makerAssetFilledAmount = new BigNumber(
+          contract.transaction.fills[j].makerAssetFilledAmount
+        );
+        const takerAssetFilledAmount = new BigNumber(
+          contract.transaction.fills[j].takerAssetFilledAmount
+        );
+        totalMakerAssetFilledAmount = totalMakerAssetFilledAmount.plus(
+          makerAssetFilledAmount
+        );
+        totalTakerAssetFilledAmount = totalTakerAssetFilledAmount.plus(
+          takerAssetFilledAmount
+        );
       }
       contract.price = totalTakerAssetFilledAmount
         .dividedBy(totalMakerAssetFilledAmount)
