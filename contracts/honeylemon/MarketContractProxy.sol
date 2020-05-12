@@ -49,7 +49,7 @@ contract MarketContractProxy is Ownable {
     mapping(address => uint256) addressToMarketId;
 
     // Stores the most recent MRI value
-    uint256 latestMri = 0;
+    uint256 internal latestMri = 0;
 
     // DSProxy factory to create smart contract wallets for users to enable bulk redemption.
     DSProxyFactory dSProxyFactory;
@@ -117,12 +117,44 @@ contract MarketContractProxy is Ownable {
         _;
     }
 
-    //////////////////////////
-    //// PUBLIC FUNCTIONS ////
-    //////////////////////////
+    ////////////////////////////////////
+    //// EXTERNAL FUNCTIONS ////////////
+    ////////////////////////////////////
 
-    function getFillableAmounts(address[] memory makerAddresses)
-        public
+    /**
+     * @notice Set oracle address
+     * @dev can only be called by owner
+     * @param _honeyLemonOracleAddress oracle address
+     */
+    function setOracleAddress(address _honeyLemonOracleAddress) external onlyOwner {
+        HONEY_LEMON_ORACLE_ADDRESS = _honeyLemonOracleAddress;
+    }
+
+    /**
+     * @notice Set minter bridge address
+     * @dev can only be called by owner
+     * @param _minterBridgeAddress 0x minter bridge address
+     */
+    function setMinterBridgeAddress(address _minterBridgeAddress) external onlyOwner {
+        MINTER_BRIDGE_ADDRESS = _minterBridgeAddress;
+    }
+
+    /**
+     * @notice Set market contract specs
+     * @dev can only be called by owner
+     * @param _params array of specs
+     */
+    function setMarketContractSpecs(uint[7] calldata _params) external onlyOwner {
+        marketContractSpecs = _params;
+    }
+
+    /**
+     * @notice get amounts of TH that can be filled
+     * @param makerAddresses list of makers addresses
+     * @return array of fillable amounts
+     */
+    function getFillableAmounts(address[] calldata makerAddresses)
+        external
         view
         returns (uint256[] memory fillableAmounts)
     {
@@ -135,6 +167,26 @@ contract MarketContractProxy is Ownable {
 
         return fillableAmounts;
     }
+
+    /**
+     * @notice get latest MRI value
+     * @return latestMri
+     */
+    function getLatestMri() external view returns (uint256) {
+        return latestMri;
+    }
+
+    /**
+     * @notice get all market contarcts
+     * @return marketContracts
+     */
+    function getAllMarketContracts() public view returns (address[] memory) {
+        return marketContracts;
+    }
+
+    //////////////////////////
+    //// PUBLIC FUNCTIONS ////
+    //////////////////////////
 
     // The TH amount that can currently be filled based on owner’s BTC balance and allowance
     function getFillableAmount(address makerAddress) public view returns (uint256) {
@@ -194,10 +246,6 @@ contract MarketContractProxy is Ownable {
         return MathLib.multiply(amount, latestMarketContract.COLLATERAL_PER_UNIT());
     }
 
-    function getAllMarketContracts() public returns (address[] memory) {
-        return marketContracts;
-    }
-
     // Return `balanceOf` for current day PositionTokenLong. This is used to prove to
     // 0x that the wallet balance was correctly transferred.
     function balanceOf(address owner) public returns (uint) {
@@ -207,8 +255,23 @@ contract MarketContractProxy is Ownable {
         return longToken.balanceOf(addressToCheck);
     }
 
-    function getTime() public returns (uint) {
+    function getTime() public view returns (uint) {
         return now;
+    }
+
+    function generateContractSpecs(uint currentMRI, uint expiration)
+        public
+        view
+        returns (uint[7] memory)
+    {
+        uint[7] memory dailySpecs = marketContractSpecs;
+        // capPrice. div by 1e8 for correct scaling
+        dailySpecs[1] =
+            (CONTRACT_DURATION_DAYS * currentMRI * (CONTRACT_COLLATERAL_RATIO)) /
+            1e8;
+        // expirationTimeStamp. Fed in directly from oracle to ensure timing is exact, irrespective of block mining times
+        dailySpecs[6] = expiration;
+        return dailySpecs;
     }
 
     // If the user has a DSProxy wallet, return that address. Else, return their wallet address
@@ -379,22 +442,6 @@ contract MarketContractProxy is Ownable {
         );
     }
 
-    ////////////////////////////////////
-    //// OWNER (DEPLOYER) FUNCTIONS ////
-    ////////////////////////////////////
-
-    function setOracleAddress(address _honeyLemonOracleAddress) public onlyOwner {
-        HONEY_LEMON_ORACLE_ADDRESS = _honeyLemonOracleAddress;
-    }
-
-    function setMinterBridgeAddress(address _minterBridgeAddress) public onlyOwner {
-        MINTER_BRIDGE_ADDRESS = _minterBridgeAddress;
-    }
-
-    function setMarketContractSpecs(uint[7] memory _params) public onlyOwner {
-        marketContractSpecs = _params;
-    }
-
     ////////////////////////////
     //// INTERNAL FUNCTIONS ////
     ////////////////////////////
@@ -423,7 +470,7 @@ contract MarketContractProxy is Ownable {
         uint currentMRI,
         bytes32[3] memory marketAndsTokenNames,
         uint expiration
-    ) public onlyOwner returns (address) {
+    ) internal returns (address) {
         address contractAddress = marketContractFactoryMPX.deployMarketContractMPX(
             marketAndsTokenNames,
             COLLATERAL_TOKEN_ADDRESS,
@@ -437,19 +484,5 @@ contract MarketContractProxy is Ownable {
         addressToMarketId[contractAddress] = index;
         return (contractAddress);
         //TODO: emit event
-    }
-
-    function generateContractSpecs(uint currentMRI, uint expiration)
-        public
-        returns (uint[7] memory)
-    {
-        uint[7] memory dailySpecs = marketContractSpecs;
-        // capPrice. div by 1e8 for correct scaling
-        dailySpecs[1] =
-            (CONTRACT_DURATION_DAYS * currentMRI * (CONTRACT_COLLATERAL_RATIO)) /
-            1e8;
-        // expirationTimeStamp. Fed in directly from oracle to ensure timing is exact, irrespective of block mining times
-        dailySpecs[6] = expiration;
-        return dailySpecs;
     }
 }
