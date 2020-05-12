@@ -458,7 +458,7 @@ contract(
             takerAddress,
             makerAddress,
             { from: _0xBridgeProxy }
-          );  
+          );
         }
 
         assert.equal(
@@ -519,7 +519,11 @@ contract(
           let marketsContracts = await marketContractProxy.getAllMarketContracts();
 
           await expectRevert.unspecified(
-            marketContractProxy.settleMarketContract(new BigNumber(1).multipliedBy(new BigNumber(1e8)), marketsContracts[0], { from: honeyLemonOracle})          
+            marketContractProxy.settleMarketContract(
+              new BigNumber(1).multipliedBy(new BigNumber(1e8)),
+              marketsContracts[0],
+              { from: honeyLemonOracle }
+            )
           );
         });
 
@@ -604,9 +608,7 @@ contract(
           let marketsContracts = await marketContractProxy.getAllMarketContracts();
           let marketContractMpx = await MarketContractMPX.at(marketsContracts[1]);
 
-          await time.increaseTo(
-            (await marketContractMpx.EXPIRATION()).toNumber() + 10
-          )
+          await time.increaseTo((await marketContractMpx.EXPIRATION()).toNumber() + 10);
         });
 
         it('deploy new contract and settle contract #2: case now > EXPIRATION', async () => {
@@ -629,7 +631,6 @@ contract(
             new BigNumber(1e8)
           );
           let _expiration = Math.round(new Date().getTime() / 1000) + 3600 * 24 * 28;
-
 
           marketContractProxy.dailySettlement(
             _loopbackMri,
