@@ -2,13 +2,15 @@ import React from 'react';
 import { Grid, Button } from '@material-ui/core';
 import { forwardTo } from '../helpers/history';
 import { useOnboard } from '../contexts/OnboardContext';
+import { RouteComponentProps, useLocation } from 'react-router';
 
-// const useStyles = makeStyles(theme => ({
-
-// }))
+function useQuery() {
+  return new URLSearchParams(useLocation().search);
+}
 
 const LandingPage: React.SFC = () => {
-  // const classes = useStyles()
+  let query = useQuery();
+
   const { wallet, onboard, checkIsReady } = useOnboard();
   return (
     <Grid container justify='center' alignContent='center'>
@@ -21,7 +23,7 @@ const LandingPage: React.SFC = () => {
       {wallet?.provider && (
         <Button onClick={async () => {
           const walletCheck = await checkIsReady();
-          if (walletCheck) {forwardTo('/home')}}}>
+          if (walletCheck) {forwardTo(query.get("redirectTo") || '/home') }}}>
           Connect Wallet
         </Button>
       )}

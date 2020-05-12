@@ -46,6 +46,8 @@ function HoneylemonProvider({ children }: HoneylemonProviderProps) {
         setHoneylemonService(honeylemonService);
       };
       initHoneylemonService();
+    } else {
+      
     }
   }, [wallet, network, isReady, address]);
 

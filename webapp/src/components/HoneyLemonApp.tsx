@@ -10,7 +10,12 @@ import MiningStatsPage from './MiningStatsPage';
 import { useOnboard } from '../contexts/OnboardContext';
 
 
-const ConditionalRoute: React.FC<any> = ({ component: Component, isAuthorized, redirectPath = '/403', ...rest }) => (
+const ConditionalRoute: React.FC<any> = ({ 
+  component: Component, 
+  isAuthorized, 
+  redirectPath = '/404', 
+  ...rest 
+}) => (
   <Route
     {...rest}
     render={props => (
@@ -19,7 +24,7 @@ const ConditionalRoute: React.FC<any> = ({ component: Component, isAuthorized, r
       ) : (
           <Redirect
             to={{
-              pathname: redirectPath,
+              pathname: `${redirectPath}`,
               state: { from: props.location },
             }}
           />

@@ -117,7 +117,7 @@ const OfferContractPage: React.SFC = () => {
       <Grid item xs={6}><Typography style={{ fontWeight: 'bold' }}>Total:</Typography></Grid>
       <Grid item xs={4} style={{ textAlign: 'center' }}><Typography style={{ fontWeight: 'bold' }}>${totalHashPrice}</Typography></Grid>
       <Grid item xs={12}><Typography style={{ fontStyle: 'italic', fontSize: 12 }}>${hashPrice} Th/day * 28 Days * {hashAmount} Contracts</Typography></Grid>
-      <Grid item xs={12}><Button fullWidth onClick={createOffer}>BUY NOW</Button></Grid>
+      <Grid item xs={12}><Button fullWidth onClick={createOffer}>CREATE OFFER</Button></Grid>
       <Grid item xs={12}>
         <Typography>
           You will offer {hashAmount} contracts at ${hashPrice} Th/day.

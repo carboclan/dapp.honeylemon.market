@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Typography, Grid, makeStyles, FilledInput, Link, InputAdornment } from '@material-ui/core';
+import { Button, Typography, Grid, makeStyles, FilledInput, Link, InputAdornment, Tabs, Tab, Box } from '@material-ui/core';
 import { useHoneylemon } from '../contexts/HoneylemonContext';
 import { useOnboard } from '../contexts/OnboardContext';
 const { BigNumber } = require('@0x/utils');
@@ -14,39 +14,95 @@ const useStyles = makeStyles(({ spacing }) => ({
   }
 }))
 
+interface TabPanelProps {
+  children?: React.ReactNode;
+  index: any;
+  value: any;
+}
+
+const TabPanel = ({ children, value, index, ...other }: TabPanelProps) => (
+  <Grid item xs={12}
+    role="tabpanel"
+    hidden={value !== index}
+    {...other}
+    style={{
+      display: 'flex',
+      padding: (value !== index) ? '0px' : '8px',
+    }}
+  >
+    {value === index && (children)}
+  </Grid>
+);
+
+enum BuyType { 'budget', 'quantity' };
+
 const BuyContractPage: React.SFC = () => {
   const { address } = useOnboard();
   const { honeylemonService } = useHoneylemon()
   const classes = useStyles();
 
-  const [totalPrice, setTotalPrice] = useState(0);
+  const [orderValue, setOrderValue] = useState(0);
   const [hashPrice, setHashPrice] = useState(0);
-  const [totalHashAmount, setTotalHashAmount] = useState(0);
+  const [orderQuantity, setOrderQuantity] = useState(0);
   const [isValid, setIsValid] = useState(false);
 
   const [resultOrders, setResultOrders] = useState([]);
   const [takerAssetFillAmounts, setTakerFillAmounts] = useState([]);
+  const [buyType, setBuyType] = React.useState<BuyType>(BuyType.budget);
 
-  useEffect(() => {
-    let cancelled = false;
-    const fetchData = async () => {
-      const result = await honeylemonService.getQuoteForBudget(new BigNumber(totalPrice))
-      if (!cancelled) {
-        const isLiquid = !!(Number(result?.remainingTakerFillAmount?.toString() || -1) === 0)
-        setIsValid(isLiquid);
-        setHashPrice(Number(result?.price?.toString()) || 0);
-        setTotalHashAmount(Number(result?.totalTakerFillAmount?.toString()) || 0);
-        setResultOrders(result.resultOrders);
-        setTakerFillAmounts(result.takerAssetFillAmounts);
-      }
-    };
-    fetchData();
-    return () => { cancelled = true }
-  }, [totalPrice, honeylemonService]);
+  const handleChangeBuyType = (event: React.ChangeEvent<{}>, newValue: BuyType) => {
+    setBuyType(newValue);
+  };
+
+  const validateOrderQuantity = async (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const newValueString = e.target.value;
+    if (!newValueString) {
+      setOrderValue(0);
+      return;
+    }
+    const newValue = parseFloat(newValueString);
+    !isNaN(newValue) && setOrderQuantity(newValue);
+
+    try {
+      const result = await honeylemonService.getQuoteForSize(new BigNumber(newValue))
+      const isLiquid = !!(Number(result?.remainingMakerFillAmount?.toString() || -1) === 0)
+      setIsValid(isLiquid);
+      setHashPrice(Number(result?.price?.toString()) || 0);
+      setOrderValue(Number(result?.totalTakerFillAmount?.toString()) || 0);
+      setResultOrders(result?.resultOrders || undefined);
+      setTakerFillAmounts(result?.takerAssetFillAmounts || undefined);      
+    } catch (error) {
+      console.log('Error getting the current liquidity')
+      setIsValid(false);
+    }
+  }
+
+  const validateOrderValue = async (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const newValueString = e.target.value;
+    if (!newValueString) {
+      setOrderValue(0);
+      return;
+    }
+    const newValue = parseFloat(newValueString);
+    !isNaN(newValue) && setOrderValue(newValue);
+
+    try {
+      const result = await honeylemonService.getQuoteForBudget(new BigNumber(newValue))
+      const isLiquid = !!(Number(result?.remainingTakerFillAmount?.toString() || -1) === 0)
+      setIsValid(isLiquid);
+      setHashPrice(Number(result?.price?.toString()) || 0);
+      setOrderQuantity(Number(result?.totalMakerFillAmount?.toString()) || 0);
+      setResultOrders(result.resultOrders || undefined);
+      setTakerFillAmounts(result.takerAssetFillAmounts || undefined);      
+    } catch (error) {
+      console.log('Error getting the current liquidity')
+      setIsValid(false);
+    }
+  }
 
   const buyOffer = async () => {
     try {
-      const approval = await honeylemonService.checkPaymentTokenApproval(address) 
+      const approval = await honeylemonService.checkPaymentTokenApproval(address)
       if (!approval) {
         const approvalTx = await honeylemonService.approvePaymentToken(address);
         console.log(approvalTx);
@@ -88,41 +144,65 @@ const BuyContractPage: React.SFC = () => {
         <Typography style={{ fontWeight: 'bold' }}>Buy Mining Rewards</Typography>
       </Grid>
       <Grid item xs={6}><Typography style={{ fontWeight: 'bold' }}>PRICE</Typography></Grid>
-      <Grid item xs={6} className={classes.rightAlign}><Typography color='secondary'>${hashPrice} Th/day</Typography></Grid>
-      <Grid item xs={12}><Typography style={{ fontWeight: 'bold' }}>ENTER BUDGET</Typography></Grid>
-      <Grid item xs={10} className={classes.rightAlign}>
-        <FilledInput
-          fullWidth
-          disableUnderline
-          inputProps={{
-            className: classes.inputBase,
-            min: 0,
-            // max: maxProjectContribution,
-            step: 1
-          }}
-          startAdornment={<InputAdornment position="start">$</InputAdornment>}
-          onChange={e => {
-            const newValueString = e.target.value;
-            if (!newValueString) {
-              setTotalPrice(0);
-              return;
-            }
-            const newValue = parseFloat(newValueString);
-            !isNaN(newValue) && setTotalPrice(newValue);
-          }}
-          value={totalPrice}
-          type='number' />
+      <Grid item xs={6} className={classes.rightAlign}><Typography color='secondary'>${hashPrice.toPrecision(6)} Th/day</Typography></Grid>
+      <Grid item xs={12}>
+        <Tabs
+          value={buyType}
+          onChange={handleChangeBuyType}
+          indicatorColor="secondary"
+          variant="fullWidth"
+          textColor="primary"
+          scrollButtons="auto"
+        >
+          <Tab label="Enter budget" />
+          <Tab label="Enter amount" />
+        </Tabs>
       </Grid>
-      <Grid item xs={2} className={classes.rightAlign}>
-        <Typography style={{ fontWeight: 'bold' }} color='secondary'>USDT</Typography>
-      </Grid>
-      <Grid item xs={12}><Typography className={classes.rightAlign}>31.06 Th for 28 days</Typography></Grid>
+      <TabPanel value={buyType} index={0}>
+        <Grid item xs={9} className={classes.rightAlign}>
+          <FilledInput
+            fullWidth
+            disableUnderline
+            inputProps={{
+              className: classes.inputBase,
+              min: 0,
+              max: 10000000000, //Max Liquidity or takerTokenBalance
+              step: 1
+            }}
+            startAdornment={<InputAdornment position="start">$</InputAdornment>}
+            onChange={validateOrderValue}
+            value={orderValue}
+            type='number' />
+        </Grid>
+        <Grid item xs={2} className={classes.rightAlign}>
+          <Typography style={{ fontWeight: 'bold' }} color='secondary'>USDT</Typography>
+        </Grid>
+      </TabPanel>
+      <TabPanel value={buyType} index={1}>
+        <Grid item xs={9} className={classes.rightAlign}>
+          <FilledInput
+            fullWidth
+            disableUnderline
+            inputProps={{
+              className: classes.inputBase,
+              min: 0,
+              max: 10000000000, //Max Liquidity or takerTokenBalance
+              step: 1
+            }}
+            onChange={validateOrderQuantity}
+            value={orderQuantity}
+            type='number' />
+        </Grid>
+        <Grid item xs={2} className={classes.rightAlign}>
+          <Typography style={{ fontWeight: 'bold' }} color='secondary'>TH</Typography>
+        </Grid>
+      </TabPanel>
       <Button fullWidth onClick={() => buyOffer()} disabled={!isValid}>BUY NOW</Button><Grid item xs={12}></Grid>
       <Grid item xs={12}>
         <Typography>
-          You will pay ${totalPrice} to buy {totalHashAmount} Th of hasrate for 28 days for ${hashPrice} Th/day.
+          You will pay ${orderValue} to buy {orderQuantity} Th of hasrate for 28 days for ${hashPrice} Th/day.
           You will receive the average value of the <Link href='#'>Mining Revenue Index</Link> over 28 days.
-          Representing {totalHashAmount} Th of mining power per day per contract.
+          Representing {orderQuantity} Th of mining power per day per contract.
         </Typography>
       </Grid>
       <Grid item><Typography>See <Link href='#'>full contract specification here.</Link></Typography></Grid>
