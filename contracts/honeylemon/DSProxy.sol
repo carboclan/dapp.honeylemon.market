@@ -1,3 +1,13 @@
+// This is the DS proxy implementation taken from: https://github.com/dapphub/ds-proxy
+// This contract and it's deployment along with the HoneyLemon Market Contract Proxy
+// enable bulk redemption of long or short tokens by traders. At position creation
+// the miner and investor's tokens are sent to the DSProxy. This proxy acts as a wallet
+// for the miner and investor which only they can access (think smart contract wallet).
+// At redemption time the user can use the DSProxy to execute batch transaction on their
+// behalf by calling a `script` within the `MarketContractProxy`. DSProxy uses delegate
+// call and as such this function execution can modify state within the DSProxy, without
+// the DSProxy needing to story the logic for unwinding.
+
 pragma solidity 0.5.2;
 
 

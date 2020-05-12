@@ -1,4 +1,13 @@
-// This script simulates tests creation of DSProxy based positions against the HoneyLemon proxy
+// This script simulates tests creation of DSProxy based positions against the HoneyLemon proxy.
+// it follows the same logic in the `full-order-redemption-test` and intentionally re-creates
+// much of that logic to ensure that the same functionality works via a DS proxy.
+
+// /Note these are not unit tests. They are aim to show the connection of each layer
+// to showcase a full end to end connection of the smart contracts and diffrent layers.
+
+// To run this script start the 0x docker container and then run the script as follows
+// $docker run -it -p 8545:8545 0xorg/ganache-cli:latest
+// $truffle migrate --reset && truffle exec ./honeylemon-intergration-tests/proxy-redemption-lifecycle-test.js
 const { PayoutCalculator } = require('./payout-calculator');
 
 //Ox libs and tools

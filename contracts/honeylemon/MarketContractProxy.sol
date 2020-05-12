@@ -11,6 +11,13 @@ import '../libraries/MathLib.sol';
 import './DSProxy.sol';
 
 
+///@title Market Contract Proxy.
+/// @notice Handles the interconnection of the Market Protocol with 0x to
+/// facilitate issuance of long and short tokens at order execution.
+/// @dev This contract is responsible for 1) daily deployment of new market
+/// contracts 2) settling old contracts 3) minting of long and short tokens 4)
+/// storage of DSProxy info 5) enabling batch token redemption.
+
 contract MarketContractProxy is Ownable {
     MarketContractFactoryMPX marketContractFactoryMPX;
 
