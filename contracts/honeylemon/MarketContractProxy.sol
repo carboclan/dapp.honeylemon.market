@@ -1,15 +1,22 @@
 pragma solidity 0.5.2;
 
-import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
+import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
 
-import "../marketprotocol/MarketCollateralPool.sol";
-import "../marketprotocol/mpx/MarketContractFactoryMPX.sol";
-import "../marketprotocol/mpx/MarketContractMPX.sol";
+import '../marketprotocol/MarketCollateralPool.sol';
+import '../marketprotocol/mpx/MarketContractFactoryMPX.sol';
+import '../marketprotocol/mpx/MarketContractMPX.sol';
 
-import "../libraries/MathLib.sol";
+import '../libraries/MathLib.sol';
 
-import "./DSProxy.sol";
+import './DSProxy.sol';
 
+
+///@title Market Contract Proxy.
+/// @notice Handles the interconnection of the Market Protocol with 0x to
+/// facilitate issuance of long and short tokens at order execution.
+/// @dev This contract is responsible for 1) daily deployment of new market
+/// contracts 2) settling old contracts 3) minting of long and short tokens 4)
+/// storage of DSProxy info 5) enabling batch token redemption.
 
 contract MarketContractProxy is Ownable {
     MarketContractFactoryMPX marketContractFactoryMPX;
@@ -18,8 +25,8 @@ contract MarketContractProxy is Ownable {
     address public MINTER_BRIDGE_ADDRESS;
     address public COLLATERAL_TOKEN_ADDRESS; //imBTC
 
-    string public ORACLE_URL = "null";
-    string public ORACLE_STATISTIC = "null";
+    string public ORACLE_URL = 'null';
+    string public ORACLE_STATISTIC = 'null';
 
     uint public CONTRACT_DURATION_DAYS = 28;
     uint public CONTRACT_DURATION = CONTRACT_DURATION_DAYS * 24 * 60 * 60; // 28 days in seconds
@@ -101,12 +108,12 @@ contract MarketContractProxy is Ownable {
     //////////////////////////////////////
 
     modifier onlyHoneyLemonOracle() {
-        require(msg.sender == HONEY_LEMON_ORACLE_ADDRESS, "Only Honey Lemon Oracle");
+        require(msg.sender == HONEY_LEMON_ORACLE_ADDRESS, 'Only Honey Lemon Oracle');
         _;
     }
 
     modifier onlyMinterBridge() {
-        require(msg.sender == MINTER_BRIDGE_ADDRESS, "Only Minter Bridge");
+        require(msg.sender == MINTER_BRIDGE_ADDRESS, 'Only Minter Bridge');
         _;
     }
 
@@ -238,9 +245,9 @@ contract MarketContractProxy is Ownable {
             tokenAddresses.length == marketAddresses.length &&
                 tokenAddresses.length == tokensToRedeem.length &&
                 tokenAddresses.length == traderLong.length,
-            "Invalid input params"
+            'Invalid input params'
         );
-        require(this.owner() == msg.sender,"You don't own this DSProxy GTFO");
+        require(this.owner() == msg.sender, "You don't own this DSProxy GTFO");
         MarketContractMPX marketInstance;
         MarketCollateralPool marketCollateralPool;
         ERC20 tokenInstance;
@@ -296,7 +303,7 @@ contract MarketContractProxy is Ownable {
         bytes32[3] memory marketAndsTokenNames,
         uint newMarketExpiration
     ) public onlyHoneyLemonOracle {
-        require(currentIndexValue != 0, "Current MRI value cant be zero");
+        require(currentIndexValue != 0, 'Current MRI value cant be zero');
 
         // 1. Settle the past contract, if there is a price and contract exists.
         MarketContractMPX expiringMarketContract = getExpiringMarketContract();
@@ -397,7 +404,7 @@ contract MarketContractProxy is Ownable {
         public
         onlyHoneyLemonOracle
     {
-        require(mri != 0, "The mri loockback value can not be 0");
+        require(mri != 0, 'The mri loockback value can not be 0');
         require(marketContractAddress != address(0x0));
 
         MarketContractMPX marketContract = MarketContractMPX(marketContractAddress);
