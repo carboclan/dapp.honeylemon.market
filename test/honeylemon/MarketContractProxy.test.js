@@ -434,6 +434,31 @@ contract(
             _expiration,
             { from: honeyLemonOracle }
           );
+
+          let amount = new BigNumber(10);
+          // set minter bridge address (for testing purpose)
+          await marketContractProxy.setMinterBridgeAddress(_0xBridgeProxy, {
+            from: honeyLemonOracle
+          });
+          // calculate needed collateral token
+          neededCollateral = await marketContractProxy.calculateRequiredCollateral(
+            amount.toString()
+          );
+          await imbtc.transfer(_0xBridgeProxy, neededCollateral.toString());
+
+          // approve token transfer from makerAddress
+          await imbtc.approve(
+            marketContractProxy.address,
+            new BigNumber(2).pow(256).minus(1),
+            { from: _0xBridgeProxy }
+          );
+
+          await marketContractProxy.mintPositionTokens(
+            amount.toString(),
+            takerAddress,
+            makerAddress,
+            { from: _0xBridgeProxy }
+          );  
         }
 
         assert.equal(
@@ -487,6 +512,14 @@ contract(
             await marketContractMpx.isSettled(),
             true,
             'market contract did not settle when latest MRI above price cap'
+          );
+        });
+
+        it('should revert settling an already settled contract', async () => {
+          let marketsContracts = await marketContractProxy.getAllMarketContracts();
+
+          await expectRevert.unspecified(
+            marketContractProxy.settleMarketContract(new BigNumber(1).multipliedBy(new BigNumber(1e8)), marketsContracts[0], { from: honeyLemonOracle})          
           );
         });
 
@@ -562,6 +595,71 @@ contract(
             takerImbtcBalanceAfter.minus(takerImbtcBalanceBefore).toString(),
             expectedTakerReturnedCollateral.toString(),
             'taker returned collateral mismatch'
+          );
+        });
+      });
+
+      describe('case: current date passed expiration date', async () => {
+        before(async () => {
+          let marketsContracts = await marketContractProxy.getAllMarketContracts();
+          let marketContractMpx = await MarketContractMPX.at(marketsContracts[1]);
+
+          await time.increaseTo(
+            (await marketContractMpx.EXPIRATION()).toNumber() + 10
+          )
+        });
+
+        it('deploy new contract and settle contract #2: case now > EXPIRATION', async () => {
+          let marketsContracts = await marketContractProxy.getAllMarketContracts();
+          assert.equal(
+            (await marketContractProxy.getExpiringMarketContract()).toString(),
+            marketsContracts[1],
+            'expiring market contract mismatch'
+          );
+
+          // deploy new contract & settle first market contract
+          let _marketAndsTokenNames = [];
+          _marketAndsTokenNames.push(web3.utils.fromAscii('BTC'));
+          _marketAndsTokenNames.push(web3.utils.fromAscii('MRI-BTC-28D-00000000-Long'));
+          _marketAndsTokenNames.push(web3.utils.fromAscii('MRI-BTC-28D-00000000-Short'));
+          let _loopbackMri = new BigNumber(pc.getMRIDataForDay(30)).multipliedBy(
+            new BigNumber(1e8)
+          );
+          let _mri = new BigNumber(pc.getMRIDataForDay(31)).multipliedBy(
+            new BigNumber(1e8)
+          );
+          let _expiration = Math.round(new Date().getTime() / 1000) + 3600 * 24 * 28;
+
+
+          marketContractProxy.dailySettlement(
+            _loopbackMri,
+            _mri,
+            _marketAndsTokenNames,
+            _expiration,
+            { from: honeyLemonOracle }
+          );
+
+          let marketContractMpx = await MarketContractMPX.at(marketsContracts[1]);
+
+          assert.equal(
+            (await marketContractMpx.lastPrice()).toString(),
+            _loopbackMri.toString(),
+            'last MRI value mismatch'
+          );
+          assert.isBelow(
+            (await marketContractMpx.lastPrice()).toNumber(),
+            (await marketContractMpx.PRICE_CAP()).toNumber(),
+            'latest pushed MRI is not below price cap'
+          );
+          assert.isAbove(
+            (await marketContractMpx.lastPrice()).toNumber(),
+            (await marketContractMpx.PRICE_FLOOR()).toNumber(),
+            'latest pushed MRI is not above price floor'
+          );
+          assert.equal(
+            await marketContractMpx.isSettled(),
+            true,
+            'market contract did not settle when latest MRI above price cap'
           );
         });
       });
