@@ -10,8 +10,10 @@ export type HoneylemonContext = {
   honeylemonService: any; //TODO update this when types exist
   collateralTokenBalance: BigNumber,
   collateralTokenAllowance: BigNumber,
+  COLLATERAL_TOKEN_DECIMALS: number,
   paymentTokenBalance: BigNumber,
   paymentTokenAllowance: BigNumber,
+  PAYMENT_TOKEN_DECIMALS: number,
 };
 
 export type HoneylemonProviderProps = {
@@ -85,8 +87,10 @@ function HoneylemonProvider({ children }: HoneylemonProviderProps) {
         honeylemonService,
         collateralTokenBalance,
         collateralTokenAllowance,
+        COLLATERAL_TOKEN_DECIMALS: 8,
         paymentTokenAllowance,
-        paymentTokenBalance
+        paymentTokenBalance,
+        PAYMENT_TOKEN_DECIMALS: 6,
       }}
     >
       {children}

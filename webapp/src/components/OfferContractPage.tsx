@@ -15,26 +15,26 @@ const useStyles = makeStyles(({ spacing }) => ({
 }))
 
 const OfferContractPage: React.SFC = () => {
-  const { honeylemonService } = useHoneylemon();
+  const { honeylemonService, COLLATERAL_TOKEN_DECIMALS } = useHoneylemon();
   const { address = '0x' } = useOnboard();
   const classes = useStyles();
 
   const [hashPrice, setHashPrice] = useState(0);
   const [hashAmount, setHashAmount] = useState(0);
   const [totalHashPrice, setTotalHashPrice] = useState(0);
-  const [btcAmount, setBtcAmount] = useState(new BigNumber(0));
+  const [collateralAmount, setCollateralAmount] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
     const fetchData = async () => {
       const result = await honeylemonService.getCollateralForContract(hashAmount)
       if (!cancelled) {
-        setBtcAmount(new BigNumber(result)); //TODO: Confirm whether scaling here is correct
+        setCollateralAmount(Number(new BigNumber(result || 0).shiftedBy(-COLLATERAL_TOKEN_DECIMALS).toString()));
       }
     };
     fetchData();
     return () => { cancelled = true }
-  }, [hashAmount, honeylemonService]);
+  }, [hashAmount, honeylemonService, COLLATERAL_TOKEN_DECIMALS]);
 
   useEffect(() => {
     setTotalHashPrice(hashPrice * hashAmount * 28)
@@ -42,9 +42,9 @@ const OfferContractPage: React.SFC = () => {
 
   const createOffer = async () => {
     try {
-      const approval = await honeylemonService.checkCollateralTokenApproval(address, btcAmount)
+      const approval = await honeylemonService.checkCollateralTokenApproval(address, collateralAmount)
       if (!approval) {
-        await honeylemonService.approveCollateralToken(address, btcAmount);
+        await honeylemonService.approveCollateralToken(address, collateralAmount);
       }
       const order = honeylemonService.createOrder(address, new BigNumber(hashAmount), new BigNumber(hashPrice));
       const signedOrder = await honeylemonService.signOrder(order);
@@ -53,10 +53,6 @@ const OfferContractPage: React.SFC = () => {
       console.log('Something went wrong creating the offer');
       console.log(error);
     }
-  }
-
-  const getFormattedBtcAmount = () => {
-    return btcAmount.shiftedBy(-8).toString();
   }
 
   return (
@@ -99,7 +95,6 @@ const OfferContractPage: React.SFC = () => {
           inputProps={{
             className: classes.inputBase,
             min: 0,
-            // max: User imBTC balance,
             step: 1
           }}
           onChange={e => {
@@ -118,14 +113,14 @@ const OfferContractPage: React.SFC = () => {
         <Typography style={{ fontWeight: 'bold' }} color='secondary'>Th</Typography>
       </Grid>
       <Grid item xs={6}><Typography style={{ fontWeight: 'bold' }}>Total:</Typography></Grid>
-      <Grid item xs={4} style={{ textAlign: 'center' }}><Typography style={{ fontWeight: 'bold' }}>${totalHashPrice}</Typography></Grid>
+      <Grid item xs={4} style={{ textAlign: 'center' }}><Typography style={{ fontWeight: 'bold' }}>${totalHashPrice.toFixed(2)}</Typography></Grid>
       <Grid item xs={12}><Typography style={{ fontStyle: 'italic', fontSize: 12 }}>${hashPrice} Th/day * 28 Days * {hashAmount} Contracts</Typography></Grid>
       <Grid item xs={12}><Button fullWidth onClick={createOffer}>CREATE OFFER</Button></Grid>
       <Grid item xs={12}>
         <Typography>
           You will offer {hashAmount} contracts at ${hashPrice} Th/day.
-          If a hodler buys your offer you will receive ${totalHashPrice} USDT.
-          You will be asked to post the hodlers max win of {getFormattedBtcAmount()} BTC as collateral.
+          If a hodler buys your offer you will receive ${totalHashPrice.toFixed(2)} USDT.
+          You will be asked to post the hodlers max win of {collateralAmount} BTC as collateral.
           The amount of that collateral that the hodler receives will be determined
           by the average value of the <Link href='#'>Mining Revenue Index</Link> over the
           28 days starting when the hodler pays you.

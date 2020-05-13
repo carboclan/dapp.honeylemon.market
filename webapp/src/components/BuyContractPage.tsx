@@ -38,7 +38,7 @@ enum BuyType { 'budget', 'quantity' };
 
 const BuyContractPage: React.SFC = () => {
   const { address } = useOnboard();
-  const { honeylemonService } = useHoneylemon()
+  const { honeylemonService, PAYMENT_TOKEN_DECIMALS } = useHoneylemon()
   const classes = useStyles();
 
   const [orderValue, setOrderValue] = useState(0);
@@ -68,7 +68,7 @@ const BuyContractPage: React.SFC = () => {
       const isLiquid = !!(Number(result?.remainingMakerFillAmount?.toString() || -1) === 0)
       setIsValid(isLiquid);
       setHashPrice(Number(result?.price?.toString()) || 0);
-      setOrderValue(Number(result?.totalTakerFillAmount?.shiftedBy(-6).toString()) || 0);
+      setOrderValue(Number(result?.totalTakerFillAmount?.shiftedBy(-PAYMENT_TOKEN_DECIMALS).toString()) || 0);
       setResultOrders(result?.resultOrders || undefined);
       setTakerFillAmounts(result?.takerAssetFillAmounts || undefined);
     } catch (error) {
