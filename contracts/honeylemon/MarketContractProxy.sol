@@ -1,14 +1,14 @@
 pragma solidity 0.5.2;
 
-import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
+import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
-import '../marketprotocol/MarketCollateralPool.sol';
-import '../marketprotocol/mpx/MarketContractFactoryMPX.sol';
-import '../marketprotocol/mpx/MarketContractMPX.sol';
+import "../marketprotocol/MarketCollateralPool.sol";
+import "../marketprotocol/mpx/MarketContractFactoryMPX.sol";
+import "../marketprotocol/mpx/MarketContractMPX.sol";
 
-import '../libraries/MathLib.sol';
+import "../libraries/MathLib.sol";
 
-import './DSProxy.sol';
+import "./DSProxy.sol";
 
 
 /// @title Market Contract Proxy.
@@ -25,8 +25,8 @@ contract MarketContractProxy is Ownable {
     address public MINTER_BRIDGE_ADDRESS;
     address public COLLATERAL_TOKEN_ADDRESS; //imBTC
 
-    string public ORACLE_URL = 'null';
-    string public ORACLE_STATISTIC = 'null';
+    string public ORACLE_URL = "null";
+    string public ORACLE_STATISTIC = "null";
 
     uint public CONTRACT_DURATION_DAYS = 28;
     uint public CONTRACT_DURATION = CONTRACT_DURATION_DAYS * 24 * 60 * 60; // 28 days in seconds
@@ -83,6 +83,10 @@ contract MarketContractProxy is Ownable {
         dSProxyFactory = new DSProxyFactory();
     }
 
+    ////////////////
+    //// EVENTS ////
+    ////////////////
+
     ///@notice PositionTokensMinted event
     event PositionTokensMinted(
         uint indexed marketId,
@@ -114,11 +118,15 @@ contract MarketContractProxy is Ownable {
         address tokenAddress
     );
 
+    ///////////////////
+    //// MODIFIERS ////
+    ///////////////////
+
     /**
      * @notice modifier to check that the caller is honeylemon oracle address
      */
     modifier onlyHoneyLemonOracle() {
-        require(msg.sender == HONEY_LEMON_ORACLE_ADDRESS, 'Only Honey Lemon Oracle');
+        require(msg.sender == HONEY_LEMON_ORACLE_ADDRESS, "Only Honey Lemon Oracle");
         _;
     }
 
@@ -126,9 +134,13 @@ contract MarketContractProxy is Ownable {
      * @notice mofidier to check that the caller is minter bridge address
      */
     modifier onlyMinterBridge() {
-        require(msg.sender == MINTER_BRIDGE_ADDRESS, 'Only Minter Bridge');
+        require(msg.sender == MINTER_BRIDGE_ADDRESS, "Only Minter Bridge");
         _;
     }
+
+    /////////////////////////
+    //// OWNER FUNCTIONS ////
+    /////////////////////////
 
     /**
      * @notice Set oracle address
@@ -156,6 +168,10 @@ contract MarketContractProxy is Ownable {
     function setMarketContractSpecs(uint[7] calldata _params) external onlyOwner {
         marketContractSpecs = _params;
     }
+
+    ////////////////////////
+    //// PUBLIC GETTERS ////
+    ////////////////////////
 
     /**
      * @notice get amounts of TH that can be filled
@@ -333,6 +349,10 @@ contract MarketContractProxy is Ownable {
                 : addressToDSProxy[inputAddress];
     }
 
+    ///////////////////////////
+    //// DSPROXY FUNCTIONS ////
+    ///////////////////////////
+
     /**
      * @notice create DSProxy wallet
      * @return address of created DSProxy
@@ -366,7 +386,7 @@ contract MarketContractProxy is Ownable {
             tokenAddresses.length == marketAddresses.length &&
                 tokenAddresses.length == tokensToRedeem.length &&
                 tokenAddresses.length == traderLong.length,
-            'Invalid input params'
+            "Invalid input params"
         );
         require(this.owner() == msg.sender, "You don't own this DSProxy GTFO");
         MarketContractMPX marketInstance;
@@ -413,7 +433,10 @@ contract MarketContractProxy is Ownable {
         );
     }
 
-    // Settles old contract and deploys the new contract
+    /////////////////////////////////////
+    //// HONEYLEMON ORACLE FUNCTIONS ////
+    /////////////////////////////////////
+    
     /**
      * @notice deploy new market and settle last one (if met settlement requirements)
      * @dev can only be called by hinelemon oracle
@@ -428,7 +451,7 @@ contract MarketContractProxy is Ownable {
         bytes32[3] memory marketAndsTokenNames,
         uint newMarketExpiration
     ) public onlyHoneyLemonOracle {
-        require(currentIndexValue != 0, 'Current MRI value cant be zero');
+        require(currentIndexValue != 0, "Current MRI value cant be zero");
 
         // 1. Settle the past contract, if there is a price and contract exists.
         MarketContractMPX expiringMarketContract = getExpiringMarketContract();
@@ -444,9 +467,30 @@ contract MarketContractProxy is Ownable {
         latestMri = currentIndexValue;
     }
 
-    ////////////////////////////////////////////////
-    //// 0X-MINTER-BRIDGE PRIVILEGED FUNCTIONS /////
-    ////////////////////////////////////////////////
+    /**
+     * @notice settle specific market
+     * @dev can only be called from honeylemon oracle.
+     * Can be called directly to settle expiring market without deploying new one
+     * @dev mri MRI value
+     * @dev marketContractAddress market contract
+     */
+    function settleMarketContract(uint mri, address marketContractAddress)
+        public
+        onlyHoneyLemonOracle
+    {
+        require(mri != 0, "The mri loockback value can not be 0");
+        require(marketContractAddress != address(0x0));
+
+        MarketContractMPX marketContract = MarketContractMPX(marketContractAddress);
+        marketContract.oracleCallBack(mri);
+
+        // Store the most recent mri value to use in fillable amount
+        latestMri = mri;
+    }
+
+    ///////////////////////////////////////////////
+    //// 0X-MINTER-BRIDGE PRIVILEGED FUNCTIONS ////
+    ///////////////////////////////////////////////
     /**
      * @notice mint long and short tokens
      * @dev can only be called from 0x minter bridge
@@ -510,26 +554,9 @@ contract MarketContractProxy is Ownable {
         );
     }
 
-    /**
-     * @notice settle specific market
-     * @dev can only be called from honeylemon oracle.
-     * Can be called directly to settle expiring market without deploying new one
-     * @dev mri MRI value
-     * @dev marketContractAddress market contract
-     */
-    function settleMarketContract(uint mri, address marketContractAddress)
-        public
-        onlyHoneyLemonOracle
-    {
-        require(mri != 0, 'The mri loockback value can not be 0');
-        require(marketContractAddress != address(0x0));
-
-        MarketContractMPX marketContract = MarketContractMPX(marketContractAddress);
-        marketContract.oracleCallBack(mri);
-
-        // Store the most recent mri value to use in fillable amount
-        latestMri = mri;
-    }
+    ////////////////////////////
+    //// INTERNAL FUNCTIONS ////
+    ////////////////////////////
 
     /**
      * @notice deploy the current Market contract
