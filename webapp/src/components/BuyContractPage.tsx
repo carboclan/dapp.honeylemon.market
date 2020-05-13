@@ -68,7 +68,7 @@ const BuyContractPage: React.SFC = () => {
       const isLiquid = !!(Number(result?.remainingMakerFillAmount?.toString() || -1) === 0)
       setIsValid(isLiquid);
       setHashPrice(Number(result?.price?.toString()) || 0);
-      setOrderValue(Number(result?.totalTakerFillAmount?.toString()) || 0);
+      setOrderValue(Number(result?.totalTakerFillAmount?.shiftedBy(-6).toString()) || 0);
       setResultOrders(result?.resultOrders || undefined);
       setTakerFillAmounts(result?.takerAssetFillAmounts || undefined);      
     } catch (error) {
