@@ -97,13 +97,6 @@ contract DSProxy is DSAuth, DSNote {
         setCache(_cacheAddr);
     }
 
-    event LogEvent(
-        address msgsender,
-        address addressthis,
-        uint param,
-        address tokenAddress
-    );
-
     function() external payable {}
 
     // use the proxy to execute calldata _data on contract _code
