@@ -226,6 +226,7 @@ class HoneylemonService {
     );
   }
 
+  // TODO: Accept an order hash as parameter
   getCancelOrderTx(order) {
     return this.contractWrappers.exchange.cancelOrder(order);
   }

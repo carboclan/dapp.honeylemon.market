@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Typography, Grid, makeStyles, Tabs, Tab, Button, TableRow, TableHead, TableCell, Table, TableBody } from '@material-ui/core';
+import { useOnboard } from '../contexts/OnboardContext';
+import { useHoneylemon } from '../contexts/HoneylemonContext';
 
 const useStyles = makeStyles(({ spacing }) => ({
   rightAlign: {
@@ -11,13 +13,38 @@ const useStyles = makeStyles(({ spacing }) => ({
 }))
 
 const PorfolioPage: React.SFC = () => {
-  // const { wallet, onboard, address, network, balance, notify } = useOnboard();
+  const { address } = useOnboard();
+  const { honeylemonService } = useHoneylemon();
+
   const [activeTab, setActiveTab] = useState<'active' | 'settled'>('active')
-  const [btcAmount, ] = useState(0);
+  const [collateralForWithdraw,] = useState(0);
+  const [openOrders, setOpenOrders] = useState<Array<{ orderHash: string, remainingFillableTakerAssetAmount: number, price: number }>>([]);
+  const [activeContracts, setActiveContracts] = useState([]);
+
 
   const handleSetActiveTab = (event: React.ChangeEvent<{}>, newValue: 'active' | 'settled') => {
     setActiveTab(newValue);
   };
+
+  const cancelOpenOrder = async (orderHash: string) => {
+    console.log(`Cancelling ${orderHash}`);
+  }
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const getPorfolio = async () => {
+      const openOrders = await honeylemonService.getOpenOrders(address);
+      const contracts = await honeylemonService.getContracts(address);
+      if (!cancelled) {
+        setOpenOrders(openOrders.records.map((openOrder: any) => openOrder.metaData))
+        setActiveContracts(contracts.longContracts.concat(contracts.shortContracts));
+      }
+    }
+    getPorfolio();
+    return () => { cancelled = true }
+
+  }, [address, honeylemonService])
 
   const classes = useStyles();
   return (
@@ -48,14 +75,16 @@ const PorfolioPage: React.SFC = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  <TableRow>
-                    <TableCell>13.23</TableCell>
-                    <TableCell>$0.115</TableCell>
-                    <TableCell><Button>Cancel</Button></TableCell>
-                  </TableRow>
+                  {openOrders && openOrders?.map(order =>
+                    <TableRow key={order.orderHash}>
+                      <TableCell>{order?.remainingFillableTakerAssetAmount}</TableCell>
+                      <TableCell>${order?.price}</TableCell>
+                      <TableCell><Button onClick={() => cancelOpenOrder(order.orderHash)}>Cancel</Button></TableCell>
+                    </TableRow>
+                  )}
                 </TableBody>
               </Table>
-              <Typography variant='h5' style={{ fontWeight: 'bold' }} color='secondary'>Positions</Typography>    
+              <Typography variant='h5' style={{ fontWeight: 'bold' }} color='secondary'>Positions</Typography>
               <Table>
                 <TableHead>
                   <TableRow>
@@ -65,13 +94,15 @@ const PorfolioPage: React.SFC = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  <TableRow>
-                    <TableCell>Swap Long-May04</TableCell>
-                    <TableCell>13.23</TableCell>
-                    <TableCell>14</TableCell>
-                  </TableRow>
+                  {activeContracts && activeContracts?.map((contract: any, i) =>
+                    <TableRow key={i}>
+                      <TableCell>{contract.contractName}</TableCell>
+                      <TableCell>{contract.qtyToMint}</TableCell>
+                      <TableCell></TableCell>
+                    </TableRow>
+                  )}
                 </TableBody>
-              </Table>          
+              </Table>
             </> :
             <>
               <Table>
@@ -90,7 +121,7 @@ const PorfolioPage: React.SFC = () => {
                   </TableRow>
                 </TableBody>
               </Table>
-              <Button fullWidth>WITHDRAW ALL ({btcAmount} BTC)</Button>
+              <Button fullWidth>WITHDRAW ALL ({collateralForWithdraw} BTC)</Button>
             </>
           }
         </div>
