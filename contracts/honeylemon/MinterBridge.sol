@@ -17,7 +17,7 @@ contract MinterBridge is Ownable {
     using MathLib for int;
     using SafeERC20 for ERC20;
 
-    MarketContractProxy marketContractProxy;
+    MarketContractProxy public marketContractProxy;
 
     ///@dev Result of a successful bridge call.
     bytes4 internal constant BRIDGE_SUCCESS = 0xdc1600f3;
