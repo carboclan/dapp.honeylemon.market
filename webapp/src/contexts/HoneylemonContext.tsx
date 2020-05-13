@@ -61,7 +61,6 @@ function HoneylemonProvider({ children }: HoneylemonProviderProps) {
 
   useEffect(() => {
     const checkBalances = async () => {
-      debugger;
       const collateral = await honeylemonService.getCollateralTokenAmounts(address);
       setCollateralTokenAllowance(collateral.allowance);
       setCollateralTokenBalance(collateral.balance);
@@ -70,36 +69,13 @@ function HoneylemonProvider({ children }: HoneylemonProviderProps) {
       setPaymentTokenBalance(payment.balance);
     }
 
+    const poller = () => setTimeout(checkBalances, 12000)
     if (honeylemonService) {
-      console.log('subscribing to erc20 events');
-      debugger;
-      honeylemonService.collateralToken.subscribe('Approval', {
-        tokenOwner: address,
-      }, () => {
-        console.log('imBTC approval')
-        checkBalances();
-      });
-      honeylemonService.collateralToken.subscribe('Transfer', {}, () => {
-        console.log('imBTC tx')
-        checkBalances();
-      });
-      honeylemonService.paymentToken.subscribe('Approval', {
-        tokenOwner: address,
-      }, () => {
-        console.log('usdc approval')
-        checkBalances();
-      });
-      honeylemonService.paymentToken.subscribe('Transfer', {}, () => {
-        console.log('usdc tx')
-        checkBalances();
-      });
+      poller();
     }
 
     return () => {
-      if (honeylemonService) {
-        honeylemonService.collateralToken.unsubscribeAll();
-        honeylemonService.paymentToken.unsubscribeAll();
-      }
+      clearTimeout(poller());
     }
   }, [honeylemonService, address])
 
