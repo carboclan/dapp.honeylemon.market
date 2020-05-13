@@ -39,6 +39,7 @@
     "prettier-eslint-cli": "5.0.0",
     "prettier-plugin-solidity": "^1.0.0-alpha.47",
     "sinon": "^9.0.2",
+    "solidoc": "^1.0.5",
     "solium": "^1.0.5",
     "truffle": "5.1.18",
     "truffle-assertions": "0.9.0",
@@ -53,7 +54,8 @@
     "test": "truffle test",
     "lint": "prettier-eslint --write \"$(pwd)/**/*.js\" \"$(pwd)/**/*.sol\" --ignore './node_modules/**' --ignore './coverage/**' --ignore './build/**' --ignore './webapp/**' --ignore './dist/**'",
     "build": "webpack --config webpack.config.js --color -p --progress --hide-modules --display-optimization-bailout",
-    "postinstall": "npm run build"
+    "postinstall": "npm run build",
+    "docgen": "solidoc"
   },
   "husky": {
     "hooks": {}

@@ -1,3 +1,6 @@
+// This script stores some historic payout data used to seed testing scripts.
+// This acts to mock the mri packaged which pulls main net data at daily intervals.
+
 class PayoutCalculator {
   constructor() {
     this.data = [

@@ -6,7 +6,9 @@ const MarketContractProxy = artifacts.require('MarketContractProxy');
 const CollateralToken = artifacts.require('CollateralToken'); // IMBTC
 
 // Helper libraries
-const { PayoutCalculator } = require('../../payout-calculator');
+const {
+  PayoutCalculator
+} = require('../../honeylemon-intergration-tests/helpers/payout-calculator');
 
 const ADDRESS_ZERO = '0x0000000000000000000000000000000000000000';
 
@@ -76,7 +78,8 @@ contract(
         let _expiration = Math.round(new Date().getTime() / 1000) + 3600 * 24 * 28;
 
         // deploy Market
-        await marketContractProxy.deployContract(
+        await marketContractProxy.dailySettlement(
+          '0',
           _currentMRI,
           _marketAndsTokenNames,
           _expiration

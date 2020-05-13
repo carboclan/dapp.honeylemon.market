@@ -1,5 +1,14 @@
+// The test script simulates a full lifecycle of the Honeylemon ecosystem by
+// iteratively deploying and settling 60 days worth of contracts. This is done
+// to show that the look back and daily settlement works from the HoneyLemon
+// oracle and the associated permissions.
+
+// To run this script start the 0x docker container and then run the script as follows
+// $docker run -it -p 8545:8545 0xorg/ganache-cli:latest
+// $truffle migrate --reset && truffle exec ./honeylemon-intergration-tests/full-trade-lifecycle-test.js
+
 // Helper libraries
-const { PayoutCalculator } = require('./payout-calculator');
+const { PayoutCalculator } = require('../test/helpers/payout-calculator');
 
 const { ContractWrappers } = require('@0x/contract-wrappers');
 const { Web3Wrapper } = require('@0x/web3-wrapper');
