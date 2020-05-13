@@ -34,4 +34,4 @@ migrate:
 	truffle migrate --reset
 
 deploy-daily-contract:
-	truffle exec deploy-daily-contract.js
+	truffle exec scripts/deploy-daily-contract.js
