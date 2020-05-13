@@ -11,7 +11,7 @@ const MarketCollateralPool = artifacts.require('MarketCollateralPool');
 const PositionToken = artifacts.require('PositionToken'); // Long & Short tokens
 
 // Helper libraries
-const { PayoutCalculator } = require('../../payout-calculator');
+const { PayoutCalculator } = require('../../honeylemon-intergration-tests/helpers/payout-calculator');
 
 const isMarketExpired = (contractIndex, contractDay) => {
   return contractIndex < contractDay ? false : true;

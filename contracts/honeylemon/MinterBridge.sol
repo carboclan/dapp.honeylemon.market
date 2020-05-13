@@ -19,28 +19,21 @@ contract MinterBridge is Ownable {
 
     MarketContractProxy marketContractProxy;
 
-    // @dev Result of a successful bridge call.
+    ///@dev Result of a successful bridge call.
     bytes4 internal constant BRIDGE_SUCCESS = 0xdc1600f3;
     address public MARKET_CONTRACT_PROXY_ADDRESS;
     address public ERC20_BRIDGE_PROXY_ADDRESS;
 
-    function setMarketContractProxyAddress(address _marketContractProxyAddress)
-        public
-        onlyOwner
-    {
-        MARKET_CONTRACT_PROXY_ADDRESS = _marketContractProxyAddress;
-        marketContractProxy = MarketContractProxy(MARKET_CONTRACT_PROXY_ADDRESS);
-    }
-
-    function set0xBridgeProxy(address _0xBridgeProxyAddress) public onlyOwner {
-        ERC20_BRIDGE_PROXY_ADDRESS = _0xBridgeProxyAddress;
-    }
-
+    /**
+     * @notice check that called is 0x minter bridge proxy address
+     */
     modifier only0xBridgeProxy() {
         require(msg.sender == ERC20_BRIDGE_PROXY_ADDRESS, 'invalid caller');
         _;
     }
-
+    /**
+     * @notice check that market contract proxy address is initialized
+     */
     modifier onlyIfSetMarketContractProxy() {
         require(
             MARKET_CONTRACT_PROXY_ADDRESS != address(0),
@@ -49,15 +42,40 @@ contract MinterBridge is Ownable {
         _;
     }
 
-    /// @dev Transfers `amount` of the ERC20 `tokenAddress` from `from` to `to`.
-    /// @param tokenAddress in the standard 0x implementation this is the transferred token.
-    // In HoneyLemon this is the marketContractProxy which acts to spoof a token and inform
-    // the MinterBridge of the latest perpetual token.
-    /// @param from Address to transfer asset from.
-    /// @param to Address to transfer asset to.
-    /// @param amount Amount of asset to transfer.
-    /// @param bridgeData Arbitrary asset data needed by the bridge contract.
-    /// @return success The magic bytes `0x37708e9b` if successful.
+    /**
+     * @notice set market contract proxy address
+     * @dev can only be called from contract owner address
+     * @param _marketContractProxyAddress market contract address
+     */
+    function setMarketContractProxyAddress(address _marketContractProxyAddress)
+        public
+        onlyOwner
+    {
+        MARKET_CONTRACT_PROXY_ADDRESS = _marketContractProxyAddress;
+        marketContractProxy = MarketContractProxy(MARKET_CONTRACT_PROXY_ADDRESS);
+    }
+
+    /**
+     * @notice set 0x minter bridge proxy address
+     * @dev can only be called from contract owner address
+     * @param _0xBridgeProxyAddress 0x minter bridge proxy address
+     */
+    function set0xBridgeProxy(address _0xBridgeProxyAddress) public onlyOwner {
+        ERC20_BRIDGE_PROXY_ADDRESS = _0xBridgeProxyAddress;
+    }
+
+    /**
+     * @notice Transfers `amount` of the ERC20 `tokenAddress` from `from` to `to`.
+     * @dev can only be called if market contract proxy address is set.
+     * @param tokenAddress in the standard 0x implementation this is the transferred token.
+     * In HoneyLemon this is the marketContractProxy which acts to spoof a token and inform
+     * the MinterBridge of the latest perpetual token.
+     * @param from Address to transfer asset from.
+     * @param to Address to transfer asset to.
+     * @param amount Amount of asset to transfer.
+     * @param bridgeData Arbitrary asset data needed by the bridge contract.
+     * @return success The magic bytes `0x37708e9b` if successful.
+     */
     function bridgeTransferFrom(
         address tokenAddress,
         address from,
