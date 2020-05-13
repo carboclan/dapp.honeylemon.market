@@ -70,7 +70,7 @@ const BuyContractPage: React.SFC = () => {
       setHashPrice(Number(result?.price?.toString()) || 0);
       setOrderValue(Number(result?.totalTakerFillAmount?.shiftedBy(-6).toString()) || 0);
       setResultOrders(result?.resultOrders || undefined);
-      setTakerFillAmounts(result?.takerAssetFillAmounts || undefined);      
+      setTakerFillAmounts(result?.takerAssetFillAmounts || undefined);
     } catch (error) {
       console.log('Error getting the current liquidity')
       console.log(error);
@@ -88,13 +88,13 @@ const BuyContractPage: React.SFC = () => {
     !isNaN(newValue) && setOrderValue(newValue);
 
     try {
-      const result = await honeylemonService.getQuoteForBudget(new BigNumber(newValue))
-      const isLiquid = !!(Number(result?.remainingTakerFillAmount?.toString() || -1) === 0)
+      const result = await honeylemonService.getQuoteForBudget(newValue);
+      const isLiquid = !!(Number(result?.remainingTakerFillAmount?.toString() || -1) === 0);
       setIsValid(isLiquid);
       setHashPrice(Number(result?.price?.toString()) || 0);
       setOrderQuantity(Number(result?.totalMakerFillAmount?.toString()) || 0);
       setResultOrders(result.resultOrders || undefined);
-      setTakerFillAmounts(result.takerAssetFillAmounts || undefined);      
+      setTakerFillAmounts(result.takerAssetFillAmounts || undefined);
     } catch (error) {
       console.log('Error getting the current liquidity')
       console.log(error);

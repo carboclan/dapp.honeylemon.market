@@ -137,7 +137,7 @@ class HoneylemonService {
   }
 
   async getQuoteForBudget(budget) {
-    budget = new BigNumber(budget).shiftedBy(-SHIFT_PRICE_BY).integerValue();
+    budget = new BigNumber(budget).shiftedBy(PAYMENT_TOKEN_DECIMALS).integerValue();
     const { asks } = await this.getOrderbook();
     const orders = asks.records.map(r => r.order);
     const remainingFillableTakerAssetAmounts = asks.records.map(
@@ -159,13 +159,18 @@ class HoneylemonService {
     let remainingBudget = new BigNumber(budget);
     for (let i = 0; i < resultOrders.length; i++) {
       const order = resultOrders[i];
-      const takerFillAmount = BigNumber.min(
+      let takerFillAmount = BigNumber.min(
         ordersRemainingFillableTakerAssetAmounts[i],
         remainingBudget
       );
       const makerFillAmount = orderCalculationUtils.getMakerFillAmount(
         order,
         takerFillAmount
+      );
+      // Recalculate takerFillAmount based on whole makerFillAmount
+      takerFillAmount = orderCalculationUtils.getTakerFillAmount(
+        order,
+        makerFillAmount
       );
       totalMakerFillAmount = totalMakerFillAmount.plus(makerFillAmount);
       totalTakerFillAmount = totalTakerFillAmount.plus(takerFillAmount);
