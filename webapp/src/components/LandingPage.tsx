@@ -2,7 +2,7 @@ import React from 'react';
 import { Grid, Button } from '@material-ui/core';
 import { forwardTo } from '../helpers/history';
 import { useOnboard } from '../contexts/OnboardContext';
-import { RouteComponentProps, useLocation } from 'react-router';
+import { useLocation } from 'react-router';
 
 function useQuery() {
   return new URLSearchParams(useLocation().search);

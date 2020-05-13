@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Button, Typography, Grid, makeStyles, FilledInput, Link, InputAdornment, Tabs, Tab, Box } from '@material-ui/core';
+import React, { useState } from 'react';
+import { Button, Typography, Grid, makeStyles, FilledInput, Link, InputAdornment, Tabs, Tab } from '@material-ui/core';
 import { useHoneylemon } from '../contexts/HoneylemonContext';
 import { useOnboard } from '../contexts/OnboardContext';
 const { BigNumber } = require('@0x/utils');
@@ -128,7 +128,7 @@ const BuyContractPage: React.SFC = () => {
         address,
       );
 
-      const txHash = await tx.awaitTransactionSuccessAsync({
+      await tx.awaitTransactionSuccessAsync({
         from: address,
         gas,
         gasPrice,
