@@ -11,7 +11,7 @@ import '../libraries/MathLib.sol';
 import './DSProxy.sol';
 
 
-///@title Market Contract Proxy.
+/// @title Market Contract Proxy.
 /// @notice Handles the interconnection of the Market Protocol with 0x to
 /// facilitate issuance of long and short tokens at order execution.
 /// @dev This contract is responsible for 1) daily deployment of new market
@@ -42,24 +42,32 @@ contract MarketContractProxy is Ownable {
         0 // expirationTimeStamp [updated before deployment]
     ];
 
-    // Array of all market contracts deployed
+    ///@notice Array of all market contracts deployed
     address[] public marketContracts;
 
-    // Mapping of each market contract address to the associated array index
+    ///@notice Mapping of each market contract address to the associated array index
     mapping(address => uint256) addressToMarketId;
 
-    // Stores the most recent MRI value
+    ///@notice Stores the most recent MRI value
     uint256 internal latestMri = 0;
 
-    // DSProxy factory to create smart contract wallets for users to enable bulk redemption.
+    ///@notice DSProxy factory to create smart contract wallets for users to enable bulk redemption.
     DSProxyFactory dSProxyFactory;
 
-    // Mapping to link each trader address to their DSProxy address.
+    ///@notice Mapping to link each trader address to their DSProxy address.
     mapping(address => address) public addressToDSProxy;
 
-    // Mapping to link each DSProxy address to their traders address.
+    ///@notice Mapping to link each DSProxy address to their traders address.
     mapping(address => address) public dSProxyToAddress;
 
+    /**
+     * @notice constructor
+     * @dev will deloy a new DSProxy Factory
+     * @param _marketContractFactoryMPX market contract factory address
+     * @param _honeyLemonOracle honeylemon oracle address
+     * @param _minterBridge 0x minter bridge address
+     * @param _imBTCTokenAddress imBTC token address
+     */
     constructor(
         address _marketContractFactoryMPX,
         address _honeyLemonOracle,
@@ -75,6 +83,7 @@ contract MarketContractProxy is Ownable {
         dSProxyFactory = new DSProxyFactory();
     }
 
+    ///@notice PositionTokensMinted event
     event PositionTokensMinted(
         uint indexed marketId,
         string contractName,
@@ -89,6 +98,7 @@ contract MarketContractProxy is Ownable {
         uint time
     );
 
+    ///@notice BatchTokensRedeemed event
     event BatchTokensRedeemed(
         address tokenAddresses,
         address marketAddresses,
@@ -96,6 +106,7 @@ contract MarketContractProxy is Ownable {
         bool traderLong
     );
 
+    ///@notice LogEvent
     event LogEvent(
         address msgsender,
         address addressthis,
@@ -103,23 +114,21 @@ contract MarketContractProxy is Ownable {
         address tokenAddress
     );
 
-    //////////////////////////////////////
-    //// PERMISSION SCOPING MODIFIERS ////
-    //////////////////////////////////////
-
+    /**
+     * @notice modifier to check that the caller is honeylemon oracle address
+     */
     modifier onlyHoneyLemonOracle() {
         require(msg.sender == HONEY_LEMON_ORACLE_ADDRESS, 'Only Honey Lemon Oracle');
         _;
     }
 
+    /**
+     * @notice mofidier to check that the caller is minter bridge address
+     */
     modifier onlyMinterBridge() {
         require(msg.sender == MINTER_BRIDGE_ADDRESS, 'Only Minter Bridge');
         _;
     }
-
-    ////////////////////////////////////
-    //// EXTERNAL FUNCTIONS ////////////
-    ////////////////////////////////////
 
     /**
      * @notice Set oracle address
@@ -178,17 +187,17 @@ contract MarketContractProxy is Ownable {
 
     /**
      * @notice get all market contarcts
-     * @return marketContracts
+     * @return array of market contracts
      */
     function getAllMarketContracts() public view returns (address[] memory) {
         return marketContracts;
     }
 
-    //////////////////////////
-    //// PUBLIC FUNCTIONS ////
-    //////////////////////////
-
-    // The TH amount that can currently be filled based on owner’s BTC balance and allowance
+    /**
+     * @notice calculate the TH amount that can be filled based on owner’s BTC balance and allowance
+     * @param makerAddress address or BTC(imBTC) owner
+     * @return TH amount
+     */
     function getFillableAmount(address makerAddress) public view returns (uint256) {
         ERC20 collateralToken = ERC20(COLLATERAL_TOKEN_ADDRESS);
 
@@ -212,11 +221,20 @@ contract MarketContractProxy is Ownable {
             );
     }
 
+    /**
+     * @notice get latest market contract
+     * @return market contract address
+     */
     function getLatestMarketContract() public view returns (MarketContractMPX) {
         uint lastIndex = marketContracts.length - 1;
         return MarketContractMPX(marketContracts[lastIndex]);
     }
 
+    /**
+     * @notice get expiring market contract
+     * @dev return address(0) if there is no expired contract
+     * @return expired market contract address
+     */
     function getExpiringMarketContract() public view returns (MarketContractMPX) {
         uint contractsAdded = marketContracts.length;
 
@@ -228,6 +246,11 @@ contract MarketContractProxy is Ownable {
         return MarketContractMPX(marketContracts[expiringIndex]);
     }
 
+    /**
+     * @notice get market collateral pool address
+     * @param market market contract
+     * @return collateral pool address
+     */
     function getCollateralPool(MarketContractMPX market)
         public
         view
@@ -236,18 +259,31 @@ contract MarketContractProxy is Ownable {
         return MarketCollateralPool(market.COLLATERAL_POOL_ADDRESS());
     }
 
+    /**
+     * @notice get latest market collateral pool address
+     * @return collateral pool address
+     */
     function getLatestMarketCollateralPool() public view returns (MarketCollateralPool) {
         MarketContractMPX latestMarketContract = getLatestMarketContract();
         return getCollateralPool(latestMarketContract);
     }
 
+    /**
+     * @notice calculate collateral needed to mint Long/Short tokens
+     * @param amount deposited amount
+     * @return needed collateral
+     */
     function calculateRequiredCollateral(uint amount) public view returns (uint) {
         MarketContractMPX latestMarketContract = getLatestMarketContract();
         return MathLib.multiply(amount, latestMarketContract.COLLATERAL_PER_UNIT());
     }
 
-    // Return `balanceOf` for current day PositionTokenLong. This is used to prove to
-    // 0x that the wallet balance was correctly transferred.
+    /**
+     * @notice get user long token blanace for the current day
+     * @dev used to prove to 0x that the wallet balance was correctly transferred.
+     * @param owner address
+     * @return long token balance
+     */
     function balanceOf(address owner) public returns (uint) {
         address addressToCheck = getUserAddressOrDSProxy(owner);
         MarketContract latestMarketContract = getLatestMarketContract();
@@ -255,10 +291,19 @@ contract MarketContractProxy is Ownable {
         return longToken.balanceOf(addressToCheck);
     }
 
+    /**
+     * @notice get current timestamp
+     */
     function getTime() public view returns (uint) {
         return now;
     }
 
+    /**
+     * @notice generate market contract specs (cap price, expiration timestamp)
+     * @param currentMRI current MRI value
+     * @param expiration market expiration timestamp
+     * @return market specs
+     */
     function generateContractSpecs(uint currentMRI, uint expiration)
         public
         view
@@ -275,6 +320,12 @@ contract MarketContractProxy is Ownable {
     }
 
     // If the user has a DSProxy wallet, return that address. Else, return their wallet address
+    /**
+     * @notice get user address
+     * @dev get user own address or DSProxy address if user have one
+     * @param inputAddress user address
+     * @return address
+     */
     function getUserAddressOrDSProxy(address inputAddress) public view returns (address) {
         return
             addressToDSProxy[inputAddress] == address(0)
@@ -282,10 +333,10 @@ contract MarketContractProxy is Ownable {
                 : addressToDSProxy[inputAddress];
     }
 
-    ///////////////////////////
-    //// DSPROXY FUNCTIONS ////
-    ///////////////////////////
-
+    /**
+     * @notice create DSProxy wallet
+     * @return address of created DSProxy
+     */
     function createDSProxyWallet() public returns (address) {
         // Create a new DSProxy for the caller.
         address payable dsProxyWallet = dSProxyFactory.build(msg.sender);
@@ -294,10 +345,17 @@ contract MarketContractProxy is Ownable {
         return dsProxyWallet;
     }
 
-    // Function called by a DsProxy wallet which passes control from the caller using delegatecal
-    // to enable the caller to redeem bulk tokens in one tx. Parameters are parallel arrays.
-    // Note: only one side can be redeemed at a time. This is to simplify redemption as the same caller
-    // will likely never be both long and short in the same contract.
+    /**
+     * @notice batch redeem long or short tokens for different markets
+     * @dev called by a DsProxy wallet which passes control from the caller using delegatecal
+     * to enable the caller to redeem bulk tokens in one tx. Parameters are parallel arrays.
+     * Only one side can be redeemed at a time. This is to simplify redemption as the same caller
+     * will likely never be both long and short in the same contract.
+     * @param tokenAddresses long/short token addresses
+     * @param marketAddresses market contracts addresses
+     * @param tokensToRedeem amount of token to redeem
+     * @param traderLong true => trader long; false => trader short
+     */
     function batchRedeem(
         address[] memory tokenAddresses, // Address of the long or short token to redeem
         address[] memory marketAddresses, // Address of the market protocol
@@ -355,11 +413,15 @@ contract MarketContractProxy is Ownable {
         );
     }
 
-    /////////////////////////////////////
-    //// ORACLE PRIVILEGED FUNCTIONS ////
-    /////////////////////////////////////
-
     // Settles old contract and deploys the new contract
+    /**
+     * @notice deploy new market and settle last one (if met settlement requirements)
+     * @dev can only be called by hinelemon oracle
+     * @param lookbackIndexValue  last index value
+     * @param currentIndexValue current index value
+     * @param marketAndsTokenNames bytes array of market, long and short token names
+     * @param newMarketExpiration new market expiration timestamp
+     */
     function dailySettlement(
         uint lookbackIndexValue,
         uint currentIndexValue,
@@ -385,7 +447,13 @@ contract MarketContractProxy is Ownable {
     ////////////////////////////////////////////////
     //// 0X-MINTER-BRIDGE PRIVILEGED FUNCTIONS /////
     ////////////////////////////////////////////////
-
+    /**
+     * @notice mint long and short tokens
+     * @dev can only be called from 0x minter bridge
+     * @param qtyToMint long/short quantity to mint
+     * @param longTokenRecipient address of long token recipient (will receive token at this address unless address have deployed DSProxy)
+     * @param shortTokenRecipient address of short token recipient (will receive token at this address unless address have deployed DSProxy)
+     */
     function mintPositionTokens(
         uint qtyToMint,
         address longTokenRecipient,
@@ -442,11 +510,13 @@ contract MarketContractProxy is Ownable {
         );
     }
 
-    ////////////////////////////
-    //// INTERNAL FUNCTIONS ////
-    ////////////////////////////
-
-    // function called daily to settle the current expiring 28 day contract.
+    /**
+     * @notice settle specific market
+     * @dev can only be called from honeylemon oracle.
+     * Can be called directly to settle expiring market without deploying new one
+     * @dev mri MRI value
+     * @dev marketContractAddress market contract
+     */
     function settleMarketContract(uint mri, address marketContractAddress)
         public
         onlyHoneyLemonOracle
@@ -461,11 +531,12 @@ contract MarketContractProxy is Ownable {
         latestMri = mri;
     }
 
-    // Deploys the current day Market contract. `indexValue` is used to initialize collateral
-    // requirement in its constructor. Stores the new contract address, block it was deployed in,
-    // as well as the value of the index we’ll need easy access to the latest values of contract
-    // address and index. collateral requirement = indexValue * 28 * overcollateralization_factor
-    // returns the address of the new contract
+    /**
+     * @notice deploy the current Market contract
+     * @param currentMRI current MRI value
+     * @param marketAndsTokenNames bytes array of market, long and short token names
+     * @param expiration expiration timestamp
+     */
     function deployContract(
         uint currentMRI,
         bytes32[3] memory marketAndsTokenNames,
