@@ -4,9 +4,16 @@ import { useOnboard } from "./OnboardContext";
 import { HoneylemonService } from "honeylemon";
 import { MetamaskSubprovider, Web3JsProvider, SignerSubprovider } from '@0x/subproviders';
 import Web3 from 'web3'
+import { BigNumber } from "@0x/utils";
 
 export type HoneylemonContext = {
   honeylemonService: any; //TODO update this when types exist
+  collateralTokenBalance: BigNumber,
+  collateralTokenAllowance: BigNumber,
+  COLLATERAL_TOKEN_DECIMALS: number,
+  paymentTokenBalance: BigNumber,
+  paymentTokenAllowance: BigNumber,
+  PAYMENT_TOKEN_DECIMALS: number,
 };
 
 export type HoneylemonProviderProps = {
@@ -18,6 +25,11 @@ const HoneylemonContext = React.createContext<HoneylemonContext | undefined>(und
 function HoneylemonProvider({ children }: HoneylemonProviderProps) {
   const { wallet, network, isReady, address } = useOnboard();
   const [honeylemonService, setHoneylemonService] = useState<any | undefined>(undefined);
+  const [collateralTokenBalance, setCollateralTokenBalance] = useState<BigNumber>(new BigNumber(0));
+  const [collateralTokenAllowance, setCollateralTokenAllowance] = useState<BigNumber>(new BigNumber(0));
+  const [paymentTokenBalance, setPaymentTokenBalance] = useState<BigNumber>(new BigNumber(0));
+  const [paymentTokenAllowance, setPaymentTokenAllowance] = useState<BigNumber>(new BigNumber(0));
+
   useEffect(() => {
     if (isReady && wallet && network) {
       const initHoneylemonService = async () => {
@@ -49,10 +61,36 @@ function HoneylemonProvider({ children }: HoneylemonProviderProps) {
     }
   }, [wallet, network, isReady, address]);
 
+  useEffect(() => {
+    const checkBalances = async () => {
+      const collateral = await honeylemonService.getCollateralTokenAmounts(address);
+      setCollateralTokenAllowance(collateral.allowance);
+      setCollateralTokenBalance(collateral.balance);
+      const payment = await honeylemonService.getPaymentTokenAmounts(address);
+      setPaymentTokenAllowance(payment.allowance);
+      setPaymentTokenBalance(payment.balance);
+    }
+
+    const poller = () => setTimeout(checkBalances, 12000)
+    if (honeylemonService) {
+      poller();
+    }
+
+    return () => {
+      clearTimeout(poller());
+    }
+  }, [honeylemonService, address])
+
   return (
     <HoneylemonContext.Provider
       value={{
-        honeylemonService: honeylemonService
+        honeylemonService,
+        collateralTokenBalance,
+        collateralTokenAllowance,
+        COLLATERAL_TOKEN_DECIMALS: 8, //TODO: Extract this from library when TS conversion is done
+        paymentTokenAllowance,
+        paymentTokenBalance,
+        PAYMENT_TOKEN_DECIMALS: 6, //TODO: Extract this from library when TS conversion is done
       }}
     >
       {children}

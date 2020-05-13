@@ -21,6 +21,7 @@ const NULL_ADDRESS = '0x0000000000000000000000000000000000000000';
 const ORDER_FILL_GAS = 150000;
 const TH_DECIMALS = 0; // TH has 6 decimals
 const PAYMENT_TOKEN_DECIMALS = 6; // USDC has 6 decimals
+const COLLATERAL_TOKEN_DECIMALS = 8; // imBTC has 8 decimals
 const SHIFT_PRICE_BY = TH_DECIMALS - PAYMENT_TOKEN_DECIMALS;
 
 class HoneylemonService {
@@ -137,7 +138,7 @@ class HoneylemonService {
   }
 
   async getQuoteForBudget(budget) {
-    budget = new BigNumber(budget).shiftedBy(-SHIFT_PRICE_BY).integerValue();
+    budget = new BigNumber(budget).shiftedBy(PAYMENT_TOKEN_DECIMALS).integerValue();
     const { asks } = await this.getOrderbook();
     const orders = asks.records.map(r => r.order);
     const remainingFillableTakerAssetAmounts = asks.records.map(
@@ -159,13 +160,18 @@ class HoneylemonService {
     let remainingBudget = new BigNumber(budget);
     for (let i = 0; i < resultOrders.length; i++) {
       const order = resultOrders[i];
-      const takerFillAmount = BigNumber.min(
+      let takerFillAmount = BigNumber.min(
         ordersRemainingFillableTakerAssetAmounts[i],
         remainingBudget
       );
       const makerFillAmount = orderCalculationUtils.getMakerFillAmount(
         order,
         takerFillAmount
+      );
+      // Recalculate takerFillAmount based on whole makerFillAmount
+      takerFillAmount = orderCalculationUtils.getTakerFillAmount(
+        order,
+        makerFillAmount
       );
       totalMakerFillAmount = totalMakerFillAmount.plus(makerFillAmount);
       totalTakerFillAmount = totalTakerFillAmount.plus(takerFillAmount);
@@ -285,9 +291,9 @@ class HoneylemonService {
 
   async approveCollateralToken(makerAddress, amount) {
     amount = amount || new BigNumber(2).pow(256).minus(1);
-    return this.collateralToken
+    return await this.collateralToken
       .approve(this.minterBridgeAddress, amount)
-      .sendTransactionAsync({
+      .awaitTransactionSuccessAsync({
         from: makerAddress
       });
   }
@@ -306,9 +312,9 @@ class HoneylemonService {
 
   async approvePaymentToken(takerAddress, amount) {
     amount = amount || new BigNumber(2).pow(256).minus(1);
-    return this.paymentToken
+    return await this.paymentToken
       .approve(this.contractWrappers.contractAddresses.erc20Proxy, amount)
-      .sendTransactionAsync({
+      .awaitTransactionSuccessAsync({
         from: takerAddress
       });
   }
@@ -410,6 +416,8 @@ const CONTRACTS_QUERY = /* GraphQL */ `
     contractName
     longTokenAddress
     shortTokenAddress
+    longTokenDSProxy
+    shortTokenDSProxy
     longTokenRecipient {
       id
     }
@@ -437,4 +445,4 @@ const CONTRACTS_QUERY = /* GraphQL */ `
   }
 `;
 
-module.exports = HoneylemonService;
+module.exports = HoneylemonService, PAYMENT_TOKEN_DECIMALS, COLLATERAL_TOKEN_DECIMALS;

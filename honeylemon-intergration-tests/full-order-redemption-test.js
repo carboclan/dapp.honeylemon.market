@@ -294,7 +294,7 @@ async function runExport() {
 
   await recordBalances('Before 0x order');
 
-  // return
+  return
   // Pause here in order to manually submit the order to the API
   // await waitForInput('Press any key to fill the order...');
 

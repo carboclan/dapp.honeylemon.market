@@ -35,32 +35,96 @@ export class PositionTokensMinted__Params {
     return this._event.parameters[2].value.toAddress();
   }
 
-  get shortTokenRecipient(): Address {
+  get longTokenDSProxy(): Address {
     return this._event.parameters[3].value.toAddress();
   }
 
-  get qtyToMint(): BigInt {
-    return this._event.parameters[4].value.toBigInt();
+  get shortTokenRecipient(): Address {
+    return this._event.parameters[4].value.toAddress();
   }
 
-  get latestMarketContract(): Address {
+  get shortTokenDSProxy(): Address {
     return this._event.parameters[5].value.toAddress();
   }
 
-  get longTokenAddress(): Address {
-    return this._event.parameters[6].value.toAddress();
+  get qtyToMint(): BigInt {
+    return this._event.parameters[6].value.toBigInt();
   }
 
-  get shortTokenAddress(): Address {
+  get latestMarketContract(): Address {
     return this._event.parameters[7].value.toAddress();
   }
 
-  get bridgeData(): Bytes {
-    return this._event.parameters[8].value.toBytes();
+  get longTokenAddress(): Address {
+    return this._event.parameters[8].value.toAddress();
+  }
+
+  get shortTokenAddress(): Address {
+    return this._event.parameters[9].value.toAddress();
   }
 
   get time(): BigInt {
-    return this._event.parameters[9].value.toBigInt();
+    return this._event.parameters[10].value.toBigInt();
+  }
+}
+
+export class BatchTokensRedeemed extends ethereum.Event {
+  get params(): BatchTokensRedeemed__Params {
+    return new BatchTokensRedeemed__Params(this);
+  }
+}
+
+export class BatchTokensRedeemed__Params {
+  _event: BatchTokensRedeemed;
+
+  constructor(event: BatchTokensRedeemed) {
+    this._event = event;
+  }
+
+  get tokenAddresses(): Address {
+    return this._event.parameters[0].value.toAddress();
+  }
+
+  get marketAddresses(): Address {
+    return this._event.parameters[1].value.toAddress();
+  }
+
+  get tokensToRedeem(): BigInt {
+    return this._event.parameters[2].value.toBigInt();
+  }
+
+  get traderLong(): boolean {
+    return this._event.parameters[3].value.toBoolean();
+  }
+}
+
+export class LogEvent extends ethereum.Event {
+  get params(): LogEvent__Params {
+    return new LogEvent__Params(this);
+  }
+}
+
+export class LogEvent__Params {
+  _event: LogEvent;
+
+  constructor(event: LogEvent) {
+    this._event = event;
+  }
+
+  get msgsender(): Address {
+    return this._event.parameters[0].value.toAddress();
+  }
+
+  get addressthis(): Address {
+    return this._event.parameters[1].value.toAddress();
+  }
+
+  get param(): BigInt {
+    return this._event.parameters[2].value.toBigInt();
+  }
+
+  get tokenAddress(): Address {
+    return this._event.parameters[3].value.toAddress();
   }
 }
 
@@ -297,6 +361,29 @@ export class MarketContractProxy extends ethereum.SmartContract {
     return ethereum.CallResult.fromValue(value[0].toBigInt());
   }
 
+  dSProxyToAddress(param0: Address): Address {
+    let result = super.call(
+      "dSProxyToAddress",
+      "dSProxyToAddress(address):(address)",
+      [ethereum.Value.fromAddress(param0)]
+    );
+
+    return result[0].toAddress();
+  }
+
+  try_dSProxyToAddress(param0: Address): ethereum.CallResult<Address> {
+    let result = super.tryCall(
+      "dSProxyToAddress",
+      "dSProxyToAddress(address):(address)",
+      [ethereum.Value.fromAddress(param0)]
+    );
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toAddress());
+  }
+
   CONTRACT_COLLATERAL_RATIO(): BigInt {
     let result = super.call(
       "CONTRACT_COLLATERAL_RATIO",
@@ -335,6 +422,29 @@ export class MarketContractProxy extends ethereum.SmartContract {
       "HONEY_LEMON_ORACLE_ADDRESS",
       "HONEY_LEMON_ORACLE_ADDRESS():(address)",
       []
+    );
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toAddress());
+  }
+
+  addressToDSProxy(param0: Address): Address {
+    let result = super.call(
+      "addressToDSProxy",
+      "addressToDSProxy(address):(address)",
+      [ethereum.Value.fromAddress(param0)]
+    );
+
+    return result[0].toAddress();
+  }
+
+  try_addressToDSProxy(param0: Address): ethereum.CallResult<Address> {
+    let result = super.tryCall(
+      "addressToDSProxy",
+      "addressToDSProxy(address):(address)",
+      [ethereum.Value.fromAddress(param0)]
     );
     if (result.reverted) {
       return new ethereum.CallResult();
@@ -437,6 +547,29 @@ export class MarketContractProxy extends ethereum.SmartContract {
     return ethereum.CallResult.fromValue(value[0].toAddress());
   }
 
+  getCollateralPool(market: Address): Address {
+    let result = super.call(
+      "getCollateralPool",
+      "getCollateralPool(address):(address)",
+      [ethereum.Value.fromAddress(market)]
+    );
+
+    return result[0].toAddress();
+  }
+
+  try_getCollateralPool(market: Address): ethereum.CallResult<Address> {
+    let result = super.tryCall(
+      "getCollateralPool",
+      "getCollateralPool(address):(address)",
+      [ethereum.Value.fromAddress(market)]
+    );
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toAddress());
+  }
+
   getLatestMarketCollateralPool(): Address {
     let result = super.call(
       "getLatestMarketCollateralPool",
@@ -506,17 +639,17 @@ export class MarketContractProxy extends ethereum.SmartContract {
     return ethereum.CallResult.fromValue(value[0].toAddressArray());
   }
 
-  balanceOf(_owner: Address): BigInt {
+  balanceOf(owner: Address): BigInt {
     let result = super.call("balanceOf", "balanceOf(address):(uint256)", [
-      ethereum.Value.fromAddress(_owner)
+      ethereum.Value.fromAddress(owner)
     ]);
 
     return result[0].toBigInt();
   }
 
-  try_balanceOf(_owner: Address): ethereum.CallResult<BigInt> {
+  try_balanceOf(owner: Address): ethereum.CallResult<BigInt> {
     let result = super.tryCall("balanceOf", "balanceOf(address):(uint256)", [
-      ethereum.Value.fromAddress(_owner)
+      ethereum.Value.fromAddress(owner)
     ]);
     if (result.reverted) {
       return new ethereum.CallResult();
@@ -538,6 +671,54 @@ export class MarketContractProxy extends ethereum.SmartContract {
     }
     let value = result.value;
     return ethereum.CallResult.fromValue(value[0].toBigInt());
+  }
+
+  getUserAddressOrDSProxy(inputAddress: Address): Address {
+    let result = super.call(
+      "getUserAddressOrDSProxy",
+      "getUserAddressOrDSProxy(address):(address)",
+      [ethereum.Value.fromAddress(inputAddress)]
+    );
+
+    return result[0].toAddress();
+  }
+
+  try_getUserAddressOrDSProxy(
+    inputAddress: Address
+  ): ethereum.CallResult<Address> {
+    let result = super.tryCall(
+      "getUserAddressOrDSProxy",
+      "getUserAddressOrDSProxy(address):(address)",
+      [ethereum.Value.fromAddress(inputAddress)]
+    );
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toAddress());
+  }
+
+  createDSProxyWallet(): Address {
+    let result = super.call(
+      "createDSProxyWallet",
+      "createDSProxyWallet():(address)",
+      []
+    );
+
+    return result[0].toAddress();
+  }
+
+  try_createDSProxyWallet(): ethereum.CallResult<Address> {
+    let result = super.tryCall(
+      "createDSProxyWallet",
+      "createDSProxyWallet():(address)",
+      []
+    );
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toAddress());
   }
 
   deployContract(
@@ -757,7 +938,7 @@ export class BalanceOfCall__Inputs {
     this._call = call;
   }
 
-  get _owner(): Address {
+  get owner(): Address {
     return this._call.inputValues[0].value.toAddress();
   }
 }
@@ -801,6 +982,78 @@ export class GetTimeCall__Outputs {
 
   get value0(): BigInt {
     return this._call.outputValues[0].value.toBigInt();
+  }
+}
+
+export class CreateDSProxyWalletCall extends ethereum.Call {
+  get inputs(): CreateDSProxyWalletCall__Inputs {
+    return new CreateDSProxyWalletCall__Inputs(this);
+  }
+
+  get outputs(): CreateDSProxyWalletCall__Outputs {
+    return new CreateDSProxyWalletCall__Outputs(this);
+  }
+}
+
+export class CreateDSProxyWalletCall__Inputs {
+  _call: CreateDSProxyWalletCall;
+
+  constructor(call: CreateDSProxyWalletCall) {
+    this._call = call;
+  }
+}
+
+export class CreateDSProxyWalletCall__Outputs {
+  _call: CreateDSProxyWalletCall;
+
+  constructor(call: CreateDSProxyWalletCall) {
+    this._call = call;
+  }
+
+  get value0(): Address {
+    return this._call.outputValues[0].value.toAddress();
+  }
+}
+
+export class BatchRedeemCall extends ethereum.Call {
+  get inputs(): BatchRedeemCall__Inputs {
+    return new BatchRedeemCall__Inputs(this);
+  }
+
+  get outputs(): BatchRedeemCall__Outputs {
+    return new BatchRedeemCall__Outputs(this);
+  }
+}
+
+export class BatchRedeemCall__Inputs {
+  _call: BatchRedeemCall;
+
+  constructor(call: BatchRedeemCall) {
+    this._call = call;
+  }
+
+  get tokenAddresses(): Array<Address> {
+    return this._call.inputValues[0].value.toAddressArray();
+  }
+
+  get marketAddresses(): Array<Address> {
+    return this._call.inputValues[1].value.toAddressArray();
+  }
+
+  get tokensToRedeem(): Array<BigInt> {
+    return this._call.inputValues[2].value.toBigIntArray();
+  }
+
+  get traderLong(): Array<boolean> {
+    return this._call.inputValues[3].value.toBooleanArray();
+  }
+}
+
+export class BatchRedeemCall__Outputs {
+  _call: BatchRedeemCall;
+
+  constructor(call: BatchRedeemCall) {
+    this._call = call;
   }
 }
 
@@ -873,10 +1126,6 @@ export class MintPositionTokensCall__Inputs {
 
   get shortTokenRecipient(): Address {
     return this._call.inputValues[2].value.toAddress();
-  }
-
-  get bridgeData(): Bytes {
-    return this._call.inputValues[3].value.toBytes();
   }
 }
 

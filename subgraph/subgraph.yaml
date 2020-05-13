@@ -45,6 +45,6 @@ dataSources:
               - name: MarketContractProxy
                 file: ./abis/MarketContractProxy.json
           eventHandlers:
-              - event: PositionTokensMinted(indexed uint256,string,indexed address,indexed address,uint256,address,address,address,bytes,uint256)
+              - event: PositionTokensMinted(indexed uint256,string,indexed address,address,indexed address,address,uint256,address,address,address,uint256)
                 handler: handlePositionTokensMinted
           file: ./src/mapping.ts

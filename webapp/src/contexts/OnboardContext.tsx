@@ -37,7 +37,7 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
 
   useEffect(() => {
     const onboard = Onboard({
-      dappId: onboardProps.networkId !== 1337 ? onboardProps.dappId : undefined,
+      dappId: onboardProps.dappId,
       networkId: onboardProps.networkId,
       darkMode: true,
       walletSelect: {
@@ -47,7 +47,7 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
           //   walletName: "portis",
           //   apiKey: process.env.REACT_APP_PORTIS_API_KEY,
           // },
-          { 
+          {
             walletName: 'imToken',
             // rpcUrl: '' // Add this to update balances correctly
           },
@@ -79,18 +79,16 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
     })
 
     const savedWallet = localStorage.getItem('honeylemon.selectedWallet');
-    // savedWallet && onboard.walletSelect(savedWallet);
+    savedWallet && onboard.walletSelect(savedWallet);
 
     setOnboard(onboard);
 
-    if (onboardProps.networkId !== 1337) {
-      setNotify(Notify({
-        dappId: onboardProps.dappId,
-        networkId: onboardProps.networkId,
-        darkMode: true,
-      }));
+    setNotify(Notify({
+      dappId: onboardProps.dappId,
+      networkId: onboardProps.networkId,
+      darkMode: true,
+    }));
 
-    }
 
   }, [onboardProps.dappId, onboardProps.networkId])
 

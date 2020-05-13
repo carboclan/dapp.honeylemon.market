@@ -15,7 +15,7 @@ local-docker:
 	docker-compose -f ./docker/docker-compose-local.yml up -d
 
 local-subgraph-deploy:
-	cd subgraph && yarn; yarn build && yarn create-local; yarn deploy-local
+	cd subgraph && yarn build && yarn create-local; yarn deploy-local
 
 local-start: local-docker local-ganache-wait migrate local-subgraph-deploy
 
@@ -34,4 +34,4 @@ migrate:
 	truffle migrate --reset
 
 deploy-daily-contract:
-	truffle exec deploy-daily-contract.js
+	truffle exec scripts/deploy-daily-contract.js

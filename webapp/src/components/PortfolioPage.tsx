@@ -13,8 +13,7 @@ const useStyles = makeStyles(({ spacing }) => ({
 const PorfolioPage: React.SFC = () => {
   // const { wallet, onboard, address, network, balance, notify } = useOnboard();
   const [activeTab, setActiveTab] = useState<'active' | 'settled'>('active')
-  const [btcAmount, setBtcAmount] = useState(0);
-
+  const [btcAmount, ] = useState(0);
 
   const handleSetActiveTab = (event: React.ChangeEvent<{}>, newValue: 'active' | 'settled') => {
     setActiveTab(newValue);

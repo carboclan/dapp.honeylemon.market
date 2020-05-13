@@ -10,28 +10,32 @@ import MiningStatsPage from './MiningStatsPage';
 import { useOnboard } from '../contexts/OnboardContext';
 
 
-const ConditionalRoute: React.FC<any> = ({ component: Component, isAuthorized, redirectPath = '/403', ...rest }) => (
-  <Route
-    {...rest}
-    render={props => (
-      isAuthorized ? (
-        <Component {...props} />
-      ) : (
-          <Redirect
-            to={{
-              pathname: redirectPath,
-              state: { from: props.location },
-            }}
-          />
-        )
+const ConditionalRoute: React.FC<any> = ({
+  component: Component,
+  isAuthorized,
+  redirectPath = '/404',
+  ...rest
+}) => (
+    <Route
+      {...rest}
+      render={props => (
+        isAuthorized ? (
+          <Component {...props} />
+        ) : (
+            <Redirect
+              to={{
+                pathname: `${redirectPath}`,
+                state: { from: props.location },
+              }}
+            />
+          )
       )
-    }
-  />
-);
+      }
+    />
+  );
 
 const HoneyLemonApp: React.SFC = () => {
-  const {wallet, isReady} = useOnboard();
-  const isConnected = !!wallet?.provider;
+  const { isReady } = useOnboard();
   return (
     <AppWrapper>
       <Switch>
