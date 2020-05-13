@@ -199,7 +199,7 @@ const BuyContractPage: React.SFC = () => {
           <Typography style={{ fontWeight: 'bold' }} color='secondary'>TH</Typography>
         </Grid>
       </TabPanel>
-      <Button fullWidth onClick={() => buyOffer()} disabled={!isValid}>BUY NOW</Button><Grid item xs={12}></Grid>
+      <Grid item xs={12}><Button fullWidth onClick={() => buyOffer()} disabled={!isValid}>BUY NOW</Button></Grid>
       <Grid item xs={12}>
         <Typography>
           You will pay ${orderValue} to buy {orderQuantity} Th of hasrate for 28 days for ${hashPrice} Th/day.

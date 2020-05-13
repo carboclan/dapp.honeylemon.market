@@ -42,9 +42,9 @@ const OfferContractPage: React.SFC = () => {
 
   const createOffer = async () => {
     try {
-      const approval = await honeylemonService.checkCollateralTokenApproval(address, collateralAmount)
+      const approval = await honeylemonService.checkCollateralTokenApproval(address, new BigNumber(collateralAmount))
       if (!approval) {
-        await honeylemonService.approveCollateralToken(address, collateralAmount);
+        await honeylemonService.approveCollateralToken(address, new BigNumber(collateralAmount));
       }
       const order = honeylemonService.createOrder(address, new BigNumber(hashAmount), new BigNumber(hashPrice));
       const signedOrder = await honeylemonService.signOrder(order);
