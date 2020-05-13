@@ -1,6 +1,8 @@
 pragma solidity 0.5.2;
 
-import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
+import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
+import "openzeppelin-solidity/contracts/math/SafeMath.sol";
+import "openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol";
 
 import '../marketprotocol/MarketCollateralPool.sol';
 import '../marketprotocol/mpx/MarketContractFactoryMPX.sol';
@@ -19,7 +21,10 @@ import './DSProxy.sol';
 /// storage of DSProxy info 5) enabling batch token redemption.
 
 contract MarketContractProxy is Ownable {
-    MarketContractFactoryMPX marketContractFactoryMPX;
+    using SafeMath for uint256;
+    using SafeERC20 for IERC20;
+
+    MarketContractFactoryMPX public marketContractFactoryMPX;
 
     address public HONEY_LEMON_ORACLE_ADDRESS;
     address public MINTER_BRIDGE_ADDRESS;
@@ -86,8 +91,6 @@ contract MarketContractProxy is Ownable {
     ////////////////
     //// EVENTS ////
     ////////////////
-
-    ///@notice PositionTokensMinted event
     event PositionTokensMinted(
         uint indexed marketId,
         string contractName,
@@ -102,21 +105,16 @@ contract MarketContractProxy is Ownable {
         uint time
     );
 
-    ///@notice BatchTokensRedeemed event
-    event BatchTokensRedeemed(
-        address tokenAddresses,
-        address marketAddresses,
-        uint tokensToRedeem,
-        bool traderLong
+    event MarketContractSettled(address indexed marketContractAddress, uint mri);
+
+    event MarketContractDeployed(
+        uint currentMIR,
+        bytes32 indexed contractName,
+        uint indexed expiration,
+        uint indexed index
     );
 
-    ///@notice LogEvent
-    event LogEvent(
-        address msgsender,
-        address addressthis,
-        uint param,
-        address tokenAddress
-    );
+    event dSProxyCreated(address owner, address DSProxy);
 
     ///////////////////
     //// MODIFIERS ////
@@ -258,7 +256,7 @@ contract MarketContractProxy is Ownable {
         if (contractsAdded < CONTRACT_DURATION_DAYS) {
             return MarketContractMPX(address(0x0));
         }
-        uint expiringIndex = contractsAdded - CONTRACT_DURATION_DAYS;
+        uint expiringIndex = contractsAdded.sub(CONTRACT_DURATION_DAYS);
         return MarketContractMPX(marketContracts[expiringIndex]);
     }
 
@@ -327,9 +325,13 @@ contract MarketContractProxy is Ownable {
     {
         uint[7] memory dailySpecs = marketContractSpecs;
         // capPrice. div by 1e8 for correct scaling
-        dailySpecs[1] =
-            (CONTRACT_DURATION_DAYS * currentMRI * (CONTRACT_COLLATERAL_RATIO)) /
-            1e8;
+        // dailySpecs[1] =
+        //     (CONTRACT_DURATION_DAYS * currentMRI * (CONTRACT_COLLATERAL_RATIO)) /
+        //     1e8;
+        dailySpecs[1] = (
+            CONTRACT_DURATION_DAYS.mul(currentMRI).mul(CONTRACT_COLLATERAL_RATIO)
+        )
+            .div(1e8);
         // expirationTimeStamp. Fed in directly from oracle to ensure timing is exact, irrespective of block mining times
         dailySpecs[6] = expiration;
         return dailySpecs;
@@ -362,6 +364,9 @@ contract MarketContractProxy is Ownable {
         address payable dsProxyWallet = dSProxyFactory.build(msg.sender);
         addressToDSProxy[msg.sender] = dsProxyWallet;
         dSProxyToAddress[dsProxyWallet] = msg.sender;
+
+        emit dSProxyCreated(msg.sender, dsProxyWallet);
+
         return dsProxyWallet;
     }
 
@@ -424,19 +429,12 @@ contract MarketContractProxy is Ownable {
 
         // Move all redeemed tokens from DSProxy back to users wallet. msg.sender is the owner of the DSProxy.
         collateralToken.transfer(msg.sender, dSProxyBalance);
-
-        emit BatchTokensRedeemed(
-            tokenAddresses[0],
-            marketAddresses[0],
-            tokensToRedeem[0],
-            traderLong[0]
-        );
     }
 
     /////////////////////////////////////
     //// HONEYLEMON ORACLE FUNCTIONS ////
     /////////////////////////////////////
-    
+
     /**
      * @notice deploy new market and settle last one (if met settlement requirements)
      * @dev can only be called by hinelemon oracle
@@ -457,7 +455,6 @@ contract MarketContractProxy is Ownable {
         MarketContractMPX expiringMarketContract = getExpiringMarketContract();
         if (address(expiringMarketContract) != address(0x0)) {
             settleMarketContract(lookbackIndexValue, address(expiringMarketContract));
-            //TODO: emit an event here
         }
 
         // 2. Deploy daily contract for the next 28 days.
@@ -479,13 +476,15 @@ contract MarketContractProxy is Ownable {
         onlyHoneyLemonOracle
     {
         require(mri != 0, "The mri loockback value can not be 0");
-        require(marketContractAddress != address(0x0));
+        require(marketContractAddress != address(0x0), "Invalid market contract address");
 
         MarketContractMPX marketContract = MarketContractMPX(marketContractAddress);
         marketContract.oracleCallBack(mri);
 
         // Store the most recent mri value to use in fillable amount
         latestMri = mri;
+
+        emit MarketContractSettled(marketContractAddress, mri);
     }
 
     ///////////////////////////////////////////////
@@ -585,7 +584,12 @@ contract MarketContractProxy is Ownable {
         // Add new market to storage
         uint index = marketContracts.push(contractAddress) - 1;
         addressToMarketId[contractAddress] = index;
+        emit MarketContractDeployed(
+            currentMRI,
+            marketAndsTokenNames[0],
+            expiration,
+            index
+        );
         return (contractAddress);
-        //TODO: emit event
     }
 }

@@ -17,7 +17,7 @@ contract MinterBridge is Ownable {
     using MathLib for int;
     using SafeERC20 for ERC20;
 
-    MarketContractProxy marketContractProxy;
+    MarketContractProxy public marketContractProxy;
 
     ///@dev Result of a successful bridge call.
     bytes4 internal constant BRIDGE_SUCCESS = 0xdc1600f3;
@@ -82,7 +82,7 @@ contract MinterBridge is Ownable {
         address to,
         uint256 amount,
         bytes calldata bridgeData
-    ) external onlyIfSetMarketContractProxy returns (bytes4 success) {
+    ) external onlyIfSetMarketContractProxy only0xBridgeProxy returns (bytes4 success) {
         // The proxy acts as the taker token to make 0x think that the appropriate amount
         // was transferred and accept the trade as passing. Under the hood the  marketContractProxy
         // has minted long and short tokens and sent them to the the investor and miner.
