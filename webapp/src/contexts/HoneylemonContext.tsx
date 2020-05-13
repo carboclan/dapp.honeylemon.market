@@ -87,10 +87,10 @@ function HoneylemonProvider({ children }: HoneylemonProviderProps) {
         honeylemonService,
         collateralTokenBalance,
         collateralTokenAllowance,
-        COLLATERAL_TOKEN_DECIMALS: 8,
+        COLLATERAL_TOKEN_DECIMALS: 8, //TODO: Extract this from library when TS conversion is done
         paymentTokenAllowance,
         paymentTokenBalance,
-        PAYMENT_TOKEN_DECIMALS: 6,
+        PAYMENT_TOKEN_DECIMALS: 6, //TODO: Extract this from library when TS conversion is done
       }}
     >
       {children}
