@@ -558,21 +558,6 @@ contract MarketContractProxy is Ownable {
     //// INTERNAL FUNCTIONS ////
     ////////////////////////////
 
-    // function called daily to settle the current expiring 28 day contract.
-    function settleMarketContract(uint mri, address marketContractAddress)
-        public
-        onlyHoneyLemonOracle
-    {
-        require(mri != 0, 'The mri loockback value can not be 0');
-        require(marketContractAddress != address(0x0));
-
-        MarketContractMPX marketContract = MarketContractMPX(marketContractAddress);
-        marketContract.oracleCallBack(mri);
-
-        // Store the most recent mri value to use in fillable amount
-        latestMri = mri;
-    }
-
     // Deploys the current day Market contract. `indexValue` is used to initialize collateral
     // requirement in its constructor. Stores the new contract address, block it was deployed in,
     // as well as the value of the index we’ll need easy access to the latest values of contract
