@@ -100,18 +100,20 @@ async function runExport() {
     expirationTime
   );
 
-  const today = new Date();
-  const dateString = `${today.getFullYear()}${today.getMonth()}${today.getDate()}`
-  console.log(dateString);
+  // const today = new Date();
+  // const todayMonth = today.getMonth();
+  // const todayDate = today.getDate();
+  // const dateString = 
+  //   `${today.getFullYear()}${(todayMonth < 10) ? `0${todayMonth}` : todayMonth}${(todayDate < 10) ? `0${todayDate}` : todayDate}`
 
   // Create Todays market protocol contract
   await marketContractProxy.dailySettlement(
     0, // lookback index
     currentMRIScaled.toString(), // current index value
     [
-      web3.utils.utf8ToHex(`MRI-BTC-28D-${dateString}`),
-      web3.utils.utf8ToHex(`MRI-BTC-28D-${dateString}-Long`),
-      web3.utils.utf8ToHex(`MRI-BTC-28D-${dateString}-Short`)
+      web3.utils.utf8ToHex('MRI-BTC-28D-20200501'),
+      web3.utils.utf8ToHex(`MRI-BTC-28D-20200501-Long`),
+      web3.utils.utf8ToHex(`MRI-BTC-28D-20200501-Short`)
     ], // new market name
     expirationTime.toString() // new market expiration
   );
