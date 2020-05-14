@@ -11,7 +11,7 @@ module.exports = {
       network_id: '*' // Match any network id
     },
     coverage: {
-      host: 'truffle-coverage',
+      host: 'localhost',
       network_id: '*', // eslint-disable-line camelcase
       port: 8555,
       gas: 0xfffffffffff,
@@ -43,7 +43,7 @@ module.exports = {
       }
     }
   },
-  plugins: ['@chainsafe/truffle-plugin-abigen'],
+  plugins: ['@chainsafe/truffle-plugin-abigen',],
   mocha: {
     enableTimeouts: false,
     before_timeout: 120000

@@ -39,6 +39,7 @@
     "prettier-eslint-cli": "5.0.0",
     "prettier-plugin-solidity": "^1.0.0-alpha.47",
     "sinon": "^9.0.2",
+    "solidity-coverage": "0.6.7",
     "solidoc": "^1.0.5",
     "solium": "^1.0.5",
     "truffle": "5.1.18",
