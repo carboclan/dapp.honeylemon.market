@@ -25,7 +25,7 @@ let accounts = null,
   takerAddress = null,
   randomAddress = null,
   // contracts
-  honeyLemonOracle = null,
+  ownerAddress = null,
   longToken = [null],
   shortToken = [null],
   marketContractProxy = null,
@@ -38,7 +38,7 @@ let accounts = null,
 
 before(async function() {
   accounts = await web3Wrapper.getAvailableAddressesAsync();
-  honeyLemonOracle = accounts[0];
+  ownerAddress = accounts[0];
   makerAddress = accounts[1];
   takerAddress = accounts[2];
   randomAddress = accounts[3];
@@ -131,7 +131,7 @@ before(async function() {
     ], // new market name
     expirationTime.toString(), // new market expiration
     {
-      from: honeyLemonOracle
+      from: ownerAddress
     }
   );
 
@@ -451,7 +451,7 @@ async function createNewMarketProtocolContract(lookbackIndex, mriInput, marketNa
     ], // new market name
     expirationTime.toString(), // new market expiration
     {
-      from: honeyLemonOracle
+      from: ownerAddress
     }
   );
 
