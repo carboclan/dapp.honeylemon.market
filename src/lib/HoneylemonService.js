@@ -347,7 +347,19 @@ class HoneylemonService {
   }
 
   async getOpenOrders(makerAddress) {
-    return this.apiClient.getOrdersAsync({ makerAddress });
+    const ordersResponse = await this.apiClient.getOrdersAsync({ makerAddress });
+    ordersResponse.records.map(({ order, metaData }) => {
+      metaData.price = order.takerAssetAmount
+        .dividedBy(order.makerAssetAmount)
+        .shiftedBy(SHIFT_PRICE_BY);
+
+      metaData.remainingFillableMakerAssetAmount = orderCalculationUtils.getMakerFillAmount(
+        order,
+        metaData.remainingFillableTakerAssetAmount
+      );
+    });
+
+    return ordersResponse;
   }
 
   async calculateRequiredCollateral(amount) {

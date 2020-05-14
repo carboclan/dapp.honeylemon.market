@@ -86,7 +86,7 @@ before(async function() {
       remainingFillableTakerAssetAmount: o.takerAssetAmount
     }
   }));
-  const stubData = {
+  const orderbookStub = sinon.stub(honeylemonService.apiClient, 'getOrderbookAsync').returns({
     bids: {
       total: 0,
       page: 1,
@@ -99,12 +99,17 @@ before(async function() {
       perPage: 20,
       records
     }
-  };
-  const orderbookStub = sinon.stub(honeylemonService, 'getOrderbook').returns(stubData);
+  });
+  const ordersStub = sinon.stub(honeylemonService.apiClient, 'getOrdersAsync').returns({
+    total: 3,
+    page: 1,
+    perPage: 20,
+    records
+  });
 
   // Starting MRI value
   mriInput = 0.00001833;
-  currentMRIScaled = new BigNumber(mriInput).multipliedBy(new BigNumber('100000000')); //1e8
+  currentMRIScaled = new BigNumber(mriInput).shiftedBy(8); //1e8
   // expiration time in the future
   let currentContractTime = (await marketContractProxy.getTime.call()).toNumber();
   let contractDuration = (await marketContractProxy.CONTRACT_DURATION()).toNumber();
@@ -179,7 +184,7 @@ describe('HoneylemonService', () => {
       totalTakerFillAmount
     } = await honeylemonService.getQuoteForBudget(new BigNumber(10000));
 
-    expect(price.sd(5)).to.eql(new BigNumber('3.701'));
+    expect(price.sd(5)).to.eql(new BigNumber('3.7001'));
     expect(makerAssetFillAmounts).to.eql([
       new BigNumber(1000),
       new BigNumber(1200),
@@ -188,11 +193,11 @@ describe('HoneylemonService', () => {
     expect(takerAssetFillAmounts).to.eql([
       new BigNumber(3600).shiftedBy(PAYMENT_TOKEN_DECIMALS),
       new BigNumber(4440).shiftedBy(PAYMENT_TOKEN_DECIMALS),
-      new BigNumber(1960).shiftedBy(PAYMENT_TOKEN_DECIMALS)
+      new BigNumber(1957.8).shiftedBy(PAYMENT_TOKEN_DECIMALS)
     ]);
     expect(totalMakerFillAmount).to.eql(new BigNumber(2702));
     expect(totalTakerFillAmount).to.eql(
-      new BigNumber(10000).shiftedBy(PAYMENT_TOKEN_DECIMALS)
+      new BigNumber(9997.8).shiftedBy(PAYMENT_TOKEN_DECIMALS)
     );
     expect(remainingTakerFillAmount).to.eql(new BigNumber(0));
   });
@@ -382,6 +387,13 @@ describe('HoneylemonService', () => {
     const { longContracts2, shortContracts2 } = await honeylemonService.getContracts(
       makerAddress
     );
+  });
+
+  it('retrieve open orders', async () => {
+    const ordersResponse = await honeylemonService.getOpenOrders(makerAddress);
+    const record = ordersResponse.records[0];
+    expect(record.metaData.price).to.eql(new BigNumber(3.6));
+    expect(record.metaData.remainingFillableMakerAssetAmount).to.eql(new BigNumber(1000));
   });
 });
 async function fill0xOrderForAddresses(size, taker, maker) {
