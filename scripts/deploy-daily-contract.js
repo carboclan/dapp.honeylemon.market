@@ -101,7 +101,8 @@ async function runExport() {
   );
 
   const today = new Date();
-  const dateString = `${today.getFullYear}${today.getMonth}${today.getDate}`
+  const dateString = `${today.getFullYear()}${today.getMonth()}${today.getDate()}`
+  console.log(dateString);
 
   // Create Todays market protocol contract
   await marketContractProxy.dailySettlement(
