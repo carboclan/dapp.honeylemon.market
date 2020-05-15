@@ -43,7 +43,7 @@ module.exports = {
       }
     }
   },
-  plugins: ['@chainsafe/truffle-plugin-abigen',],
+  plugins: ['@chainsafe/truffle-plugin-abigen'],
   mocha: {
     enableTimeouts: false,
     before_timeout: 120000
