@@ -298,7 +298,7 @@ contract MarketContractProxy is Ownable {
      * @param owner address
      * @return long token balance
      */
-    function balanceOf(address owner) public returns (uint) {
+    function balanceOf(address owner) public view returns (uint) {
         address addressToCheck = getUserAddressOrDSProxy(owner);
         MarketContract latestMarketContract = getLatestMarketContract();
         ERC20 longToken = ERC20(latestMarketContract.LONG_POSITION_TOKEN());

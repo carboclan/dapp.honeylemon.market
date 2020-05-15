@@ -381,7 +381,7 @@ contract(
           'Miner long token balance mismatch'
         );
         assert.equal(
-          new BigNumber((await lToken.balanceOf(takerAddress)).toString())
+          new BigNumber((await marketContractProxy.balanceOf(takerAddress)).toString())
             .minus(takerLongTokenBalanceBefore)
             .toString(),
           amount.toString(),
