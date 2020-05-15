@@ -56,6 +56,7 @@
     "lint": "prettier-eslint --write \"$(pwd)/**/*.js\" \"$(pwd)/**/*.sol\" --ignore './node_modules/**' --ignore './coverage/**' --ignore './build/**' --ignore './webapp/**' --ignore './dist/**'",
     "build": "webpack --config webpack.config.js --color -p --progress --hide-modules --display-optimization-bailout",
     "postinstall": "npm run build",
+    "coverage": "npx solidity-coverage",
     "docgen": "solidoc"
   },
   "husky": {
