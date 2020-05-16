@@ -108,7 +108,6 @@ const BuyContractPage: React.SFC = () => {
       const approval = await honeylemonService.checkPaymentTokenApproval(address)
       if (!approval) {
         const approvalTx = await honeylemonService.approvePaymentToken(address);
-        console.log(approvalTx);
       }
 
       const gasPrice = 5e9; // 5 GWEI

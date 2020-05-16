@@ -1,10 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { Typography, Grid, makeStyles, Tabs, Tab, Button, TableRow, TableHead, TableCell, Table, TableBody, Paper, Divider } from '@material-ui/core';
-import { useOnboard } from '../contexts/OnboardContext';
-import { useHoneylemon } from '../contexts/HoneylemonContext';
 import { BigNumber } from '@0x/utils';
 import dayjs from 'dayjs'
+import { 
+  Typography, 
+  Grid, 
+  makeStyles, 
+  Tabs, 
+  Tab, 
+  Button, 
+  TableRow, 
+  TableHead, 
+  TableCell, 
+  Table, 
+  TableBody, 
+  Divider 
+} from '@material-ui/core';
 import { RadioButtonUnchecked } from '@material-ui/icons';
+import { useOnboard } from '../contexts/OnboardContext';
+import { useHoneylemon } from '../contexts/HoneylemonContext';
+
 const useStyles = makeStyles(({ spacing }) => ({
   icon: {
     marginLeft: spacing(1),
@@ -129,7 +143,7 @@ const PorfolioPage: React.SFC = () => {
                     <TableRow key={i}>
                       <TableCell>{contract.contractName}</TableCell>
                       <TableCell align='center'>{contract.qtyToMint}</TableCell>
-                      <TableCell></TableCell>
+                      <TableCell>{contract.daysToMaturity}</TableCell>
                     </TableRow>
                   )}
                 </TableBody>
