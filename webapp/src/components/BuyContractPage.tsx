@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Button, Typography, Grid, makeStyles, FilledInput, Link, InputAdornment, Tabs, Tab } from '@material-ui/core';
 import { useHoneylemon } from '../contexts/HoneylemonContext';
 import { useOnboard } from '../contexts/OnboardContext';
+import { forwardTo } from '../helpers/history';
 const { BigNumber } = require('@0x/utils');
 
 const useStyles = makeStyles(({ spacing }) => ({
@@ -134,6 +135,7 @@ const BuyContractPage: React.SFC = () => {
         gasPrice,
         value
       });
+      forwardTo('/portfolio')
     } catch (error) {
       console.log('Something went wrong buying this contract');
       console.log(error);

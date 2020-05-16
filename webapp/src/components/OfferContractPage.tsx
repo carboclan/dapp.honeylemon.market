@@ -3,6 +3,7 @@ import { Button, Typography, Grid, makeStyles, FilledInput, Link, InputAdornment
 import { useHoneylemon } from '../contexts/HoneylemonContext';
 import { useOnboard } from '../contexts/OnboardContext';
 import { BigNumber } from '@0x/utils';
+import { forwardTo } from '../helpers/history';
 
 const useStyles = makeStyles(({ spacing }) => ({
   rightAlign: {
@@ -54,6 +55,7 @@ const OfferContractPage: React.SFC = () => {
       const order = honeylemonService.createOrder(address, new BigNumber(hashAmount), new BigNumber(hashPrice));
       const signedOrder = await honeylemonService.signOrder(order);
       await honeylemonService.submitOrder(signedOrder);
+      forwardTo('/portfolio')
     } catch (error) {
       console.log('Something went wrong creating the offer');
       console.log(error);
