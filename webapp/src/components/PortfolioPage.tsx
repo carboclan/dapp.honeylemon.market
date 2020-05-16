@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Typography, Grid, makeStyles, Tabs, Tab, Button, TableRow, TableHead, TableCell, Table, TableBody } from '@material-ui/core';
 import { useOnboard } from '../contexts/OnboardContext';
 import { useHoneylemon } from '../contexts/HoneylemonContext';
+import { BigNumber } from '@0x/utils';
 
 const useStyles = makeStyles(({ spacing }) => ({
   rightAlign: {
@@ -18,7 +19,12 @@ const PorfolioPage: React.SFC = () => {
 
   const [activeTab, setActiveTab] = useState<'active' | 'settled'>('active')
   const [collateralForWithdraw,] = useState(0);
-  const [openOrders, setOpenOrders] = useState<Array<{ orderHash: string, remainingFillableTakerAssetAmount: number, price: number }>>([]);
+  const [openOrders, setOpenOrders] = useState<
+    Array<{ 
+      orderHash: string, 
+      remainingFillableMakerAssetAmount: BigNumber, 
+      price: number 
+    }>>([]);
   const [activeContracts, setActiveContracts] = useState([]);
 
 
@@ -38,7 +44,26 @@ const PorfolioPage: React.SFC = () => {
       const contracts = await honeylemonService.getContracts(address);
       if (!cancelled) {
         setOpenOrders(openOrders.records.map((openOrder: any) => openOrder.metaData))
-        setActiveContracts(contracts.longContracts.concat(contracts.shortContracts));
+
+        const longs = contracts.longContracts.map((lc: any) => {
+          console.log(lc);
+          return {
+            ...lc,
+            contractName: lc.contractName + '-long'
+          }
+        })
+
+        const shorts = contracts.shortContracts.map((sc: any) => {
+          console.log(sc);
+          return {
+            ...sc,
+            contractName: sc.contractName + '-short'
+          }
+        })
+
+
+        const activeContracts = longs.concat(shorts);
+        setActiveContracts(activeContracts)
       }
     }
     getPorfolio();
@@ -77,8 +102,8 @@ const PorfolioPage: React.SFC = () => {
                 <TableBody>
                   {openOrders && openOrders?.map(order =>
                     <TableRow key={order.orderHash}>
-                      <TableCell>{order?.remainingFillableTakerAssetAmount}</TableCell>
-                      <TableCell>${order?.price}</TableCell>
+                      <TableCell>{order?.remainingFillableMakerAssetAmount.toString()}</TableCell>
+                      <TableCell>${order?.price.toFixed(2)}</TableCell>
                       <TableCell><Button onClick={() => cancelOpenOrder(order.orderHash)}>Cancel</Button></TableCell>
                     </TableRow>
                   )}

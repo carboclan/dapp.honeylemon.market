@@ -27,9 +27,14 @@ const OfferContractPage: React.SFC = () => {
   useEffect(() => {
     let cancelled = false;
     const getCollateralForContract = async () => {
-      const result = await honeylemonService.getCollateralForContract(hashAmount)
-      if (!cancelled) {
-        setCollateralAmount(Number(new BigNumber(result || 0).shiftedBy(-COLLATERAL_TOKEN_DECIMALS).toString()));
+      try {
+        const result = await honeylemonService.getCollateralForContract(hashAmount)
+        if (!cancelled) {
+          setCollateralAmount(Number(new BigNumber(result || 0).shiftedBy(-COLLATERAL_TOKEN_DECIMALS).toString()));
+        }  
+      } catch (error) {
+        console.log('Something went wrong fetching required collateral amount')
+        console.log(error);
       }
     };
     getCollateralForContract();
