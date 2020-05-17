@@ -39,7 +39,7 @@ enum BuyType { 'budget', 'quantity' };
 
 const BuyContractPage: React.SFC = () => {
   const { address } = useOnboard();
-  const { honeylemonService, PAYMENT_TOKEN_DECIMALS } = useHoneylemon()
+  const { honeylemonService, PAYMENT_TOKEN_DECIMALS, paymentTokenAllowance, paymentTokenBalance } = useHoneylemon()
   const classes = useStyles();
 
   const [orderValue, setOrderValue] = useState(0);
@@ -105,9 +105,8 @@ const BuyContractPage: React.SFC = () => {
 
   const buyOffer = async () => {
     try {
-      const approval = await honeylemonService.checkPaymentTokenApproval(address)
-      if (!approval) {
-        const approvalTx = await honeylemonService.approvePaymentToken(address);
+      if (paymentTokenAllowance < orderValue) {
+        await honeylemonService.approvePaymentToken(address, new BigNumber(orderValue).shiftedBy(PAYMENT_TOKEN_DECIMALS));
       }
 
       const gasPrice = 5e9; // 5 GWEI
