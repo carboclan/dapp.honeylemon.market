@@ -23,15 +23,6 @@ export type HoneylemonProviderProps = {
 const HoneylemonContext = React.createContext<HoneylemonContext | undefined>(undefined);
 
 const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
-  const checkBalances = async () => {
-    console.log('checking balances');
-    const collateral = await honeylemonService.getCollateralTokenAmounts(address);
-    setCollateralTokenAllowance(Number(collateral.allowance.shiftedBy(-8).toString()));
-    setCollateralTokenBalance(Number(collateral.balance.shiftedBy(-8).toString()));
-    const payment = await honeylemonService.getPaymentTokenAmounts(address);
-    setPaymentTokenAllowance(Number(payment.allowance.shiftedBy(-6).toString()));
-    setPaymentTokenBalance(Number(payment.balance.shiftedBy(-6).toString()));
-  }
   const { wallet, network, isReady, address } = useOnboard();
   const [honeylemonService, setHoneylemonService] = useState<any | undefined>(undefined);
   const [collateralTokenBalance, setCollateralTokenBalance] = useState<Number>(0);
@@ -71,6 +62,15 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
   }, [wallet, network, isReady, address]);
 
   useEffect(() => {
+    const checkBalances = async () => {
+      console.log('checking balances');
+      const collateral = await honeylemonService.getCollateralTokenAmounts(address);
+      setCollateralTokenAllowance(Number(collateral.allowance.shiftedBy(-8).toString()));
+      setCollateralTokenBalance(Number(collateral.balance.shiftedBy(-8).toString()));
+      const payment = await honeylemonService.getPaymentTokenAmounts(address);
+      setPaymentTokenAllowance(Number(payment.allowance.shiftedBy(-6).toString()));
+      setPaymentTokenBalance(Number(payment.balance.shiftedBy(-6).toString()));
+    }
     const poller = () => setTimeout(checkBalances, 12000)
     if (honeylemonService) {
       checkBalances();
