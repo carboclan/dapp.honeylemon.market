@@ -363,7 +363,7 @@ describe('HoneylemonService', () => {
     //console.log('shortContracts:', shortContracts);
   });
 
-  it.only('Retrieve open contracts', async () => {
+  it('Retrieve open contracts', async () => {
     // Create positions for long and short token holder
     const fillSize = new BigNumber(1);
     console.log("1")
