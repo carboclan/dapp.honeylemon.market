@@ -32,7 +32,7 @@ dataSources:
       network: mainnet
       source:
           #address: '0x4f833a24e1f95d70f028921e27040ca56e09ab0b' # mainnet
-          address: '0x45B3A72221E571017C0f0ec42189E11d149D0ACE' # ganache
+          address: '0xdD66C23e07b4D6925b6089b5Fe6fc9E62941aFE8' # ganache
           abi: MarketContractProxy
       mapping:
           kind: ethereum/events

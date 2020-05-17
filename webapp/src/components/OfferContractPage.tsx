@@ -3,6 +3,7 @@ import { Button, Typography, Grid, makeStyles, FilledInput, Link, InputAdornment
 import { useHoneylemon } from '../contexts/HoneylemonContext';
 import { useOnboard } from '../contexts/OnboardContext';
 import { BigNumber } from '@0x/utils';
+import { forwardTo } from '../helpers/history';
 
 const useStyles = makeStyles(({ spacing }) => ({
   rightAlign: {
@@ -26,13 +27,18 @@ const OfferContractPage: React.SFC = () => {
 
   useEffect(() => {
     let cancelled = false;
-    const fetchData = async () => {
-      const result = await honeylemonService.getCollateralForContract(hashAmount)
-      if (!cancelled) {
-        setCollateralAmount(Number(new BigNumber(result || 0).shiftedBy(-COLLATERAL_TOKEN_DECIMALS).toString()));
+    const getCollateralForContract = async () => {
+      try {
+        const result = await honeylemonService.getCollateralForContract(hashAmount)
+        if (!cancelled) {
+          setCollateralAmount(Number(new BigNumber(result || 0).shiftedBy(-COLLATERAL_TOKEN_DECIMALS).toString()));
+        }  
+      } catch (error) {
+        console.log('Something went wrong fetching required collateral amount')
+        console.log(error);
       }
     };
-    fetchData();
+    getCollateralForContract();
     return () => { cancelled = true }
   }, [hashAmount, honeylemonService, COLLATERAL_TOKEN_DECIMALS]);
 
@@ -49,6 +55,7 @@ const OfferContractPage: React.SFC = () => {
       const order = honeylemonService.createOrder(address, new BigNumber(hashAmount), new BigNumber(hashPrice));
       const signedOrder = await honeylemonService.signOrder(order);
       await honeylemonService.submitOrder(signedOrder);
+      forwardTo('/portfolio')
     } catch (error) {
       console.log('Something went wrong creating the offer');
       console.log(error);
