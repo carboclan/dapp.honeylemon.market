@@ -370,7 +370,7 @@ describe('HoneylemonService', () => {
     
     // // Create two contracts. taker participates as a taker in both. Maker is only involved
     // // in the first contract.
-    // await fill0xOrderForAddresses(1, takerAddress, makerAddress);
+    await fill0xOrderForAddresses(1, takerAddress, makerAddress);
     // // await time.increase(10); // increase by 10 seconds to signify 1 day
     // await fill0xOrderForAddresses(2, takerAddress, makerAddress);
     // // await time.increase(10); // increase by 10 seconds to signify 1 day
