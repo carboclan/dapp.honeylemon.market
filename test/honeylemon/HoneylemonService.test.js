@@ -358,26 +358,30 @@ describe('HoneylemonService', () => {
     //console.log('shortContracts:', shortContracts);
   });
 
-  it('Retrieve open contracts', async () => {
+  it.only('Retrieve open contracts', async () => {
     // Create positions for long and short token holder
     const fillSize = new BigNumber(1);
+    console.log("1")
+    
+    // // Create two contracts. taker participates as a taker in both. Maker is only involved
+    // // in the first contract.
+    // await fill0xOrderForAddresses(1, takerAddress, makerAddress);
+    // // await time.increase(10); // increase by 10 seconds to signify 1 day
+    // await fill0xOrderForAddresses(2, takerAddress, makerAddress);
+    // // await time.increase(10); // increase by 10 seconds to signify 1 day
+    // await fill0xOrderForAddresses(3, takerAddress, makerAddress);
 
-    // Create two contracts. taker participates as a taker in both. Maker is only involved
-    // in the first contract.
-    await fill0xOrderForAddresses(1, takerAddress, makerAddress);
-    // await time.increase(10); // increase by 10 seconds to signify 1 day
-    await fill0xOrderForAddresses(2, takerAddress, makerAddress);
-    // await time.increase(10); // increase by 10 seconds to signify 1 day
-    await fill0xOrderForAddresses(3, takerAddress, makerAddress);
 
-    await createNewMarketProtocolContract(0, mriInput, 'MRI-BTC-28D-20200502');
+    // await createNewMarketProtocolContract(0, mriInput, 'MRI-BTC-28D-20200502');
 
-    await fill0xOrderForAddresses(2, takerAddress, makerAddress);
+    // await fill0xOrderForAddresses(2, takerAddress, makerAddress);
 
     // Get contracts object from HoneyLemonService
     const { longContracts, shortContracts } = await honeylemonService.getContracts(
       takerAddress
     );
+    console.log("PRINT")
+    console.log(longContracts, shortContracts);
 
     const { longContracts2, shortContracts2 } = await honeylemonService.getContracts(
       makerAddress
