@@ -6,9 +6,7 @@ import 'typeface-montserrat';
 import './App.css';
 
 ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
+  <App />,
   document.getElementById('root')
 );
 

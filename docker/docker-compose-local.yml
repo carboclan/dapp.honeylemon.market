@@ -22,7 +22,7 @@ services:
         ports:
             - "5432:5432"
     mesh:
-        image: docker.pkg.github.com/carboclan/0x-mesh/0x-mesh:1.1
+        image: docker.pkg.github.com/carboclan/0x-mesh/0x-mesh:1.2
         depends_on:
             - ganache
         restart: on-failure
@@ -36,6 +36,7 @@ services:
             HTTP_RPC_ADDR: "0.0.0.0:60556"
             BLOCK_POLLING_INTERVAL: "2s"
             ETHEREUM_RPC_MAX_REQUESTS_PER_24_HR_UTC: "150000"
+            HONEYLEMON_MARKET_CONTARCT_PROXY_ADDRESS: "0xdD66C23e07b4D6925b6089b5Fe6fc9E62941aFE8"
         volumes:
             - .volumes/0x_mesh:/usr/mesh/0x_mesh
         ports:
