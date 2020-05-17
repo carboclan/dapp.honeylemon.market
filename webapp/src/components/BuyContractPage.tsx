@@ -39,7 +39,7 @@ enum BuyType { 'budget', 'quantity' };
 
 const BuyContractPage: React.SFC = () => {
   const { address } = useOnboard();
-  const { honeylemonService, PAYMENT_TOKEN_DECIMALS, paymentTokenAllowance, paymentTokenBalance } = useHoneylemon()
+  const { honeylemonService, PAYMENT_TOKEN_DECIMALS, paymentTokenAllowance } = useHoneylemon()
   const classes = useStyles();
 
   const [orderValue, setOrderValue] = useState(0);
