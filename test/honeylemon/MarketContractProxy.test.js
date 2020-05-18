@@ -9,6 +9,7 @@ const MarketContractFactoryMPX = artifacts.require('MarketContractFactoryMPX');
 const MarketContractMPX = artifacts.require('MarketContractMPX');
 const MarketCollateralPool = artifacts.require('MarketCollateralPool');
 const PositionToken = artifacts.require('PositionToken'); // Long & Short tokens
+const DSProxy = artifacts.require('DSProxy');
 
 // Helper libraries
 const { PayoutCalculator } = require('../../honeylemon-intergration-tests/helpers/payout-calculator');
@@ -65,7 +66,7 @@ const ADDRESS_ZERO = '0x0000000000000000000000000000000000000000';
 
 contract(
   'MarketContractProxy',
-  ([honeyLemonOracle, makerAddress, takerAddress, , , , , , _0xBridgeProxy, random]) => {
+  ([honeyLemonOracle, makerAddress, takerAddress, maker2Address, taker2Address, , , , _0xBridgeProxy, random]) => {
     let minterBridge, marketContractProxy, imbtc, usdc, pc, _currentMri, _expiration;
 
     before(async () => {
@@ -663,6 +664,171 @@ contract(
             'market contract did not settle when latest MRI above price cap'
           );
         });
+      });
+    });
+
+    describe('DSProxy', () => {
+      it('create a proxy wallet for maker & taker', async() => {
+        assert.equal(await marketContractProxy.getUserAddressOrDSProxy(makerAddress), makerAddress, 'maker address mismatch');
+        assert.equal(await marketContractProxy.getUserAddressOrDSProxy(takerAddress), takerAddress, 'taker address mismatch');
+
+        await marketContractProxy.createDSProxyWallet({ from: makerAddress });
+        await marketContractProxy.createDSProxyWallet({ from: takerAddress });
+
+        let makerDsProxyWallet = await marketContractProxy.getUserAddressOrDSProxy(makerAddress);
+        let takerDsProxyWallet = await marketContractProxy.getUserAddressOrDSProxy(takerAddress);
+
+        assert.equal(makerAddress, await marketContractProxy.dSProxyToAddress(makerDsProxyWallet), 'maker address mismatch');
+        assert.equal(takerAddress, await marketContractProxy.dSProxyToAddress(takerDsProxyWallet), 'taker address mismatch')
+      });
+
+      it('batch redeem', async () => {
+        // for batch redeem txs
+        let longTokensAddresses = [];
+        let shortTokensAddresses = [];
+        let marketContractsAddresses = [];
+        let isLongToken = [];
+        let isShortToken = [];
+        let amounts = [];
+
+        let marketContract = await marketContractProxy.getAllMarketContracts();
+        
+        let amount = new BigNumber(10);
+
+        // deploy new markets to settle & batch redeem
+        for (let i = marketContract.length; i < 33; i++) {
+          let _marketAndsTokenNames = [];
+          _marketAndsTokenNames.push(web3.utils.fromAscii('BTC'));
+          _marketAndsTokenNames.push(web3.utils.fromAscii('MRI-BTC-28D-00000000-Long'));
+          _marketAndsTokenNames.push(web3.utils.fromAscii('MRI-BTC-28D-00000000-Short'));
+          let _mri = new BigNumber(pc.getMRIDataForDay(i)).multipliedBy(
+            new BigNumber(1e8)
+          );
+          let _expiration = Math.round(new Date().getTime() / 1000) + 3600 * 24 * 28;
+          marketContractProxy.dailySettlement(
+            _mri,
+            _mri,
+            _marketAndsTokenNames,
+            _expiration,
+            { from: honeyLemonOracle }
+          );
+          // set minter bridge address (for testing purpose)
+          await marketContractProxy.setMinterBridgeAddress(_0xBridgeProxy, {
+            from: honeyLemonOracle
+          });
+          // calculate needed collateral token
+          neededCollateral = await marketContractProxy.calculateRequiredCollateral(
+            amount.toString()
+          );
+          await imbtc.transfer(_0xBridgeProxy, neededCollateral.toString());
+          // approve token transfer from makerAddress
+          await imbtc.approve(
+            marketContractProxy.address,
+            new BigNumber(2).pow(256).minus(1),
+            { from: _0xBridgeProxy }
+          );
+          await marketContractProxy.mintPositionTokens(
+            amount.toString(),
+            takerAddress,
+            makerAddress,
+            { from: _0xBridgeProxy }
+          );
+        }
+        // mri value to settle with
+        let _mri = new BigNumber(1).multipliedBy(new BigNumber(1e8));
+        let expectedMakerReturnedCollateral = new BigNumber(0);
+        let expectedTakerReturnedCollateral = new BigNumber(0);
+        // settle last three contracts
+        marketContract = await marketContractProxy.getAllMarketContracts();
+        for (let i = marketContract.length-3; i < marketContract.length; i++) {
+          let marketContractMpx = await MarketContractMPX.at(marketContract[i]);
+
+          amounts.push(amount.toString());
+          marketContractsAddresses.push(marketContract[i]);
+          longTokensAddresses.push(await marketContractMpx.LONG_POSITION_TOKEN());
+          shortTokensAddresses.push(await marketContractMpx.SHORT_POSITION_TOKEN());
+          isLongToken.push(true);
+          isShortToken.push(false);
+
+          await marketContractProxy.settleMarketContract(_mri, marketContract[i], { from: honeyLemonOracle });
+
+          expectedMakerReturnedCollateral = expectedMakerReturnedCollateral.plus(calculateExpectedCollateralToReturn(
+            new BigNumber((await marketContractMpx.PRICE_FLOOR()).toString()),
+            new BigNumber((await marketContractMpx.PRICE_CAP()).toString()),
+            new BigNumber((await marketContractMpx.QTY_MULTIPLIER()).toString()),
+            new BigNumber(0),
+            amount,
+            new BigNumber((await marketContractMpx.settlementPrice()).toString())
+          ));
+          expectedTakerReturnedCollateral = expectedTakerReturnedCollateral.plus(calculateExpectedCollateralToReturn(
+            new BigNumber((await marketContractMpx.PRICE_FLOOR()).toString()),
+            new BigNumber((await marketContractMpx.PRICE_CAP()).toString()),
+            new BigNumber((await marketContractMpx.QTY_MULTIPLIER()).toString()),
+            amount,
+            new BigNumber(0),
+            new BigNumber((await marketContractMpx.settlementPrice()).toString())
+          ));
+          
+          assert.equal(
+            await marketContractMpx.isSettled(),
+            true
+          );
+        }
+
+        let makerImbtcBalanceBefore = new BigNumber(
+          (await imbtc.balanceOf(makerAddress)).toString()
+        );
+        let takerImbtcBalanceBefore = new BigNumber(
+          (await imbtc.balanceOf(takerAddress)).toString()
+        );
+
+        // batch redeem call for long token
+        let longTokenBatchTx = marketContractProxy.contract.methods.batchRedeem(
+          longTokensAddresses,
+          marketContractsAddresses,
+          amounts,
+          isLongToken // to indicate the token is long
+        )
+        .encodeABI();
+        // batch redeem call for short token
+        let shortTokenBatchTx = marketContractProxy.contract.methods.batchRedeem(
+          shortTokensAddresses,
+          marketContractsAddresses,
+          amounts,
+          isShortToken // to indicate the token is short
+        ).encodeABI();
+
+        // DSProxy Wallet instance
+        let makerDsProxyWallet = await DSProxy.at(await marketContractProxy.getUserAddressOrDSProxy(makerAddress));
+        let takerDsProxyWallet = await DSProxy.at(await marketContractProxy.getUserAddressOrDSProxy(takerAddress));
+        
+        // taker(investor) redeem long tokens
+        await takerDsProxyWallet.execute(marketContractProxy.address, longTokenBatchTx, {
+          from: takerAddress
+        });
+        // maker(miner) redeem short tokens
+        await makerDsProxyWallet.execute(marketContractProxy.address, shortTokenBatchTx, {
+          from: makerAddress
+        });
+
+        // maker & taker collateral token balance after redeeming
+        let makerImbtcBalanceAfter = new BigNumber(
+          (await imbtc.balanceOf(makerAddress)).toString()
+        );
+        let takerImbtcBalanceAfter = new BigNumber(
+          (await imbtc.balanceOf(takerAddress)).toString()
+        );
+
+        assert.equal(
+          makerImbtcBalanceAfter.minus(makerImbtcBalanceBefore).toString(),
+          expectedMakerReturnedCollateral.toString(),
+          'maker returned collateral mismatch'
+        );
+        assert.equal(
+          takerImbtcBalanceAfter.minus(takerImbtcBalanceBefore).toString(),
+          expectedTakerReturnedCollateral.toString(),
+          'taker returned collateral mismatch'
+        );
       });
     });
   }
