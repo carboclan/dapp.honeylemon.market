@@ -2,7 +2,7 @@ import * as React from "react";
 import Web3 from 'web3'
 import { useState, useEffect } from "react";
 import { MetamaskSubprovider, Web3JsProvider, SignerSubprovider } from '@0x/subproviders';
-// import { ERC20TokenContract, ERC20TokenEvents } from '@0x/contract-wrappers';
+import { ERC20TokenContract, ERC20TokenEvents } from '@0x/contract-wrappers';
 import { HoneylemonService } from "honeylemon";
 import { useOnboard } from "./OnboardContext";
 
@@ -61,6 +61,8 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
     }
   }, [wallet, network, isReady, address]);
 
+
+
   useEffect(() => {
     const checkBalances = async () => {
       console.log('checking balances');
@@ -71,7 +73,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
       setPaymentTokenAllowance(Number(payment.allowance.shiftedBy(-6).toString()));
       setPaymentTokenBalance(Number(payment.balance.shiftedBy(-6).toString()));
     }
-    const poller = () => setTimeout(checkBalances, 12000)
+    const poller = () => setInterval(checkBalances, 5000)
     if (honeylemonService) {
       checkBalances();
       poller();
@@ -79,31 +81,31 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
 
     return () => {
       console.log('destroying poller');
-      clearTimeout(poller());
+      clearInterval(poller());
     }
   }, [honeylemonService, address])
 
-  // useEffect(() => {
-  //   if (honeylemonService) {
-  //     const collateralToken: ERC20TokenContract = honeylemonService.collateralToken
-  //     const paymentToken: ERC20TokenContract = honeylemonService.paymentToken
+  useEffect(() => {
+    if (honeylemonService) {
+      const collateralToken: ERC20TokenContract = honeylemonService.collateralToken
+      const paymentToken: ERC20TokenContract = honeylemonService.paymentToken
 
-  //     collateralToken.subscribe(ERC20TokenEvents.Approval, { _owner: address }, (err, log) => {
-  //       console.log('payment approval');
-  //       console.log(err);
-  //       console.log(log);
-  //     });
-  //     paymentToken.subscribe(ERC20TokenEvents.Approval, { Owner: address }, (err, log) => {
-  //       console.log('payment approval');
-  //       console.log(err);
-  //       console.log(log);
-  //     });
-  //     console.log('subscribed to approval events');
-  //   }
-  //   // return () => {
-  //   //   //TODO Clean up event listeners here
-  //   // }
-  // }, [honeylemonService, address])
+      collateralToken.subscribe(ERC20TokenEvents.Approval, { _owner: address }, (err, log) => {
+        console.log('payment approval');
+        console.log(err);
+        console.log(log);
+      });
+      paymentToken.subscribe(ERC20TokenEvents.Approval, {}, (err, log) => {
+        console.log('payment approval');
+        console.log(err);
+        console.log(log);
+      });
+      console.log('subscribed to approval events');
+    }
+    // return () => {
+    //   //TODO Clean up event listeners here
+    // }
+  }, [honeylemonService, address])
 
   return (
     <HoneylemonContext.Provider
