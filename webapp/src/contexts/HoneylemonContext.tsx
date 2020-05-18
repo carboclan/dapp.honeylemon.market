@@ -78,6 +78,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
     }
 
     return () => {
+      console.log('destroying poller');
       clearTimeout(poller());
     }
   }, [honeylemonService, address])

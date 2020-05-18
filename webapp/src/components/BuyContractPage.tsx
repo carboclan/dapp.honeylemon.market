@@ -42,7 +42,9 @@ const BuyContractPage: React.SFC = () => {
   const { honeylemonService, PAYMENT_TOKEN_DECIMALS, paymentTokenAllowance } = useHoneylemon()
   const classes = useStyles();
 
+  const [budget, setBudget] = useState(0);
   const [orderValue, setOrderValue] = useState(0);
+
   const [hashPrice, setHashPrice] = useState(0);
   const [orderQuantity, setOrderQuantity] = useState(0);
   const [isValid, setIsValid] = useState(false);
@@ -53,12 +55,13 @@ const BuyContractPage: React.SFC = () => {
 
   const handleChangeBuyType = (event: React.ChangeEvent<{}>, newValue: BuyType) => {
     setBuyType(newValue);
+    setBudget(orderValue);
   };
 
   const validateOrderQuantity = async (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const newValueString = e.target.value;
     if (!newValueString) {
-      setOrderValue(0);
+      setOrderQuantity(0);
       return;
     }
     const newValue = parseFloat(newValueString);
@@ -86,8 +89,7 @@ const BuyContractPage: React.SFC = () => {
       return;
     }
     const newValue = parseFloat(newValueString);
-    !isNaN(newValue) && setOrderValue(newValue);
-
+    !isNaN(newValue) && setBudget(newValue)
     try {
       const result = await honeylemonService.getQuoteForBudget(newValue);
       const isLiquid = !!(Number(result?.remainingTakerFillAmount?.toString() || -1) === 0);
@@ -96,6 +98,7 @@ const BuyContractPage: React.SFC = () => {
       setOrderQuantity(Number(result?.totalMakerFillAmount?.toString()) || 0);
       setResultOrders(result.resultOrders || undefined);
       setTakerFillAmounts(result.takerAssetFillAmounts || undefined);
+      setOrderValue(Number(result?.totalTakerFillAmount?.shiftedBy(-PAYMENT_TOKEN_DECIMALS).toString()) || 0);
     } catch (error) {
       console.log('Error getting the current liquidity')
       console.log(error);
@@ -173,7 +176,7 @@ const BuyContractPage: React.SFC = () => {
             }}
             startAdornment={<InputAdornment position="start">$</InputAdornment>}
             onChange={validateOrderValue}
-            value={orderValue}
+            value={budget}
             type='number' />
         </Grid>
         <Grid item xs={2} className={classes.rightAlign}>
