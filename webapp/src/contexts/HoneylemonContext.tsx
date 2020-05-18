@@ -91,7 +91,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
       const paymentToken: ERC20TokenContract = honeylemonService.paymentToken
 
       collateralToken.subscribe(ERC20TokenEvents.Approval, { _owner: address }, (err, log) => {
-        console.log('payment approval');
+        console.log('collateral approval');
         console.log(err);
         console.log(log);
       });
