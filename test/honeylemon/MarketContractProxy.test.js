@@ -66,7 +66,7 @@ const ADDRESS_ZERO = '0x0000000000000000000000000000000000000000';
 
 contract(
   'MarketContractProxy',
-  ([honeyLemonOracle, makerAddress, takerAddress, maker2Address, taker2Address, , , , _0xBridgeProxy, random]) => {
+  ([honeyLemonOracle, makerAddress, takerAddress, , , , , , _0xBridgeProxy, random]) => {
     let minterBridge, marketContractProxy, imbtc, usdc, pc, _currentMri, _expiration;
 
     before(async () => {
