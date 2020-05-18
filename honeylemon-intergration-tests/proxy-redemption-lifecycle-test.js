@@ -8,7 +8,7 @@
 // To run this script start the 0x docker container and then run the script as follows
 // $docker run -it -p 8545:8545 0xorg/ganache-cli:latest
 // $truffle migrate --reset && truffle exec ./honeylemon-intergration-tests/proxy-redemption-lifecycle-test.js
-const { PayoutCalculator } = require('./payout-calculator');
+const { PayoutCalculator } = require('./helpers/payout-calculator');
 
 //Ox libs and tools
 const {
