@@ -1,0 +1,412 @@
+{
+  "contractName": "MarketContractRegistryInterface",
+  "abi": [
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "contractAddress",
+          "type": "address"
+        }
+      ],
+      "name": "addAddressToWhiteList",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "contractAddress",
+          "type": "address"
+        }
+      ],
+      "name": "isAddressWhiteListed",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "metadata": "",
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "sourceMap": "",
+  "deployedSourceMap": "",
+  "source": "/*\n    Copyright 2017-2019 Phillip A. Elsasser\n\n    Licensed under the Apache License, Version 2.0 (the \"License\");\n    you may not use this file except in compliance with the License.\n    You may obtain a copy of the License at\n\n    http://www.apache.org/licenses/LICENSE-2.0\n\n    Unless required by applicable law or agreed to in writing, software\n    distributed under the License is distributed on an \"AS IS\" BASIS,\n    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n    See the License for the specific language governing permissions and\n    limitations under the License.\n*/\n\npragma solidity 0.5.2;\n\n\ncontract MarketContractRegistryInterface {\n    function addAddressToWhiteList(address contractAddress) external;\n\n    function isAddressWhiteListed(address contractAddress) external view returns (bool);\n}\n",
+  "sourcePath": "/Users/chris/HoneyLemon/dapp.honeylemon.market/contracts/marketprotocol/MarketContractRegistryInterface.sol",
+  "ast": {
+    "absolutePath": "/Users/chris/HoneyLemon/dapp.honeylemon.market/contracts/marketprotocol/MarketContractRegistryInterface.sol",
+    "exportedSymbols": {
+      "MarketContractRegistryInterface": [
+        3156
+      ]
+    },
+    "id": 3157,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 3143,
+        "literals": [
+          "solidity",
+          "0.5",
+          ".2"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "608:22:10"
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": null,
+        "fullyImplemented": false,
+        "id": 3156,
+        "linearizedBaseContracts": [
+          3156
+        ],
+        "name": "MarketContractRegistryInterface",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "body": null,
+            "documentation": null,
+            "id": 3148,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "addAddressToWhiteList",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 3146,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 3145,
+                  "name": "contractAddress",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 3148,
+                  "src": "711:23:10",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 3144,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "711:7:10",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "710:25:10"
+            },
+            "returnParameters": {
+              "id": 3147,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "744:0:10"
+            },
+            "scope": 3156,
+            "src": "680:65:10",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "external"
+          },
+          {
+            "body": null,
+            "documentation": null,
+            "id": 3155,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "isAddressWhiteListed",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 3151,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 3150,
+                  "name": "contractAddress",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 3155,
+                  "src": "781:23:10",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 3149,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "781:7:10",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "780:25:10"
+            },
+            "returnParameters": {
+              "id": 3154,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 3153,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 3155,
+                  "src": "829:4:10",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  },
+                  "typeName": {
+                    "id": 3152,
+                    "name": "bool",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "829:4:10",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "828:6:10"
+            },
+            "scope": 3156,
+            "src": "751:84:10",
+            "stateMutability": "view",
+            "superFunction": null,
+            "visibility": "external"
+          }
+        ],
+        "scope": 3157,
+        "src": "633:204:10"
+      }
+    ],
+    "src": "608:230:10"
+  },
+  "legacyAST": {
+    "absolutePath": "/Users/chris/HoneyLemon/dapp.honeylemon.market/contracts/marketprotocol/MarketContractRegistryInterface.sol",
+    "exportedSymbols": {
+      "MarketContractRegistryInterface": [
+        3156
+      ]
+    },
+    "id": 3157,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 3143,
+        "literals": [
+          "solidity",
+          "0.5",
+          ".2"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "608:22:10"
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": null,
+        "fullyImplemented": false,
+        "id": 3156,
+        "linearizedBaseContracts": [
+          3156
+        ],
+        "name": "MarketContractRegistryInterface",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "body": null,
+            "documentation": null,
+            "id": 3148,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "addAddressToWhiteList",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 3146,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 3145,
+                  "name": "contractAddress",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 3148,
+                  "src": "711:23:10",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 3144,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "711:7:10",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "710:25:10"
+            },
+            "returnParameters": {
+              "id": 3147,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "744:0:10"
+            },
+            "scope": 3156,
+            "src": "680:65:10",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "external"
+          },
+          {
+            "body": null,
+            "documentation": null,
+            "id": 3155,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "isAddressWhiteListed",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 3151,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 3150,
+                  "name": "contractAddress",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 3155,
+                  "src": "781:23:10",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 3149,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "781:7:10",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "780:25:10"
+            },
+            "returnParameters": {
+              "id": 3154,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 3153,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 3155,
+                  "src": "829:4:10",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  },
+                  "typeName": {
+                    "id": 3152,
+                    "name": "bool",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "829:4:10",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "828:6:10"
+            },
+            "scope": 3156,
+            "src": "751:84:10",
+            "stateMutability": "view",
+            "superFunction": null,
+            "visibility": "external"
+          }
+        ],
+        "scope": 3157,
+        "src": "633:204:10"
+      }
+    ],
+    "src": "608:230:10"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.5.2+commit.1df8f40c.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "3.0.23",
+  "updatedAt": "2020-05-17T14:02:05.248Z",
+  "devdoc": {
+    "methods": {}
+  },
+  "userdoc": {
+    "methods": {}
+  }
+}
