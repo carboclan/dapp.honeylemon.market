@@ -1,18 +1,18 @@
 import * as React from "react";
-import { useState, useEffect } from "react";
-import { useOnboard } from "./OnboardContext";
-import { HoneylemonService } from "honeylemon";
-import { MetamaskSubprovider, Web3JsProvider, SignerSubprovider } from '@0x/subproviders';
 import Web3 from 'web3'
-import { BigNumber } from "@0x/utils";
+import { useState, useEffect } from "react";
+import { MetamaskSubprovider, Web3JsProvider, SignerSubprovider } from '@0x/subproviders';
+import { ERC20TokenContract, ERC20TokenEvents } from '@0x/contract-wrappers';
+import { HoneylemonService } from "honeylemon";
+import { useOnboard } from "./OnboardContext";
 
 export type HoneylemonContext = {
   honeylemonService: any; //TODO update this when types exist
-  collateralTokenBalance: BigNumber,
-  collateralTokenAllowance: BigNumber,
+  collateralTokenBalance: Number,
+  collateralTokenAllowance: Number,
   COLLATERAL_TOKEN_DECIMALS: number,
-  paymentTokenBalance: BigNumber,
-  paymentTokenAllowance: BigNumber,
+  paymentTokenBalance: Number,
+  paymentTokenAllowance: Number,
   PAYMENT_TOKEN_DECIMALS: number,
 };
 
@@ -22,13 +22,13 @@ export type HoneylemonProviderProps = {
 
 const HoneylemonContext = React.createContext<HoneylemonContext | undefined>(undefined);
 
-function HoneylemonProvider({ children }: HoneylemonProviderProps) {
+const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
   const { wallet, network, isReady, address } = useOnboard();
   const [honeylemonService, setHoneylemonService] = useState<any | undefined>(undefined);
-  const [collateralTokenBalance, setCollateralTokenBalance] = useState<BigNumber>(new BigNumber(0));
-  const [collateralTokenAllowance, setCollateralTokenAllowance] = useState<BigNumber>(new BigNumber(0));
-  const [paymentTokenBalance, setPaymentTokenBalance] = useState<BigNumber>(new BigNumber(0));
-  const [paymentTokenAllowance, setPaymentTokenAllowance] = useState<BigNumber>(new BigNumber(0));
+  const [collateralTokenBalance, setCollateralTokenBalance] = useState<Number>(0);
+  const [collateralTokenAllowance, setCollateralTokenAllowance] = useState<Number>(0);
+  const [paymentTokenBalance, setPaymentTokenBalance] = useState<Number>(0);
+  const [paymentTokenAllowance, setPaymentTokenAllowance] = useState<Number>(0);
 
   useEffect(() => {
     if (isReady && wallet && network) {
@@ -61,24 +61,50 @@ function HoneylemonProvider({ children }: HoneylemonProviderProps) {
     }
   }, [wallet, network, isReady, address]);
 
+
+
   useEffect(() => {
     const checkBalances = async () => {
+      console.log('checking balances');
       const collateral = await honeylemonService.getCollateralTokenAmounts(address);
-      setCollateralTokenAllowance(collateral.allowance);
-      setCollateralTokenBalance(collateral.balance);
+      setCollateralTokenAllowance(Number(collateral.allowance.shiftedBy(-8).toString()));
+      setCollateralTokenBalance(Number(collateral.balance.shiftedBy(-8).toString()));
       const payment = await honeylemonService.getPaymentTokenAmounts(address);
-      setPaymentTokenAllowance(payment.allowance);
-      setPaymentTokenBalance(payment.balance);
+      setPaymentTokenAllowance(Number(payment.allowance.shiftedBy(-6).toString()));
+      setPaymentTokenBalance(Number(payment.balance.shiftedBy(-6).toString()));
     }
-
-    const poller = () => setTimeout(checkBalances, 12000)
+    const poller = () => setInterval(checkBalances, 5000)
     if (honeylemonService) {
+      checkBalances();
       poller();
     }
 
     return () => {
-      clearTimeout(poller());
+      console.log('destroying poller');
+      clearInterval(poller());
     }
+  }, [honeylemonService, address])
+
+  useEffect(() => {
+    if (honeylemonService) {
+      const collateralToken: ERC20TokenContract = honeylemonService.collateralToken
+      const paymentToken: ERC20TokenContract = honeylemonService.paymentToken
+
+      collateralToken.subscribe(ERC20TokenEvents.Approval, { _owner: address }, (err, log) => {
+        console.log('collateral approval');
+        console.log(err);
+        console.log(log);
+      });
+      paymentToken.subscribe(ERC20TokenEvents.Approval, {}, (err, log) => {
+        console.log('payment approval');
+        console.log(err);
+        console.log(log);
+      });
+      console.log('subscribed to approval events');
+    }
+    // return () => {
+    //   //TODO Clean up event listeners here
+    // }
   }, [honeylemonService, address])
 
   return (

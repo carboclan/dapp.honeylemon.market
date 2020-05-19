@@ -373,10 +373,13 @@ class HoneylemonService {
     const data = await this.subgraphClient.request(CONTRACTS_QUERY, { address });
 
     // TODO: additional processing, calculate total price by iterating over fills
-    const shortContractsProcessed = this._processContractsData(
-      data.user.contractsAsMaker
-    );
-    const longContractsProcessed = this._processContractsData(data.user.contractsAsTaker);
+    const shortContractsProcessed = data.user && data.user.contractsAsMaker ? 
+      this._processContractsData(data.user.contractsAsMaker) :
+      [];
+
+    const longContractsProcessed = data.user && data.user.contractsAsTaker ? 
+      this._processContractsData(data.user.contractsAsTaker) :
+      [];
 
     return {
       longContracts: longContractsProcessed,

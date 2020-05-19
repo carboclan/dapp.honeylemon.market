@@ -8,7 +8,7 @@
 // $truffle migrate --reset && truffle exec ./honeylemon-intergration-tests/full-trade-lifecycle-test.js
 
 // Helper libraries
-const { PayoutCalculator } = require('../test/helpers/payout-calculator');
+const { PayoutCalculator } = require('./helpers/payout-calculator');
 
 const { ContractWrappers } = require('@0x/contract-wrappers');
 const { Web3Wrapper } = require('@0x/web3-wrapper');

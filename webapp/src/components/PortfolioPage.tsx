@@ -1,19 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { BigNumber } from '@0x/utils';
 import dayjs from 'dayjs'
-import { 
-  Typography, 
-  Grid, 
-  makeStyles, 
-  Tabs, 
-  Tab, 
-  Button, 
-  TableRow, 
-  TableHead, 
-  TableCell, 
-  Table, 
-  TableBody, 
-  Divider 
+import {
+  Typography,
+  Grid,
+  makeStyles,
+  Tabs,
+  Tab,
+  Button,
+  TableRow,
+  TableHead,
+  TableCell,
+  Table,
+  TableBody,
+  Divider
 } from '@material-ui/core';
 import { RadioButtonUnchecked } from '@material-ui/icons';
 import { useOnboard } from '../contexts/OnboardContext';
@@ -30,7 +30,7 @@ const useStyles = makeStyles(({ spacing }) => ({
     paddingTop: spacing(2)
   },
   sectionDivider: {
-    margin: spacing(2), 
+    margin: spacing(2),
     height: spacing(0.5),
   }
 }))
@@ -41,32 +41,68 @@ const PorfolioPage: React.SFC = () => {
 
   const [activeTab, setActiveTab] = useState<'active' | 'settled'>('active')
   const [collateralForWithdraw, setCollateralForWithdraw] = useState(0);
-  const [openOrders, setOpenOrders] = useState<
+  const [openOrdersMetadata, setOpenOrdersMetadata] = useState<
     Array<{
       orderHash: string,
       remainingFillableMakerAssetAmount: BigNumber,
       price: number
+      //TODO: update to use types once definitions have been added
     }>>([]);
+
+  const [openOrders, setOpenOrders] = useState<{
+    [orderHash: string]: {
+      makerAddress: string;
+      takerAddress: string;
+      feeRecipientAddress: string;
+      senderAddress: string;
+      makerAssetAmount: BigNumber;
+      takerAssetAmount: BigNumber;
+      makerFee: BigNumber;
+      takerFee: BigNumber;
+      expirationTimeSeconds: BigNumber;
+      salt: BigNumber;
+      makerAssetData: string;
+      takerAssetData: string;
+      makerFeeAssetData: string;
+      takerFeeAssetData: string;
+    }
+  } | undefined>()
   const [activeContracts, setActiveContracts] = useState([]);
   const [settledContractsToWithdraw, setSettledContractsToWithdraw] = useState([]);
   const [settledContracts, setSettledContracts] = useState([]);
+  const [refresh, setRefresh] = useState(true);
 
   const handleSetActiveTab = (event: React.ChangeEvent<{}>, newValue: 'active' | 'settled') => {
     setActiveTab(newValue);
   };
 
   const cancelOpenOrder = async (orderHash: string) => {
-    console.log(`Cancelling ${orderHash}`);
+    const order = openOrders?.[orderHash];
+    if (!order) {
+      console.log('This order does not exist.')
+      return;
+    }
+
+    await honeylemonService.getCancelOrderTx(order)
+      .awaitTransactionSuccessAsync({
+        from: address,
+        gas: 1500000
+      })
+      .then(() => setRefresh(true));
   }
 
   useEffect(() => {
     let cancelled = false;
 
     const getPorfolio = async () => {
-      const openOrders = await honeylemonService.getOpenOrders(address);
+
+      const openOrdersRes = await honeylemonService.getOpenOrders(address);
       const contracts = await honeylemonService.getContracts(address);
       if (!cancelled) {
-        setOpenOrders(openOrders.records.map((openOrder: any) => openOrder.metaData))
+        setOpenOrdersMetadata(openOrdersRes.records.map((openOrder: any) => openOrder.metaData))
+        setOpenOrders(Object.fromEntries(
+          openOrdersRes.records.map(((openOrder: any) => [openOrder.metaData.orderHash, openOrder.order]))
+        ));
 
         const allContracts = contracts.longContracts.map((lc: any) => ({
           ...lc,
@@ -83,12 +119,13 @@ const PorfolioPage: React.SFC = () => {
         setSettledContractsToWithdraw(sctw);
         setCollateralForWithdraw(sctw.reduce((total: any, contract: any) => total += contract?.withdrawalAmount, 0))
         setSettledContracts(allContracts.filter((c: any) => c.daysToMaturity <= 0 && c?.withdrawalAmount === 0))
+        setRefresh(false);
       }
     }
     getPorfolio();
     return () => { cancelled = true }
 
-  }, [address, honeylemonService])
+  }, [address, honeylemonService, refresh])
 
   const classes = useStyles();
   return (
@@ -119,7 +156,7 @@ const PorfolioPage: React.SFC = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {openOrders && openOrders?.map(order =>
+                  {openOrdersMetadata && openOrdersMetadata?.map(order =>
                     <TableRow key={order.orderHash}>
                       <TableCell>{order?.remainingFillableMakerAssetAmount.toString()}</TableCell>
                       <TableCell align='center'>${order?.price.toFixed(2)}</TableCell>

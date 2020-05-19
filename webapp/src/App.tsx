@@ -1,6 +1,6 @@
 import React from 'react';
 import theme from './theme';
-import { MuiThemeProvider, CssBaseline, Container } from '@material-ui/core';
+import { MuiThemeProvider, CssBaseline } from '@material-ui/core';
 import { Router } from 'react-router-dom';
 import ScrollToTop from './helpers/scrollToTop';
 import history from './helpers/history';
@@ -20,9 +20,7 @@ function App() {
           <CssBaseline />
           <OnboardProvider {...onboardInit}>
             <HoneylemonProvider>
-              <Container maxWidth="sm">
-                <HoneyLemonApp />
-              </Container>
+              <HoneyLemonApp />
             </HoneylemonProvider>
           </OnboardProvider >
         </ScrollToTop>
