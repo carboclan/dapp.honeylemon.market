@@ -169,10 +169,7 @@ class HoneylemonService {
         takerFillAmount
       );
       // Recalculate takerFillAmount based on whole makerFillAmount
-      takerFillAmount = orderCalculationUtils.getTakerFillAmount(
-        order,
-        makerFillAmount
-      );
+      takerFillAmount = orderCalculationUtils.getTakerFillAmount(order, makerFillAmount);
       totalMakerFillAmount = totalMakerFillAmount.plus(makerFillAmount);
       totalTakerFillAmount = totalTakerFillAmount.plus(takerFillAmount);
 
@@ -371,6 +368,7 @@ class HoneylemonService {
   async getContracts(address) {
     address = address.toLowerCase();
     const data = await this.subgraphClient.request(CONTRACTS_QUERY, { address });
+    console.log(data);
 
     // TODO: additional processing, calculate total price by iterating over fills
     const shortContractsProcessed = this._processContractsData(
@@ -458,4 +456,4 @@ const CONTRACTS_QUERY = /* GraphQL */ `
   }
 `;
 
-module.exports = HoneylemonService, PAYMENT_TOKEN_DECIMALS, COLLATERAL_TOKEN_DECIMALS;
+(module.exports = HoneylemonService), PAYMENT_TOKEN_DECIMALS, COLLATERAL_TOKEN_DECIMALS;

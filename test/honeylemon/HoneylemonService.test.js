@@ -355,12 +355,13 @@ describe('HoneylemonService', () => {
     assert.equal(absoluteDriftError.lt(new BigNumber(0.001)), true);
   });
 
-  it.skip('Gets contracts', async () => {
+  it('Gets contracts', async () => {
     const { longContracts, shortContracts } = await honeylemonService.getContracts(
       makerAddress
     );
 
-    //console.log('shortContracts:', shortContracts);
+    console.log("1")
+    console.log('shortContracts:', shortContracts);
   });
 
   it('Retrieve open contracts', async () => {
@@ -368,13 +369,13 @@ describe('HoneylemonService', () => {
     const fillSize = new BigNumber(1);
     console.log("1")
     
-    // // Create two contracts. taker participates as a taker in both. Maker is only involved
-    // // in the first contract.
+    // Create two contracts. taker participates as a taker in both. Maker is only involved
+    // in the first contract.
     await fill0xOrderForAddresses(1, takerAddress, makerAddress);
-    // // await time.increase(10); // increase by 10 seconds to signify 1 day
-    // await fill0xOrderForAddresses(2, takerAddress, makerAddress);
-    // // await time.increase(10); // increase by 10 seconds to signify 1 day
-    // await fill0xOrderForAddresses(3, takerAddress, makerAddress);
+    // await time.increase(10); // increase by 10 seconds to signify 1 day
+    await fill0xOrderForAddresses(2, takerAddress, makerAddress);
+    // await time.increase(10); // increase by 10 seconds to signify 1 day
+    await fill0xOrderForAddresses(3, takerAddress, makerAddress);
 
 
     // await createNewMarketProtocolContract(0, mriInput, 'MRI-BTC-28D-20200502');
@@ -391,6 +392,7 @@ describe('HoneylemonService', () => {
     const { longContracts2, shortContracts2 } = await honeylemonService.getContracts(
       makerAddress
     );
+    console.log(longContracts2, shortContracts2);
   });
 
   it('retrieve open orders', async () => {
