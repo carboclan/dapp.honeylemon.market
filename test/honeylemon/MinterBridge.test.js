@@ -1,5 +1,6 @@
 const BigNumber = require('bignumber.js');
 const { expectRevert, ether, time } = require('@openzeppelin/test-helpers');
+const { getContractAddressesForChainOrThrow } = require('@0x/contract-addresses');
 
 const MinterBridge = artifacts.require('MinterBridge');
 const MarketContractProxy = artifacts.require('MarketContractProxy');
@@ -36,8 +37,8 @@ contract(
       });
       it('check 0x Brdige Proxy address', async () => {
         assert.equal(
-          await minterBridge.ERC20_BRIDGE_PROXY_ADDRESS(),
-          ADDRESS_ZERO,
+          (await minterBridge.ERC20_BRIDGE_PROXY_ADDRESS()).toLowerCase(),
+          (getContractAddressesForChainOrThrow(await web3.eth.net.getId()).erc20BridgeProxy).toLowerCase(),
           '0x bridge proxy address missmatch'
         );
       });
