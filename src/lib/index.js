@@ -1,3 +1,3 @@
-import HoneylemonService from './HoneylemonService';
+import { HoneylemonService, COLLATERAL_TOKEN_DECIMALS, PAYMENT_TOKEN_DECIMALS, CONTRACTS_QUERY } from './HoneylemonService';
 
-export { HoneylemonService };
+export { HoneylemonService, COLLATERAL_TOKEN_DECIMALS, PAYMENT_TOKEN_DECIMALS, CONTRACTS_QUERY };

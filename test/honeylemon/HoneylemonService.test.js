@@ -13,7 +13,8 @@ const MarketContractMPX = artifacts.require('MarketContractMPX');
 const PositionToken = artifacts.require('PositionToken'); // Long & Short tokens
 const MarketCollateralPool = artifacts.require('MarketCollateralPool');
 
-const HoneylemonService = require('../../src/lib/HoneylemonService');
+const { HoneylemonService, CONTRACTS_QUERY } = require('../../src/lib/HoneylemonService');
+const { revertToSnapShot, takeSnapshot } = require('../helpers/snapshot');
 
 const web3Wrapper = new Web3Wrapper(web3.currentProvider);
 
@@ -60,52 +61,10 @@ before(async function() {
   );
 
   // Stub orders
-  const orderParams = [
-    {
-      sizeTh: new BigNumber(1000),
-      pricePerTh: new BigNumber(3.6)
-    },
-    {
-      sizeTh: new BigNumber(1200),
-      pricePerTh: new BigNumber(3.7)
-    },
-    {
-      sizeTh: new BigNumber(3600),
-      pricePerTh: new BigNumber(3.9)
-    }
-  ];
-  const orders = orderParams.map(p =>
-    honeylemonService.createOrder(makerAddress, p.sizeTh, p.pricePerTh)
-  );
-  const signedOrders = await Promise.all(orders.map(o => honeylemonService.signOrder(o)));
+  await stubOrders();
 
-  const records = signedOrders.map(o => ({
-    order: o,
-    metaData: {
-      orderHash: orderHashUtils.getOrderHash(o),
-      remainingFillableTakerAssetAmount: o.takerAssetAmount
-    }
-  }));
-  const orderbookStub = sinon.stub(honeylemonService.apiClient, 'getOrderbookAsync').returns({
-    bids: {
-      total: 0,
-      page: 1,
-      perPage: 20,
-      records: []
-    },
-    asks: {
-      total: 3,
-      page: 1,
-      perPage: 20,
-      records
-    }
-  });
-  const ordersStub = sinon.stub(honeylemonService.apiClient, 'getOrdersAsync').returns({
-    total: 3,
-    page: 1,
-    perPage: 20,
-    records
-  });
+  // Stub subgraph
+  await stubSubgraph();
 
   // Starting MRI value
   mriInput = 0.00001833;
@@ -146,7 +105,123 @@ before(async function() {
   );
 });
 
-describe('HoneylemonService', () => {
+const stubOrders = async () => {
+  const orderParams = [
+    {
+      sizeTh: new BigNumber(1000),
+      pricePerTh: new BigNumber(3.6)
+    },
+    {
+      sizeTh: new BigNumber(1200),
+      pricePerTh: new BigNumber(3.7)
+    },
+    {
+      sizeTh: new BigNumber(3600),
+      pricePerTh: new BigNumber(3.9)
+    }
+  ];
+  const expirationTime = new BigNumber(
+    Math.round(Date.now() / 1000) + 365 * 24 * 60 * 60
+  ); // 1 year
+  const orders = orderParams.map(p =>
+    honeylemonService.createOrder(makerAddress, p.sizeTh, p.pricePerTh, expirationTime)
+  );
+  const signedOrders = await Promise.all(orders.map(o => honeylemonService.signOrder(o)));
+
+  const records = signedOrders.map(o => ({
+    order: o,
+    metaData: {
+      orderHash: orderHashUtils.getOrderHash(o),
+      remainingFillableTakerAssetAmount: o.takerAssetAmount
+    }
+  }));
+  sinon.stub(honeylemonService.apiClient, 'getOrderbookAsync').returns({
+    bids: {
+      total: 0,
+      page: 1,
+      perPage: 20,
+      records: []
+    },
+    asks: {
+      total: 3,
+      page: 1,
+      perPage: 20,
+      records
+    }
+  });
+  sinon.stub(honeylemonService.apiClient, 'getOrdersAsync').returns({
+    total: 3,
+    page: 1,
+    perPage: 20,
+    records
+  });
+}
+
+const createContract = (marketId, qtyToMint) => {
+  return {
+    "contractName": "MRI-BTC-28D-20200501",
+    "createdAt": "85",
+    "id": "0-0x83de191d42df02849c3fa4d1b05428a96dc005c7a53673a8dff9fb6140207820-16",
+    "latestMarketContract": "0x173be3b7f6a7f5db49dc90fb47c5a3c08ae3026f",
+    "longTokenAddress": "0x01606f7913b0417e4e81fe84589371216faa9e95",
+    "longTokenDSProxy": "0xe36ea790bc9d7ab70c55260c66d52b1eca985f84",
+    "longTokenRecipient": {
+      "id": "0xe36ea790bc9d7ab70c55260c66d52b1eca985f84"
+    },
+    "marketId": marketId,
+    "qtyToMint": qtyToMint,
+    "shortTokenAddress": "0x57ff2298fea9066efff1505f14b4b0bdad5c8342",
+    "shortTokenDSProxy": "0x6ecbe1db9ef729cbe972c83fb886247691fb6beb",
+    "shortTokenRecipient": {
+      "id": "0x6ecbe1db9ef729cbe972c83fb886247691fb6beb"
+    },
+    "time": "1590014756",
+    "transaction": {
+      "blockNumber": "85",
+      "fills": [
+        {
+          "makerAssetFilledAmount": "54",
+          "takerAssetFilledAmount": "9990000"
+        }
+      ]
+    }
+  };
+}
+
+const stubSubgraph = async () => {
+  const subgraphStub = sinon.stub(honeylemonService.subgraphClient, 'request');
+  // as maker
+  subgraphStub
+    .withArgs(CONTRACTS_QUERY, sinon.match({ address: makerAddress.toLowerCase() }))
+    .returns({
+      user: {
+        contractsAsMaker: [
+          createContract("0", "1"),
+          createContract("0", "2"),
+          createContract("0", "3"),
+          createContract("1", "2")
+        ],
+        contractsAsTaker: []
+      }
+    });
+
+  // as taker
+  subgraphStub
+    .withArgs(CONTRACTS_QUERY, sinon.match({ address: takerAddress.toLowerCase() }))
+    .returns({
+      user: {
+        contractsAsMaker: [],
+        contractsAsTaker: [
+          createContract("0", "1"),
+          createContract("0", "2"),
+          createContract("0", "3"),
+          createContract("1", "2")
+        ]
+      }
+    });
+}
+
+contract('HoneylemonService', () => {
   it('should give correct quote for size', async () => {
     const {
       price,
@@ -355,15 +430,9 @@ describe('HoneylemonService', () => {
     assert.equal(absoluteDriftError.lt(new BigNumber(0.001)), true);
   });
 
-  it.skip('Gets contracts', async () => {
-    const { longContracts, shortContracts } = await honeylemonService.getContracts(
-      makerAddress
-    );
+  it.only('Retrieve open contracts', async () => {
+    const { result: snapshotId } = await takeSnapshot();
 
-    //console.log('shortContracts:', shortContracts);
-  });
-
-  it('Retrieve open contracts', async () => {
     // Create positions for long and short token holder
     const fillSize = new BigNumber(1);
 
@@ -375,7 +444,12 @@ describe('HoneylemonService', () => {
     // await time.increase(10); // increase by 10 seconds to signify 1 day
     await fill0xOrderForAddresses(3, takerAddress, makerAddress);
 
-    await createNewMarketProtocolContract(0, mriInput, 'MRI-BTC-28D-20200502');
+    // fast forward 28 days
+    await time.increase(28 * 24 * 60 * 60 + 1);
+    // we need to deploy 28 times in order to be able to settle
+    await Promise.all(Array.from({ length: 28 }, (x, i) => {
+      return createNewMarketProtocolContract(mriInput * 28, mriInput, 'MRI-BTC-28D-20200502');
+    }));
 
     await fill0xOrderForAddresses(2, takerAddress, makerAddress);
 
@@ -384,9 +458,12 @@ describe('HoneylemonService', () => {
       takerAddress
     );
 
-    const { longContracts2, shortContracts2 } = await honeylemonService.getContracts(
+    const { longContracts: longContracts2, shortContracts: shortContracts2 } = await honeylemonService.getContracts(
       makerAddress
     );
+
+    console.log(`Reverting to snapshot ${snapshotId}`);
+    await revertToSnapShot(snapshotId);
   });
 
   it('retrieve open orders', async () => {
@@ -438,11 +515,10 @@ async function createNewMarketProtocolContract(lookbackIndex, mriInput, marketNa
   let contractDuration = (await marketContractProxy.CONTRACT_DURATION()).toNumber();
   let expirationTime = currentContractTime + contractDuration;
 
-  const currentMRIScaled = new BigNumber(mriInput).multipliedBy(
-    new BigNumber('100000000')
-  ); //1e8
+  const currentMRIScaled = new BigNumber(mriInput).shiftedBy(8); //1e8
+  const lookbackScaled = new BigNumber(lookbackIndex).shiftedBy(8); //1e8
   await marketContractProxy.dailySettlement(
-    lookbackIndex,
+    lookbackScaled.toString(),
     currentMRIScaled.toString(), // current index value
     [
       web3.utils.utf8ToHex(marketName),

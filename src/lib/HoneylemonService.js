@@ -231,12 +231,14 @@ class HoneylemonService {
     return this.contractWrappers.exchange.cancelOrder(order);
   }
 
-  createOrder(makerAddress, sizeTh, pricePerTh) {
+  createOrder(makerAddress, sizeTh, pricePerTh, expirationTime) {
     sizeTh = new BigNumber(sizeTh);
     pricePerTh = new BigNumber(pricePerTh);
-    const expirationTime = new BigNumber(
-      Math.round(Date.now() / 1000) + 10 * 24 * 60 * 60
-    ); // 10 days
+    if (!expirationTime) {
+      expirationTime = new BigNumber(
+        Math.round(Date.now() / 1000) + 10 * 24 * 60 * 60
+      ); // 10 days
+    }
     const exchangeAddress = this.contractWrappers.exchange.address;
 
     const order = {
@@ -355,7 +357,7 @@ class HoneylemonService {
 
       metaData.remainingFillableMakerAssetAmount = orderCalculationUtils.getMakerFillAmount(
         order,
-        new BigNumber(metaData.remainingFillableTakerAssetAmount)
+        metaData.remainingFillableTakerAssetAmount
       );
     });
 
@@ -371,15 +373,14 @@ class HoneylemonService {
   async getContracts(address) {
     address = address.toLowerCase();
     const data = await this.subgraphClient.request(CONTRACTS_QUERY, { address });
+    if (!data.user) return {
+      longContracts: [],
+      shortContracts: []
+    }
 
     // TODO: additional processing, calculate total price by iterating over fills
-    const shortContractsProcessed = data.user && data.user.contractsAsMaker ? 
-      this._processContractsData(data.user.contractsAsMaker) :
-      [];
-
-    const longContractsProcessed = data.user && data.user.contractsAsTaker ? 
-      this._processContractsData(data.user.contractsAsTaker) :
-      [];
+    const shortContractsProcessed = await this._processContractsData(data.user.contractsAsMaker, true);
+    const longContractsProcessed = await this._processContractsData(data.user.contractsAsTaker, false);
 
     return {
       longContracts: longContractsProcessed,
@@ -387,10 +388,15 @@ class HoneylemonService {
     };
   }
 
-  _processContractsData(data) {
+  async _processContractsData(data, short) {
+    const collateralsToReturns = await this.marketContractProxy.methods
+      .calculateCollateralToReturnForAll(short)
+      .call();
+
     for (let i = 0; i < data.length; i++) {
       const contract = data[i];
 
+      // price
       let totalMakerAssetFilledAmount = new BigNumber(0);
       let totalTakerAssetFilledAmount = new BigNumber(0);
       for (let j = 0; j < contract.transaction.fills.length; j++) {
@@ -410,6 +416,10 @@ class HoneylemonService {
       contract.price = totalTakerAssetFilledAmount
         .dividedBy(totalMakerAssetFilledAmount)
         .shiftedBy(SHIFT_PRICE_BY);
+
+      // Collateral to return
+      contract.collateralToReturn = new BigNumber(collateralsToReturns[parseInt(contract.marketId)])
+        .multipliedBy(contract.qtyToMint);
     }
 
     return data;
@@ -461,4 +471,4 @@ const CONTRACTS_QUERY = /* GraphQL */ `
   }
 `;
 
-module.exports = HoneylemonService, PAYMENT_TOKEN_DECIMALS, COLLATERAL_TOKEN_DECIMALS;
+module.exports =  { HoneylemonService, PAYMENT_TOKEN_DECIMALS, COLLATERAL_TOKEN_DECIMALS, CONTRACTS_QUERY };

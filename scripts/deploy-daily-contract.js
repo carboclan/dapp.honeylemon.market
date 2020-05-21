@@ -103,12 +103,12 @@ async function runExport() {
   // const today = new Date();
   // const todayMonth = today.getMonth();
   // const todayDate = today.getDate();
-  // const dateString = 
+  // const dateString =
   //   `${today.getFullYear()}${(todayMonth < 10) ? `0${todayMonth}` : todayMonth}${(todayDate < 10) ? `0${todayDate}` : todayDate}`
 
   // Create Todays market protocol contract
   await marketContractProxy.dailySettlement(
-    0, // lookback index
+    currentMRIScaled.toString(), // lookback index
     currentMRIScaled.toString(), // current index value
     [
       web3.utils.utf8ToHex('MRI-BTC-28D-20200501'),

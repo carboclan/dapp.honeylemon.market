@@ -13,7 +13,7 @@ const readline = require('readline');
 
 // Helper libraries
 const { PayoutCalculator } = require('./helpers/payout-calculator');
-const HoneylemonService = require('../src/lib/HoneylemonService');
+const { HoneylemonService } = require('../src/lib/HoneylemonService');
 
 //Ox libs and tools
 const {

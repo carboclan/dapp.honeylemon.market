@@ -293,6 +293,30 @@ contract MarketContractProxy is Ownable {
     }
 
     /**
+     * @notice calculate collateral to return for all contracts
+     * @param short true for short contracts, false for long contracts
+     * @return array of collateral to return
+     */
+    function calculateCollateralToReturnForAll(bool short) public view returns(uint[] memory collateralsToReturn) {
+        uint256 length = marketContracts.length;
+        collateralsToReturn = new uint[](length);
+
+        for (uint i = 0; i < length; i++) {
+            MarketContractMPX marketContract = MarketContractMPX(marketContracts[i]);
+            collateralsToReturn[i] = MathLib.calculateCollateralToReturn(
+                marketContract.PRICE_FLOOR(),
+                marketContract.PRICE_CAP(),
+                marketContract.QTY_MULTIPLIER(),
+                short ? 0 : 1,
+                short ? 1 : 0,
+                marketContract.settlementPrice()
+            );
+        }
+
+        return collateralsToReturn;
+    }
+
+    /**
      * @notice get user long token blanace for the current day
      * @dev used to prove to 0x that the wallet balance was correctly transferred.
      * @param owner address
