@@ -3,8 +3,8 @@ type User @entity {
     fillsAsTaker: [Fill!] @derivedFrom(field: "taker")
     fillsAsMaker: [Fill!] @derivedFrom(field: "maker")
     orders: [Order!] @derivedFrom(field: "maker")
-    contractsAsMaker: [Contract!] @derivedFrom(field: "shortTokenRecipient")
-    contractsAsTaker: [Contract!] @derivedFrom(field: "longTokenRecipient")
+    positionsAsMaker: [Position!] @derivedFrom(field: "shortTokenRecipient")
+    positionsAsTaker: [Position!] @derivedFrom(field: "longTokenRecipient")
 #    cancelled: [CancelledOrder!] @derivedFrom(field: "maker")
 #    validatorsApproved: [Bytes!] # event SignatureValidationApproval - allows me to give any other address the ability to sign for me # TODO: why are these all null?
 }
@@ -50,7 +50,7 @@ type CancelledOrder @entity {
     maker: Bytes! # some reason this cancels on null
 }
 
-type Contract @entity {
+type Position @entity {
     id: ID! # orderHash-blockNumber-logIndex
     createdAt: BigInt!
     transaction: Transaction!
@@ -60,10 +60,31 @@ type Contract @entity {
     longTokenRecipient: User!
     shortTokenRecipient: User!
     qtyToMint: BigInt!
-    latestMarketContract: Bytes!
+    contract: Contract!
     longTokenAddress: Bytes!
     shortTokenAddress: Bytes!
     longTokenDSProxy: Bytes
     shortTokenDSProxy: Bytes
     time: BigInt!
+}
+
+type Contract @entity {
+    id: ID!
+    createdAt: BigInt!
+    transaction: Transaction!
+    transactionHash: Transaction!
+    currentMRI: BigInt!
+    contractName: String!
+    expiration: BigInt!
+    index: BigInt!
+    collateralPerUnit: BigInt!
+    settlement: ContractSettlement @derivedFrom(field: "contract")
+}
+
+type ContractSettlement @entity {
+    id: ID!
+    createdAt: BigInt!
+    revenuePerUnit: BigInt!
+    index: BigInt!
+    contract: Contract!
 }

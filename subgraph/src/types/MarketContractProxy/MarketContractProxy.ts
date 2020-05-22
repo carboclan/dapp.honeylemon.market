@@ -68,63 +68,89 @@ export class PositionTokensMinted__Params {
   }
 }
 
-export class BatchTokensRedeemed extends ethereum.Event {
-  get params(): BatchTokensRedeemed__Params {
-    return new BatchTokensRedeemed__Params(this);
+export class MarketContractSettled extends ethereum.Event {
+  get params(): MarketContractSettled__Params {
+    return new MarketContractSettled__Params(this);
   }
 }
 
-export class BatchTokensRedeemed__Params {
-  _event: BatchTokensRedeemed;
+export class MarketContractSettled__Params {
+  _event: MarketContractSettled;
 
-  constructor(event: BatchTokensRedeemed) {
+  constructor(event: MarketContractSettled) {
     this._event = event;
   }
 
-  get tokenAddresses(): Address {
+  get contractAddress(): Address {
     return this._event.parameters[0].value.toAddress();
   }
 
-  get marketAddresses(): Address {
-    return this._event.parameters[1].value.toAddress();
+  get revenuePerUnit(): BigInt {
+    return this._event.parameters[1].value.toBigInt();
   }
 
-  get tokensToRedeem(): BigInt {
+  get index(): BigInt {
     return this._event.parameters[2].value.toBigInt();
   }
+}
 
-  get traderLong(): boolean {
-    return this._event.parameters[3].value.toBoolean();
+export class MarketContractDeployed extends ethereum.Event {
+  get params(): MarketContractDeployed__Params {
+    return new MarketContractDeployed__Params(this);
   }
 }
 
-export class LogEvent extends ethereum.Event {
-  get params(): LogEvent__Params {
-    return new LogEvent__Params(this);
-  }
-}
+export class MarketContractDeployed__Params {
+  _event: MarketContractDeployed;
 
-export class LogEvent__Params {
-  _event: LogEvent;
-
-  constructor(event: LogEvent) {
+  constructor(event: MarketContractDeployed) {
     this._event = event;
   }
 
-  get msgsender(): Address {
-    return this._event.parameters[0].value.toAddress();
+  get currentMRI(): BigInt {
+    return this._event.parameters[0].value.toBigInt();
   }
 
-  get addressthis(): Address {
-    return this._event.parameters[1].value.toAddress();
+  get contractName(): Bytes {
+    return this._event.parameters[1].value.toBytes();
   }
 
-  get param(): BigInt {
+  get expiration(): BigInt {
     return this._event.parameters[2].value.toBigInt();
   }
 
-  get tokenAddress(): Address {
-    return this._event.parameters[3].value.toAddress();
+  get index(): BigInt {
+    return this._event.parameters[3].value.toBigInt();
+  }
+
+  get contractAddress(): Address {
+    return this._event.parameters[4].value.toAddress();
+  }
+
+  get collateralPerUnit(): BigInt {
+    return this._event.parameters[5].value.toBigInt();
+  }
+}
+
+export class dSProxyCreated extends ethereum.Event {
+  get params(): dSProxyCreated__Params {
+    return new dSProxyCreated__Params(this);
+  }
+}
+
+export class dSProxyCreated__Params {
+  _event: dSProxyCreated;
+
+  constructor(event: dSProxyCreated) {
+    this._event = event;
+  }
+
+  get owner(): Address {
+    return this._event.parameters[0].value.toAddress();
+  }
+
+  get DSProxy(): Address {
+    return this._event.parameters[1].value.toAddress();
   }
 }
 
@@ -407,6 +433,29 @@ export class MarketContractProxy extends ethereum.SmartContract {
     return ethereum.CallResult.fromValue(value[0].toBigInt());
   }
 
+  marketContractFactoryMPX(): Address {
+    let result = super.call(
+      "marketContractFactoryMPX",
+      "marketContractFactoryMPX():(address)",
+      []
+    );
+
+    return result[0].toAddress();
+  }
+
+  try_marketContractFactoryMPX(): ethereum.CallResult<Address> {
+    let result = super.tryCall(
+      "marketContractFactoryMPX",
+      "marketContractFactoryMPX():(address)",
+      []
+    );
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toAddress());
+  }
+
   HONEY_LEMON_ORACLE_ADDRESS(): Address {
     let result = super.call(
       "HONEY_LEMON_ORACLE_ADDRESS",
@@ -476,6 +525,44 @@ export class MarketContractProxy extends ethereum.SmartContract {
     }
     let value = result.value;
     return ethereum.CallResult.fromValue(value[0].toBigIntArray());
+  }
+
+  getLatestMri(): BigInt {
+    let result = super.call("getLatestMri", "getLatestMri():(uint256)", []);
+
+    return result[0].toBigInt();
+  }
+
+  try_getLatestMri(): ethereum.CallResult<BigInt> {
+    let result = super.tryCall("getLatestMri", "getLatestMri():(uint256)", []);
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toBigInt());
+  }
+
+  getAllMarketContracts(): Array<Address> {
+    let result = super.call(
+      "getAllMarketContracts",
+      "getAllMarketContracts():(address[])",
+      []
+    );
+
+    return result[0].toAddressArray();
+  }
+
+  try_getAllMarketContracts(): ethereum.CallResult<Array<Address>> {
+    let result = super.tryCall(
+      "getAllMarketContracts",
+      "getAllMarketContracts():(address[])",
+      []
+    );
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toAddressArray());
   }
 
   getFillableAmount(makerAddress: Address): BigInt {
@@ -616,29 +703,6 @@ export class MarketContractProxy extends ethereum.SmartContract {
     return ethereum.CallResult.fromValue(value[0].toBigInt());
   }
 
-  getAllMarketContracts(): Array<Address> {
-    let result = super.call(
-      "getAllMarketContracts",
-      "getAllMarketContracts():(address[])",
-      []
-    );
-
-    return result[0].toAddressArray();
-  }
-
-  try_getAllMarketContracts(): ethereum.CallResult<Array<Address>> {
-    let result = super.tryCall(
-      "getAllMarketContracts",
-      "getAllMarketContracts():(address[])",
-      []
-    );
-    if (result.reverted) {
-      return new ethereum.CallResult();
-    }
-    let value = result.value;
-    return ethereum.CallResult.fromValue(value[0].toAddressArray());
-  }
-
   balanceOf(owner: Address): BigInt {
     let result = super.call("balanceOf", "balanceOf(address):(uint256)", [
       ethereum.Value.fromAddress(owner)
@@ -671,6 +735,38 @@ export class MarketContractProxy extends ethereum.SmartContract {
     }
     let value = result.value;
     return ethereum.CallResult.fromValue(value[0].toBigInt());
+  }
+
+  generateContractSpecs(currentMRI: BigInt, expiration: BigInt): Array<BigInt> {
+    let result = super.call(
+      "generateContractSpecs",
+      "generateContractSpecs(uint256,uint256):(uint256[7])",
+      [
+        ethereum.Value.fromUnsignedBigInt(currentMRI),
+        ethereum.Value.fromUnsignedBigInt(expiration)
+      ]
+    );
+
+    return result[0].toBigIntArray();
+  }
+
+  try_generateContractSpecs(
+    currentMRI: BigInt,
+    expiration: BigInt
+  ): ethereum.CallResult<Array<BigInt>> {
+    let result = super.tryCall(
+      "generateContractSpecs",
+      "generateContractSpecs(uint256,uint256):(uint256[7])",
+      [
+        ethereum.Value.fromUnsignedBigInt(currentMRI),
+        ethereum.Value.fromUnsignedBigInt(expiration)
+      ]
+    );
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toBigIntArray());
   }
 
   getUserAddressOrDSProxy(inputAddress: Address): Address {
@@ -719,77 +815,6 @@ export class MarketContractProxy extends ethereum.SmartContract {
     }
     let value = result.value;
     return ethereum.CallResult.fromValue(value[0].toAddress());
-  }
-
-  deployContract(
-    currentMRI: BigInt,
-    marketAndsTokenNames: Array<Bytes>,
-    expiration: BigInt
-  ): Address {
-    let result = super.call(
-      "deployContract",
-      "deployContract(uint256,bytes32[3],uint256):(address)",
-      [
-        ethereum.Value.fromUnsignedBigInt(currentMRI),
-        ethereum.Value.fromFixedBytesArray(marketAndsTokenNames),
-        ethereum.Value.fromUnsignedBigInt(expiration)
-      ]
-    );
-
-    return result[0].toAddress();
-  }
-
-  try_deployContract(
-    currentMRI: BigInt,
-    marketAndsTokenNames: Array<Bytes>,
-    expiration: BigInt
-  ): ethereum.CallResult<Address> {
-    let result = super.tryCall(
-      "deployContract",
-      "deployContract(uint256,bytes32[3],uint256):(address)",
-      [
-        ethereum.Value.fromUnsignedBigInt(currentMRI),
-        ethereum.Value.fromFixedBytesArray(marketAndsTokenNames),
-        ethereum.Value.fromUnsignedBigInt(expiration)
-      ]
-    );
-    if (result.reverted) {
-      return new ethereum.CallResult();
-    }
-    let value = result.value;
-    return ethereum.CallResult.fromValue(value[0].toAddress());
-  }
-
-  generateContractSpecs(currentMRI: BigInt, expiration: BigInt): Array<BigInt> {
-    let result = super.call(
-      "generateContractSpecs",
-      "generateContractSpecs(uint256,uint256):(uint256[7])",
-      [
-        ethereum.Value.fromUnsignedBigInt(currentMRI),
-        ethereum.Value.fromUnsignedBigInt(expiration)
-      ]
-    );
-
-    return result[0].toBigIntArray();
-  }
-
-  try_generateContractSpecs(
-    currentMRI: BigInt,
-    expiration: BigInt
-  ): ethereum.CallResult<Array<BigInt>> {
-    let result = super.tryCall(
-      "generateContractSpecs",
-      "generateContractSpecs(uint256,uint256):(uint256[7])",
-      [
-        ethereum.Value.fromUnsignedBigInt(currentMRI),
-        ethereum.Value.fromUnsignedBigInt(expiration)
-      ]
-    );
-    if (result.reverted) {
-      return new ethereum.CallResult();
-    }
-    let value = result.value;
-    return ethereum.CallResult.fromValue(value[0].toBigIntArray());
   }
 }
 
@@ -891,97 +916,93 @@ export class ConstructorCall__Outputs {
   }
 }
 
-export class GetAllMarketContractsCall extends ethereum.Call {
-  get inputs(): GetAllMarketContractsCall__Inputs {
-    return new GetAllMarketContractsCall__Inputs(this);
+export class SetOracleAddressCall extends ethereum.Call {
+  get inputs(): SetOracleAddressCall__Inputs {
+    return new SetOracleAddressCall__Inputs(this);
   }
 
-  get outputs(): GetAllMarketContractsCall__Outputs {
-    return new GetAllMarketContractsCall__Outputs(this);
-  }
-}
-
-export class GetAllMarketContractsCall__Inputs {
-  _call: GetAllMarketContractsCall;
-
-  constructor(call: GetAllMarketContractsCall) {
-    this._call = call;
+  get outputs(): SetOracleAddressCall__Outputs {
+    return new SetOracleAddressCall__Outputs(this);
   }
 }
 
-export class GetAllMarketContractsCall__Outputs {
-  _call: GetAllMarketContractsCall;
+export class SetOracleAddressCall__Inputs {
+  _call: SetOracleAddressCall;
 
-  constructor(call: GetAllMarketContractsCall) {
+  constructor(call: SetOracleAddressCall) {
     this._call = call;
   }
 
-  get value0(): Array<Address> {
-    return this._call.outputValues[0].value.toAddressArray();
-  }
-}
-
-export class BalanceOfCall extends ethereum.Call {
-  get inputs(): BalanceOfCall__Inputs {
-    return new BalanceOfCall__Inputs(this);
-  }
-
-  get outputs(): BalanceOfCall__Outputs {
-    return new BalanceOfCall__Outputs(this);
-  }
-}
-
-export class BalanceOfCall__Inputs {
-  _call: BalanceOfCall;
-
-  constructor(call: BalanceOfCall) {
-    this._call = call;
-  }
-
-  get owner(): Address {
+  get _honeyLemonOracleAddress(): Address {
     return this._call.inputValues[0].value.toAddress();
   }
 }
 
-export class BalanceOfCall__Outputs {
-  _call: BalanceOfCall;
+export class SetOracleAddressCall__Outputs {
+  _call: SetOracleAddressCall;
 
-  constructor(call: BalanceOfCall) {
-    this._call = call;
-  }
-
-  get value0(): BigInt {
-    return this._call.outputValues[0].value.toBigInt();
-  }
-}
-
-export class GetTimeCall extends ethereum.Call {
-  get inputs(): GetTimeCall__Inputs {
-    return new GetTimeCall__Inputs(this);
-  }
-
-  get outputs(): GetTimeCall__Outputs {
-    return new GetTimeCall__Outputs(this);
-  }
-}
-
-export class GetTimeCall__Inputs {
-  _call: GetTimeCall;
-
-  constructor(call: GetTimeCall) {
+  constructor(call: SetOracleAddressCall) {
     this._call = call;
   }
 }
 
-export class GetTimeCall__Outputs {
-  _call: GetTimeCall;
+export class SetMinterBridgeAddressCall extends ethereum.Call {
+  get inputs(): SetMinterBridgeAddressCall__Inputs {
+    return new SetMinterBridgeAddressCall__Inputs(this);
+  }
 
-  constructor(call: GetTimeCall) {
+  get outputs(): SetMinterBridgeAddressCall__Outputs {
+    return new SetMinterBridgeAddressCall__Outputs(this);
+  }
+}
+
+export class SetMinterBridgeAddressCall__Inputs {
+  _call: SetMinterBridgeAddressCall;
+
+  constructor(call: SetMinterBridgeAddressCall) {
     this._call = call;
   }
 
-  get value0(): BigInt {
-    return this._call.outputValues[0].value.toBigInt();
+  get _minterBridgeAddress(): Address {
+    return this._call.inputValues[0].value.toAddress();
+  }
+}
+
+export class SetMinterBridgeAddressCall__Outputs {
+  _call: SetMinterBridgeAddressCall;
+
+  constructor(call: SetMinterBridgeAddressCall) {
+    this._call = call;
+  }
+}
+
+export class SetMarketContractSpecsCall extends ethereum.Call {
+  get inputs(): SetMarketContractSpecsCall__Inputs {
+    return new SetMarketContractSpecsCall__Inputs(this);
+  }
+
+  get outputs(): SetMarketContractSpecsCall__Outputs {
+    return new SetMarketContractSpecsCall__Outputs(this);
+  }
+}
+
+export class SetMarketContractSpecsCall__Inputs {
+  _call: SetMarketContractSpecsCall;
+
+  constructor(call: SetMarketContractSpecsCall) {
+    this._call = call;
+  }
+
+  get _params(): Array<BigInt> {
+    return this._call.inputValues[0].value.toBigIntArray();
+  }
+}
+
+export class SetMarketContractSpecsCall__Outputs {
+  _call: SetMarketContractSpecsCall;
+
+  constructor(call: SetMarketContractSpecsCall) {
+    this._call = call;
   }
 }
 
@@ -1099,6 +1120,40 @@ export class DailySettlementCall__Outputs {
   }
 }
 
+export class SettleMarketContractCall extends ethereum.Call {
+  get inputs(): SettleMarketContractCall__Inputs {
+    return new SettleMarketContractCall__Inputs(this);
+  }
+
+  get outputs(): SettleMarketContractCall__Outputs {
+    return new SettleMarketContractCall__Outputs(this);
+  }
+}
+
+export class SettleMarketContractCall__Inputs {
+  _call: SettleMarketContractCall;
+
+  constructor(call: SettleMarketContractCall) {
+    this._call = call;
+  }
+
+  get mri(): BigInt {
+    return this._call.inputValues[0].value.toBigInt();
+  }
+
+  get marketContractAddress(): Address {
+    return this._call.inputValues[1].value.toAddress();
+  }
+}
+
+export class SettleMarketContractCall__Outputs {
+  _call: SettleMarketContractCall;
+
+  constructor(call: SettleMarketContractCall) {
+    this._call = call;
+  }
+}
+
 export class MintPositionTokensCall extends ethereum.Call {
   get inputs(): MintPositionTokensCall__Inputs {
     return new MintPositionTokensCall__Inputs(this);
@@ -1134,209 +1189,5 @@ export class MintPositionTokensCall__Outputs {
 
   constructor(call: MintPositionTokensCall) {
     this._call = call;
-  }
-}
-
-export class SetOracleAddressCall extends ethereum.Call {
-  get inputs(): SetOracleAddressCall__Inputs {
-    return new SetOracleAddressCall__Inputs(this);
-  }
-
-  get outputs(): SetOracleAddressCall__Outputs {
-    return new SetOracleAddressCall__Outputs(this);
-  }
-}
-
-export class SetOracleAddressCall__Inputs {
-  _call: SetOracleAddressCall;
-
-  constructor(call: SetOracleAddressCall) {
-    this._call = call;
-  }
-
-  get _honeyLemonOracleAddress(): Address {
-    return this._call.inputValues[0].value.toAddress();
-  }
-}
-
-export class SetOracleAddressCall__Outputs {
-  _call: SetOracleAddressCall;
-
-  constructor(call: SetOracleAddressCall) {
-    this._call = call;
-  }
-}
-
-export class SetMinterBridgeAddressCall extends ethereum.Call {
-  get inputs(): SetMinterBridgeAddressCall__Inputs {
-    return new SetMinterBridgeAddressCall__Inputs(this);
-  }
-
-  get outputs(): SetMinterBridgeAddressCall__Outputs {
-    return new SetMinterBridgeAddressCall__Outputs(this);
-  }
-}
-
-export class SetMinterBridgeAddressCall__Inputs {
-  _call: SetMinterBridgeAddressCall;
-
-  constructor(call: SetMinterBridgeAddressCall) {
-    this._call = call;
-  }
-
-  get _minterBridgeAddress(): Address {
-    return this._call.inputValues[0].value.toAddress();
-  }
-}
-
-export class SetMinterBridgeAddressCall__Outputs {
-  _call: SetMinterBridgeAddressCall;
-
-  constructor(call: SetMinterBridgeAddressCall) {
-    this._call = call;
-  }
-}
-
-export class SetMarketContractSpecsCall extends ethereum.Call {
-  get inputs(): SetMarketContractSpecsCall__Inputs {
-    return new SetMarketContractSpecsCall__Inputs(this);
-  }
-
-  get outputs(): SetMarketContractSpecsCall__Outputs {
-    return new SetMarketContractSpecsCall__Outputs(this);
-  }
-}
-
-export class SetMarketContractSpecsCall__Inputs {
-  _call: SetMarketContractSpecsCall;
-
-  constructor(call: SetMarketContractSpecsCall) {
-    this._call = call;
-  }
-
-  get _params(): Array<BigInt> {
-    return this._call.inputValues[0].value.toBigIntArray();
-  }
-}
-
-export class SetMarketContractSpecsCall__Outputs {
-  _call: SetMarketContractSpecsCall;
-
-  constructor(call: SetMarketContractSpecsCall) {
-    this._call = call;
-  }
-}
-
-export class SettleMarketContractCall extends ethereum.Call {
-  get inputs(): SettleMarketContractCall__Inputs {
-    return new SettleMarketContractCall__Inputs(this);
-  }
-
-  get outputs(): SettleMarketContractCall__Outputs {
-    return new SettleMarketContractCall__Outputs(this);
-  }
-}
-
-export class SettleMarketContractCall__Inputs {
-  _call: SettleMarketContractCall;
-
-  constructor(call: SettleMarketContractCall) {
-    this._call = call;
-  }
-
-  get mri(): BigInt {
-    return this._call.inputValues[0].value.toBigInt();
-  }
-
-  get marketContractAddress(): Address {
-    return this._call.inputValues[1].value.toAddress();
-  }
-}
-
-export class SettleMarketContractCall__Outputs {
-  _call: SettleMarketContractCall;
-
-  constructor(call: SettleMarketContractCall) {
-    this._call = call;
-  }
-}
-
-export class DeployContractCall extends ethereum.Call {
-  get inputs(): DeployContractCall__Inputs {
-    return new DeployContractCall__Inputs(this);
-  }
-
-  get outputs(): DeployContractCall__Outputs {
-    return new DeployContractCall__Outputs(this);
-  }
-}
-
-export class DeployContractCall__Inputs {
-  _call: DeployContractCall;
-
-  constructor(call: DeployContractCall) {
-    this._call = call;
-  }
-
-  get currentMRI(): BigInt {
-    return this._call.inputValues[0].value.toBigInt();
-  }
-
-  get marketAndsTokenNames(): Array<Bytes> {
-    return this._call.inputValues[1].value.toBytesArray();
-  }
-
-  get expiration(): BigInt {
-    return this._call.inputValues[2].value.toBigInt();
-  }
-}
-
-export class DeployContractCall__Outputs {
-  _call: DeployContractCall;
-
-  constructor(call: DeployContractCall) {
-    this._call = call;
-  }
-
-  get value0(): Address {
-    return this._call.outputValues[0].value.toAddress();
-  }
-}
-
-export class GenerateContractSpecsCall extends ethereum.Call {
-  get inputs(): GenerateContractSpecsCall__Inputs {
-    return new GenerateContractSpecsCall__Inputs(this);
-  }
-
-  get outputs(): GenerateContractSpecsCall__Outputs {
-    return new GenerateContractSpecsCall__Outputs(this);
-  }
-}
-
-export class GenerateContractSpecsCall__Inputs {
-  _call: GenerateContractSpecsCall;
-
-  constructor(call: GenerateContractSpecsCall) {
-    this._call = call;
-  }
-
-  get currentMRI(): BigInt {
-    return this._call.inputValues[0].value.toBigInt();
-  }
-
-  get expiration(): BigInt {
-    return this._call.inputValues[1].value.toBigInt();
-  }
-}
-
-export class GenerateContractSpecsCall__Outputs {
-  _call: GenerateContractSpecsCall;
-
-  constructor(call: GenerateContractSpecsCall) {
-    this._call = call;
-  }
-
-  get value0(): Array<BigInt> {
-    return this._call.outputValues[0].value.toBigIntArray();
   }
 }

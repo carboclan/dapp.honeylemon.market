@@ -13,7 +13,7 @@ const MarketContractMPX = artifacts.require('MarketContractMPX');
 const PositionToken = artifacts.require('PositionToken'); // Long & Short tokens
 const MarketCollateralPool = artifacts.require('MarketCollateralPool');
 
-const { HoneylemonService, CONTRACTS_QUERY } = require('../../src/lib/HoneylemonService');
+const { HoneylemonService, POSITIONS_QUERY } = require('../../src/lib/HoneylemonService');
 const { revertToSnapShot, takeSnapshot } = require('../helpers/snapshot');
 
 const web3Wrapper = new Web3Wrapper(web3.currentProvider);
@@ -81,7 +81,7 @@ before(async function() {
 
   // Create Todays market protocol contract
   await marketContractProxy.dailySettlement(
-    0, // lookback index
+    currentMRIScaled.multipliedBy(28).toString(), // lookback index
     currentMRIScaled.toString(), // current index value
     [
       web3.utils.utf8ToHex('MRI-BTC-28D-20200501'),
@@ -192,26 +192,26 @@ const stubSubgraph = async () => {
   const subgraphStub = sinon.stub(honeylemonService.subgraphClient, 'request');
   // as maker
   subgraphStub
-    .withArgs(CONTRACTS_QUERY, sinon.match({ address: makerAddress.toLowerCase() }))
+    .withArgs(POSITIONS_QUERY, sinon.match({ address: makerAddress.toLowerCase() }))
     .returns({
       user: {
-        contractsAsMaker: [
+        positionsAsMaker: [
           createContract("0", "1"),
           createContract("0", "2"),
           createContract("0", "3"),
           createContract("1", "2")
         ],
-        contractsAsTaker: []
+        positionsAsTaker: []
       }
     });
 
   // as taker
   subgraphStub
-    .withArgs(CONTRACTS_QUERY, sinon.match({ address: takerAddress.toLowerCase() }))
+    .withArgs(POSITIONS_QUERY, sinon.match({ address: takerAddress.toLowerCase() }))
     .returns({
       user: {
-        contractsAsMaker: [],
-        contractsAsTaker: [
+        positionsAsMaker: [],
+        positionsAsTaker: [
           createContract("0", "1"),
           createContract("0", "2"),
           createContract("0", "3"),
@@ -454,11 +454,11 @@ contract('HoneylemonService', () => {
     await fill0xOrderForAddresses(2, takerAddress, makerAddress);
 
     // Get contracts object from HoneyLemonService
-    const { longContracts, shortContracts } = await honeylemonService.getContracts(
+    const { longPositions, shortPositions } = await honeylemonService.getPositions(
       takerAddress
     );
 
-    const { longContracts: longContracts2, shortContracts: shortContracts2 } = await honeylemonService.getContracts(
+    const { longPositions: longPositions2, shortPositions: shortPositions2 } = await honeylemonService.getPositions(
       makerAddress
     );
 

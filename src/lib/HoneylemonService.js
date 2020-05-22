@@ -370,41 +370,37 @@ class HoneylemonService {
       .call();
   }
 
-  async getContracts(address) {
+  async getPositions(address) {
     address = address.toLowerCase();
-    const data = await this.subgraphClient.request(CONTRACTS_QUERY, { address });
+    const data = await this.subgraphClient.request(POSITIONS_QUERY, { address });
     if (!data.user) return {
-      longContracts: [],
-      shortContracts: []
+      longPositions: [],
+      shortPositions: []
     }
 
     // TODO: additional processing, calculate total price by iterating over fills
-    const shortContractsProcessed = await this._processContractsData(data.user.contractsAsMaker, true);
-    const longContractsProcessed = await this._processContractsData(data.user.contractsAsTaker, false);
+    const shortPositionsProcessed = await this._processPositionsData(data.user.positionsAsMaker, true);
+    const longPositionsProcessed = await this._processPositionsData(data.user.positionsAsTaker, false);
 
     return {
-      longContracts: longContractsProcessed,
-      shortContracts: shortContractsProcessed
+      longPositions: longPositionsProcessed,
+      shortPositions: shortPositionsProcessed
     };
   }
 
-  async _processContractsData(data, short) {
-    const collateralsToReturns = await this.marketContractProxy.methods
-      .calculateCollateralToReturnForAll(short)
-      .call();
-
+  async _processPositionsData(data, short) {
     for (let i = 0; i < data.length; i++) {
-      const contract = data[i];
+      const position = data[i];
 
       // price
       let totalMakerAssetFilledAmount = new BigNumber(0);
       let totalTakerAssetFilledAmount = new BigNumber(0);
-      for (let j = 0; j < contract.transaction.fills.length; j++) {
+      for (let j = 0; j < position.transaction.fills.length; j++) {
         const makerAssetFilledAmount = new BigNumber(
-          contract.transaction.fills[j].makerAssetFilledAmount
+          position.transaction.fills[j].makerAssetFilledAmount
         );
         const takerAssetFilledAmount = new BigNumber(
-          contract.transaction.fills[j].takerAssetFilledAmount
+          position.transaction.fills[j].takerAssetFilledAmount
         );
         totalMakerAssetFilledAmount = totalMakerAssetFilledAmount.plus(
           makerAssetFilledAmount
@@ -413,13 +409,20 @@ class HoneylemonService {
           takerAssetFilledAmount
         );
       }
-      contract.price = totalTakerAssetFilledAmount
+      position.price = totalTakerAssetFilledAmount
         .dividedBy(totalMakerAssetFilledAmount)
         .shiftedBy(SHIFT_PRICE_BY);
 
       // Collateral to return
-      contract.collateralToReturn = new BigNumber(collateralsToReturns[parseInt(contract.marketId)])
-        .multipliedBy(contract.qtyToMint);
+      position.collateralToReturn = 0;
+      // For now only calculate this for settled contracts
+      if (position.contract.settlement) {
+        const collateralPerUnit = new BigNumber(position.contract.collateralPerUnit);
+        const revenuePerUnit = new BigNumber(position.contract.settlement.revenuePerUnit);
+        const returnPerUnit = short ? collateralPerUnit.minus(revenuePerUnit) : revenuePerUnit;
+        position.collateralToReturn = returnPerUnit.multipliedBy(position.qtyToMint);
+      }
+      // TODO: calculate pending rewards
     }
 
     return data;
@@ -430,14 +433,22 @@ class HoneylemonService {
   }
 }
 
-const CONTRACTS_QUERY = /* GraphQL */ `
-  fragment ContractFragment on Contract {
+const POSITIONS_QUERY = /* GraphQL */ `
+  fragment PositionFragment on Position {
     id
     createdAt
     marketId
     contractName
     qtyToMint
-    latestMarketContract
+    contract {
+      id
+      index
+      expiration
+      collateralPerUnit
+      settlement {
+        revenuePerUnit
+      }
+    }
     time
     contractName
     longTokenAddress
@@ -461,14 +472,27 @@ const CONTRACTS_QUERY = /* GraphQL */ `
 
   query($address: ID!) {
     user(id: $address) {
-      contractsAsMaker {
-        ...ContractFragment
+      positionsAsMaker {
+        ...PositionFragment
       }
-      contractsAsTaker {
-        ...ContractFragment
+      positionsAsTaker {
+        ...PositionFragment
       }
     }
   }
 `;
 
-module.exports =  { HoneylemonService, PAYMENT_TOKEN_DECIMALS, COLLATERAL_TOKEN_DECIMALS, CONTRACTS_QUERY };
+const CONTRACTS_QUERY = /* GraphQL */ `
+  query($last: Int!) {
+    contracts(orderBy: id, orderDirection: desc, first: $last) {
+      id
+      createdAt
+      currentMRI
+      contractName
+      index
+      collateralPerUnit
+    }
+  }
+`;
+
+module.exports =  { HoneylemonService, PAYMENT_TOKEN_DECIMALS, COLLATERAL_TOKEN_DECIMALS, POSITIONS_QUERY };

@@ -6,10 +6,11 @@ import {
 } from './types/ExchangeV3/ExchangeV3';
 import {
     PositionTokensMinted as PositionTokensMintedEvent,
-    PositionTokensMinted__Params,
+    MarketContractDeployed as MarketContractDeployedEvent,
+    MarketContractSettled as MarketContractSettledEvent,
 } from './types/MarketContractProxy/MarketContractProxy';
-import { Order, User, CancelledOrder, Fill, Transaction, Contract } from './types/schema';
-import { Bytes, ethereum } from '@graphprotocol/graph-ts';
+import { Order, User, CancelledOrder, Fill, Transaction, Position, Contract, ContractSettlement } from './types/schema';
+import { Bytes, ethereum, BigInt } from '@graphprotocol/graph-ts';
 
 function _findOrCreateUser(addressHex: string): User {
     let user = User.load(addressHex);
@@ -85,26 +86,49 @@ export function handleCancel(event: CancelEvent): void {
     let id = event.params.orderHash.toHex();
 }
 
-function _createContract(event: PositionTokensMintedEvent): Contract {
+function _createPosition(event: PositionTokensMintedEvent): Position {
     let id = event.params.marketId
         .toString()
         .concat('-')
         .concat(event.transaction.hash.toHex())
         .concat('-')
         .concat(event.logIndex.toString());
-    let contract = new Contract(id);
+    let position = new Position(id);
     let params = event.params;
-    contract.marketId = params.marketId;
-    contract.contractName = params.contractName.substr(0, params.contractName.indexOf('\0'));
-    contract.longTokenRecipient = params.longTokenRecipient.toHex();
-    contract.shortTokenRecipient = params.shortTokenRecipient.toHex();
-    contract.longTokenDSProxy = params.longTokenDSProxy;
-    contract.shortTokenDSProxy = params.shortTokenDSProxy;
-    contract.qtyToMint = params.qtyToMint;
-    contract.latestMarketContract = params.latestMarketContract;
-    contract.longTokenAddress = params.longTokenAddress;
-    contract.shortTokenAddress = params.shortTokenAddress;
-    contract.time = params.time;
+    position.marketId = params.marketId;
+    position.contractName = params.contractName.substr(0, params.contractName.indexOf('\0'));
+    position.longTokenRecipient = params.longTokenRecipient.toHex();
+    position.shortTokenRecipient = params.shortTokenRecipient.toHex();
+    position.longTokenDSProxy = params.longTokenDSProxy;
+    position.shortTokenDSProxy = params.shortTokenDSProxy;
+    position.qtyToMint = params.qtyToMint;
+    position.contract = params.latestMarketContract.toHexString();
+    position.longTokenAddress = params.longTokenAddress;
+    position.shortTokenAddress = params.shortTokenAddress;
+    position.time = params.time;
+    position.transaction = event.transaction.hash.toHex();
+    position.transactionHash = event.transaction.hash.toHex();
+    position.createdAt = event.block.number;
+    position.save();
+    return position;
+}
+
+export function handlePositionTokensMinted(event: PositionTokensMintedEvent): void {
+    let maker = _findOrCreateUser(event.params.shortTokenRecipient.toHex());
+    let taker = _findOrCreateUser(event.params.longTokenRecipient.toHex());
+    let position = _createPosition(event);
+    let transaction = _createTransaction(event);
+}
+
+function _createContract(event: MarketContractDeployedEvent): Contract {
+    let id = event.params.contractAddress;
+    let contract = new Contract(id.toHexString());
+    let params = event.params;
+    contract.currentMRI = params.currentMRI;
+    contract.contractName = params.contractName.toString();
+    contract.expiration = params.expiration;
+    contract.index = params.index;
+    contract.collateralPerUnit = params.collateralPerUnit;
     contract.transaction = event.transaction.hash.toHex();
     contract.transactionHash = event.transaction.hash.toHex();
     contract.createdAt = event.block.number;
@@ -112,9 +136,23 @@ function _createContract(event: PositionTokensMintedEvent): Contract {
     return contract;
 }
 
-export function handlePositionTokensMinted(event: PositionTokensMintedEvent): void {
-    let maker = _findOrCreateUser(event.params.shortTokenRecipient.toHex());
-    let taker = _findOrCreateUser(event.params.longTokenRecipient.toHex());
-    let positionTokensMinted = _createContract(event);
+export function handleMarketContractDeployed(event: MarketContractDeployedEvent): void {
+    let contract = _createContract(event);
     let transaction = _createTransaction(event);
+}
+
+function _createContractSettlement(event: MarketContractSettledEvent): ContractSettlement {
+    let id = event.params.contractAddress;
+    let contractSettlement = new ContractSettlement(id.toHexString());
+    let params = event.params;
+    contractSettlement.revenuePerUnit = params.revenuePerUnit;
+    contractSettlement.index = params.index;
+    contractSettlement.contract = id.toHexString();
+    contractSettlement.createdAt = event.block.number;
+    contractSettlement.save();
+    return contractSettlement;
+}
+
+export function handleMarketContractSettled(event: MarketContractSettledEvent): void {
+    let contractSettlement = _createContractSettlement(event);
 }

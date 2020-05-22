@@ -105,13 +105,19 @@ contract MarketContractProxy is Ownable {
         uint time
     );
 
-    event MarketContractSettled(address indexed marketContractAddress, uint mri);
+    event MarketContractSettled(
+        address indexed contractAddress,
+        uint revenuePerUnit,
+        uint index
+    );
 
     event MarketContractDeployed(
-        uint currentMIR,
-        bytes32 indexed contractName,
-        uint indexed expiration,
-        uint indexed index
+        uint currentMRI,
+        bytes32 contractName,
+        uint expiration,
+        uint indexed index,
+        address contractAddress,
+        uint collateralPerUnit
     );
 
     event dSProxyCreated(address owner, address DSProxy);
@@ -290,30 +296,6 @@ contract MarketContractProxy is Ownable {
     function calculateRequiredCollateral(uint amount) public view returns (uint) {
         MarketContractMPX latestMarketContract = getLatestMarketContract();
         return MathLib.multiply(amount, latestMarketContract.COLLATERAL_PER_UNIT());
-    }
-
-    /**
-     * @notice calculate collateral to return for all contracts
-     * @param short true for short contracts, false for long contracts
-     * @return array of collateral to return
-     */
-    function calculateCollateralToReturnForAll(bool short) public view returns(uint[] memory collateralsToReturn) {
-        uint256 length = marketContracts.length;
-        collateralsToReturn = new uint[](length);
-
-        for (uint i = 0; i < length; i++) {
-            MarketContractMPX marketContract = MarketContractMPX(marketContracts[i]);
-            collateralsToReturn[i] = MathLib.calculateCollateralToReturn(
-                marketContract.PRICE_FLOOR(),
-                marketContract.PRICE_CAP(),
-                marketContract.QTY_MULTIPLIER(),
-                short ? 0 : 1,
-                short ? 1 : 0,
-                marketContract.settlementPrice()
-            );
-        }
-
-        return collateralsToReturn;
     }
 
     /**
@@ -508,7 +490,7 @@ contract MarketContractProxy is Ownable {
         // Store the most recent mri value to use in fillable amount
         latestMri = mri;
 
-        emit MarketContractSettled(marketContractAddress, mri);
+        emit MarketContractSettled(marketContractAddress, mri, marketContracts.length);
     }
 
     ///////////////////////////////////////////////
@@ -608,11 +590,14 @@ contract MarketContractProxy is Ownable {
         // Add new market to storage
         uint index = marketContracts.push(contractAddress) - 1;
         addressToMarketId[contractAddress] = index;
+        MarketContractMPX marketContract = MarketContractMPX(contractAddress);
         emit MarketContractDeployed(
             currentMRI,
             marketAndsTokenNames[0],
             expiration,
-            index
+            index,
+            contractAddress,
+            marketContract.COLLATERAL_PER_UNIT()
         );
         return (contractAddress);
     }
