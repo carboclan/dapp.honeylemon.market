@@ -7,6 +7,8 @@ const MarketCollateralPool = artifacts.require('./MarketCollateralPool.sol');
 const MarketContractRegistry = artifacts.require('./MarketContractRegistry.sol');
 
 module.exports = async function(deployer, network, accounts) {
+  if (network == "skip-migrations") return;
+
   if (network !== 'live') {
     const gasLimit = (await web3.eth.getBlock('latest')).gasLimit;
 

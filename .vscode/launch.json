@@ -38,6 +38,21 @@
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
       "disableOptimisticBPs": true
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "(skip-migrations) Test Current File",
+      "program": "${workspaceRoot}/node_modules/truffle/build/cli.bundled.js",
+      "args": [
+        "test",
+        "${relativeFile}",
+        "--network",
+        "skip-migrations"
+      ],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "disableOptimisticBPs": true
     }
   ]
 }

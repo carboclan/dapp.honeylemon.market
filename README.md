@@ -1,9 +1,9 @@
 ## Local development
 
 Useful commands:
-* `make local-start` - to start docker containers and deploy all contracts. Sometimes you'd have to manually restart the `docker_api` container after, in case mesh didn't fully initialize before the api was started.
-* `make local-reset` - to clean all data and restart docker containers
+* `make local-reset` - to clean all data and start/restart docker containers
 * `make deploy-daily-contract` - to deploy current day contract.
+* `truffle test --network skip-migrations test/honeylemon/HoneylemonService.test.js` - running tests without triggering migrations (useful for testing subgraph integration)
 
 API URL: http://localhost:3000/sra/v3/
 

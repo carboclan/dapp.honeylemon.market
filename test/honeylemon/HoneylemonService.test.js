@@ -64,7 +64,7 @@ before(async function() {
   await stubOrders();
 
   // Stub subgraph
-  await stubSubgraph();
+  // await stubSubgraph();
 
   // Starting MRI value
   mriInput = 0.00001833;
@@ -430,7 +430,7 @@ contract('HoneylemonService', () => {
     assert.equal(absoluteDriftError.lt(new BigNumber(0.001)), true);
   });
 
-  it.only('Retrieve open contracts', async () => {
+  it('Retrieve open contracts', async () => {
     const { result: snapshotId } = await takeSnapshot();
 
     // Create positions for long and short token holder
@@ -461,6 +461,8 @@ contract('HoneylemonService', () => {
     const { longContracts: longContracts2, shortContracts: shortContracts2 } = await honeylemonService.getContracts(
       makerAddress
     );
+
+    // TODO: validate contracts and collateralToReturn
 
     console.log(`Reverting to snapshot ${snapshotId}`);
     await revertToSnapShot(snapshotId);
