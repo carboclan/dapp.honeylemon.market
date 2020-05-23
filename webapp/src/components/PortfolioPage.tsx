@@ -115,10 +115,10 @@ const PorfolioPage: React.SFC = () => {
         })));
 
         setActiveContracts(allContracts.filter((c: any) => c.daysToMaturity > 0));
-        const sctw = allContracts.filter((c: any) => c.daysToMaturity <= 0 && c?.withdrawalAmount > 0)
+        const sctw = allContracts.filter((c: any) => c.daysToMaturity <= 0 && c?.finalReward > 0)
         setSettledContractsToWithdraw(sctw);
-        setCollateralForWithdraw(sctw.reduce((total: any, contract: any) => total += contract?.withdrawalAmount, 0))
-        setSettledContracts(allContracts.filter((c: any) => c.daysToMaturity <= 0 && c?.withdrawalAmount === 0))
+        setCollateralForWithdraw(sctw.reduce((total: any, contract: any) => total += contract?.finalReward, 0))
+        setSettledContracts(allContracts.filter((c: any) => c.daysToMaturity <= 0 && c?.finalReward === 0))
         setRefresh(false);
       }
     }

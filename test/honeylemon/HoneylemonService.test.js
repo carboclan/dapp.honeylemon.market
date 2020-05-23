@@ -13,8 +13,9 @@ const MarketContractMPX = artifacts.require('MarketContractMPX');
 const PositionToken = artifacts.require('PositionToken'); // Long & Short tokens
 const MarketCollateralPool = artifacts.require('MarketCollateralPool');
 
-const { HoneylemonService, POSITIONS_QUERY } = require('../../src/lib/HoneylemonService');
+const { HoneylemonService, POSITIONS_QUERY, CONTRACTS_QUERY } = require('../../src/lib/HoneylemonService');
 const { revertToSnapShot, takeSnapshot } = require('../helpers/snapshot');
+const delay = require('../helpers/delay');
 
 const web3Wrapper = new Web3Wrapper(web3.currentProvider);
 
@@ -35,7 +36,9 @@ let accounts = null,
   mriInput = null,
   currentMRIScaled = null,
   // tested service
-  honeylemonService = null;
+  honeylemonService = null,
+  // stubs
+  subgraphStub = null;
 
 before(async function() {
   accounts = await web3Wrapper.getAvailableAddressesAsync();
@@ -64,7 +67,7 @@ before(async function() {
   await stubOrders();
 
   // Stub subgraph
-  // await stubSubgraph();
+  // subgraphStub = sinon.stub(honeylemonService.subgraphClient, 'request')
 
   // Starting MRI value
   mriInput = 0.00001833;
@@ -157,68 +160,21 @@ const stubOrders = async () => {
   });
 }
 
-const createContract = (marketId, qtyToMint) => {
-  return {
-    "contractName": "MRI-BTC-28D-20200501",
-    "createdAt": "85",
-    "id": "0-0x83de191d42df02849c3fa4d1b05428a96dc005c7a53673a8dff9fb6140207820-16",
-    "latestMarketContract": "0x173be3b7f6a7f5db49dc90fb47c5a3c08ae3026f",
-    "longTokenAddress": "0x01606f7913b0417e4e81fe84589371216faa9e95",
-    "longTokenDSProxy": "0xe36ea790bc9d7ab70c55260c66d52b1eca985f84",
-    "longTokenRecipient": {
-      "id": "0xe36ea790bc9d7ab70c55260c66d52b1eca985f84"
-    },
-    "marketId": marketId,
-    "qtyToMint": qtyToMint,
-    "shortTokenAddress": "0x57ff2298fea9066efff1505f14b4b0bdad5c8342",
-    "shortTokenDSProxy": "0x6ecbe1db9ef729cbe972c83fb886247691fb6beb",
-    "shortTokenRecipient": {
-      "id": "0x6ecbe1db9ef729cbe972c83fb886247691fb6beb"
-    },
-    "time": "1590014756",
-    "transaction": {
-      "blockNumber": "85",
-      "fills": [
-        {
-          "makerAssetFilledAmount": "54",
-          "takerAssetFilledAmount": "9990000"
-        }
-      ]
-    }
-  };
+const stubPositions = (positionsAsMaker, positionsAsTaker, address) => {
+  subgraphStub
+    .withArgs(POSITIONS_QUERY, sinon.match({ address: address.toLowerCase() }))
+    .returns({
+      user: {
+        positionsAsMaker,
+        positionsAsTaker
+      }
+    });
 }
 
-const stubSubgraph = async () => {
-  const subgraphStub = sinon.stub(honeylemonService.subgraphClient, 'request');
-  // as maker
+const stubContracts = (contracts, last = 28) => {
   subgraphStub
-    .withArgs(POSITIONS_QUERY, sinon.match({ address: makerAddress.toLowerCase() }))
-    .returns({
-      user: {
-        positionsAsMaker: [
-          createContract("0", "1"),
-          createContract("0", "2"),
-          createContract("0", "3"),
-          createContract("1", "2")
-        ],
-        positionsAsTaker: []
-      }
-    });
-
-  // as taker
-  subgraphStub
-    .withArgs(POSITIONS_QUERY, sinon.match({ address: takerAddress.toLowerCase() }))
-    .returns({
-      user: {
-        positionsAsMaker: [],
-        positionsAsTaker: [
-          createContract("0", "1"),
-          createContract("0", "2"),
-          createContract("0", "3"),
-          createContract("1", "2")
-        ]
-      }
-    });
+    .withArgs(CONTRACTS_QUERY, sinon.match({ last }))
+    .returns({ contracts });
 }
 
 contract('HoneylemonService', () => {
@@ -439,19 +395,22 @@ contract('HoneylemonService', () => {
     // Create two contracts. taker participates as a taker in both. Maker is only involved
     // in the first contract.
     await fill0xOrderForAddresses(1, takerAddress, makerAddress);
-    // await time.increase(10); // increase by 10 seconds to signify 1 day
     await fill0xOrderForAddresses(2, takerAddress, makerAddress);
-    // await time.increase(10); // increase by 10 seconds to signify 1 day
     await fill0xOrderForAddresses(3, takerAddress, makerAddress);
 
     // fast forward 28 days
     await time.increase(28 * 24 * 60 * 60 + 1);
     // we need to deploy 28 times in order to be able to settle
     await Promise.all(Array.from({ length: 28 }, (x, i) => {
-      return createNewMarketProtocolContract(mriInput * 28, mriInput, 'MRI-BTC-28D-20200502');
+      return createNewMarketProtocolContract(mriInput * 28, mriInput, 'MRI-BTC-28D-test');
     }));
 
-    await fill0xOrderForAddresses(2, takerAddress, makerAddress);
+    await fill0xOrderForAddresses(4, takerAddress, makerAddress);
+    await createNewMarketProtocolContract(mriInput * 28, mriInput, 'MRI-BTC-28D-test');
+    await fill0xOrderForAddresses(5, takerAddress, makerAddress);
+
+    // Wait for subgraph to index the events
+    await delay(3000);
 
     // Get contracts object from HoneyLemonService
     const { longPositions, shortPositions } = await honeylemonService.getPositions(
@@ -462,7 +421,27 @@ contract('HoneylemonService', () => {
       makerAddress
     );
 
-    // TODO: validate contracts and collateralToReturn
+    // Validate positions
+    expect(longPositions.length).to.eq(5);
+    expect(shortPositions.length).to.eq(0);
+    expect(longPositions2.length).to.eq(0);
+    expect(shortPositions2.length).to.eq(5);
+
+    // Expired contract
+    expect(longPositions[0].finalReward).to.eql(new BigNumber(51324));
+    expect(shortPositions2[0].finalReward).to.eql(new BigNumber(17963));
+
+    // Active contract
+    expect(longPositions[3].pendingReward).to.eql(new BigNumber(7332));
+    expect(shortPositions2[3].pendingReward).to.eql(new BigNumber(269816));
+    expect(longPositions[3].finalReward).to.eql(new BigNumber(0));
+    expect(shortPositions2[3].finalReward).to.eql(new BigNumber(0));
+
+    // New contract
+    expect(longPositions[4].pendingReward).to.eql(new BigNumber(0));
+    expect(shortPositions2[4].pendingReward).to.eql(new BigNumber(346435));
+    expect(longPositions[4].finalReward).to.eql(new BigNumber(0));
+    expect(shortPositions2[4].finalReward).to.eql(new BigNumber(0));
 
     console.log(`Reverting to snapshot ${snapshotId}`);
     await revertToSnapShot(snapshotId);

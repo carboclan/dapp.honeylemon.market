@@ -378,9 +378,11 @@ class HoneylemonService {
       shortPositions: []
     }
 
+    const contracts = await this.getContracts(28);
+
     // TODO: additional processing, calculate total price by iterating over fills
-    const shortPositionsProcessed = await this._processPositionsData(data.user.positionsAsMaker, true);
-    const longPositionsProcessed = await this._processPositionsData(data.user.positionsAsTaker, false);
+    const shortPositionsProcessed = await this._processPositionsData(data.user.positionsAsMaker, contracts, true);
+    const longPositionsProcessed = await this._processPositionsData(data.user.positionsAsTaker, contracts, false);
 
     return {
       longPositions: longPositionsProcessed,
@@ -388,9 +390,9 @@ class HoneylemonService {
     };
   }
 
-  async _processPositionsData(data, short) {
-    for (let i = 0; i < data.length; i++) {
-      const position = data[i];
+  async _processPositionsData(positions, contracts, short) {
+    for (let i = 0; i < positions.length; i++) {
+      const position = positions[i];
 
       // price
       let totalMakerAssetFilledAmount = new BigNumber(0);
@@ -413,19 +415,30 @@ class HoneylemonService {
         .dividedBy(totalMakerAssetFilledAmount)
         .shiftedBy(SHIFT_PRICE_BY);
 
-      // Collateral to return
-      position.collateralToReturn = 0;
-      // For now only calculate this for settled contracts
+      // final rewards
+      const collateralPerUnit = new BigNumber(position.contract.collateralPerUnit);
+      position.finalReward = new BigNumber(0);
       if (position.contract.settlement) {
-        const collateralPerUnit = new BigNumber(position.contract.collateralPerUnit);
         const revenuePerUnit = new BigNumber(position.contract.settlement.revenuePerUnit);
         const returnPerUnit = short ? collateralPerUnit.minus(revenuePerUnit) : revenuePerUnit;
-        position.collateralToReturn = returnPerUnit.multipliedBy(position.qtyToMint);
+        position.finalReward = returnPerUnit.multipliedBy(position.qtyToMint);
+        position.pendingReward = position.finalReward;
+      } else {
+        // pending rewards
+        let pendingRewardPerUnit = contracts
+          .filter(c => parseInt(c.index) > parseInt(position.marketId))
+          .reduce((sum, c) => sum.plus(c.currentMRI), new BigNumber(0));
+        if (short) pendingRewardPerUnit = collateralPerUnit.minus(pendingRewardPerUnit);
+        position.pendingReward = pendingRewardPerUnit.multipliedBy(position.qtyToMint);
       }
-      // TODO: calculate pending rewards
     }
 
-    return data;
+    return positions;
+  }
+
+  async getContracts(last = 28) {
+    const { contracts } = await this.subgraphClient.request(CONTRACTS_QUERY, { last });
+    return contracts;
   }
 
   async redeemContract(someContractIdentifier, address) {
@@ -472,10 +485,10 @@ const POSITIONS_QUERY = /* GraphQL */ `
 
   query($address: ID!) {
     user(id: $address) {
-      positionsAsMaker {
+      positionsAsMaker(orderBy: createdAt) {
         ...PositionFragment
       }
-      positionsAsTaker {
+      positionsAsTaker(orderBy: createdAt) {
         ...PositionFragment
       }
     }
@@ -484,7 +497,7 @@ const POSITIONS_QUERY = /* GraphQL */ `
 
 const CONTRACTS_QUERY = /* GraphQL */ `
   query($last: Int!) {
-    contracts(orderBy: id, orderDirection: desc, first: $last) {
+    contracts(orderBy: index, orderDirection: desc, first: $last) {
       id
       createdAt
       currentMRI
@@ -495,4 +508,4 @@ const CONTRACTS_QUERY = /* GraphQL */ `
   }
 `;
 
-module.exports =  { HoneylemonService, PAYMENT_TOKEN_DECIMALS, COLLATERAL_TOKEN_DECIMALS, POSITIONS_QUERY };
+module.exports =  { HoneylemonService, PAYMENT_TOKEN_DECIMALS, COLLATERAL_TOKEN_DECIMALS, POSITIONS_QUERY, CONTRACTS_QUERY };
