@@ -13,7 +13,9 @@ const MarketContractMPX = artifacts.require('MarketContractMPX');
 const PositionToken = artifacts.require('PositionToken'); // Long & Short tokens
 const MarketCollateralPool = artifacts.require('MarketCollateralPool');
 
-const HoneylemonService = require('../../src/lib/HoneylemonService');
+const { HoneylemonService, POSITIONS_QUERY, CONTRACTS_QUERY } = require('../../src/lib/HoneylemonService');
+const { revertToSnapShot, takeSnapshot } = require('../helpers/snapshot');
+const delay = require('../helpers/delay');
 
 const web3Wrapper = new Web3Wrapper(web3.currentProvider);
 
@@ -34,7 +36,9 @@ let accounts = null,
   mriInput = null,
   currentMRIScaled = null,
   // tested service
-  honeylemonService = null;
+  honeylemonService = null,
+  // stubs
+  subgraphStub = null;
 
 before(async function() {
   accounts = await web3Wrapper.getAvailableAddressesAsync();
@@ -60,52 +64,10 @@ before(async function() {
   );
 
   // Stub orders
-  const orderParams = [
-    {
-      sizeTh: new BigNumber(1000),
-      pricePerTh: new BigNumber(3.6)
-    },
-    {
-      sizeTh: new BigNumber(1200),
-      pricePerTh: new BigNumber(3.7)
-    },
-    {
-      sizeTh: new BigNumber(3600),
-      pricePerTh: new BigNumber(3.9)
-    }
-  ];
-  const orders = orderParams.map(p =>
-    honeylemonService.createOrder(makerAddress, p.sizeTh, p.pricePerTh)
-  );
-  const signedOrders = await Promise.all(orders.map(o => honeylemonService.signOrder(o)));
+  await stubOrders();
 
-  const records = signedOrders.map(o => ({
-    order: o,
-    metaData: {
-      orderHash: orderHashUtils.getOrderHash(o),
-      remainingFillableTakerAssetAmount: o.takerAssetAmount
-    }
-  }));
-  const orderbookStub = sinon.stub(honeylemonService.apiClient, 'getOrderbookAsync').returns({
-    bids: {
-      total: 0,
-      page: 1,
-      perPage: 20,
-      records: []
-    },
-    asks: {
-      total: 3,
-      page: 1,
-      perPage: 20,
-      records
-    }
-  });
-  const ordersStub = sinon.stub(honeylemonService.apiClient, 'getOrdersAsync').returns({
-    total: 3,
-    page: 1,
-    perPage: 20,
-    records
-  });
+  // Stub subgraph
+  // subgraphStub = sinon.stub(honeylemonService.subgraphClient, 'request')
 
   // Starting MRI value
   mriInput = 0.00001833;
@@ -122,7 +84,7 @@ before(async function() {
 
   // Create Todays market protocol contract
   await marketContractProxy.dailySettlement(
-    0, // lookback index
+    currentMRIScaled.multipliedBy(28).toString(), // lookback index
     currentMRIScaled.toString(), // current index value
     [
       web3.utils.utf8ToHex('MRI-BTC-28D-20200501'),
@@ -146,7 +108,76 @@ before(async function() {
   );
 });
 
-describe('HoneylemonService', () => {
+const stubOrders = async () => {
+  const orderParams = [
+    {
+      sizeTh: new BigNumber(1000),
+      pricePerTh: new BigNumber(3.6)
+    },
+    {
+      sizeTh: new BigNumber(1200),
+      pricePerTh: new BigNumber(3.7)
+    },
+    {
+      sizeTh: new BigNumber(3600),
+      pricePerTh: new BigNumber(3.9)
+    }
+  ];
+  const expirationTime = new BigNumber(
+    Math.round(Date.now() / 1000) + 365 * 24 * 60 * 60
+  ); // 1 year
+  const orders = orderParams.map(p =>
+    honeylemonService.createOrder(makerAddress, p.sizeTh, p.pricePerTh, expirationTime)
+  );
+  const signedOrders = await Promise.all(orders.map(o => honeylemonService.signOrder(o)));
+
+  const records = signedOrders.map(o => ({
+    order: o,
+    metaData: {
+      orderHash: orderHashUtils.getOrderHash(o),
+      remainingFillableTakerAssetAmount: o.takerAssetAmount
+    }
+  }));
+  sinon.stub(honeylemonService.apiClient, 'getOrderbookAsync').returns({
+    bids: {
+      total: 0,
+      page: 1,
+      perPage: 20,
+      records: []
+    },
+    asks: {
+      total: 3,
+      page: 1,
+      perPage: 20,
+      records
+    }
+  });
+  sinon.stub(honeylemonService.apiClient, 'getOrdersAsync').returns({
+    total: 3,
+    page: 1,
+    perPage: 20,
+    records
+  });
+}
+
+const stubPositions = (positionsAsMaker, positionsAsTaker, address) => {
+  subgraphStub
+    .withArgs(POSITIONS_QUERY, sinon.match({ address: address.toLowerCase() }))
+    .returns({
+      user: {
+        positionsAsMaker,
+        positionsAsTaker
+      }
+    });
+}
+
+const stubContracts = (contracts, last = 28) => {
+  subgraphStub
+    .withArgs(CONTRACTS_QUERY, sinon.match({ last }))
+    .returns({ contracts });
+}
+
+contract('HoneylemonService', () => {
   it('should give correct quote for size', async () => {
     const {
       price,
@@ -355,38 +386,65 @@ describe('HoneylemonService', () => {
     assert.equal(absoluteDriftError.lt(new BigNumber(0.001)), true);
   });
 
-  it.skip('Gets contracts', async () => {
-    const { longContracts, shortContracts } = await honeylemonService.getContracts(
-      makerAddress
-    );
-
-    //console.log('shortContracts:', shortContracts);
-  });
-
   it('Retrieve open contracts', async () => {
+    const { result: snapshotId } = await takeSnapshot();
+
     // Create positions for long and short token holder
     const fillSize = new BigNumber(1);
 
     // Create two contracts. taker participates as a taker in both. Maker is only involved
     // in the first contract.
     await fill0xOrderForAddresses(1, takerAddress, makerAddress);
-    // await time.increase(10); // increase by 10 seconds to signify 1 day
     await fill0xOrderForAddresses(2, takerAddress, makerAddress);
-    // await time.increase(10); // increase by 10 seconds to signify 1 day
     await fill0xOrderForAddresses(3, takerAddress, makerAddress);
 
-    await createNewMarketProtocolContract(0, mriInput, 'MRI-BTC-28D-20200502');
+    // fast forward 28 days
+    await time.increase(28 * 24 * 60 * 60 + 1);
+    // we need to deploy 28 times in order to be able to settle
+    await Promise.all(Array.from({ length: 28 }, (x, i) => {
+      return createNewMarketProtocolContract(mriInput * 28, mriInput, 'MRI-BTC-28D-test');
+    }));
 
-    await fill0xOrderForAddresses(2, takerAddress, makerAddress);
+    await fill0xOrderForAddresses(4, takerAddress, makerAddress);
+    await createNewMarketProtocolContract(mriInput * 28, mriInput, 'MRI-BTC-28D-test');
+    await fill0xOrderForAddresses(5, takerAddress, makerAddress);
+
+    // Wait for subgraph to index the events
+    await delay(3000);
 
     // Get contracts object from HoneyLemonService
-    const { longContracts, shortContracts } = await honeylemonService.getContracts(
+    const { longPositions, shortPositions } = await honeylemonService.getPositions(
       takerAddress
     );
 
-    const { longContracts2, shortContracts2 } = await honeylemonService.getContracts(
+    const { longPositions: longPositions2, shortPositions: shortPositions2 } = await honeylemonService.getPositions(
       makerAddress
     );
+
+    // Validate positions
+    expect(longPositions.length).to.eq(5);
+    expect(shortPositions.length).to.eq(0);
+    expect(longPositions2.length).to.eq(0);
+    expect(shortPositions2.length).to.eq(5);
+
+    // Expired contract
+    expect(longPositions[0].finalReward).to.eql(new BigNumber(51324));
+    expect(shortPositions2[0].finalReward).to.eql(new BigNumber(17963));
+
+    // Active contract
+    expect(longPositions[3].pendingReward).to.eql(new BigNumber(7332));
+    expect(shortPositions2[3].pendingReward).to.eql(new BigNumber(269816));
+    expect(longPositions[3].finalReward).to.eql(new BigNumber(0));
+    expect(shortPositions2[3].finalReward).to.eql(new BigNumber(0));
+
+    // New contract
+    expect(longPositions[4].pendingReward).to.eql(new BigNumber(0));
+    expect(shortPositions2[4].pendingReward).to.eql(new BigNumber(346435));
+    expect(longPositions[4].finalReward).to.eql(new BigNumber(0));
+    expect(shortPositions2[4].finalReward).to.eql(new BigNumber(0));
+
+    console.log(`Reverting to snapshot ${snapshotId}`);
+    await revertToSnapShot(snapshotId);
   });
 
   it('retrieve open orders', async () => {
@@ -438,11 +496,10 @@ async function createNewMarketProtocolContract(lookbackIndex, mriInput, marketNa
   let contractDuration = (await marketContractProxy.CONTRACT_DURATION()).toNumber();
   let expirationTime = currentContractTime + contractDuration;
 
-  const currentMRIScaled = new BigNumber(mriInput).multipliedBy(
-    new BigNumber('100000000')
-  ); //1e8
+  const currentMRIScaled = new BigNumber(mriInput).shiftedBy(8); //1e8
+  const lookbackScaled = new BigNumber(lookbackIndex).shiftedBy(8); //1e8
   await marketContractProxy.dailySettlement(
-    lookbackIndex,
+    lookbackScaled.toString(),
     currentMRIScaled.toString(), // current index value
     [
       web3.utils.utf8ToHex(marketName),

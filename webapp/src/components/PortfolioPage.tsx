@@ -97,28 +97,28 @@ const PorfolioPage: React.SFC = () => {
     const getPorfolio = async () => {
 
       const openOrdersRes = await honeylemonService.getOpenOrders(address);
-      const contracts = await honeylemonService.getContracts(address);
+      const contracts = await honeylemonService.getPositions(address);
       if (!cancelled) {
         setOpenOrdersMetadata(openOrdersRes.records.map((openOrder: any) => openOrder.metaData))
         setOpenOrders(Object.fromEntries(
           openOrdersRes.records.map(((openOrder: any) => [openOrder.metaData.orderHash, openOrder.order]))
         ));
 
-        const allContracts = contracts.longContracts.map((lc: any) => ({
+        const allContracts = contracts.longPositions.map((lc: any) => ({
           ...lc,
           contractName: lc.contractName + '-long',
           daysToMaturity: dayjs(lc.time * 1000).add(28, 'd').diff(dayjs(), 'd')
-        })).concat(contracts.shortContracts.map((sc: any) => ({
+        })).concat(contracts.shortPositions.map((sc: any) => ({
           ...sc,
           contractName: sc.contractName + '-short',
           daysToMaturity: dayjs(sc.time * 1000).add(28, 'd').diff(dayjs(), 'd')
         })));
 
         setActiveContracts(allContracts.filter((c: any) => c.daysToMaturity > 0));
-        const sctw = allContracts.filter((c: any) => c.daysToMaturity <= 0 && c?.withdrawalAmount > 0)
+        const sctw = allContracts.filter((c: any) => c.daysToMaturity <= 0 && c?.finalReward > 0)
         setSettledContractsToWithdraw(sctw);
-        setCollateralForWithdraw(sctw.reduce((total: any, contract: any) => total += contract?.withdrawalAmount, 0))
-        setSettledContracts(allContracts.filter((c: any) => c.daysToMaturity <= 0 && c?.withdrawalAmount === 0))
+        setCollateralForWithdraw(sctw.reduce((total: any, contract: any) => total += contract?.finalReward, 0))
+        setSettledContracts(allContracts.filter((c: any) => c.daysToMaturity <= 0 && c?.finalReward === 0))
         setRefresh(false);
       }
     }

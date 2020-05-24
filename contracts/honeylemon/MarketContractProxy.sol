@@ -105,13 +105,19 @@ contract MarketContractProxy is Ownable {
         uint time
     );
 
-    event MarketContractSettled(address indexed marketContractAddress, uint mri);
+    event MarketContractSettled(
+        address indexed contractAddress,
+        uint revenuePerUnit,
+        uint index
+    );
 
     event MarketContractDeployed(
-        uint currentMIR,
-        bytes32 indexed contractName,
-        uint indexed expiration,
-        uint indexed index
+        uint currentMRI,
+        bytes32 contractName,
+        uint expiration,
+        uint indexed index,
+        address contractAddress,
+        uint collateralPerUnit
     );
 
     event dSProxyCreated(address owner, address DSProxy);
@@ -484,7 +490,7 @@ contract MarketContractProxy is Ownable {
         // Store the most recent mri value to use in fillable amount
         latestMri = mri;
 
-        emit MarketContractSettled(marketContractAddress, mri);
+        emit MarketContractSettled(marketContractAddress, mri, marketContracts.length);
     }
 
     ///////////////////////////////////////////////
@@ -584,11 +590,14 @@ contract MarketContractProxy is Ownable {
         // Add new market to storage
         uint index = marketContracts.push(contractAddress) - 1;
         addressToMarketId[contractAddress] = index;
+        MarketContractMPX marketContract = MarketContractMPX(contractAddress);
         emit MarketContractDeployed(
             currentMRI,
             marketAndsTokenNames[0],
             expiration,
-            index
+            index,
+            contractAddress,
+            marketContract.COLLATERAL_PER_UNIT()
         );
         return (contractAddress);
     }

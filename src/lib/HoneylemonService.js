@@ -231,12 +231,14 @@ class HoneylemonService {
     return this.contractWrappers.exchange.cancelOrder(order);
   }
 
-  createOrder(makerAddress, sizeTh, pricePerTh) {
+  createOrder(makerAddress, sizeTh, pricePerTh, expirationTime) {
     sizeTh = new BigNumber(sizeTh);
     pricePerTh = new BigNumber(pricePerTh);
-    const expirationTime = new BigNumber(
-      Math.round(Date.now() / 1000) + 10 * 24 * 60 * 60
-    ); // 10 days
+    if (!expirationTime) {
+      expirationTime = new BigNumber(
+        Math.round(Date.now() / 1000) + 10 * 24 * 60 * 60
+      ); // 10 days
+    }
     const exchangeAddress = this.contractWrappers.exchange.address;
 
     const order = {
@@ -355,7 +357,7 @@ class HoneylemonService {
 
       metaData.remainingFillableMakerAssetAmount = orderCalculationUtils.getMakerFillAmount(
         order,
-        new BigNumber(metaData.remainingFillableTakerAssetAmount)
+        metaData.remainingFillableTakerAssetAmount
       );
     });
 
@@ -368,37 +370,39 @@ class HoneylemonService {
       .call();
   }
 
-  async getContracts(address) {
+  async getPositions(address) {
     address = address.toLowerCase();
-    const data = await this.subgraphClient.request(CONTRACTS_QUERY, { address });
+    const data = await this.subgraphClient.request(POSITIONS_QUERY, { address });
+    if (!data.user) return {
+      longPositions: [],
+      shortPositions: []
+    }
+
+    const contracts = await this.getContracts(28);
 
     // TODO: additional processing, calculate total price by iterating over fills
-    const shortContractsProcessed = data.user && data.user.contractsAsMaker ? 
-      this._processContractsData(data.user.contractsAsMaker) :
-      [];
-
-    const longContractsProcessed = data.user && data.user.contractsAsTaker ? 
-      this._processContractsData(data.user.contractsAsTaker) :
-      [];
+    const shortPositionsProcessed = await this._processPositionsData(data.user.positionsAsMaker, contracts, true);
+    const longPositionsProcessed = await this._processPositionsData(data.user.positionsAsTaker, contracts, false);
 
     return {
-      longContracts: longContractsProcessed,
-      shortContracts: shortContractsProcessed
+      longPositions: longPositionsProcessed,
+      shortPositions: shortPositionsProcessed
     };
   }
 
-  _processContractsData(data) {
-    for (let i = 0; i < data.length; i++) {
-      const contract = data[i];
+  async _processPositionsData(positions, contracts, short) {
+    for (let i = 0; i < positions.length; i++) {
+      const position = positions[i];
 
+      // price
       let totalMakerAssetFilledAmount = new BigNumber(0);
       let totalTakerAssetFilledAmount = new BigNumber(0);
-      for (let j = 0; j < contract.transaction.fills.length; j++) {
+      for (let j = 0; j < position.transaction.fills.length; j++) {
         const makerAssetFilledAmount = new BigNumber(
-          contract.transaction.fills[j].makerAssetFilledAmount
+          position.transaction.fills[j].makerAssetFilledAmount
         );
         const takerAssetFilledAmount = new BigNumber(
-          contract.transaction.fills[j].takerAssetFilledAmount
+          position.transaction.fills[j].takerAssetFilledAmount
         );
         totalMakerAssetFilledAmount = totalMakerAssetFilledAmount.plus(
           makerAssetFilledAmount
@@ -407,12 +411,34 @@ class HoneylemonService {
           takerAssetFilledAmount
         );
       }
-      contract.price = totalTakerAssetFilledAmount
+      position.price = totalTakerAssetFilledAmount
         .dividedBy(totalMakerAssetFilledAmount)
         .shiftedBy(SHIFT_PRICE_BY);
+
+      // final rewards
+      const collateralPerUnit = new BigNumber(position.contract.collateralPerUnit);
+      position.finalReward = new BigNumber(0);
+      if (position.contract.settlement) {
+        const revenuePerUnit = new BigNumber(position.contract.settlement.revenuePerUnit);
+        const returnPerUnit = short ? collateralPerUnit.minus(revenuePerUnit) : revenuePerUnit;
+        position.finalReward = returnPerUnit.multipliedBy(position.qtyToMint);
+        position.pendingReward = position.finalReward;
+      } else {
+        // pending rewards
+        let pendingRewardPerUnit = contracts
+          .filter(c => parseInt(c.index) > parseInt(position.marketId))
+          .reduce((sum, c) => sum.plus(c.currentMRI), new BigNumber(0));
+        if (short) pendingRewardPerUnit = collateralPerUnit.minus(pendingRewardPerUnit);
+        position.pendingReward = pendingRewardPerUnit.multipliedBy(position.qtyToMint);
+      }
     }
 
-    return data;
+    return positions;
+  }
+
+  async getContracts(last = 28) {
+    const { contracts } = await this.subgraphClient.request(CONTRACTS_QUERY, { last });
+    return contracts;
   }
 
   async redeemContract(someContractIdentifier, address) {
@@ -420,14 +446,22 @@ class HoneylemonService {
   }
 }
 
-const CONTRACTS_QUERY = /* GraphQL */ `
-  fragment ContractFragment on Contract {
+const POSITIONS_QUERY = /* GraphQL */ `
+  fragment PositionFragment on Position {
     id
     createdAt
     marketId
     contractName
     qtyToMint
-    latestMarketContract
+    contract {
+      id
+      index
+      expiration
+      collateralPerUnit
+      settlement {
+        revenuePerUnit
+      }
+    }
     time
     contractName
     longTokenAddress
@@ -451,14 +485,27 @@ const CONTRACTS_QUERY = /* GraphQL */ `
 
   query($address: ID!) {
     user(id: $address) {
-      contractsAsMaker {
-        ...ContractFragment
+      positionsAsMaker(orderBy: createdAt) {
+        ...PositionFragment
       }
-      contractsAsTaker {
-        ...ContractFragment
+      positionsAsTaker(orderBy: createdAt) {
+        ...PositionFragment
       }
     }
   }
 `;
 
-module.exports = HoneylemonService, PAYMENT_TOKEN_DECIMALS, COLLATERAL_TOKEN_DECIMALS;
+const CONTRACTS_QUERY = /* GraphQL */ `
+  query($last: Int!) {
+    contracts(orderBy: index, orderDirection: desc, first: $last) {
+      id
+      createdAt
+      currentMRI
+      contractName
+      index
+      collateralPerUnit
+    }
+  }
+`;
+
+module.exports =  { HoneylemonService, PAYMENT_TOKEN_DECIMALS, COLLATERAL_TOKEN_DECIMALS, POSITIONS_QUERY, CONTRACTS_QUERY };

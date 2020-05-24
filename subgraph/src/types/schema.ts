@@ -93,8 +93,8 @@ export class User extends Entity {
     }
   }
 
-  get contractsAsMaker(): Array<string> | null {
-    let value = this.get("contractsAsMaker");
+  get positionsAsMaker(): Array<string> | null {
+    let value = this.get("positionsAsMaker");
     if (value === null) {
       return null;
     } else {
@@ -102,19 +102,19 @@ export class User extends Entity {
     }
   }
 
-  set contractsAsMaker(value: Array<string> | null) {
+  set positionsAsMaker(value: Array<string> | null) {
     if (value === null) {
-      this.unset("contractsAsMaker");
+      this.unset("positionsAsMaker");
     } else {
       this.set(
-        "contractsAsMaker",
+        "positionsAsMaker",
         Value.fromStringArray(value as Array<string>)
       );
     }
   }
 
-  get contractsAsTaker(): Array<string> | null {
-    let value = this.get("contractsAsTaker");
+  get positionsAsTaker(): Array<string> | null {
+    let value = this.get("positionsAsTaker");
     if (value === null) {
       return null;
     } else {
@@ -122,12 +122,12 @@ export class User extends Entity {
     }
   }
 
-  set contractsAsTaker(value: Array<string> | null) {
+  set positionsAsTaker(value: Array<string> | null) {
     if (value === null) {
-      this.unset("contractsAsTaker");
+      this.unset("positionsAsTaker");
     } else {
       this.set(
-        "contractsAsTaker",
+        "positionsAsTaker",
         Value.fromStringArray(value as Array<string>)
       );
     }
@@ -499,7 +499,7 @@ export class CancelledOrder extends Entity {
   }
 }
 
-export class Contract extends Entity {
+export class Position extends Entity {
   constructor(id: string) {
     super();
     this.set("id", Value.fromString(id));
@@ -507,17 +507,17 @@ export class Contract extends Entity {
 
   save(): void {
     let id = this.get("id");
-    assert(id !== null, "Cannot save Contract entity without an ID");
+    assert(id !== null, "Cannot save Position entity without an ID");
     assert(
       id.kind == ValueKind.STRING,
-      "Cannot save Contract entity with non-string ID. " +
+      "Cannot save Position entity with non-string ID. " +
         'Considering using .toHex() to convert the "id" to a string.'
     );
-    store.set("Contract", id.toString(), this);
+    store.set("Position", id.toString(), this);
   }
 
-  static load(id: string): Contract | null {
-    return store.get("Contract", id) as Contract | null;
+  static load(id: string): Position | null {
+    return store.get("Position", id) as Position | null;
   }
 
   get id(): string {
@@ -601,13 +601,13 @@ export class Contract extends Entity {
     this.set("qtyToMint", Value.fromBigInt(value));
   }
 
-  get latestMarketContract(): Bytes {
-    let value = this.get("latestMarketContract");
-    return value.toBytes();
+  get contract(): string {
+    let value = this.get("contract");
+    return value.toString();
   }
 
-  set latestMarketContract(value: Bytes) {
-    this.set("latestMarketContract", Value.fromBytes(value));
+  set contract(value: string) {
+    this.set("contract", Value.fromString(value));
   }
 
   get longTokenAddress(): Bytes {
@@ -669,5 +669,192 @@ export class Contract extends Entity {
 
   set time(value: BigInt) {
     this.set("time", Value.fromBigInt(value));
+  }
+}
+
+export class Contract extends Entity {
+  constructor(id: string) {
+    super();
+    this.set("id", Value.fromString(id));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(id !== null, "Cannot save Contract entity without an ID");
+    assert(
+      id.kind == ValueKind.STRING,
+      "Cannot save Contract entity with non-string ID. " +
+        'Considering using .toHex() to convert the "id" to a string.'
+    );
+    store.set("Contract", id.toString(), this);
+  }
+
+  static load(id: string): Contract | null {
+    return store.get("Contract", id) as Contract | null;
+  }
+
+  get id(): string {
+    let value = this.get("id");
+    return value.toString();
+  }
+
+  set id(value: string) {
+    this.set("id", Value.fromString(value));
+  }
+
+  get createdAt(): BigInt {
+    let value = this.get("createdAt");
+    return value.toBigInt();
+  }
+
+  set createdAt(value: BigInt) {
+    this.set("createdAt", Value.fromBigInt(value));
+  }
+
+  get transaction(): string {
+    let value = this.get("transaction");
+    return value.toString();
+  }
+
+  set transaction(value: string) {
+    this.set("transaction", Value.fromString(value));
+  }
+
+  get transactionHash(): string {
+    let value = this.get("transactionHash");
+    return value.toString();
+  }
+
+  set transactionHash(value: string) {
+    this.set("transactionHash", Value.fromString(value));
+  }
+
+  get currentMRI(): BigInt {
+    let value = this.get("currentMRI");
+    return value.toBigInt();
+  }
+
+  set currentMRI(value: BigInt) {
+    this.set("currentMRI", Value.fromBigInt(value));
+  }
+
+  get contractName(): string {
+    let value = this.get("contractName");
+    return value.toString();
+  }
+
+  set contractName(value: string) {
+    this.set("contractName", Value.fromString(value));
+  }
+
+  get expiration(): BigInt {
+    let value = this.get("expiration");
+    return value.toBigInt();
+  }
+
+  set expiration(value: BigInt) {
+    this.set("expiration", Value.fromBigInt(value));
+  }
+
+  get index(): BigInt {
+    let value = this.get("index");
+    return value.toBigInt();
+  }
+
+  set index(value: BigInt) {
+    this.set("index", Value.fromBigInt(value));
+  }
+
+  get collateralPerUnit(): BigInt {
+    let value = this.get("collateralPerUnit");
+    return value.toBigInt();
+  }
+
+  set collateralPerUnit(value: BigInt) {
+    this.set("collateralPerUnit", Value.fromBigInt(value));
+  }
+
+  get settlement(): string | null {
+    let value = this.get("settlement");
+    if (value === null) {
+      return null;
+    } else {
+      return value.toString();
+    }
+  }
+
+  set settlement(value: string | null) {
+    if (value === null) {
+      this.unset("settlement");
+    } else {
+      this.set("settlement", Value.fromString(value as string));
+    }
+  }
+}
+
+export class ContractSettlement extends Entity {
+  constructor(id: string) {
+    super();
+    this.set("id", Value.fromString(id));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(id !== null, "Cannot save ContractSettlement entity without an ID");
+    assert(
+      id.kind == ValueKind.STRING,
+      "Cannot save ContractSettlement entity with non-string ID. " +
+        'Considering using .toHex() to convert the "id" to a string.'
+    );
+    store.set("ContractSettlement", id.toString(), this);
+  }
+
+  static load(id: string): ContractSettlement | null {
+    return store.get("ContractSettlement", id) as ContractSettlement | null;
+  }
+
+  get id(): string {
+    let value = this.get("id");
+    return value.toString();
+  }
+
+  set id(value: string) {
+    this.set("id", Value.fromString(value));
+  }
+
+  get createdAt(): BigInt {
+    let value = this.get("createdAt");
+    return value.toBigInt();
+  }
+
+  set createdAt(value: BigInt) {
+    this.set("createdAt", Value.fromBigInt(value));
+  }
+
+  get revenuePerUnit(): BigInt {
+    let value = this.get("revenuePerUnit");
+    return value.toBigInt();
+  }
+
+  set revenuePerUnit(value: BigInt) {
+    this.set("revenuePerUnit", Value.fromBigInt(value));
+  }
+
+  get index(): BigInt {
+    let value = this.get("index");
+    return value.toBigInt();
+  }
+
+  set index(value: BigInt) {
+    this.set("index", Value.fromBigInt(value));
+  }
+
+  get contract(): string {
+    let value = this.get("contract");
+    return value.toString();
+  }
+
+  set contract(value: string) {
+    this.set("contract", Value.fromString(value));
   }
 }
