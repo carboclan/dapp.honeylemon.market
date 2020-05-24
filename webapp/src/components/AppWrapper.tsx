@@ -5,7 +5,7 @@ import { Drawer, AppBar, Toolbar, Divider, IconButton, Typography, ListItem, Lis
 import { Menu, ChevronLeft, ChevronRight, AccountBalance } from '@material-ui/icons';
 
 import { forwardTo } from '../helpers/history';
-import { ReactComponent as HoneyLemonLogo } from './../hl-logo.svg';
+import { ReactComponent as HoneyLemonLogo } from '../images/honeylemon-logo.svg';
 
 const drawerWidth = 240;
 
@@ -83,6 +83,10 @@ function AppWrapper(props: { children: any }) {
     setOpen(false);
   };
 
+  const handleNavigate = (path: string) => {
+    forwardTo(path);
+    setOpen(false);
+  }
   return (
     <div className={classes.root}>
       <AppBar
@@ -131,7 +135,7 @@ function AppWrapper(props: { children: any }) {
           </div>
           <Divider />
           <List>
-            <ListItem button onClick={() => forwardTo('/portfolio')}>
+            <ListItem button onClick={() => handleNavigate('/portfolio')}>
               <ListItemIcon><AccountBalance /></ListItemIcon>
               <ListItemText primary="Portfolio" />
             </ListItem>
