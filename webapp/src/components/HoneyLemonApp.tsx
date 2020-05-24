@@ -1,7 +1,6 @@
 import React from 'react';
 import AppWrapper from './AppWrapper';
 import { Switch, Route, Redirect } from 'react-router-dom';
-import LandingPage from './LandingPage';
 import HomePage from './HomePage';
 import BuyContractPage from './BuyContractPage';
 import PortfolioPage from './PortfolioPage';
@@ -20,7 +19,7 @@ const useStyles = makeStyles(({spacing}) => ({
 const ConditionalRoute: React.FC<any> = ({
   component: Component,
   isAuthorized,
-  redirectPath = '/404',
+  redirectPath = '/403',
   ...rest
 }) => (
     <Route
@@ -48,8 +47,7 @@ const HoneyLemonApp: React.SFC = () => {
     <AppWrapper>
       <Container maxWidth='sm' className={classes.contentContainer}>
         <Switch>
-          <ConditionalRoute exact path='/' component={LandingPage} isAuthorized={!isReady} redirectPath='/home' />
-          <Route exact path='/home' component={HomePage} />
+          <Route exact path='/' component={HomePage} />
           <ConditionalRoute exact path='/buy' component={BuyContractPage} isAuthorized={isReady} redirectPath='/' />
           <ConditionalRoute exact path='/offer' component={OfferContractPage} isAuthorized={isReady} redirectPath='/' />
           <Route exact path='/stats' component={MiningStatsPage} />

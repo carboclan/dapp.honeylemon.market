@@ -357,7 +357,7 @@ class HoneylemonService {
 
       metaData.remainingFillableMakerAssetAmount = orderCalculationUtils.getMakerFillAmount(
         order,
-        metaData.remainingFillableTakerAssetAmount
+        new BigNumber(metaData.remainingFillableTakerAssetAmount)
       );
     });
 

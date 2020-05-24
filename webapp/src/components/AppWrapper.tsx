@@ -1,7 +1,7 @@
 import React from 'react';
 import clsx from 'clsx';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
-import { Drawer, AppBar, Toolbar, Divider, IconButton, Typography, ListItem, ListItemIcon, ListItemText, List } from '@material-ui/core';
+import { Drawer, AppBar, Toolbar, Divider, IconButton, Typography, ListItem, ListItemIcon, ListItemText, List, ClickAwayListener } from '@material-ui/core';
 import { Menu, ChevronLeft, ChevronRight, AccountBalance } from '@material-ui/icons';
 
 import { forwardTo } from '../helpers/history';
@@ -46,10 +46,12 @@ const useStyles = makeStyles((theme) => ({
     color: theme.palette.secondary.main,
   },
   drawer: {
-    width: drawerWidth,
     flexShrink: 0,
   },
   drawerPaper: {
+    width: 0,
+  },
+  drawerOpen: {
     width: drawerWidth,
   },
   drawerHeader: {
@@ -62,19 +64,10 @@ const useStyles = makeStyles((theme) => ({
   },
   content: {
     flexGrow: 1,
-    transition: theme.transitions.create('margin', {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.leavingScreen,
-    }),
-    marginRight: -drawerWidth,
   },
-  contentShift: {
-    transition: theme.transitions.create('margin', {
-      easing: theme.transitions.easing.easeOut,
-      duration: theme.transitions.duration.enteringScreen,
-    }),
-    // marginRight: 0,
-  },
+  contentDrawerOpen: {
+    marginRight: -drawerWidth
+  }
 }));
 
 function AppWrapper(props: { children: any }) {
@@ -114,36 +107,38 @@ function AppWrapper(props: { children: any }) {
           </IconButton>
         </Toolbar>
       </AppBar>
-      <main
-        className={clsx(classes.content, {
-          [classes.contentShift]: open,
-        })}
-      >
+      <main className={clsx(classes.content, {[classes.contentDrawerOpen]: open})}>
         {props.children}
       </main>
-      <Drawer
-        className={classes.drawer}
-        variant="persistent"
-        anchor="right"
-        open={open}
-        classes={{
-          paper: classes.drawerPaper,
-        }}
-      >
-        <div className={classes.drawerHeader}>
-          <IconButton onClick={handleDrawerClose}>
-            {theme.direction === 'rtl' ? <ChevronLeft fontSize='large' /> : <ChevronRight fontSize='large' />}
-          </IconButton>
-        </div>
-        <Divider />
-        <List>
-          <ListItem button onClick={() => forwardTo('/portfolio')}>
-            <ListItemIcon><AccountBalance /></ListItemIcon>
-            <ListItemText primary="Portfolio" />
-          </ListItem>
-        </List>
-        <Divider />
-      </Drawer>
+      <ClickAwayListener onClickAway={() => console.log('click away')}>
+        <Drawer
+          className={clsx(classes.drawer, {
+            [classes.drawerOpen]: open,
+          })}
+          variant="persistent"
+          anchor="right"
+          open={open}
+          classes={{
+            paper: clsx(classes.drawerPaper, {
+              [classes.drawerOpen]: open
+            }),
+          }}
+        >
+          <div className={classes.drawerHeader}>
+            <IconButton onClick={handleDrawerClose}>
+              {theme.direction === 'rtl' ? <ChevronLeft fontSize='large' /> : <ChevronRight fontSize='large' />}
+            </IconButton>
+          </div>
+          <Divider />
+          <List>
+            <ListItem button onClick={() => forwardTo('/portfolio')}>
+              <ListItemIcon><AccountBalance /></ListItemIcon>
+              <ListItemText primary="Portfolio" />
+            </ListItem>
+          </List>
+          <Divider />
+        </Drawer>
+      </ClickAwayListener>
     </div>
   );
 }
