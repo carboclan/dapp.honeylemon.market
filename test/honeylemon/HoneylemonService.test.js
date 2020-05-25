@@ -13,7 +13,11 @@ const MarketContractMPX = artifacts.require('MarketContractMPX');
 const PositionToken = artifacts.require('PositionToken'); // Long & Short tokens
 const MarketCollateralPool = artifacts.require('MarketCollateralPool');
 
-const { HoneylemonService, POSITIONS_QUERY, CONTRACTS_QUERY } = require('../../src/lib/HoneylemonService');
+const {
+  HoneylemonService,
+  POSITIONS_QUERY,
+  CONTRACTS_QUERY
+} = require('../../src/lib/HoneylemonService');
 const { revertToSnapShot, takeSnapshot } = require('../helpers/snapshot');
 const delay = require('../helpers/delay');
 
@@ -30,6 +34,7 @@ let accounts = null,
   ownerAddress = null,
   longToken = [null],
   shortToken = [null],
+  collateralToken = null,
   marketContractProxy = null,
   // variables
   currentDayCounter = 0,
@@ -49,7 +54,7 @@ before(async function() {
 
   const minterBridge = await MinterBridge.deployed();
   marketContractProxy = await MarketContractProxy.deployed();
-  const collateralToken = await CollateralToken.deployed();
+  collateralToken = await CollateralToken.deployed();
   const paymentToken = await PaymentToken.deployed();
 
   honeylemonService = new HoneylemonService(
@@ -158,7 +163,7 @@ const stubOrders = async () => {
     perPage: 20,
     records
   });
-}
+};
 
 const stubPositions = (positionsAsMaker, positionsAsTaker, address) => {
   subgraphStub
@@ -169,13 +174,11 @@ const stubPositions = (positionsAsMaker, positionsAsTaker, address) => {
         positionsAsTaker
       }
     });
-}
+};
 
 const stubContracts = (contracts, last = 28) => {
-  subgraphStub
-    .withArgs(CONTRACTS_QUERY, sinon.match({ last }))
-    .returns({ contracts });
-}
+  subgraphStub.withArgs(CONTRACTS_QUERY, sinon.match({ last })).returns({ contracts });
+};
 
 contract('HoneylemonService', () => {
   it('should give correct quote for size', async () => {
@@ -401,9 +404,15 @@ contract('HoneylemonService', () => {
     // fast forward 28 days
     await time.increase(28 * 24 * 60 * 60 + 1);
     // we need to deploy 28 times in order to be able to settle
-    await Promise.all(Array.from({ length: 28 }, (x, i) => {
-      return createNewMarketProtocolContract(mriInput * 28, mriInput, 'MRI-BTC-28D-test');
-    }));
+    await Promise.all(
+      Array.from({ length: 28 }, (x, i) => {
+        return createNewMarketProtocolContract(
+          mriInput * 28,
+          mriInput,
+          'MRI-BTC-28D-test'
+        );
+      })
+    );
 
     await fill0xOrderForAddresses(4, takerAddress, makerAddress);
     await createNewMarketProtocolContract(mriInput * 28, mriInput, 'MRI-BTC-28D-test');
@@ -417,9 +426,10 @@ contract('HoneylemonService', () => {
       takerAddress
     );
 
-    const { longPositions: longPositions2, shortPositions: shortPositions2 } = await honeylemonService.getPositions(
-      makerAddress
-    );
+    const {
+      longPositions: longPositions2,
+      shortPositions: shortPositions2
+    } = await honeylemonService.getPositions(makerAddress);
 
     // Validate positions
     expect(longPositions.length).to.eq(5);
@@ -453,11 +463,101 @@ contract('HoneylemonService', () => {
     expect(record.metaData.price).to.eql(new BigNumber(3.6));
     expect(record.metaData.remainingFillableMakerAssetAmount).to.eql(new BigNumber(1000));
   });
+
+  it.only('Batch Redemption', async () => {
+    const { result: snapshotId } = await takeSnapshot();
+
+    // Create positions for long and short token holder
+    const fillSize = new BigNumber(1);
+
+    takerDSProxyAddress = await honeylemonService.deployDSProxyContract(takerAddress);
+    console.log('taker', takerAddress, takerDSProxyAddress);
+    makerDSProxyAddress = await honeylemonService.deployDSProxyContract(makerAddress);
+    console.log('maker', makerAddress, makerDSProxyAddress);
+
+    // Create Three contracts. Two fill today and one fills tomorrow.
+    await fill0xOrderForAddresses(1, takerAddress, makerAddress);
+    // await fill0xOrderForAddresses(2, takerAddress, makerAddress);
+
+    await time.increase(28 * 24 * 60 * 60 + 1);
+    await createNewMarketProtocolContract(mriInput * 28, mriInput, 'MRI-BTC-28D-test');
+    // await fill0xOrderForAddresses(3, takerAddress, makerAddress);
+
+    // fast forward 28 days and deploy another 28 contracts to settle all those deployed.
+    await time.increase(28 * 24 * 60 * 60 + 1);
+    // we need to deploy 28 times in order to be able to settle
+    await Promise.all(
+      Array.from({ length: 28 }, (x, i) => {
+        return createNewMarketProtocolContract(
+          mriInput * 28,
+          mriInput,
+          'MRI-BTC-28D-test'
+        );
+      })
+    );
+
+    // We should now be able to redeem all 3 sets of tokens, spanning two different markets
+    // in one transaction per user
+
+    // Wait for subgraph to index the events
+    await delay(3000);
+
+    await createNewMarketProtocolContract(
+      mriInput * 28,
+      mriInput,
+      'MRI-BTC-28D-20200502'
+    );
+
+    const { longPositions, shortPositions } = await honeylemonService.getPositions(
+      takerAddress
+    );
+
+    console.log('longPositions', longPositions);
+    console.log('shortPositions', shortPositions);
+
+    const {
+      longPositions: longPositions2,
+      shortPositions: shortPositions2
+    } = await honeylemonService.getPositions(makerAddress);
+
+    let takerCollateralBalanceBefore = await collateralToken.balanceOf(takerAddress);
+    await honeylemonService.batchRedeem(takerAddress);
+    let takerCollateralBalanceAfter = await collateralToken.balanceOf(takerAddress);
+    console.log(
+      'takerCollateralBalance',
+      takerCollateralBalanceBefore.toString(),
+      takerCollateralBalanceAfter.toString()
+    );
+
+    let makerCollateralBalanceBefore = await collateralToken.balanceOf(makerAddress);
+    await honeylemonService.batchRedeem(makerAddress);
+    let makerCollateralBalanceAfter = await collateralToken.balanceOf(makerAddress);
+    console.log(
+      'makerCollateralBalance',
+      makerCollateralBalanceBefore.toString(),
+      makerCollateralBalanceAfter.toString()
+    );
+
+
+    console.log(`Reverting to snapshot ${snapshotId}`);
+    await revertToSnapShot(snapshotId);
+  });
+
+  it('retrieve open orders', async () => {
+    const ordersResponse = await honeylemonService.getOpenOrders(makerAddress);
+    const record = ordersResponse.records[0];
+    expect(record.metaData.price).to.eql(new BigNumber(3.6));
+    expect(record.metaData.remainingFillableMakerAssetAmount).to.eql(new BigNumber(1000));
+  });
 });
 async function fill0xOrderForAddresses(size, taker, maker) {
   const fillSize = new BigNumber(size);
-  const longBalanceBefore = await longToken[currentDayCounter].balanceOf(taker);
-  const shortBalanceBefore = await shortToken[currentDayCounter].balanceOf(maker);
+  const longBalanceBefore = await longToken[currentDayCounter].balanceOf(
+    await marketContractProxy.getUserAddressOrDSProxy(taker)
+  );
+  const shortBalanceBefore = await shortToken[currentDayCounter].balanceOf(
+    await marketContractProxy.getUserAddressOrDSProxy(maker)
+  );
 
   const { resultOrders, takerAssetFillAmounts } = await honeylemonService.getQuoteForSize(
     fillSize
@@ -483,10 +583,14 @@ async function fill0xOrderForAddresses(size, taker, maker) {
   });
   expect(txHash).to.not.be.null;
   // Check position token balances
-  const longBalanceAfter = await longToken[currentDayCounter].balanceOf(taker);
+  const longBalanceAfter = await longToken[currentDayCounter].balanceOf(
+    await marketContractProxy.getUserAddressOrDSProxy(taker)
+  );
   assert.equal(longBalanceAfter.toNumber() - longBalanceBefore.toNumber(), fillSize);
 
-  const shortBalanceAfter = await shortToken[currentDayCounter].balanceOf(maker);
+  const shortBalanceAfter = await shortToken[currentDayCounter].balanceOf(
+    await marketContractProxy.getUserAddressOrDSProxy(maker)
+  );
 
   assert.equal(shortBalanceAfter.toNumber() - shortBalanceBefore.toNumber(), fillSize);
 }
