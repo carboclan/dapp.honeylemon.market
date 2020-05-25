@@ -2,7 +2,6 @@ import * as React from "react";
 import Web3 from 'web3'
 import { useState, useEffect } from "react";
 import { MetamaskSubprovider, Web3JsProvider, SignerSubprovider } from '@0x/subproviders';
-import { ERC20TokenContract, ERC20TokenEvents } from '@0x/contract-wrappers';
 import { HoneylemonService } from "honeylemon";
 import { useOnboard } from "./OnboardContext";
 
@@ -39,12 +38,6 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
           case 'MetaMask':
             wrappedSubprovider = new MetamaskSubprovider(web3.currentProvider as Web3JsProvider);
             break;
-          case 'Portis':
-            wrappedSubprovider = new MetamaskSubprovider(web3.currentProvider as Web3JsProvider);
-            break;
-          case 'imToken':
-            wrappedSubprovider = new MetamaskSubprovider(web3.currentProvider as Web3JsProvider);
-            break;
           default:
             wrappedSubprovider = new SignerSubprovider(web3.currentProvider as Web3JsProvider);
         }
@@ -65,7 +58,6 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
 
   useEffect(() => {
     const checkBalances = async () => {
-      console.log('checking balances');
       const collateral = await honeylemonService.getCollateralTokenAmounts(address);
       setCollateralTokenAllowance(Number(collateral.allowance.shiftedBy(-8).toString()));
       setCollateralTokenBalance(Number(collateral.balance.shiftedBy(-8).toString()));
@@ -80,31 +72,8 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
     }
 
     return () => {
-      console.log('destroying poller');
       clearInterval(poller());
     }
-  }, [honeylemonService, address])
-
-  useEffect(() => {
-    if (honeylemonService) {
-      const collateralToken: ERC20TokenContract = honeylemonService.collateralToken
-      const paymentToken: ERC20TokenContract = honeylemonService.paymentToken
-
-      collateralToken.subscribe(ERC20TokenEvents.Approval, { _owner: address }, (err, log) => {
-        console.log('collateral approval');
-        console.log(err);
-        console.log(log);
-      });
-      paymentToken.subscribe(ERC20TokenEvents.Approval, {}, (err, log) => {
-        console.log('payment approval');
-        console.log(err);
-        console.log(log);
-      });
-      console.log('subscribed to approval events');
-    }
-    // return () => {
-    //   //TODO Clean up event listeners here
-    // }
   }, [honeylemonService, address])
 
   return (
