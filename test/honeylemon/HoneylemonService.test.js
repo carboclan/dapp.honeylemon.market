@@ -432,10 +432,10 @@ contract('HoneylemonService', () => {
     } = await honeylemonService.getPositions(makerAddress);
 
     // Validate positions
-    expect(longPositions.length).to.eq(5);
+    expect(longPositions.length).to.eq(6);
     expect(shortPositions.length).to.eq(0);
     expect(longPositions2.length).to.eq(0);
-    expect(shortPositions2.length).to.eq(5);
+    expect(shortPositions2.length).to.eq(6);
 
     // Expired contract
     expect(longPositions[0].finalReward).to.eql(new BigNumber(51324));
@@ -464,10 +464,12 @@ contract('HoneylemonService', () => {
     expect(record.metaData.remainingFillableMakerAssetAmount).to.eql(new BigNumber(1000));
   });
 
-  it('Batch Redemption', async () => {
+  it.only('Batch Redemption', async () => {
     const { result: snapshotId } = await takeSnapshot();
 
+    expect(await honeylemonService.addressHasDSProxy(takerAddress)).to.equal(false);
     takerDSProxyAddress = await honeylemonService.deployDSProxyContract(takerAddress);
+    expect(await honeylemonService.addressHasDSProxy(takerAddress)).to.equal(true);
 
     makerDSProxyAddress = await honeylemonService.deployDSProxyContract(makerAddress);
 

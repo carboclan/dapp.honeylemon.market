@@ -377,11 +377,18 @@ class HoneylemonService {
     return address;
   }
 
+  async addressHasDSProxy(address) {
+    const DSProxyAddress = await this.marketContractProxy.methods
+      .getUserAddressOrDSProxy(address)
+      .call({ from: address });
+    // if the address is not the same as the DSProxy address then the user has a DSProxy
+    return DSProxyAddress.toLowerCase() != address.toLowerCase();
+  }
+
   async batchRedeem(recipientAddress) {
     const dsProxyAddress = await this.marketContractProxy.methods
       .getUserAddressOrDSProxy(recipientAddress)
       .call();
-    console.log('User DXProxy', dsProxyAddress);
 
     if (dsProxyAddress == recipientAddress) {
       console.error('User does not have DSProxy wallet');
