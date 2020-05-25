@@ -464,7 +464,7 @@ contract('HoneylemonService', () => {
     expect(record.metaData.remainingFillableMakerAssetAmount).to.eql(new BigNumber(1000));
   });
 
-  it.only('Batch Redemption', async () => {
+  it('Batch Redemption', async () => {
     const { result: snapshotId } = await takeSnapshot();
 
     takerDSProxyAddress = await honeylemonService.deployDSProxyContract(takerAddress);
@@ -494,15 +494,13 @@ contract('HoneylemonService', () => {
     );
 
     // We should now be able to redeem all 3 sets of tokens, spanning two different markets
-    // in one transaction per user.
+    // in one transaction per user. Test to ensure the balance change as expected
 
     // Wait for subgraph to index the events
     await delay(3000);
 
     const takerCollateralBalanceBefore = await collateralToken.balanceOf(takerAddress);
-
     const takerTxReturned = await honeylemonService.batchRedeem(takerAddress);
-
     const takerCollateralBalanceAfter = await collateralToken.balanceOf(takerAddress);
 
     // The collateral balance of the taker should have increased. Not going to test
@@ -511,6 +509,7 @@ contract('HoneylemonService', () => {
       takerCollateralBalanceBefore.toNumber()
     );
 
+    // The taker should only have a long tx result. no short tx
     expect(takerTxReturned.redemptionTxLong).to.not.be.null;
     expect(takerTxReturned.redemptionTxShort).to.be.null;
 
@@ -522,6 +521,7 @@ contract('HoneylemonService', () => {
       makerCollateralBalanceBefore.toNumber()
     );
 
+    // The maker should only have a short tx result. no long tx
     expect(makerTxReturned.redemptionTxShort).to.not.be.null;
     expect(makerTxReturned.redemptionTxLong).to.be.null;
 
