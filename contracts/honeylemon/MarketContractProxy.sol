@@ -93,13 +93,13 @@ contract MarketContractProxy is ReentrancyGuard, Ownable {
     //// EVENTS ////
     ////////////////
     event PositionTokensMinted(
+        uint256 qtyToMint,
         uint indexed marketId,
         string contractName,
         address indexed longTokenRecipient,
         address longTokenDSProxy,
         address indexed shortTokenRecipient,
         address shortTokenDSProxy,
-        uint256 qtyToMint,
         address latestMarketContract,
         address longTokenAddress,
         address shortTokenAddress,
@@ -546,13 +546,13 @@ contract MarketContractProxy is ReentrancyGuard, Ownable {
         shortToken.transfer(getUserAddressOrDSProxy(shortTokenRecipient), qtyToMint);
 
         emit PositionTokensMinted(
+            qtyToMint,
             addressToMarketId[address(latestMarketContract)], // MarketID
             latestMarketContract.CONTRACT_NAME(),
             longTokenRecipient,
             getUserAddressOrDSProxy(longTokenRecipient),
             shortTokenRecipient,
             getUserAddressOrDSProxy(shortTokenRecipient),
-            qtyToMint,
             address(latestMarketContract),
             address(longToken),
             address(shortToken),
