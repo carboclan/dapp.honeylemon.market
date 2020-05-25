@@ -391,6 +391,19 @@ class HoneylemonService {
   }
 
   async _processPositionsData(positions, contracts, short) {
+    // Merge positions by transaction in order to correctly represent fills and price
+    const merged = positions.reduce((res, pos) => {
+      const existing = res[pos.transaction.id];
+      if (existing) {
+        // merge positions
+        existing.qtyToMint = new BigNumber(existing.qtyToMint).plus(pos.qtyToMint).toString();
+      } else {
+        res[pos.transaction.id] = pos;
+      }
+      return res;
+    }, {});
+    positions = Object.values(merged);
+
     for (let i = 0; i < positions.length; i++) {
       const position = positions[i];
 
@@ -475,6 +488,7 @@ const POSITIONS_QUERY = /* GraphQL */ `
       id
     }
     transaction {
+      id
       blockNumber
       fills {
         makerAssetFilledAmount
