@@ -391,7 +391,12 @@ class HoneylemonService {
     let traderDSProxy = new web3.eth.Contract(DSProxyArtefacts.abi, dsProxyAddress);
     traderDSProxy.setProvider(this.provider);
 
+    // Get position information for the recipient
     const { longPositions, shortPositions } = await this.getPositions(recipientAddress);
+
+    // Place holders to return tx within if there was a batch redemption
+    let redemptionTxLong = null,
+      redemptionTxShort = null;
 
     // The trader could have entered into both long and short trades. Start with the long trade
     if (longPositions.length > 0) {
@@ -431,9 +436,7 @@ class HoneylemonService {
           }
         }
       }
-
-      console.log('longParams', longParams);
-
+      // encode the function call to send to DSProxy
       const batchRedemptionLongTx = this.marketContractProxy.methods
         .batchRedeem(
           longParams.tokenAddresses,
@@ -442,13 +445,11 @@ class HoneylemonService {
           longParams.isTradeLong
         )
         .encodeABI();
-      console.log('batchRedemptionLongTx', batchRedemptionLongTx);
 
-      let redemptionTxLong = await traderDSProxy.methods
+      // Execute function call on DSProxy
+      redemptionTxLong = await traderDSProxy.methods
         .execute(this.marketContractProxyAddress, batchRedemptionLongTx)
         .send({ from: recipientAddress, gas: 9000000 });
-
-      console.log('redemptionTxLong', redemptionTxLong);
     }
 
     if (shortPositions.length > 0) {
@@ -482,8 +483,6 @@ class HoneylemonService {
         }
       }
 
-      console.log('shortParams', shortParams);
-
       const batchRedemptionShortTx = this.marketContractProxy.methods
         .batchRedeem(
           shortParams.tokenAddresses,
@@ -492,15 +491,12 @@ class HoneylemonService {
           shortParams.isTradeLong
         )
         .encodeABI();
-      console.log('batchRedemptionShortTx', batchRedemptionShortTx);
 
-      let redemptionTxShort = await traderDSProxy.methods
+      redemptionTxShort = await traderDSProxy.methods
         .execute(this.marketContractProxyAddress, batchRedemptionShortTx)
         .send({ from: recipientAddress, gas: 9000000 });
-
-      console.log('redemptionTxShort', redemptionTxShort);
     }
-    console.log('END');
+    return { redemptionTxLong, redemptionTxShort };
   }
 
   async getPositions(address) {

@@ -467,21 +467,18 @@ contract('HoneylemonService', () => {
   it.only('Batch Redemption', async () => {
     const { result: snapshotId } = await takeSnapshot();
 
-    // Create positions for long and short token holder
-    const fillSize = new BigNumber(1);
-
     takerDSProxyAddress = await honeylemonService.deployDSProxyContract(takerAddress);
-    console.log('taker', takerAddress, takerDSProxyAddress);
+
     makerDSProxyAddress = await honeylemonService.deployDSProxyContract(makerAddress);
-    console.log('maker', makerAddress, makerDSProxyAddress);
 
     // Create Three contracts. Two fill today and one fills tomorrow.
     await fill0xOrderForAddresses(1, takerAddress, makerAddress);
-    // await fill0xOrderForAddresses(2, takerAddress, makerAddress);
+    await fill0xOrderForAddresses(2, takerAddress, makerAddress);
 
-    await time.increase(28 * 24 * 60 * 60 + 1);
+    // Increase the time by one day. Deploy a new contract to simulate having tokens over multiple days.
+    await time.increase(24 * 60 * 60 + 1);
     await createNewMarketProtocolContract(mriInput * 28, mriInput, 'MRI-BTC-28D-test');
-    // await fill0xOrderForAddresses(3, takerAddress, makerAddress);
+    await fill0xOrderForAddresses(3, takerAddress, makerAddress);
 
     // fast forward 28 days and deploy another 28 contracts to settle all those deployed.
     await time.increase(28 * 24 * 60 * 60 + 1);
@@ -497,47 +494,36 @@ contract('HoneylemonService', () => {
     );
 
     // We should now be able to redeem all 3 sets of tokens, spanning two different markets
-    // in one transaction per user
+    // in one transaction per user.
 
     // Wait for subgraph to index the events
     await delay(3000);
 
-    await createNewMarketProtocolContract(
-      mriInput * 28,
-      mriInput,
-      'MRI-BTC-28D-20200502'
+    const takerCollateralBalanceBefore = await collateralToken.balanceOf(takerAddress);
+
+    const takerTxReturned = await honeylemonService.batchRedeem(takerAddress);
+
+    const takerCollateralBalanceAfter = await collateralToken.balanceOf(takerAddress);
+
+    // The collateral balance of the taker should have increased. Not going to test
+    // the exact returned values as these are done in other unit tests on smart contracts.
+    expect(takerCollateralBalanceAfter.toNumber()).to.be.above(
+      takerCollateralBalanceBefore.toNumber()
     );
 
-    const { longPositions, shortPositions } = await honeylemonService.getPositions(
-      takerAddress
+    expect(takerTxReturned.redemptionTxLong).to.not.be.null;
+    expect(takerTxReturned.redemptionTxShort).to.be.null;
+
+    const makerCollateralBalanceBefore = await collateralToken.balanceOf(makerAddress);
+    const makerTxReturned = await honeylemonService.batchRedeem(makerAddress);
+    const makerCollateralBalanceAfter = await collateralToken.balanceOf(makerAddress);
+
+    expect(makerCollateralBalanceAfter.toNumber()).to.be.above(
+      makerCollateralBalanceBefore.toNumber()
     );
 
-    console.log('longPositions', longPositions);
-    console.log('shortPositions', shortPositions);
-
-    const {
-      longPositions: longPositions2,
-      shortPositions: shortPositions2
-    } = await honeylemonService.getPositions(makerAddress);
-
-    let takerCollateralBalanceBefore = await collateralToken.balanceOf(takerAddress);
-    await honeylemonService.batchRedeem(takerAddress);
-    let takerCollateralBalanceAfter = await collateralToken.balanceOf(takerAddress);
-    console.log(
-      'takerCollateralBalance',
-      takerCollateralBalanceBefore.toString(),
-      takerCollateralBalanceAfter.toString()
-    );
-
-    let makerCollateralBalanceBefore = await collateralToken.balanceOf(makerAddress);
-    await honeylemonService.batchRedeem(makerAddress);
-    let makerCollateralBalanceAfter = await collateralToken.balanceOf(makerAddress);
-    console.log(
-      'makerCollateralBalance',
-      makerCollateralBalanceBefore.toString(),
-      makerCollateralBalanceAfter.toString()
-    );
-
+    expect(makerTxReturned.redemptionTxShort).to.not.be.null;
+    expect(makerTxReturned.redemptionTxLong).to.be.null;
 
     console.log(`Reverting to snapshot ${snapshotId}`);
     await revertToSnapShot(snapshotId);
