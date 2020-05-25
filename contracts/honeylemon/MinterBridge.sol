@@ -3,6 +3,7 @@ pragma solidity 0.5.2;
 import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
 import 'openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol';
 import 'openzeppelin-solidity/contracts/token/ERC20/ERC20.sol';
+import "openzeppelin-solidity/contracts/utils/ReentrancyGuard.sol";
 
 import '../libraries/MathLib.sol';
 import '../marketprotocol/MarketCollateralPool.sol';
@@ -12,7 +13,7 @@ import '../marketprotocol/tokens/PositionToken.sol';
 import './MarketContractProxy.sol';
 
 
-contract MinterBridge is Ownable {
+contract MinterBridge is ReentrancyGuard, Ownable {
     using MathLib for uint;
     using MathLib for int;
     using SafeERC20 for ERC20;
@@ -23,6 +24,8 @@ contract MinterBridge is Ownable {
     bytes4 internal constant BRIDGE_SUCCESS = 0xdc1600f3;
     address public MARKET_CONTRACT_PROXY_ADDRESS;
     address public ERC20_BRIDGE_PROXY_ADDRESS;
+
+    constructor() public ReentrancyGuard() {}
 
     /**
      * @notice check that called is 0x minter bridge proxy address
@@ -82,7 +85,7 @@ contract MinterBridge is Ownable {
         address to,
         uint256 amount,
         bytes calldata bridgeData
-    ) external onlyIfSetMarketContractProxy only0xBridgeProxy returns (bytes4 success) {
+    ) external onlyIfSetMarketContractProxy only0xBridgeProxy nonReentrant returns (bytes4 success) {
         // The proxy acts as the taker token to make 0x think that the appropriate amount
         // was transferred and accept the trade as passing. Under the hood the  marketContractProxy
         // has minted long and short tokens and sent them to the the investor and miner.

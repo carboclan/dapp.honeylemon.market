@@ -24,13 +24,13 @@ import './MarketContractRegistryInterface.sol';
 import 'openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol';
 import 'openzeppelin-solidity/contracts/token/ERC20/ERC20.sol';
 import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
-
+import "openzeppelin-solidity/contracts/utils/ReentrancyGuard.sol";
 
 /// @title MarketCollateralPool
 /// @notice This collateral pool houses all of the collateral for all market contracts currently in circulation.
 /// This pool facilitates locking of collateral and minting / redemption of position tokens for that collateral.
 /// @author Phil Elsasser <phil@marketprotocol.io>
-contract MarketCollateralPool is Ownable {
+contract MarketCollateralPool is ReentrancyGuard, Ownable {
     using MathLib for uint;
     using MathLib for int;
     using SafeERC20 for ERC20;
@@ -58,7 +58,7 @@ contract MarketCollateralPool is Ownable {
         uint collateralUnlocked
     );
 
-    constructor(address marketContractRegistryAddress, address mktTokenAddress) public {
+    constructor(address marketContractRegistryAddress, address mktTokenAddress) public ReentrancyGuard() {
         marketContractRegistry = marketContractRegistryAddress;
         mktToken = mktTokenAddress;
     }
@@ -77,7 +77,7 @@ contract MarketCollateralPool is Ownable {
         address marketContractAddress,
         uint qtyToMint,
         bool isAttemptToPayInMKT
-    ) external onlyWhiteListedAddress(marketContractAddress) {
+    ) external onlyWhiteListedAddress(marketContractAddress) nonReentrant {
         MarketContract marketContract = MarketContract(marketContractAddress);
         require(!marketContract.isSettled(), 'Contract is already settled');
 

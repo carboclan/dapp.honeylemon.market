@@ -3,6 +3,7 @@ pragma solidity 0.5.2;
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol";
+import "openzeppelin-solidity/contracts/utils/ReentrancyGuard.sol";
 
 import '../marketprotocol/MarketCollateralPool.sol';
 import '../marketprotocol/mpx/MarketContractFactoryMPX.sol';
@@ -20,7 +21,7 @@ import './DSProxy.sol';
 /// contracts 2) settling old contracts 3) minting of long and short tokens 4)
 /// storage of DSProxy info 5) enabling batch token redemption.
 
-contract MarketContractProxy is Ownable {
+contract MarketContractProxy is ReentrancyGuard, Ownable {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
@@ -78,7 +79,7 @@ contract MarketContractProxy is Ownable {
         address _honeyLemonOracle,
         address _minterBridge,
         address _imBTCTokenAddress
-    ) public {
+    ) public ReentrancyGuard() {
         marketContractFactoryMPX = MarketContractFactoryMPX(_marketContractFactoryMPX);
         HONEY_LEMON_ORACLE_ADDRESS = _honeyLemonOracle;
         MINTER_BRIDGE_ADDRESS = _minterBridge;
@@ -392,7 +393,7 @@ contract MarketContractProxy is Ownable {
         address[] memory marketAddresses, // Address of the market protocol
         uint256[] memory tokensToRedeem, // the number of tokens to redeem
         bool[] memory traderLong // if the trader is long or short
-    ) public {
+    ) public nonReentrant {
         require(
             tokenAddresses.length == marketAddresses.length &&
                 tokenAddresses.length == tokensToRedeem.length &&
@@ -507,7 +508,7 @@ contract MarketContractProxy is Ownable {
         uint qtyToMint,
         address longTokenRecipient,
         address shortTokenRecipient
-    ) public onlyMinterBridge {
+    ) public onlyMinterBridge nonReentrant {
         uint collateralNeeded = calculateRequiredCollateral(qtyToMint);
 
         // Create instance of the latest market contract for today
