@@ -12,6 +12,6 @@ module.exports = async function(deployer, network, accounts) {
   await deployer.deploy(MinterBridge);
   const minterBridge = await MinterBridge.deployed();
   const erc20BridgeProxyAddress = await getErc20BridgeProxyAddress();
-  await minterBridge.set0xBridgeProxy(erc20BridgeProxyAddress, { from: accounts[0] });
+  await minterBridge.set0xBridgeProxy(erc20BridgeProxyAddress);
   console.log('🤑 Done Minter Bridge Migration!');
 };
