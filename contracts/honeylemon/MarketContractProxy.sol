@@ -246,7 +246,7 @@ contract MarketContractProxy is Ownable {
      * @return market contract address
      */
     function getLatestMarketContract() public view returns (MarketContractMPX) {
-        uint lastIndex = marketContracts.length - 1;
+        uint lastIndex = marketContracts.length.sub(1);
         return MarketContractMPX(marketContracts[lastIndex]);
     }
 
