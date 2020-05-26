@@ -708,7 +708,7 @@ const CONTRACTS_QUERY = /* GraphQL */ `
   }
 `;
 
-module.exports = {
+module.exports =  {
   HoneylemonService,
   PAYMENT_TOKEN_DECIMALS,
   COLLATERAL_TOKEN_DECIMALS,
