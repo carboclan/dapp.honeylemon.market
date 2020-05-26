@@ -13,7 +13,7 @@
     "dayjs": "1.8.26",
     "dotenv": "8.2.0",
     "eslint": "6.8.0",
-    "honeylemon": "file:../.",
+    "honeylemon": "git+https://github.com/carboclan/dapp.honeylemon.market.git",
     "react": "16.13.1",
     "react-dom": "16.13.1",
     "react-router-dom": "5.1.2",

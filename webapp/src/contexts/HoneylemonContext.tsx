@@ -47,7 +47,11 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
           process.env.REACT_APP_SRA_URL,
           process.env.REACT_APP_SUBGRAPH_URL,
           wrappedSubprovider,
-          network
+          network,
+          process.env.REACT_APP_MINTER_BRIDGE_ADDRESS,
+          process.env.REACT_APP_MARKET_CONTRACT_PROXY_ADDRESS,
+          process.env.REACT_APP_COLLATERAL_TOKEN_ADDRESS,
+          process.env.REACT_APP_PAYMENT_TOKEN_ADDRESS,
         );
         setHoneylemonService(honeylemonService);
       };
