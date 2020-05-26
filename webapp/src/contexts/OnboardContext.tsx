@@ -43,10 +43,10 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
       walletSelect: {
         wallets: [
           { walletName: 'metamask' },
-          // {
-          //   walletName: "portis",
-          //   apiKey: process.env.REACT_APP_PORTIS_API_KEY,
-          // },
+          {
+            walletName: "portis",
+            apiKey: process.env.REACT_APP_PORTIS_API_KEY,
+          },
           {
             walletName: 'imToken',
             // rpcUrl: '' // Add this to update balances correctly
