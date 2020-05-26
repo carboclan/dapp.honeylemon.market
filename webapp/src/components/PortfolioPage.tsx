@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BigNumber } from '@0x/utils';
-import dayjs from 'dayjs'
+import dayjs from 'dayjs';
 import {
   Typography,
   Grid,
@@ -37,7 +37,7 @@ const useStyles = makeStyles(({ spacing }) => ({
 
 const PorfolioPage: React.SFC = () => {
   const { address } = useOnboard();
-  const { honeylemonService } = useHoneylemon();
+  const { honeylemonService, CONTRACT_DURATION } = useHoneylemon();
 
   const [activeTab, setActiveTab] = useState<'active' | 'settled'>('active')
   const [collateralForWithdraw, setCollateralForWithdraw] = useState(0);
@@ -45,7 +45,7 @@ const PorfolioPage: React.SFC = () => {
     Array<{
       orderHash: string,
       remainingFillableMakerAssetAmount: BigNumber,
-      price: number
+      price: BigNumber
       //TODO: update to use types once definitions have been added
     }>>([]);
 
@@ -67,9 +67,9 @@ const PorfolioPage: React.SFC = () => {
       takerFeeAssetData: string;
     }
   } | undefined>()
-  const [activeContracts, setActiveContracts] = useState([]);
-  const [settledContractsToWithdraw, setSettledContractsToWithdraw] = useState([]);
-  const [settledContracts, setSettledContracts] = useState([]);
+  const [activePositions, setActivePositions] = useState([]);
+  const [settledPositionsToWithdraw, setSettledPositionsToWithdraw] = useState([]);
+  const [settledPositions, setSettledPositions] = useState([]);
   const [refresh, setRefresh] = useState(true);
 
   const handleSetActiveTab = (event: React.ChangeEvent<{}>, newValue: 'active' | 'settled') => {
@@ -97,28 +97,28 @@ const PorfolioPage: React.SFC = () => {
     const getPorfolio = async () => {
 
       const openOrdersRes = await honeylemonService.getOpenOrders(address);
-      const contracts = await honeylemonService.getPositions(address);
+      const positions = await honeylemonService.getPositions(address);
       if (!cancelled) {
         setOpenOrdersMetadata(openOrdersRes.records.map((openOrder: any) => openOrder.metaData))
         setOpenOrders(Object.fromEntries(
           openOrdersRes.records.map(((openOrder: any) => [openOrder.metaData.orderHash, openOrder.order]))
         ));
 
-        const allContracts = contracts.longPositions.map((lc: any) => ({
+        const allPositions = positions.longPositions.map((lc: any) => ({
           ...lc,
           contractName: lc.contractName + '-long',
-          daysToMaturity: dayjs(lc.time * 1000).add(28, 'd').diff(dayjs(), 'd')
-        })).concat(contracts.shortPositions.map((sc: any) => ({
+          daysToMaturity: dayjs(lc.time * 1000).add(CONTRACT_DURATION, 'd').diff(dayjs(), 'd')
+        })).concat(positions.shortPositions.map((sc: any) => ({
           ...sc,
           contractName: sc.contractName + '-short',
-          daysToMaturity: dayjs(sc.time * 1000).add(28, 'd').diff(dayjs(), 'd')
+          daysToMaturity: dayjs(sc.time * 1000).add(CONTRACT_DURATION, 'd').diff(dayjs(), 'd')
         })));
 
-        setActiveContracts(allContracts.filter((c: any) => c.daysToMaturity > 0));
-        const sctw = allContracts.filter((c: any) => c.daysToMaturity <= 0 && c?.finalReward > 0)
-        setSettledContractsToWithdraw(sctw);
-        setCollateralForWithdraw(sctw.reduce((total: any, contract: any) => total += contract?.finalReward, 0))
-        setSettledContracts(allContracts.filter((c: any) => c.daysToMaturity <= 0 && c?.finalReward === 0))
+        setActivePositions(allPositions.filter((p: any) => !p.contract.settlement));
+        const sctw = allPositions.filter((c: any) => c.daysToMaturity <= 0 && c?.pendingReward?.gt(0))
+        setSettledPositionsToWithdraw(sctw);
+        setCollateralForWithdraw(sctw.reduce((total: BigNumber, contract: any) => total.plus(contract?.pendingReward), new BigNumber(0)));
+        setSettledPositions(allPositions.filter((c: any) => c.daysToMaturity <= 0 && c?.pendingReward.eq(0)))
         setRefresh(false);
       }
     }
@@ -159,7 +159,7 @@ const PorfolioPage: React.SFC = () => {
                   {openOrdersMetadata && openOrdersMetadata?.map(order =>
                     <TableRow key={order.orderHash}>
                       <TableCell>{order?.remainingFillableMakerAssetAmount.toString()}</TableCell>
-                      <TableCell align='center'>${order?.price.toFixed(2)}</TableCell>
+                      <TableCell align='center'>${order?.price.dividedBy(CONTRACT_DURATION).toFixed(2)}</TableCell>
                       <TableCell align='right'><Button onClick={() => cancelOpenOrder(order.orderHash)}>Cancel</Button></TableCell>
                     </TableRow>
                   )}
@@ -176,7 +176,7 @@ const PorfolioPage: React.SFC = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {activeContracts && activeContracts?.map((contract: any, i) =>
+                  {activePositions && activePositions?.map((contract: any, i) =>
                     <TableRow key={i}>
                       <TableCell>{contract.contractName}</TableCell>
                       <TableCell align='center'>{contract.qtyToMint}</TableCell>
@@ -196,7 +196,7 @@ const PorfolioPage: React.SFC = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {settledContractsToWithdraw?.map((contract: any, i) =>
+                  {settledPositionsToWithdraw?.map((contract: any, i) =>
                     <TableRow key={i}>
                       <TableCell>{contract.contractName}</TableCell>
                       <TableCell align='center'>{contract.qtyToMint}</TableCell>
@@ -221,7 +221,7 @@ const PorfolioPage: React.SFC = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {settledContracts.map((contract: any, i) =>
+                  {settledPositions.map((contract: any, i) =>
                     <TableRow key={i}>
                       <TableCell>{contract.contractName}</TableCell>
                       <TableCell align='center'>{contract.qtyToMint}</TableCell>

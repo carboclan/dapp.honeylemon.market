@@ -3,6 +3,8 @@ const { BigNumber } = require('@0x/utils');
 const { Web3Wrapper } = require('@0x/web3-wrapper');
 const { orderHashUtils } = require('@0x/order-utils');
 const sinon = require('sinon');
+const contractStub = require('../stubs/contract');
+const positionStub = require('../stubs/position');
 const { time } = require('@openzeppelin/test-helpers');
 
 const MinterBridge = artifacts.require('MinterBridge');
@@ -72,7 +74,7 @@ before(async function() {
   await stubOrders();
 
   // Stub subgraph
-  // subgraphStub = sinon.stub(honeylemonService.subgraphClient, 'request')
+  subgraphStub = sinon.stub(honeylemonService.subgraphClient, 'request')
 
   // Starting MRI value
   mriInput = 0.00001833;
@@ -174,11 +176,17 @@ const stubPositions = (positionsAsMaker, positionsAsTaker, address) => {
         positionsAsTaker
       }
     });
-};
+
+  return subgraphStub;
+}
 
 const stubContracts = (contracts, last = 28) => {
-  subgraphStub.withArgs(CONTRACTS_QUERY, sinon.match({ last })).returns({ contracts });
-};
+  subgraphStub
+    .withArgs(CONTRACTS_QUERY, sinon.match({ last }))
+    .returns({ contracts });
+
+  return subgraphStub;
+}
 
 contract('HoneylemonService', () => {
   it('should give correct quote for size', async () => {
@@ -455,6 +463,47 @@ contract('HoneylemonService', () => {
 
     console.log(`Reverting to snapshot ${snapshotId}`);
     await revertToSnapShot(snapshotId);
+  });
+
+  it.only('merges related positions', async () => {
+    // stub positions;
+    const tx1 = {
+      id: "tx1",
+      fills: [
+        { makerAssetFilledAmount: "10", takerAssetFilledAmount: "10000" },
+        { makerAssetFilledAmount: "7", takerAssetFilledAmount: "8000" }
+      ]
+    };
+    const tx2 = {
+      id: "tx2",
+      fills: [
+        { makerAssetFilledAmount: "5", takerAssetFilledAmount: "6000" },
+        { makerAssetFilledAmount: "9", takerAssetFilledAmount: "9500" }
+      ]
+    };
+    const positions = [
+      positionStub({ marketId: "0", qtyToMint: "10", transaction: tx1 }),
+      positionStub({ marketId: "0", qtyToMint: "7", transaction: tx1 }),
+      positionStub({ marketId: "1", qtyToMint: "5", transaction: tx2 }),
+      positionStub({ marketId: "1", qtyToMint: "9", transaction: tx2 }),
+    ];
+    stubPositions(positions, [], makerAddress);
+    stubContracts([]);
+
+    const { longPositions, shortPositions } = await honeylemonService.getPositions(
+      makerAddress
+    );
+
+    expect(shortPositions.length).to.eq(2);
+    const [p1, p2] = shortPositions;
+    expect(p1.qtyToMint.toString()).to.eq('17');
+    expect(p2.qtyToMint.toString()).to.eq('14');
+    // TODO: fix price assertions
+    // expect(p1.price).to.eql(new BigNumber((10 * 10000 + 7 * 8000) / (10000 + 8000)));
+    // expect(p2.price).to.eql(new BigNumber((5 * 6000 + 9 * 9500) / (6000 + 9500)));
+
+    // clean up stubs
+    subgraphStub.restore();
   });
 
   it('retrieve open orders', async () => {

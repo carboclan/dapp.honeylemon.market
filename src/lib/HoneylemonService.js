@@ -24,6 +24,7 @@ const TH_DECIMALS = 0; // TH has 6 decimals
 const PAYMENT_TOKEN_DECIMALS = 6; // USDC has 6 decimals
 const COLLATERAL_TOKEN_DECIMALS = 8; // imBTC has 8 decimals
 const SHIFT_PRICE_BY = TH_DECIMALS - PAYMENT_TOKEN_DECIMALS;
+const CONTRACT_DURATION = 28; // 28 days
 
 class HoneylemonService {
   constructor(
@@ -353,7 +354,7 @@ class HoneylemonService {
 
       metaData.remainingFillableMakerAssetAmount = orderCalculationUtils.getMakerFillAmount(
         order,
-        metaData.remainingFillableTakerAssetAmount
+        new BigNumber(metaData.remainingFillableTakerAssetAmount)
       );
     });
 
@@ -515,7 +516,7 @@ class HoneylemonService {
         shortPositions: []
       };
 
-    const contracts = await this.getContracts(28);
+    const contracts = await this.getContracts(CONTRACT_DURATION);
 
     // TODO: additional processing, calculate total price by iterating over fills
     const shortPositionsProcessed = await this._processPositionsData(
@@ -535,7 +536,29 @@ class HoneylemonService {
     };
   }
 
+  _mergePositions(positions, mergeByFunc) {
+    const merged = positions.reduce((res, pos) => {
+      const mergeBy = mergeByFunc(pos);
+      const existing = res[mergeBy];
+      if (existing) {
+        // merge positions
+        existing.qtyToMint = new BigNumber(existing.qtyToMint).plus(pos.qtyToMint).toString();
+      } else {
+        res[mergeBy] = pos;
+      }
+      return res;
+    }, {});
+
+    return Object.values(merged);
+  }
+
   async _processPositionsData(positions, contracts, short) {
+    // 1. merge positions by transaction in order to correctly represent fills and price
+    positions = this._mergePositions(positions, (pos) => pos.transaction.id);
+
+    // 2. merge positions by marketId
+    positions = this._mergePositions(positions, (pos) => pos.marketId);
+
     for (let i = 0; i < positions.length; i++) {
       const position = positions[i];
 
@@ -583,7 +606,7 @@ class HoneylemonService {
     return positions;
   }
 
-  async getContracts(last = 28) {
+  async getContracts(last = CONTRACT_DURATION) {
     const { contracts } = await this.subgraphClient.request(CONTRACTS_QUERY, { last });
     return contracts;
   }
@@ -622,6 +645,7 @@ const POSITIONS_QUERY = /* GraphQL */ `
       id
     }
     transaction {
+      id
       blockNumber
       fills {
         makerAssetFilledAmount
@@ -655,10 +679,11 @@ const CONTRACTS_QUERY = /* GraphQL */ `
   }
 `;
 
-module.exports = {
-  HoneylemonService,
-  PAYMENT_TOKEN_DECIMALS,
-  COLLATERAL_TOKEN_DECIMALS,
-  POSITIONS_QUERY,
-  CONTRACTS_QUERY
+module.exports =  { 
+  HoneylemonService, 
+  PAYMENT_TOKEN_DECIMALS, 
+  COLLATERAL_TOKEN_DECIMALS, 
+  POSITIONS_QUERY, 
+  CONTRACTS_QUERY, 
+  CONTRACT_DURATION 
 };

@@ -15,7 +15,7 @@ local-docker:
 	docker-compose -f ./docker/docker-compose-local.yml up -d
 
 local-subgraph-deploy:
-	cd subgraph && npm run build && npm run create-local; npm run deploy-local
+	cd subgraph && npm run prepare:local && npm run build && npm run create-local; npm run deploy-local
 
 local-start: local-docker local-ganache-wait migrate local-subgraph-deploy
 
