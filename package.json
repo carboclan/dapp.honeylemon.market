@@ -57,9 +57,9 @@
     "test": "truffle test",
     "lint": "prettier-eslint --write \"$(pwd)/**/*.js\" \"$(pwd)/**/*.sol\" --ignore './node_modules/**' --ignore './coverage/**' --ignore './build/**' --ignore './webapp/**' --ignore './dist/**'",
     "build": "webpack --config webpack.config.js --color -p --progress --hide-modules --display-optimization-bailout",
-    "build:webapp": "cd webapp && npm install && npm run build",
-    "install:webapp": "cd webapp ",
-    "postinstall": "truffle compile && npm run build",
+    "build:webapp": "cd webapp && npm run build",
+    "install:webapp": "cd webapp && npm install",
+    "postinstall": "truffle compile && npm run build && npm run install:webapp",
     "coverage": "npx solidity-coverage",
     "docgen": "solidoc"
   },
