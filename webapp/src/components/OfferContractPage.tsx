@@ -31,7 +31,7 @@ const useStyles = makeStyles(({ spacing, palette }) => ({
 }))
 
 const OfferContractPage: React.SFC = () => {
-  const { honeylemonService, COLLATERAL_TOKEN_DECIMALS, collateralTokenAllowance, collateralTokenBalance } = useHoneylemon();
+  const { honeylemonService, COLLATERAL_TOKEN_DECIMALS, collateralTokenAllowance, collateralTokenBalance, CONTRACT_DURATION } = useHoneylemon();
   const { address = '0x' } = useOnboard();
   const classes = useStyles();
 
@@ -58,12 +58,12 @@ const OfferContractPage: React.SFC = () => {
   }, [hashAmount, honeylemonService, COLLATERAL_TOKEN_DECIMALS]);
 
   useEffect(() => {
-    setTotalHashPrice(hashPrice * hashAmount * 28)
-  }, [hashPrice, hashAmount])
+    setTotalHashPrice(hashPrice * hashAmount * CONTRACT_DURATION)
+  }, [hashPrice, hashAmount, CONTRACT_DURATION])
 
   const createOffer = async () => {
     try {
-      const order = honeylemonService.createOrder(address, new BigNumber(hashAmount), new BigNumber(hashPrice));
+      const order = honeylemonService.createOrder(address, new BigNumber(hashAmount), new BigNumber(CONTRACT_DURATION).multipliedBy(hashPrice));
       const signedOrder = await honeylemonService.signOrder(order);
       await honeylemonService.submitOrder(signedOrder);
       forwardTo('/portfolio')
@@ -96,7 +96,7 @@ const OfferContractPage: React.SFC = () => {
       }
       <Grid container alignItems='flex-start' justify='flex-start' spacing={2} className={classes.offerForm}>
         <Grid item xs={12}>
-          <Typography style={{ fontWeight: 'bold' }}>Offer a 28 day Mining Revenue Contract</Typography>
+          <Typography style={{ fontWeight: 'bold' }}>Offer a {CONTRACT_DURATION} day Mining Revenue Contract</Typography>
         </Grid>
         <Grid item xs={6}><Typography style={{ fontWeight: 'bold' }}>Price:</Typography></Grid>
         <Grid item xs={4}>
@@ -154,7 +154,7 @@ const OfferContractPage: React.SFC = () => {
         </Grid>
         <Grid item xs={6}><Typography style={{ fontWeight: 'bold' }}>Total:</Typography></Grid>
         <Grid item xs={4} style={{ textAlign: 'center' }}><Typography style={{ fontWeight: 'bold' }}>${totalHashPrice.toFixed(2)}</Typography></Grid>
-        <Grid item xs={12}><Typography style={{ fontStyle: 'italic', fontSize: 12 }}>${hashPrice} Th/day * 28 Days * {hashAmount} Contracts</Typography></Grid>
+        <Grid item xs={12}><Typography style={{ fontStyle: 'italic', fontSize: 12 }}>${hashPrice} Th/day * {CONTRACT_DURATION} Days * {hashAmount} Contracts</Typography></Grid>
         <Grid item xs={12}><Button fullWidth onClick={createOffer} disabled={!isValid}>CREATE OFFER</Button></Grid>
         <Grid item xs={12}>
           <Typography>
@@ -162,8 +162,8 @@ const OfferContractPage: React.SFC = () => {
           If a hodler buys your offer you will receive ${totalHashPrice.toFixed(2)} USDT.
           You will be asked to post the hodlers max win of {collateralAmount} BTC as collateral.
           The amount of that collateral that the hodler receives will be determined
-          by the average value of the <Link href='#'>Mining Revenue Index</Link> over the
-          28 days starting when the hodler pays you.
+          by the average value of the <Link href='#'>Mining Revenue Index</Link> over the&nbsp;
+          {CONTRACT_DURATION} days starting when the hodler pays you.
         </Typography>
         </Grid>
         <Grid item xs={12}><Typography>See <Link href='#'>full contract specification here.</Link></Typography></Grid>

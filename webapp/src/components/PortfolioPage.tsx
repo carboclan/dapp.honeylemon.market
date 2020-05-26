@@ -37,7 +37,7 @@ const useStyles = makeStyles(({ spacing }) => ({
 
 const PorfolioPage: React.SFC = () => {
   const { address } = useOnboard();
-  const { honeylemonService } = useHoneylemon();
+  const { honeylemonService, CONTRACT_DURATION } = useHoneylemon();
 
   const [activeTab, setActiveTab] = useState<'active' | 'settled'>('active')
   const [collateralForWithdraw, setCollateralForWithdraw] = useState(0);
@@ -45,7 +45,7 @@ const PorfolioPage: React.SFC = () => {
     Array<{
       orderHash: string,
       remainingFillableMakerAssetAmount: BigNumber,
-      price: number
+      price: BigNumber
       //TODO: update to use types once definitions have been added
     }>>([]);
 
@@ -159,7 +159,7 @@ const PorfolioPage: React.SFC = () => {
                   {openOrdersMetadata && openOrdersMetadata?.map(order =>
                     <TableRow key={order.orderHash}>
                       <TableCell>{order?.remainingFillableMakerAssetAmount.toString()}</TableCell>
-                      <TableCell align='center'>${order?.price.toFixed(2)}</TableCell>
+                      <TableCell align='center'>${order?.price.dividedBy(CONTRACT_DURATION).toFixed(2)}</TableCell>
                       <TableCell align='right'><Button onClick={() => cancelOpenOrder(order.orderHash)}>Cancel</Button></TableCell>
                     </TableRow>
                   )}

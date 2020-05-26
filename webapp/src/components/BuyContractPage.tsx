@@ -39,7 +39,7 @@ enum BuyType { 'budget', 'quantity' };
 
 const BuyContractPage: React.SFC = () => {
   const { address } = useOnboard();
-  const { honeylemonService, PAYMENT_TOKEN_DECIMALS, paymentTokenAllowance } = useHoneylemon()
+  const { honeylemonService, PAYMENT_TOKEN_DECIMALS, paymentTokenAllowance, CONTRACT_DURATION } = useHoneylemon()
   const classes = useStyles();
 
   const [budget, setBudget] = useState(0);
@@ -71,7 +71,7 @@ const BuyContractPage: React.SFC = () => {
       const result = await honeylemonService.getQuoteForSize(new BigNumber(newValue))
       const isLiquid = !!(Number(result?.remainingMakerFillAmount?.toString() || -1) === 0)
       setIsValid(isLiquid);
-      setHashPrice(Number(result?.price?.toString()) || 0);
+      setHashPrice(Number(result?.price?.dividedBy(CONTRACT_DURATION).toString()) || 0);
       setOrderValue(Number(result?.totalTakerFillAmount?.shiftedBy(-PAYMENT_TOKEN_DECIMALS).toString()) || 0);
       setResultOrders(result?.resultOrders || undefined);
       setTakerFillAmounts(result?.takerAssetFillAmounts || undefined);
@@ -94,7 +94,7 @@ const BuyContractPage: React.SFC = () => {
       const result = await honeylemonService.getQuoteForBudget(newValue);
       const isLiquid = !!(Number(result?.remainingTakerFillAmount?.toString() || -1) === 0);
       setIsValid(isLiquid);
-      setHashPrice(Number(result?.price?.toString()) || 0);
+      setHashPrice(Number(result?.price?.dividedBy(CONTRACT_DURATION).toString()) || 0);
       setOrderQuantity(Number(result?.totalMakerFillAmount?.toString()) || 0);
       setResultOrders(result.resultOrders || undefined);
       setTakerFillAmounts(result.takerAssetFillAmounts || undefined);
@@ -205,7 +205,7 @@ const BuyContractPage: React.SFC = () => {
       <Grid item xs={12}><Button fullWidth onClick={() => buyOffer()} disabled={!isValid}>BUY NOW</Button></Grid>
       <Grid item xs={12}>
         <Typography>
-          You will pay ${orderValue} to buy {orderQuantity} Th of hasrate for 28 days for ${hashPrice} Th/day.
+          You will pay ${orderValue} to buy {orderQuantity} Th of hasrate for 28 days for ${hashPrice.toPrecision(6)} Th/day.
           You will receive the average value of the <Link href='#'>Mining Revenue Index</Link> over 28 days.
           Representing {orderQuantity} Th of mining power per day per contract.
         </Typography>
