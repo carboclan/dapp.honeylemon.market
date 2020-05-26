@@ -107,11 +107,11 @@ const PorfolioPage: React.SFC = () => {
         const allPositions = positions.longPositions.map((lc: any) => ({
           ...lc,
           contractName: lc.contractName + '-long',
-          daysToMaturity: dayjs(lc.time * 1000).add(28, 'd').diff(dayjs(), 'd')
+          daysToMaturity: dayjs(lc.time * 1000).add(CONTRACT_DURATION, 'd').diff(dayjs(), 'd')
         })).concat(positions.shortPositions.map((sc: any) => ({
           ...sc,
           contractName: sc.contractName + '-short',
-          daysToMaturity: dayjs(sc.time * 1000).add(28, 'd').diff(dayjs(), 'd')
+          daysToMaturity: dayjs(sc.time * 1000).add(CONTRACT_DURATION, 'd').diff(dayjs(), 'd')
         })));
 
         setActivePositions(allPositions.filter((p: any) => !p.contract.settlement));

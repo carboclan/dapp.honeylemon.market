@@ -391,19 +391,28 @@ class HoneylemonService {
     };
   }
 
-  async _processPositionsData(positions, contracts, short) {
-    // Merge positions by transaction in order to correctly represent fills and price
+  _mergePositions(positions, mergeByFunc) {
     const merged = positions.reduce((res, pos) => {
-      const existing = res[pos.transaction.id];
+      const mergeBy = mergeByFunc(pos);
+      const existing = res[mergeBy];
       if (existing) {
         // merge positions
         existing.qtyToMint = new BigNumber(existing.qtyToMint).plus(pos.qtyToMint).toString();
       } else {
-        res[pos.transaction.id] = pos;
+        res[mergeBy] = pos;
       }
       return res;
     }, {});
-    positions = Object.values(merged);
+
+    return Object.values(merged);
+  }
+
+  async _processPositionsData(positions, contracts, short) {
+    // 1. merge positions by transaction in order to correctly represent fills and price
+    positions = this._mergePositions(positions, (pos) => pos.transaction.id);
+
+    // 2. merge positions by marketId
+    positions = this._mergePositions(positions, (pos) => pos.marketId);
 
     for (let i = 0; i < positions.length; i++) {
       const position = positions[i];
