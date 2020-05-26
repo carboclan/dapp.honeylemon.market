@@ -2,6 +2,7 @@ const { GraphQLClient } = require('graphql-request');
 const { HttpClient, OrderbookRequest } = require('@0x/connect');
 const MinterBridgeArtefacts = require('../../build/contracts/MinterBridge.json');
 const MarketContractProxyArtefacts = require('../../build/contracts/MarketContractProxy.json');
+const DSProxyArtefacts = require('../../build/contracts/DSProxy.json');
 const CollateralTokenArtefacts = require('../../build/contracts/CollateralToken.json');
 const PaymentTokenArtefacts = require('../../build/contracts/PaymentToken.json');
 
@@ -170,10 +171,7 @@ class HoneylemonService {
         takerFillAmount
       );
       // Recalculate takerFillAmount based on whole makerFillAmount
-      takerFillAmount = orderCalculationUtils.getTakerFillAmount(
-        order,
-        makerFillAmount
-      );
+      takerFillAmount = orderCalculationUtils.getTakerFillAmount(order, makerFillAmount);
       totalMakerFillAmount = totalMakerFillAmount.plus(makerFillAmount);
       totalTakerFillAmount = totalTakerFillAmount.plus(takerFillAmount);
 
@@ -236,9 +234,7 @@ class HoneylemonService {
     sizeTh = new BigNumber(sizeTh);
     pricePerTh = new BigNumber(pricePerTh);
     if (!expirationTime) {
-      expirationTime = new BigNumber(
-        Math.round(Date.now() / 1000) + 10 * 24 * 60 * 60
-      ); // 10 days
+      expirationTime = new BigNumber(Math.round(Date.now() / 1000) + 10 * 24 * 60 * 60); // 10 days
     }
     const exchangeAddress = this.contractWrappers.exchange.address;
 
@@ -371,19 +367,168 @@ class HoneylemonService {
       .call();
   }
 
+  async deployDSProxyContract(deployer) {
+    const address = await this.marketContractProxy.methods
+      .createDSProxyWallet()
+      .call({ from: deployer });
+    await this.marketContractProxy.methods.createDSProxyWallet().send({
+      from: deployer,
+      gas: 9000000
+    });
+    return address;
+  }
+
+  async addressHasDSProxy(address) {
+    const DSProxyAddress = await this.marketContractProxy.methods
+      .getUserAddressOrDSProxy(address)
+      .call({ from: address });
+    // if the address is not the same as the DSProxy address then the user has a DSProxy
+    return DSProxyAddress.toLowerCase() != address.toLowerCase();
+  }
+
+  async batchRedeem(recipientAddress) {
+    const dsProxyAddress = await this.marketContractProxy.methods
+      .getUserAddressOrDSProxy(recipientAddress)
+      .call();
+
+    if (dsProxyAddress == recipientAddress) {
+      console.error('User does not have DSProxy wallet');
+      return null;
+    }
+
+    let traderDSProxy = new web3.eth.Contract(DSProxyArtefacts.abi, dsProxyAddress);
+    traderDSProxy.setProvider(this.provider);
+
+    // Get position information for the recipient
+    const { longPositions, shortPositions } = await this.getPositions(recipientAddress);
+
+    // Place holders to return tx within if there was a batch redemption
+    let redemptionTxLong = null,
+      redemptionTxShort = null;
+
+    // The trader could have entered into both long and short trades. Start with the long trade
+    if (longPositions.length > 0) {
+      let longParams = {
+        tokenAddresses: [],
+        marketContractAddresses: [],
+        numTokens: [],
+        isTradeLong: []
+      };
+
+      // For each trade they've entered, add the position information to the params.
+      for (let position of longPositions) {
+        // If the settlement information is not null the token is redeemable.
+        if (position.contract.settlement != null) {
+          // Grab the index of the address within the array. This is done to group by address
+          // As a trader could be in multiple instance of one token for each given day.
+          const arrayIndex = longParams.tokenAddresses.findIndex(
+            addr => addr == position.longTokenAddress
+          );
+          // If this is the only instance of the token then add to the end of the array
+          if (arrayIndex == -1) {
+            longParams.tokenAddresses.push(position.longTokenAddress);
+            longParams.marketContractAddresses.push(
+              await this.marketContractProxy.methods
+                .marketContracts(position.marketId)
+                .call()
+            );
+            longParams.numTokens.push(position.qtyToMint);
+            longParams.isTradeLong.push(true); // true set for long trades
+          }
+          // If this is not the only instance of this token then update the other previous
+          // occupance with more tokens to redeem
+          else {
+            longParams.numTokens[arrayIndex] = (
+              Number(longParams.numTokens[arrayIndex]) + Number(position.qtyToMint)
+            ).toString();
+          }
+        }
+      }
+      // encode the function call to send to DSProxy
+      const batchRedemptionLongTx = this.marketContractProxy.methods
+        .batchRedeem(
+          longParams.tokenAddresses,
+          longParams.marketContractAddresses,
+          longParams.numTokens,
+          longParams.isTradeLong
+        )
+        .encodeABI();
+
+      // Execute function call on DSProxy
+      redemptionTxLong = await traderDSProxy.methods
+        .execute(this.marketContractProxyAddress, batchRedemptionLongTx)
+        .send({ from: recipientAddress, gas: 9000000 });
+    }
+
+    if (shortPositions.length > 0) {
+      let shortParams = {
+        tokenAddresses: [],
+        marketContractAddresses: [],
+        numTokens: [],
+        isTradeLong: []
+      };
+
+      for (let position of shortPositions) {
+        if (position.contract.settlement != null) {
+          const arrayIndex = shortParams.tokenAddresses.findIndex(
+            addr => addr == position.shortTokenAddress
+          );
+
+          if (arrayIndex == -1) {
+            shortParams.tokenAddresses.push(position.shortTokenAddress);
+            shortParams.marketContractAddresses.push(
+              await this.marketContractProxy.methods
+                .marketContracts(position.marketId)
+                .call()
+            );
+            shortParams.numTokens.push(position.qtyToMint);
+            shortParams.isTradeLong.push(false); // true set for long trades
+          } else {
+            shortParams.numTokens[arrayIndex] = (
+              Number(shortParams.numTokens[arrayIndex]) + Number(position.qtyToMint)
+            ).toString();
+          }
+        }
+      }
+
+      const batchRedemptionShortTx = this.marketContractProxy.methods
+        .batchRedeem(
+          shortParams.tokenAddresses,
+          shortParams.marketContractAddresses,
+          shortParams.numTokens,
+          shortParams.isTradeLong
+        )
+        .encodeABI();
+
+      redemptionTxShort = await traderDSProxy.methods
+        .execute(this.marketContractProxyAddress, batchRedemptionShortTx)
+        .send({ from: recipientAddress, gas: 9000000 });
+    }
+    return { redemptionTxLong, redemptionTxShort };
+  }
+
   async getPositions(address) {
     address = address.toLowerCase();
     const data = await this.subgraphClient.request(POSITIONS_QUERY, { address });
-    if (!data.user) return {
-      longPositions: [],
-      shortPositions: []
-    }
+    if (!data.user)
+      return {
+        longPositions: [],
+        shortPositions: []
+      };
 
     const contracts = await this.getContracts(CONTRACT_DURATION);
 
     // TODO: additional processing, calculate total price by iterating over fills
-    const shortPositionsProcessed = await this._processPositionsData(data.user.positionsAsMaker, contracts, true);
-    const longPositionsProcessed = await this._processPositionsData(data.user.positionsAsTaker, contracts, false);
+    const shortPositionsProcessed = await this._processPositionsData(
+      data.user.positionsAsMaker,
+      contracts,
+      true
+    );
+    const longPositionsProcessed = await this._processPositionsData(
+      data.user.positionsAsTaker,
+      contracts,
+      false
+    );
 
     return {
       longPositions: longPositionsProcessed,
@@ -443,7 +588,9 @@ class HoneylemonService {
       position.finalReward = new BigNumber(0);
       if (position.contract.settlement) {
         const revenuePerUnit = new BigNumber(position.contract.settlement.revenuePerUnit);
-        const returnPerUnit = short ? collateralPerUnit.minus(revenuePerUnit) : revenuePerUnit;
+        const returnPerUnit = short
+          ? collateralPerUnit.minus(revenuePerUnit)
+          : revenuePerUnit;
         position.finalReward = returnPerUnit.multipliedBy(position.qtyToMint);
         position.pendingReward = position.finalReward;
       } else {
@@ -532,4 +679,11 @@ const CONTRACTS_QUERY = /* GraphQL */ `
   }
 `;
 
-module.exports =  { HoneylemonService, PAYMENT_TOKEN_DECIMALS, COLLATERAL_TOKEN_DECIMALS, POSITIONS_QUERY, CONTRACTS_QUERY, CONTRACT_DURATION };
+module.exports =  { 
+  HoneylemonService, 
+  PAYMENT_TOKEN_DECIMALS, 
+  COLLATERAL_TOKEN_DECIMALS, 
+  POSITIONS_QUERY, 
+  CONTRACTS_QUERY, 
+  CONTRACT_DURATION 
+};

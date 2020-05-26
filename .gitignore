@@ -11,3 +11,4 @@ goBindings/
 docker/.volumes/
 build/
 dist/*
+.netlify/
