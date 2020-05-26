@@ -1,15 +1,14 @@
 specVersion: 0.0.2
 description: Honeylemon graph
-repository: https://github.com/0xproject/0x-subgraph
+repository: https://github.com/carboclan/dapp.honeylemon.market
 schema:
     file: ./schema.graphql
 dataSources:
     - kind: ethereum/contract
       name: ExchangeV3
-      network: mainnet
+      network: {{network}}
       source:
-          #address: '0x4f833a24e1f95d70f028921e27040ca56e09ab0b' # mainnet
-          address: '0x48bacb9266a570d521063ef5dd96e61686dbe788' # ganache
+          address: '{{ExchangeV3Address}}'
           abi: ExchangeV3
       mapping:
           kind: ethereum/events
@@ -29,10 +28,9 @@ dataSources:
           file: ./src/mapping.ts
     - kind: ethereum/contract
       name: MarketContractProxy
-      network: mainnet
+      network: {{network}}
       source:
-          #address: '0x4f833a24e1f95d70f028921e27040ca56e09ab0b' # mainnet
-          address: '0xdD66C23e07b4D6925b6089b5Fe6fc9E62941aFE8' # ganache
+          address: '{{MarketContractProxyAddress}}'
           abi: MarketContractProxy
       mapping:
           kind: ethereum/events
