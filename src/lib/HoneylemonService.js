@@ -391,7 +391,29 @@ class HoneylemonService {
     };
   }
 
+  _mergePositions(positions, mergeByFunc) {
+    const merged = positions.reduce((res, pos) => {
+      const mergeBy = mergeByFunc(pos);
+      const existing = res[mergeBy];
+      if (existing) {
+        // merge positions
+        existing.qtyToMint = new BigNumber(existing.qtyToMint).plus(pos.qtyToMint).toString();
+      } else {
+        res[mergeBy] = pos;
+      }
+      return res;
+    }, {});
+
+    return Object.values(merged);
+  }
+
   async _processPositionsData(positions, contracts, short) {
+    // 1. merge positions by transaction in order to correctly represent fills and price
+    positions = this._mergePositions(positions, (pos) => pos.transaction.id);
+
+    // 2. merge positions by marketId
+    positions = this._mergePositions(positions, (pos) => pos.marketId);
+
     for (let i = 0; i < positions.length; i++) {
       const position = positions[i];
 
@@ -476,6 +498,7 @@ const POSITIONS_QUERY = /* GraphQL */ `
       id
     }
     transaction {
+      id
       blockNumber
       fills {
         makerAssetFilledAmount
