@@ -13,6 +13,7 @@ export type HoneylemonContext = {
   paymentTokenBalance: Number,
   paymentTokenAllowance: Number,
   PAYMENT_TOKEN_DECIMALS: number,
+  CONTRACT_DURATION: number
 };
 
 export type HoneylemonProviderProps = {
@@ -86,6 +87,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
         paymentTokenAllowance,
         paymentTokenBalance,
         PAYMENT_TOKEN_DECIMALS: 6, //TODO: Extract this from library when TS conversion is done
+        CONTRACT_DURATION: 28
       }}
     >
       {children}

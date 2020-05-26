@@ -23,6 +23,7 @@ const TH_DECIMALS = 0; // TH has 6 decimals
 const PAYMENT_TOKEN_DECIMALS = 6; // USDC has 6 decimals
 const COLLATERAL_TOKEN_DECIMALS = 8; // imBTC has 8 decimals
 const SHIFT_PRICE_BY = TH_DECIMALS - PAYMENT_TOKEN_DECIMALS;
+const CONTRACT_DURATION = 28; // 28 days
 
 class HoneylemonService {
   constructor(
@@ -378,7 +379,7 @@ class HoneylemonService {
       shortPositions: []
     }
 
-    const contracts = await this.getContracts(28);
+    const contracts = await this.getContracts(CONTRACT_DURATION);
 
     // TODO: additional processing, calculate total price by iterating over fills
     const shortPositionsProcessed = await this._processPositionsData(data.user.positionsAsMaker, contracts, true);
@@ -436,7 +437,7 @@ class HoneylemonService {
     return positions;
   }
 
-  async getContracts(last = 28) {
+  async getContracts(last = CONTRACT_DURATION) {
     const { contracts } = await this.subgraphClient.request(CONTRACTS_QUERY, { last });
     return contracts;
   }
@@ -508,4 +509,4 @@ const CONTRACTS_QUERY = /* GraphQL */ `
   }
 `;
 
-module.exports =  { HoneylemonService, PAYMENT_TOKEN_DECIMALS, COLLATERAL_TOKEN_DECIMALS, POSITIONS_QUERY, CONTRACTS_QUERY };
+module.exports =  { HoneylemonService, PAYMENT_TOKEN_DECIMALS, COLLATERAL_TOKEN_DECIMALS, POSITIONS_QUERY, CONTRACTS_QUERY, CONTRACT_DURATION };
