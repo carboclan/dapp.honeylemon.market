@@ -205,8 +205,8 @@ const BuyContractPage: React.SFC = () => {
       <Grid item xs={12}><Button fullWidth onClick={() => buyOffer()} disabled={!isValid}>BUY NOW</Button></Grid>
       <Grid item xs={12}>
         <Typography>
-          You will pay ${orderValue} to buy {orderQuantity} Th of hasrate for {CONTRACT_DURATION} days for ${hashPrice.toPrecision(6)} Th/day.
-          You will receive the average value of the <Link href='#'>Mining Revenue Index</Link> over {CONTRACT_DURATION} days.
+          You will pay ${orderValue} to buy {orderQuantity} Th of hasrate for {CONTRACT_DURATION} days for ${hashPrice.toPrecision(6)} 
+          Th/day. You will receive the average value of the <Link href='#'>Mining Revenue Index</Link> over {CONTRACT_DURATION} days.
           Representing {orderQuantity} Th of mining power per day per contract.
         </Typography>
       </Grid>
