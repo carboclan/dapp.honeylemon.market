@@ -40,7 +40,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
             wrappedSubprovider = new MetamaskSubprovider(web3.currentProvider as Web3JsProvider);
             break;
           default:
-            wrappedSubprovider = new SignerSubprovider(web3.currentProvider as Web3JsProvider);
+            wrappedSubprovider = new MetamaskSubprovider(web3.currentProvider as Web3JsProvider);
         }
 
         const honeylemonService = new HoneylemonService(
@@ -66,14 +66,15 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
       setPaymentTokenAllowance(Number(payment.allowance.shiftedBy(-6).toString()));
       setPaymentTokenBalance(Number(payment.balance.shiftedBy(-6).toString()));
     }
-    const poller = () => setInterval(checkBalances, 5000)
+    let poller: NodeJS.Timeout;
     if (honeylemonService) {
       checkBalances();
-      poller();
+      poller = setInterval(checkBalances, 5000);
     }
 
     return () => {
-      clearInterval(poller());
+      console.log(`destroying balance poller for ${address}`);
+      clearInterval(poller);
     }
   }, [honeylemonService, address])
 
@@ -87,7 +88,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
         paymentTokenAllowance,
         paymentTokenBalance,
         PAYMENT_TOKEN_DECIMALS: 6, //TODO: Extract this from library when TS conversion is done
-        CONTRACT_DURATION: 28
+        CONTRACT_DURATION: 2 //TODO: Extract this from library when TS conversion is done
       }}
     >
       {children}

@@ -23,7 +23,7 @@ const TH_DECIMALS = 0; // TH has 6 decimals
 const PAYMENT_TOKEN_DECIMALS = 6; // USDC has 6 decimals
 const COLLATERAL_TOKEN_DECIMALS = 8; // imBTC has 8 decimals
 const SHIFT_PRICE_BY = TH_DECIMALS - PAYMENT_TOKEN_DECIMALS;
-const CONTRACT_DURATION = 28; // 28 days
+const CONTRACT_DURATION = 2; // 28 days
 
 class HoneylemonService {
   constructor(
@@ -509,4 +509,11 @@ const CONTRACTS_QUERY = /* GraphQL */ `
   }
 `;
 
-module.exports =  { HoneylemonService, PAYMENT_TOKEN_DECIMALS, COLLATERAL_TOKEN_DECIMALS, POSITIONS_QUERY, CONTRACTS_QUERY, CONTRACT_DURATION };
+module.exports =  { 
+  HoneylemonService, 
+  PAYMENT_TOKEN_DECIMALS, 
+  COLLATERAL_TOKEN_DECIMALS, 
+  POSITIONS_QUERY, 
+  CONTRACTS_QUERY, 
+  CONTRACT_DURATION,
+};
