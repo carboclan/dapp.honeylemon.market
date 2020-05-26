@@ -1,9 +1,6 @@
 module.exports = ({
   marketId = 1,
   qtyToMint = 1,
-  revenuePerUnit = 51324,
-  makerAssetFilledAmount = 1,
-  takerAssetFilledAmount = 3600,
   makerAddress = "0x6ecbe1db9ef729cbe972c83fb886247691fb6beb",
   takerAddress = "0xe36ea790bc9d7ab70c55260c66d52b1eca985f84",
   time = "1590264097",
@@ -12,7 +9,14 @@ module.exports = ({
     contractName = "MRI-BTC-28D-test",
     isSettled = false,
     revenuePerUnit = 51324
-  }
+  } = {},
+  transaction: {
+    id: transactionId = "someid",
+    fills = [{
+      "makerAssetFilledAmount": 1,
+      "takerAssetFilledAmount": 3600
+    }]
+  } = {}
 }) => {
   const position = {
     "contract": {
@@ -39,13 +43,9 @@ module.exports = ({
     },
     "time": time.toString(),
     "transaction": {
+      "id": transactionId,
       "blockNumber": "88",
-      "fills": [
-        {
-          "makerAssetFilledAmount": makerAssetFilledAmount.toString(),
-          "takerAssetFilledAmount": takerAssetFilledAmount.toString()
-        }
-      ]
+      "fills": fills
     }
   };
 
