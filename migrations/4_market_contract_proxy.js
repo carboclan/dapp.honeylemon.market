@@ -9,11 +9,11 @@ module.exports = async function(deployer, network, accounts) {
   if (network == "skip-migrations") return;
 
   // Deploy imBTC token
-  await deployer.deploy(CollateralToken, 'Mock imBTC', 'imBTC', 1000000000000, 8);
+  await deployer.deploy(CollateralToken, 'Mock imBTC', 'imBTC', 1000000000000000, 8);
 
   // Give some collateral token to miner
   const collateralToken = await CollateralToken.deployed();
-  collateralToken.transfer(accounts[1], 1000000000000);
+  collateralToken.transfer(accounts[1], 1000000000000000);
 
   console.log('🕺 Deployed Mock Collateral token');
 
