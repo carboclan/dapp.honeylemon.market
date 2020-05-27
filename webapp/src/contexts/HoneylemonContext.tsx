@@ -68,6 +68,15 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
         setIsDsProxyDeployed(proxyDeployed);
       };
       initHoneylemonService();
+
+      return () => {
+        setHoneylemonService(undefined);
+        setCollateralTokenAllowance(0)
+        setCollateralTokenBalance(0);
+        setPaymentTokenAllowance(0);
+        setPaymentTokenBalance(0);
+        setIsDsProxyDeployed(false);
+      }
     }
   }, [wallet, network, isReady, address]);
 
@@ -110,7 +119,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
       update({
         eventCode: 'deployDsProxy',
         message: 'Wallet deployed',
-        autoDismiss: 5,
+        autoDismiss: 5000,
         type: 'success'
       })
     } catch (error) {
@@ -118,7 +127,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
       update({
         eventCode: 'deployDsProxy',
         message: 'Wallet deployment failed',
-        autoDismiss: 10,
+        autoDismiss: 5000,
         type: 'error'
       })
     }

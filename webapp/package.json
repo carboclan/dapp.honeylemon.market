@@ -31,13 +31,15 @@
     "@types/react-dom": "16.9.0",
     "@types/react-router": "5.1.7",
     "@types/react-router-dom": "5.1.5",
+    "source-map-explorer": "^2.4.2",
     "typescript": "3.9.2"
   },
   "scripts": {
     "start": "react-scripts --max_old_space_size=8192 start",
     "build": "react-scripts --max_old_space_size=8192 build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "analyze": "source-map-explorer 'build/static/js/*.js'"
   },
   "eslintConfig": {
     "extends": "react-app"
