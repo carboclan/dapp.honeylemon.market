@@ -43,7 +43,7 @@ dataSources:
               - name: MarketContractProxy
                 file: ../build/contracts/MarketContractProxy.json
           eventHandlers:
-              - event: PositionTokensMinted(indexed uint256,string,indexed address,address,indexed address,address,uint256,address,address,address,uint256)
+              - event: PositionTokensMinted(uint256,indexed uint256,string,indexed address,address,indexed address,address,address,address,address,uint256)
                 handler: handlePositionTokensMinted
               - event: MarketContractDeployed(uint256,bytes32,uint256,indexed uint256,address,uint256)
                 handler: handleMarketContractDeployed
