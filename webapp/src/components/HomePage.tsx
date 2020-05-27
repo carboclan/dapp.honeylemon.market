@@ -4,7 +4,6 @@ import { forwardTo } from '../helpers/history';
 import dayjs, { Dayjs } from 'dayjs';
 import duration from 'dayjs/plugin/duration';
 import { useOnboard } from '../contexts/OnboardContext';
-import { useHoneylemon } from '../contexts/HoneylemonContext';
 dayjs.extend(duration);
 
 const useStyles = makeStyles(({ palette, spacing }) => ({
@@ -43,8 +42,7 @@ const useStyles = makeStyles(({ palette, spacing }) => ({
 }))
 
 const HomePage: React.SFC = () => {
-  const { wallet, onboard, isReady, checkIsReady, address } = useOnboard();
-  const { isDsProxyDeployed, honeylemonService } = useHoneylemon(); 
+  const { wallet, onboard, isReady, checkIsReady } = useOnboard();
   const [difficultyAdjustmentDate, setDifficultyAdjustmentDate] = useState<Dayjs | undefined>(undefined);
   const [adjustmentInterval, setAdjustmentInterval] = useState({
     days: '00',
@@ -89,14 +87,8 @@ const HomePage: React.SFC = () => {
 
   const classes = useStyles();
 
-  const ready = onboard && wallet && isReady && isDsProxyDeployed;
-  const deployProxy = async () => {
-    try {
-      await honeylemonService.deployDSProxyContract(address);
-    } catch (error) {
-      console.log('The transaction was declined. Please approve to continue');
-    }
-  }
+  const ready = onboard && wallet && isReady;
+
   return (
     <>
       {
@@ -112,14 +104,6 @@ const HomePage: React.SFC = () => {
         <Paper className={classes.notification} square onClick={() => checkIsReady()}>
           <Typography style={{ fontWeight: 'bold' }}>
             Connect wallet to continue
-          </Typography>
-        </Paper>
-      }
-      {
-        onboard && wallet && isReady && !isDsProxyDeployed &&
-        <Paper className={classes.notification} square onClick={deployProxy}>
-          <Typography style={{ fontWeight: 'bold' }}>
-            Deploy Wallet Contract
           </Typography>
         </Paper>
       }

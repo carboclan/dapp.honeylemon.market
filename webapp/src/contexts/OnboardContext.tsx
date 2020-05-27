@@ -35,6 +35,9 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
   const [isReady, setIsReady] = useState<boolean>(false);
   const [notify, setNotify] = useState<NotifyApi | undefined>(undefined)
 
+  const infuraId = process.env.REACT_APP_INFURA_ID
+  const infuraRpc = "https://kovan.infura.io/v3/3025ae52e6ba43d7baa3dfc2490468db"
+
   useEffect(() => {
     const onboard = Onboard({
       dappId: onboardProps.dappId,
@@ -42,15 +45,29 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
       darkMode: true,
       walletSelect: {
         wallets: [
-          { walletName: 'metamask' },
+          { walletName: 'metamask', preferred: true },
           {
             walletName: "portis",
             apiKey: process.env.REACT_APP_PORTIS_API_KEY,
           },
           {
             walletName: 'imToken',
-            // rpcUrl: '' // Add this to update balances correctly
+            rpcUrl: infuraRpc,
+            preferred: true
           },
+          { walletName: "coinbase" },
+          { walletName: "dapper" },
+          { walletName: "fortmatic", apiKey: process.env.REACT_APP_FORTMATIC_KEY},
+          {
+            walletName: "walletConnect",
+            infuraKey: infuraId
+          },
+          { walletName: "walletLink", rpcUrl: infuraRpc },
+          { walletName: "opera" },
+          { walletName: "operaTouch" },
+          { walletName: "torus" },
+          { walletName: "status" },
+          { walletName: "unilogin" },
         ]
       },
       walletCheck: [
@@ -90,7 +107,7 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
     }));
 
 
-  }, [onboardProps.dappId, onboardProps.networkId])
+  }, [onboardProps.dappId, onboardProps.networkId, infuraId])
 
   const checkIsReady = async () => {
     const isReady = await onboard?.walletCheck();

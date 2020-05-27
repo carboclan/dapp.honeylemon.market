@@ -31,11 +31,13 @@ const useStyles = makeStyles(({ spacing, palette }) => ({
 }))
 
 const OfferContractPage: React.SFC = () => {
-  const { honeylemonService, 
-    COLLATERAL_TOKEN_DECIMALS, 
-    collateralTokenAllowance, 
-    collateralTokenBalance, 
-    CONTRACT_DURATION 
+  const { honeylemonService,
+    COLLATERAL_TOKEN_DECIMALS,
+    collateralTokenAllowance,
+    collateralTokenBalance,
+    CONTRACT_DURATION,
+    deployProxy,
+    isDsProxyDeployed,
   } = useHoneylemon();
   const { address = '0x' } = useOnboard();
   const classes = useStyles();
@@ -92,7 +94,15 @@ const OfferContractPage: React.SFC = () => {
 
   return (
     <>
-      {!ERC20ApprovalComplete &&
+      {
+        !isDsProxyDeployed &&
+        <Paper className={classes.notification} square onClick={deployProxy}>
+          <Typography style={{ fontWeight: 'bold' }}>
+            Deploy Wallet Contract
+          </Typography>
+        </Paper>
+      }
+      {isDsProxyDeployed && !ERC20ApprovalComplete &&
         <Paper className={classes.notification} square onClick={approveCollateralToken}>
           <Typography style={{ fontWeight: 'bold' }}>
             Please approve Honeylemon to spend your imBTC to continue
@@ -160,7 +170,7 @@ const OfferContractPage: React.SFC = () => {
         <Grid item xs={6}><Typography style={{ fontWeight: 'bold' }}>Total:</Typography></Grid>
         <Grid item xs={4} style={{ textAlign: 'center' }}><Typography style={{ fontWeight: 'bold' }}>${totalHashPrice.toFixed(2)}</Typography></Grid>
         <Grid item xs={12}><Typography style={{ fontStyle: 'italic', fontSize: 12 }}>${hashPrice} Th/day * {CONTRACT_DURATION} Days * {hashAmount} Contracts</Typography></Grid>
-        <Grid item xs={12}><Button fullWidth onClick={createOffer} disabled={!isValid}>CREATE OFFER</Button></Grid>
+        <Grid item xs={12}><Button fullWidth onClick={createOffer} disabled={!isValid || !isDsProxyDeployed}>CREATE OFFER</Button></Grid>
         <Grid item xs={12}>
           <Typography>
             You will offer {hashAmount} contracts at ${hashPrice} Th/day.
