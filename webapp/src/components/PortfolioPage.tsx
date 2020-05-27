@@ -125,7 +125,7 @@ const PorfolioPage: React.SFC = () => {
     getPorfolio();
     return () => { cancelled = true }
 
-  }, [address, honeylemonService, refresh])
+  }, [address, honeylemonService, refresh, CONTRACT_DURATION])
 
   const classes = useStyles();
   return (

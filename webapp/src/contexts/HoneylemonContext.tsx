@@ -1,7 +1,7 @@
 import * as React from "react";
 import Web3 from 'web3'
 import { useState, useEffect } from "react";
-import { MetamaskSubprovider, Web3JsProvider, SignerSubprovider } from '@0x/subproviders';
+import { MetamaskSubprovider, Web3JsProvider } from '@0x/subproviders';
 import { HoneylemonService } from "honeylemon";
 import { useOnboard } from "./OnboardContext";
 
@@ -15,6 +15,7 @@ export type HoneylemonContext = {
   PAYMENT_TOKEN_DECIMALS: number,
   CONTRACT_DURATION: number,
   isDsProxyDeployed: Boolean,
+  deployProxy(): void,
 };
 
 export type HoneylemonProviderProps = {
@@ -24,20 +25,21 @@ export type HoneylemonProviderProps = {
 const HoneylemonContext = React.createContext<HoneylemonContext | undefined>(undefined);
 
 const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
-  const { wallet, network, isReady, address } = useOnboard();
+  const { wallet, network, isReady, address, notify } = useOnboard();
   const [honeylemonService, setHoneylemonService] = useState<any | undefined>(undefined);
   const [collateralTokenBalance, setCollateralTokenBalance] = useState<number>(0);
   const [collateralTokenAllowance, setCollateralTokenAllowance] = useState<number>(0);
   const [paymentTokenBalance, setPaymentTokenBalance] = useState<number>(0);
   const [paymentTokenAllowance, setPaymentTokenAllowance] = useState<number>(0);
   const [isDsProxyDeployed, setIsDsProxyDeployed] = useState<Boolean>(false);
-  
+
   useEffect(() => {
     if (isReady && wallet && network) {
       const initHoneylemonService = async () => {
         let wrappedSubprovider;
         const web3 = new Web3(wallet.provider)
         switch (wallet.name) {
+          // TODO Test this with all other enabled
           case 'MetaMask':
             wrappedSubprovider = new MetamaskSubprovider(web3.currentProvider as Web3JsProvider);
             break;
@@ -85,8 +87,35 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
     return () => {
       console.log(`destroying balance poller for ${address}`);
       clearInterval(poller);
+      setIsDsProxyDeployed(false); 
     }
-  }, [honeylemonService, address])
+  }, [honeylemonService, address, isDsProxyDeployed])
+
+  const deployProxy = async () => {
+    //@ts-ignore
+    const { update } = notify.notification({
+      eventCode: 'deployDSProxy',
+      message: 'Deploying Wallet Contract',
+      type: 'pending'
+    })
+    try {
+      await honeylemonService.deployDSProxyContract(address);
+      update({
+        eventCode: 'deployDsProxy',
+        message: 'Wallet deployed',
+        autoDismiss: 5,
+        type: 'success'
+      })
+    } catch (error) {
+      console.log('The transaction was declined. Please approve to continue');
+      update({
+        eventCode: 'deployDsProxy',
+        message: 'Wallet deployment failed',
+        autoDismiss: 10,
+        type: 'error'
+      })
+    }
+  }
 
   return (
     <HoneylemonContext.Provider
@@ -98,8 +127,9 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
         paymentTokenAllowance,
         paymentTokenBalance,
         PAYMENT_TOKEN_DECIMALS: 6, //TODO: Extract this from library when TS conversion is done
-        CONTRACT_DURATION: 2,
-        isDsProxyDeployed, //TODO: Extract this from library when TS conversion is done
+        CONTRACT_DURATION: 2, //TODO: Extract this from library when TS conversion is done
+        isDsProxyDeployed,
+        deployProxy,
       }}
     >
       {children}

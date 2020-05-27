@@ -1,18 +1,30 @@
 import React, { useState } from 'react';
-import { Button, Typography, Grid, makeStyles, FilledInput, Link, InputAdornment, Tabs, Tab } from '@material-ui/core';
+import { Button, Typography, Grid, makeStyles, FilledInput, Link, InputAdornment, Tabs, Tab, Paper } from '@material-ui/core';
 import { useHoneylemon } from '../contexts/HoneylemonContext';
 import { useOnboard } from '../contexts/OnboardContext';
 import { forwardTo } from '../helpers/history';
 const { BigNumber } = require('@0x/utils');
 
-const useStyles = makeStyles(({ spacing }) => ({
+const useStyles = makeStyles(({ spacing, palette }) => ({
   rightAlign: {
     textAlign: 'end',
   },
   inputBase: {
     textAlign: 'end',
     padding: spacing(1)
-  }
+  },
+  notification: {
+    backgroundColor: palette.secondary.main,
+    color: palette.common.black,
+    textAlign: 'center',
+    marginLeft: -spacing(2),
+    marginRight: -spacing(2),
+    marginTop: -spacing(2),
+    padding: spacing(2),
+    '&:hover': {
+      backgroundColor: palette.secondary.dark,
+    }
+  },
 }))
 
 interface TabPanelProps {
@@ -39,7 +51,14 @@ enum BuyType { 'budget', 'quantity' };
 
 const BuyContractPage: React.SFC = () => {
   const { address } = useOnboard();
-  const { honeylemonService, PAYMENT_TOKEN_DECIMALS, paymentTokenAllowance, CONTRACT_DURATION } = useHoneylemon()
+  const {
+    honeylemonService,
+    PAYMENT_TOKEN_DECIMALS,
+    paymentTokenAllowance,
+    CONTRACT_DURATION,
+    isDsProxyDeployed,
+    deployProxy
+  } = useHoneylemon()
   const classes = useStyles();
 
   const [budget, setBudget] = useState(0);
@@ -144,74 +163,84 @@ const BuyContractPage: React.SFC = () => {
   }
 
   return (
-    <Grid container alignItems='stretch' justify='center' spacing={2}>
-      <Grid item xs={12}>
-        <Typography style={{ fontWeight: 'bold' }}>Buy Mining Rewards</Typography>
-      </Grid>
-      <Grid item xs={6}><Typography style={{ fontWeight: 'bold' }}>PRICE</Typography></Grid>
-      <Grid item xs={6} className={classes.rightAlign}><Typography color='secondary'>${hashPrice.toPrecision(6)} Th/day</Typography></Grid>
-      <Grid item xs={12}>
-        <Tabs
-          value={buyType}
-          onChange={handleChangeBuyType}
-          indicatorColor="secondary"
-          variant="fullWidth"
-          textColor="primary"
-          scrollButtons="auto"
-        >
-          <Tab label="Enter budget" />
-          <Tab label="Enter amount" />
-        </Tabs>
-      </Grid>
-      <TabPanel value={buyType} index={0}>
-        <Grid item xs={9} className={classes.rightAlign}>
-          <FilledInput
-            fullWidth
-            disableUnderline
-            inputProps={{
-              className: classes.inputBase,
-              min: 0,
-              max: 10000000000, //Max Liquidity or takerTokenBalance
-              step: 1
-            }}
-            startAdornment={<InputAdornment position="start">$</InputAdornment>}
-            onChange={validateOrderValue}
-            value={budget}
-            type='number' />
+    <>
+      {
+        !isDsProxyDeployed &&
+        <Paper className={classes.notification} square onClick={deployProxy}>
+          <Typography style={{ fontWeight: 'bold' }}>
+            Deploy Wallet Contract
+          </Typography>
+        </Paper>
+      }
+      <Grid container alignItems='stretch' justify='center' spacing={2}>
+        <Grid item xs={12}>
+          <Typography style={{ fontWeight: 'bold' }}>Buy Mining Rewards</Typography>
         </Grid>
-        <Grid item xs={2} className={classes.rightAlign}>
-          <Typography style={{ fontWeight: 'bold' }} color='secondary'>USDT</Typography>
+        <Grid item xs={6}><Typography style={{ fontWeight: 'bold' }}>PRICE</Typography></Grid>
+        <Grid item xs={6} className={classes.rightAlign}><Typography color='secondary'>${hashPrice.toPrecision(6)} Th/day</Typography></Grid>
+        <Grid item xs={12}>
+          <Tabs
+            value={buyType}
+            onChange={handleChangeBuyType}
+            indicatorColor="secondary"
+            variant="fullWidth"
+            textColor="primary"
+            scrollButtons="auto"
+          >
+            <Tab label="Enter budget" />
+            <Tab label="Enter amount" />
+          </Tabs>
         </Grid>
-      </TabPanel>
-      <TabPanel value={buyType} index={1}>
-        <Grid item xs={9} className={classes.rightAlign}>
-          <FilledInput
-            fullWidth
-            disableUnderline
-            inputProps={{
-              className: classes.inputBase,
-              min: 0,
-              max: 10000000000, //Max Liquidity or takerTokenBalance
-              step: 1
-            }}
-            onChange={validateOrderQuantity}
-            value={orderQuantity}
-            type='number' />
-        </Grid>
-        <Grid item xs={2} className={classes.rightAlign}>
-          <Typography style={{ fontWeight: 'bold' }} color='secondary'>TH</Typography>
-        </Grid>
-      </TabPanel>
-      <Grid item xs={12}><Button fullWidth onClick={() => buyOffer()} disabled={!isValid}>BUY NOW</Button></Grid>
-      <Grid item xs={12}>
-        <Typography>
-          You will pay ${orderValue} to buy {orderQuantity} Th of hasrate for {CONTRACT_DURATION} days for ${hashPrice.toPrecision(6)} 
-          Th/day. You will receive the average value of the <Link href='#'>Mining Revenue Index</Link> over {CONTRACT_DURATION} days.
-          Representing {orderQuantity} Th of mining power per day per contract.
+        <TabPanel value={buyType} index={0}>
+          <Grid item xs={9} className={classes.rightAlign}>
+            <FilledInput
+              fullWidth
+              disableUnderline
+              inputProps={{
+                className: classes.inputBase,
+                min: 0,
+                max: 10000000000, //Max Liquidity or takerTokenBalance
+                step: 1
+              }}
+              startAdornment={<InputAdornment position="start">$</InputAdornment>}
+              onChange={validateOrderValue}
+              value={budget}
+              type='number' />
+          </Grid>
+          <Grid item xs={2} className={classes.rightAlign}>
+            <Typography style={{ fontWeight: 'bold' }} color='secondary'>USDT</Typography>
+          </Grid>
+        </TabPanel>
+        <TabPanel value={buyType} index={1}>
+          <Grid item xs={9} className={classes.rightAlign}>
+            <FilledInput
+              fullWidth
+              disableUnderline
+              inputProps={{
+                className: classes.inputBase,
+                min: 0,
+                max: 10000000000, //Max Liquidity or takerTokenBalance
+                step: 1
+              }}
+              onChange={validateOrderQuantity}
+              value={orderQuantity}
+              type='number' />
+          </Grid>
+          <Grid item xs={2} className={classes.rightAlign}>
+            <Typography style={{ fontWeight: 'bold' }} color='secondary'>TH</Typography>
+          </Grid>
+        </TabPanel>
+        <Grid item xs={12}><Button fullWidth onClick={() => buyOffer()} disabled={!isValid || !isDsProxyDeployed}>BUY NOW</Button></Grid>
+        <Grid item xs={12}>
+          <Typography>
+            You will pay ${orderValue} to buy {orderQuantity} Th of hasrate for {CONTRACT_DURATION} days for ${hashPrice.toPrecision(6)}
+            Th/day. You will receive the average value of the <Link href='#'>Mining Revenue Index</Link> over {CONTRACT_DURATION} days.
+            Representing {orderQuantity} Th of mining power per day per contract.
         </Typography>
+        </Grid>
+        <Grid item><Typography>See <Link href='#'>full contract specification here.</Link></Typography></Grid>
       </Grid>
-      <Grid item><Typography>See <Link href='#'>full contract specification here.</Link></Typography></Grid>
-    </Grid>
+    </>
   )
 }
 
