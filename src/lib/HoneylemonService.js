@@ -410,9 +410,7 @@ class HoneylemonService {
     if (longPositions.length > 0) {
       let longParams = {
         tokenAddresses: [],
-        marketContractAddresses: [],
-        numTokens: [],
-        isTradeLong: []
+        numTokens: []
       };
 
       // For each trade they've entered, add the position information to the params.
@@ -427,13 +425,7 @@ class HoneylemonService {
           // If this is the only instance of the token then add to the end of the array
           if (arrayIndex == -1) {
             longParams.tokenAddresses.push(position.longTokenAddress);
-            longParams.marketContractAddresses.push(
-              await this.marketContractProxy.methods
-                .marketContracts(position.marketId)
-                .call()
-            );
             longParams.numTokens.push(position.qtyToMint);
-            longParams.isTradeLong.push(true); // true set for long trades
           }
           // If this is not the only instance of this token then update the other previous
           // occupance with more tokens to redeem
@@ -448,9 +440,7 @@ class HoneylemonService {
       const batchRedemptionLongTx = this.marketContractProxy.methods
         .batchRedeem(
           longParams.tokenAddresses,
-          longParams.marketContractAddresses,
-          longParams.numTokens,
-          longParams.isTradeLong
+          longParams.numTokens
         )
         .encodeABI();
 
@@ -463,9 +453,7 @@ class HoneylemonService {
     if (shortPositions.length > 0) {
       let shortParams = {
         tokenAddresses: [],
-        marketContractAddresses: [],
-        numTokens: [],
-        isTradeLong: []
+        numTokens: []
       };
 
       for (let position of shortPositions) {
@@ -476,13 +464,7 @@ class HoneylemonService {
 
           if (arrayIndex == -1) {
             shortParams.tokenAddresses.push(position.shortTokenAddress);
-            shortParams.marketContractAddresses.push(
-              await this.marketContractProxy.methods
-                .marketContracts(position.marketId)
-                .call()
-            );
             shortParams.numTokens.push(position.qtyToMint);
-            shortParams.isTradeLong.push(false); // true set for long trades
           } else {
             shortParams.numTokens[arrayIndex] = (
               Number(shortParams.numTokens[arrayIndex]) + Number(position.qtyToMint)
@@ -494,9 +476,7 @@ class HoneylemonService {
       const batchRedemptionShortTx = this.marketContractProxy.methods
         .batchRedeem(
           shortParams.tokenAddresses,
-          shortParams.marketContractAddresses,
-          shortParams.numTokens,
-          shortParams.isTradeLong
+          shortParams.numTokens
         )
         .encodeABI();
 
