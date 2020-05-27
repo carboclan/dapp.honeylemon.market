@@ -4,6 +4,7 @@ import { forwardTo } from '../helpers/history';
 import dayjs, { Dayjs } from 'dayjs';
 import duration from 'dayjs/plugin/duration';
 import { useOnboard } from '../contexts/OnboardContext';
+import { useHoneylemon } from '../contexts/HoneylemonContext';
 dayjs.extend(duration);
 
 const useStyles = makeStyles(({ palette, spacing }) => ({
@@ -42,7 +43,8 @@ const useStyles = makeStyles(({ palette, spacing }) => ({
 }))
 
 const HomePage: React.SFC = () => {
-  const { wallet, onboard, isReady, checkIsReady } = useOnboard();
+  const { wallet, onboard, isReady, checkIsReady, address } = useOnboard();
+  const { isDsProxyDeployed, honeylemonService } = useHoneylemon(); 
   const [difficultyAdjustmentDate, setDifficultyAdjustmentDate] = useState<Dayjs | undefined>(undefined);
   const [adjustmentInterval, setAdjustmentInterval] = useState({
     days: '00',
@@ -86,6 +88,15 @@ const HomePage: React.SFC = () => {
   }, [difficultyAdjustmentDate])
 
   const classes = useStyles();
+
+  const ready = onboard && wallet && isReady && isDsProxyDeployed;
+  const deployProxy = async () => {
+    try {
+      await honeylemonService.deployDSProxyContract(address);
+    } catch (error) {
+      console.log('The transaction was declined. Please approve to continue');
+    }
+  }
   return (
     <>
       {
@@ -101,6 +112,14 @@ const HomePage: React.SFC = () => {
         <Paper className={classes.notification} square onClick={() => checkIsReady()}>
           <Typography style={{ fontWeight: 'bold' }}>
             Connect wallet to continue
+          </Typography>
+        </Paper>
+      }
+      {
+        onboard && wallet && isReady && !isDsProxyDeployed &&
+        <Paper className={classes.notification} square onClick={deployProxy}>
+          <Typography style={{ fontWeight: 'bold' }}>
+            Deploy Wallet Contract
           </Typography>
         </Paper>
       }
@@ -155,11 +174,11 @@ const HomePage: React.SFC = () => {
         </Grid>
         <Typography variant='h5' style={{ fontWeight: 'bold' }}>I am a BTC Holder</Typography>
         <Typography color='secondary' style={{ fontWeight: 'bold' }} gutterBottom>Pay cash & earn miner rewards</Typography>
-        <Button onClick={() => forwardTo('/buy')} className={classes.button}>BUY CONTRACTS</Button>
+        <Button onClick={() => forwardTo('/buy')} className={classes.button} disabled={!ready}>BUY CONTRACTS</Button>
         <Divider className={classes.divider} />
         <Typography variant='h5' style={{ fontWeight: 'bold' }}>I am a BTC miner</Typography>
         <Typography color='secondary' style={{ fontWeight: 'bold' }}>Hedge risk & get cash up front</Typography>
-        <Button onClick={() => forwardTo('/offer')} className={classes.button}>OFFER CONTRACTS</Button>
+        <Button onClick={() => forwardTo('/offer')} className={classes.button} disabled={!ready}>OFFER CONTRACTS</Button>
       </Grid>
     </>
   )

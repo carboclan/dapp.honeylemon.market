@@ -6,6 +6,7 @@ import { Menu, ChevronLeft, ChevronRight, AccountBalance } from '@material-ui/ic
 
 import { forwardTo } from '../helpers/history';
 import { ReactComponent as HoneyLemonLogo } from '../images/honeylemon-logo.svg';
+import { useOnboard } from '../contexts/OnboardContext';
 
 const drawerWidth = 240;
 
@@ -74,6 +75,7 @@ function AppWrapper(props: { children: any }) {
   const classes = useStyles();
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
+  const { isReady } = useOnboard();
 
   const handleDrawerOpen = () => {
     setOpen(true);
@@ -106,12 +108,13 @@ function AppWrapper(props: { children: any }) {
             edge="end"
             onClick={handleDrawerOpen}
             className={clsx(classes.hamburger,
-              { [classes.hide]: open })}>
+              { [classes.hide]: open })}
+            disabled={!isReady} >
             <Menu fontSize='large' />
           </IconButton>
         </Toolbar>
       </AppBar>
-      <main className={clsx(classes.content, {[classes.contentDrawerOpen]: open})}>
+      <main className={clsx(classes.content, { [classes.contentDrawerOpen]: open })}>
         {props.children}
       </main>
       <ClickAwayListener onClickAway={() => console.log('click away')}>
