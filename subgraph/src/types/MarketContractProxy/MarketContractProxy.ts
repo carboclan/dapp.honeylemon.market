@@ -23,32 +23,32 @@ export class PositionTokensMinted__Params {
     this._event = event;
   }
 
-  get marketId(): BigInt {
+  get qtyToMint(): BigInt {
     return this._event.parameters[0].value.toBigInt();
   }
 
+  get marketId(): BigInt {
+    return this._event.parameters[1].value.toBigInt();
+  }
+
   get contractName(): string {
-    return this._event.parameters[1].value.toString();
+    return this._event.parameters[2].value.toString();
   }
 
   get longTokenRecipient(): Address {
-    return this._event.parameters[2].value.toAddress();
-  }
-
-  get longTokenDSProxy(): Address {
     return this._event.parameters[3].value.toAddress();
   }
 
-  get shortTokenRecipient(): Address {
+  get longTokenDSProxy(): Address {
     return this._event.parameters[4].value.toAddress();
   }
 
-  get shortTokenDSProxy(): Address {
+  get shortTokenRecipient(): Address {
     return this._event.parameters[5].value.toAddress();
   }
 
-  get qtyToMint(): BigInt {
-    return this._event.parameters[6].value.toBigInt();
+  get shortTokenDSProxy(): Address {
+    return this._event.parameters[6].value.toAddress();
   }
 
   get latestMarketContract(): Address {
