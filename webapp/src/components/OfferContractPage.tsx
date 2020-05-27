@@ -31,7 +31,12 @@ const useStyles = makeStyles(({ spacing, palette }) => ({
 }))
 
 const OfferContractPage: React.SFC = () => {
-  const { honeylemonService, COLLATERAL_TOKEN_DECIMALS, collateralTokenAllowance, collateralTokenBalance, CONTRACT_DURATION } = useHoneylemon();
+  const { honeylemonService, 
+    COLLATERAL_TOKEN_DECIMALS, 
+    collateralTokenAllowance, 
+    collateralTokenBalance, 
+    CONTRACT_DURATION 
+  } = useHoneylemon();
   const { address = '0x' } = useOnboard();
   const classes = useStyles();
 

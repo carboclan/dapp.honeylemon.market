@@ -7,13 +7,14 @@ import { useOnboard } from "./OnboardContext";
 
 export type HoneylemonContext = {
   honeylemonService: any; //TODO update this when types exist
-  collateralTokenBalance: Number,
-  collateralTokenAllowance: Number,
+  collateralTokenBalance: number,
+  collateralTokenAllowance: number,
   COLLATERAL_TOKEN_DECIMALS: number,
-  paymentTokenBalance: Number,
-  paymentTokenAllowance: Number,
+  paymentTokenBalance: number,
+  paymentTokenAllowance: number,
   PAYMENT_TOKEN_DECIMALS: number,
-  CONTRACT_DURATION: number
+  CONTRACT_DURATION: number,
+  isDsProxyDeployed: Boolean,
 };
 
 export type HoneylemonProviderProps = {
@@ -25,11 +26,12 @@ const HoneylemonContext = React.createContext<HoneylemonContext | undefined>(und
 const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
   const { wallet, network, isReady, address } = useOnboard();
   const [honeylemonService, setHoneylemonService] = useState<any | undefined>(undefined);
-  const [collateralTokenBalance, setCollateralTokenBalance] = useState<Number>(0);
-  const [collateralTokenAllowance, setCollateralTokenAllowance] = useState<Number>(0);
-  const [paymentTokenBalance, setPaymentTokenBalance] = useState<Number>(0);
-  const [paymentTokenAllowance, setPaymentTokenAllowance] = useState<Number>(0);
-
+  const [collateralTokenBalance, setCollateralTokenBalance] = useState<number>(0);
+  const [collateralTokenAllowance, setCollateralTokenAllowance] = useState<number>(0);
+  const [paymentTokenBalance, setPaymentTokenBalance] = useState<number>(0);
+  const [paymentTokenAllowance, setPaymentTokenAllowance] = useState<number>(0);
+  const [isDsProxyDeployed, setIsDsProxyDeployed] = useState<Boolean>(false);
+  
   useEffect(() => {
     if (isReady && wallet && network) {
       const initHoneylemonService = async () => {
@@ -69,6 +71,10 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
       const payment = await honeylemonService.getPaymentTokenAmounts(address);
       setPaymentTokenAllowance(Number(payment.allowance.shiftedBy(-6).toString()));
       setPaymentTokenBalance(Number(payment.balance.shiftedBy(-6).toString()));
+      if (!isDsProxyDeployed) {
+        const proxyDeployed = await honeylemonService.addressHasDSProxy(address)
+        setIsDsProxyDeployed(proxyDeployed);
+      }
     }
     let poller: NodeJS.Timeout;
     if (honeylemonService) {
@@ -92,7 +98,8 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
         paymentTokenAllowance,
         paymentTokenBalance,
         PAYMENT_TOKEN_DECIMALS: 6, //TODO: Extract this from library when TS conversion is done
-        CONTRACT_DURATION: 2 //TODO: Extract this from library when TS conversion is done
+        CONTRACT_DURATION: 2,
+        isDsProxyDeployed, //TODO: Extract this from library when TS conversion is done
       }}
     >
       {children}
