@@ -58,6 +58,14 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
           process.env.REACT_APP_PAYMENT_TOKEN_ADDRESS,
         );
         setHoneylemonService(honeylemonService);
+        const collateral = await honeylemonService.getCollateralTokenAmounts(address);
+        setCollateralTokenAllowance(Number(collateral.allowance.shiftedBy(-8).toString()));
+        setCollateralTokenBalance(Number(collateral.balance.shiftedBy(-8).toString()));
+        const payment = await honeylemonService.getPaymentTokenAmounts(address);
+        setPaymentTokenAllowance(Number(payment.allowance.shiftedBy(-6).toString()));
+        setPaymentTokenBalance(Number(payment.balance.shiftedBy(-6).toString()));
+        const proxyDeployed = await honeylemonService.addressHasDSProxy(address)
+        setIsDsProxyDeployed(proxyDeployed);
       };
       initHoneylemonService();
     }
@@ -87,9 +95,8 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
     return () => {
       console.log(`destroying balance poller for ${address}`);
       clearInterval(poller);
-      setIsDsProxyDeployed(false); 
     }
-  }, [honeylemonService, address, isDsProxyDeployed])
+  }, [honeylemonService, address])
 
   const deployProxy = async () => {
     //@ts-ignore
