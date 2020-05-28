@@ -105,8 +105,6 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
       networkId: onboardProps.networkId,
       darkMode: true,
     }));
-
-
   }, [onboardProps.dappId, onboardProps.networkId, infuraId])
 
   const checkIsReady = async () => {
