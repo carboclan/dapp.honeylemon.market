@@ -114,28 +114,10 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
   }, [honeylemonService, address])
 
   const deployProxy = async () => {
-    //@ts-ignore
-    const { update } = notify.notification({
-      eventCode: 'deployDSProxy',
-      message: 'Deploying Wallet Contract',
-      type: 'pending'
-    })
     try {
       await honeylemonService.deployDSProxyContract(address);
-      update({
-        eventCode: 'deployDsProxy',
-        message: 'Wallet deployed',
-        autoDismiss: 5000,
-        type: 'success'
-      })
     } catch (error) {
       console.log('The transaction was declined. Please approve to continue');
-      update({
-        eventCode: 'deployDsProxy',
-        message: 'Wallet deployment failed',
-        autoDismiss: 5000,
-        type: 'error'
-      })
     }
   }
 
