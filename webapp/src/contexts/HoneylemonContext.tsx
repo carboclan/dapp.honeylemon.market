@@ -39,7 +39,6 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
         let wrappedSubprovider;
         const web3 = new Web3(wallet.provider)
         switch (wallet.name) {
-          // TODO Test this with all other enabled
           case 'MetaMask':
             wrappedSubprovider = new MetamaskSubprovider(web3.currentProvider as Web3JsProvider);
             break;
@@ -66,6 +65,12 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
         setPaymentTokenBalance(Number(payment.balance.shiftedBy(-6).toString()));
         const proxyDeployed = await honeylemonService.addressHasDSProxy(address)
         setIsDsProxyDeployed(proxyDeployed);
+        if (address && notify) {
+          const { emitter } = notify.account(address);
+          emitter.on('all', tx => ({
+            onclick: () => window.open(`https://kovan.etherscan.io/tx/${tx.hash}`) // TODO update this to work on other networks
+          }))
+        }
       };
       initHoneylemonService();
 
@@ -76,6 +81,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
         setPaymentTokenAllowance(0);
         setPaymentTokenBalance(0);
         setIsDsProxyDeployed(false);
+        notify?.unsubscribe(address || "0x");
       }
     }
   }, [wallet, network, isReady, address]);
