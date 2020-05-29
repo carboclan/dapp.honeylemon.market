@@ -68,6 +68,14 @@ const OfferContractPage: React.SFC = () => {
     setTotalHashPrice(hashPrice * hashAmount * CONTRACT_DURATION)
   }, [hashPrice, hashAmount, CONTRACT_DURATION])
 
+  useEffect(() => {
+    const getCurrentHashPrice = async () => {
+      const result = await honeylemonService.getQuoteForSize(new BigNumber(1))
+      setHashPrice(Number(result?.price?.dividedBy(CONTRACT_DURATION).toString()) || 0);
+    }
+    getCurrentHashPrice();
+  }, [])
+  
   const createOffer = async () => {
     try {
       const order = honeylemonService.createOrder(address, new BigNumber(hashAmount), new BigNumber(CONTRACT_DURATION).multipliedBy(hashPrice));

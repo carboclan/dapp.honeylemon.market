@@ -1,7 +1,7 @@
 import React, { ReactNode } from 'react';
 import clsx from 'clsx';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
-import { Drawer, AppBar, Toolbar, Divider, IconButton, Typography, ListItem, ListItemIcon, ListItemText, List } from '@material-ui/core';
+import { Drawer, AppBar, Toolbar, Divider, IconButton, Typography, ListItem, ListItemIcon, ListItemText, List, Avatar, Link } from '@material-ui/core';
 import { Menu, ChevronLeft, ChevronRight, AccountBalance, Assessment, MonetizationOn, Whatshot, ExitToApp } from '@material-ui/icons';
 import Blockies from 'react-blockies';
 
@@ -149,14 +149,19 @@ function AppWrapper(props: { children: ReactNode }) {
         <List>
           <ListItem>
             <ListItemIcon>
-              <Blockies seed={address || '0x'} size={10} />
+              <Avatar>
+                <Blockies seed={address || '0x'} size={10} />
+              </Avatar>
             </ListItemIcon>
             <ListItemText
-              primary={address}
               primaryTypographyProps={{
                 align: 'right',
-                noWrap: true,
-              }} />
+                noWrap: true}
+              }>
+              <Link href={`https://kovan.etherscan.io/address/${address}`} target="_blank" rel='noopener' underline='always' >
+                {address}
+              </Link>
+            </ListItemText>
           </ListItem>
         </List>
         <Divider />
@@ -166,7 +171,10 @@ function AppWrapper(props: { children: ReactNode }) {
               <img src='imBtc.png' style={{ width: '40px' }} />
             </ListItemIcon>
             <ListItemText
-              primary={`${collateralTokenBalance.toFixed(COLLATERAL_TOKEN_DECIMALS)}`}
+              primary={`${collateralTokenBalance.toLocaleString(undefined, {
+                useGrouping: true,
+                maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS,
+              })}`}
               secondary='imBTC'
               primaryTypographyProps={{
                 align: 'right',
@@ -181,7 +189,11 @@ function AppWrapper(props: { children: ReactNode }) {
               <img src='usdc.png' style={{ width: '40px' }} />
             </ListItemIcon>
             <ListItemText
-              primary={`${paymentTokenBalance.toFixed(PAYMENT_TOKEN_DECIMALS)}`}
+              primary={`${paymentTokenBalance.toLocaleString(undefined, {
+                useGrouping: true,
+                maximumFractionDigits: PAYMENT_TOKEN_DECIMALS,
+                minimumFractionDigits: 2,
+              })}`}
               secondary='USDC'
               primaryTypographyProps={{
                 align: 'right',
