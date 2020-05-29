@@ -116,6 +116,7 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
 
   const resetOnboard = () => {
     localStorage.clear();
+    setIsReady(false);
     onboard?.walletReset();
   }
 
