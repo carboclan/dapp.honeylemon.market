@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useRef } from 'react';
 import clsx from 'clsx';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
 import { Drawer, AppBar, Toolbar, Divider, IconButton, Typography, ListItem, ListItemIcon, ListItemText, List, Avatar, Link } from '@material-ui/core';
@@ -9,6 +9,7 @@ import { forwardTo } from '../helpers/history';
 import { ReactComponent as HoneyLemonLogo } from '../images/honeylemon-logo.svg';
 import { useOnboard } from '../contexts/OnboardContext';
 import { useHoneylemon } from '../contexts/HoneylemonContext';
+import { useOnClickOutside } from '../helpers/useOnClickOutside';
 
 const drawerWidth = 300;
 
@@ -99,6 +100,14 @@ function AppWrapper(props: { children: ReactNode }) {
     forwardTo(path);
     setOpen(false);
   }
+
+  const ref = useRef(null);
+  useOnClickOutside(ref, () => {
+    if(open){
+      setOpen(false)
+    }
+  })
+  
   return (
     <div className={classes.root}>
       <AppBar
@@ -128,6 +137,7 @@ function AppWrapper(props: { children: ReactNode }) {
         {props.children}
       </main>
       <Drawer
+        ref={ref}
         className={clsx(classes.drawer, {
           [classes.drawerOpen]: open,
         })}
