@@ -22,6 +22,7 @@ export type OnboardContext = {
   notify?: NotifyApi,
   isReady: boolean,
   checkIsReady(): Promise<boolean>,
+  resetOnboard(): void,
 }
 
 const OnboardContext = React.createContext<OnboardContext | undefined>(undefined);
@@ -113,6 +114,11 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
     return !!isReady;
   }
 
+  const resetOnboard = () => {
+    localStorage.clear();
+    onboard?.walletReset();
+  }
+
   return (
     <OnboardContext.Provider value={{
       address: address,
@@ -123,6 +129,7 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
       notify: notify,
       isReady: isReady,
       checkIsReady,
+      resetOnboard,
     }}>
       {children}
     </OnboardContext.Provider>

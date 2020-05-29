@@ -1,14 +1,16 @@
-import React from 'react';
+import React, { ReactNode } from 'react';
 import clsx from 'clsx';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
-import { Drawer, AppBar, Toolbar, Divider, IconButton, Typography, ListItem, ListItemIcon, ListItemText, List, ClickAwayListener } from '@material-ui/core';
-import { Menu, ChevronLeft, ChevronRight, AccountBalance } from '@material-ui/icons';
+import { Drawer, AppBar, Toolbar, Divider, IconButton, Typography, ListItem, ListItemIcon, ListItemText, List } from '@material-ui/core';
+import { Menu, ChevronLeft, ChevronRight, AccountBalance, Assessment, MonetizationOn, Whatshot, ExitToApp } from '@material-ui/icons';
+import Blockies from 'react-blockies';
 
 import { forwardTo } from '../helpers/history';
 import { ReactComponent as HoneyLemonLogo } from '../images/honeylemon-logo.svg';
 import { useOnboard } from '../contexts/OnboardContext';
+import { useHoneylemon } from '../contexts/HoneylemonContext';
 
-const drawerWidth = 240;
+const drawerWidth = 300;
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -51,6 +53,7 @@ const useStyles = makeStyles((theme) => ({
   },
   drawerPaper: {
     width: 0,
+    // backgroundColor: theme.palette.common.white,
   },
   drawerOpen: {
     width: drawerWidth,
@@ -71,11 +74,18 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-function AppWrapper(props: { children: any }) {
+function AppWrapper(props: { children: ReactNode }) {
   const classes = useStyles();
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
-  const { isReady } = useOnboard();
+  const { isReady, address, resetOnboard } = useOnboard();
+  const { collateralTokenBalance, COLLATERAL_TOKEN_DECIMALS, paymentTokenBalance, PAYMENT_TOKEN_DECIMALS } = useHoneylemon();
+
+  const handleLogout = () => {
+    resetOnboard();
+    setOpen(false);
+    forwardTo('/');
+  }
 
   const handleDrawerOpen = () => {
     setOpen(true);
@@ -97,7 +107,7 @@ function AppWrapper(props: { children: any }) {
           [classes.appBarShift]: open,
         })}>
         <Toolbar>
-          <HoneyLemonLogo className={classes.logo} />
+          <HoneyLemonLogo className={classes.logo} onClick={() => forwardTo('/')} />
           <Typography
             className={classes.title}
             onClick={() => forwardTo('/')}>
@@ -117,35 +127,98 @@ function AppWrapper(props: { children: any }) {
       <main className={clsx(classes.content, { [classes.contentDrawerOpen]: open })}>
         {props.children}
       </main>
-      <ClickAwayListener onClickAway={() => console.log('click away')}>
-        <Drawer
-          className={clsx(classes.drawer, {
-            [classes.drawerOpen]: open,
-          })}
-          variant="persistent"
-          anchor="right"
-          open={open}
-          classes={{
-            paper: clsx(classes.drawerPaper, {
-              [classes.drawerOpen]: open
-            }),
-          }}
-        >
-          <div className={classes.drawerHeader}>
-            <IconButton onClick={handleDrawerClose}>
-              {theme.direction === 'rtl' ? <ChevronLeft fontSize='large' /> : <ChevronRight fontSize='large' />}
-            </IconButton>
-          </div>
-          <Divider />
-          <List>
-            <ListItem button onClick={() => handleNavigate('/portfolio')}>
-              <ListItemIcon><AccountBalance /></ListItemIcon>
-              <ListItemText primary="Portfolio" />
-            </ListItem>
-          </List>
-          <Divider />
-        </Drawer>
-      </ClickAwayListener>
+      <Drawer
+        className={clsx(classes.drawer, {
+          [classes.drawerOpen]: open,
+        })}
+        variant="persistent"
+        anchor="right"
+        open={open}
+        classes={{
+          paper: clsx(classes.drawerPaper, {
+            [classes.drawerOpen]: open
+          }),
+        }}
+      >
+        <div className={classes.drawerHeader}>
+          <IconButton onClick={handleDrawerClose}>
+            {theme.direction === 'rtl' ? <ChevronLeft fontSize='large' /> : <ChevronRight fontSize='large' />}
+          </IconButton>
+        </div>
+        <Divider />
+        <List>
+          <ListItem>
+            <ListItemIcon>
+              <Blockies seed={address || '0x'} size={10} />
+            </ListItemIcon>
+            <ListItemText
+              primary={address}
+              primaryTypographyProps={{
+                align: 'right',
+                noWrap: true,
+              }} />
+          </ListItem>
+        </List>
+        <Divider />
+        <List>
+          <ListItem>
+            <ListItemIcon>
+              <img src='imBtc.png' style={{ width: '40px' }} />
+            </ListItemIcon>
+            <ListItemText
+              primary={`${collateralTokenBalance.toFixed(COLLATERAL_TOKEN_DECIMALS)}`}
+              secondary='imBTC'
+              primaryTypographyProps={{
+                align: 'right',
+                noWrap: true,
+              }}
+              secondaryTypographyProps={{
+                align: 'right'
+              }} />
+          </ListItem>
+          <ListItem>
+            <ListItemIcon>
+              <img src='usdc.png' style={{ width: '40px' }} />
+            </ListItemIcon>
+            <ListItemText
+              primary={`${paymentTokenBalance.toFixed(PAYMENT_TOKEN_DECIMALS)}`}
+              secondary='USDC'
+              primaryTypographyProps={{
+                align: 'right',
+                noWrap: true,
+              }}
+              secondaryTypographyProps={{
+                align: 'right'
+              }} />
+          </ListItem>
+        </List>
+        <Divider />
+        <List>
+          <ListItem button onClick={() => handleNavigate('/portfolio')}>
+            <ListItemIcon><AccountBalance /></ListItemIcon>
+            <ListItemText primary="Portfolio" />
+          </ListItem>
+          <ListItem button onClick={() => handleNavigate('/offer')}>
+            <ListItemIcon><Assessment /></ListItemIcon>
+            <ListItemText primary="Offer Contract" />
+          </ListItem>
+          <ListItem button onClick={() => handleNavigate('/buy')}>
+            <ListItemIcon><MonetizationOn /></ListItemIcon>
+            <ListItemText primary="Buy Contract" />
+          </ListItem>
+          <ListItem button onClick={() => handleNavigate('/stats')}>
+            <ListItemIcon><Whatshot /></ListItemIcon>
+            <ListItemText primary="Live Market Stats" />
+          </ListItem>
+        </List>
+        <Divider />
+        <List>
+          <ListItem button onClick={handleLogout}>
+            <ListItemIcon><ExitToApp /></ListItemIcon>
+            <ListItemText primary="Log out" />
+          </ListItem>
+        </List>
+      </Drawer>
     </div>
   );
 }

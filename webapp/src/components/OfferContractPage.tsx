@@ -136,7 +136,6 @@ const OfferContractPage: React.SFC = () => {
             }}
             value={hashPrice}
             type='number'
-            disabled={!isValid}
             onBlur={e => {
               e.target.value = e.target.value.replace(/^(-)?0+(0\.|\d)/, '$1$2')
             }} />
@@ -165,7 +164,6 @@ const OfferContractPage: React.SFC = () => {
             }}
             value={hashAmount}
             type='number'
-            disabled={!ERC20ApprovalComplete}
             onBlur={e => {
               e.target.value = e.target.value.replace(/^(-)?0+(0\.|\d)/, '$1$2')
             }} />

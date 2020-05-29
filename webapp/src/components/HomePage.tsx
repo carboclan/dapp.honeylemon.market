@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, Button, Typography, makeStyles, Grid, Divider, Paper } from '@material-ui/core';
+import { Link as RouterLink } from 'react-router-dom';
 import { forwardTo } from '../helpers/history';
 import dayjs, { Dayjs } from 'dayjs';
 import duration from 'dayjs/plugin/duration';
@@ -109,10 +110,10 @@ const HomePage: React.SFC = () => {
       }
       <Grid container direction='column' spacing={2}>
         <Grid item>
-          <Typography color="secondary" variant='h5' align='center'>Sweet Deals On Cyrpto</Typography>
+          <Typography color="secondary" variant='h5' align='center'>Sweet Deals In Crypto Mining</Typography>
         </Grid>
         <Grid item>
-          <Link href="#" onClick={() => forwardTo('/stats')}>
+          <Link component={RouterLink} to='/stats' underline='always'>
             <Typography align='center' style={{ fontWeight: 'bold' }} gutterBottom>
               <span role="img" aria-label="fire">🔥</span>
               Mining Market Live Stats
@@ -156,11 +157,11 @@ const HomePage: React.SFC = () => {
             <Typography style={{ fontWeight: 'bold' }}>Estimate: {difficultyAdjustmentDate?.format('MMM DD, YYYY HH:mm:ss')}</Typography>
           </Grid>
         </Grid>
-        <Typography variant='h5' style={{ fontWeight: 'bold' }}>I am a BTC Holder</Typography>
-        <Typography color='secondary' style={{ fontWeight: 'bold' }} gutterBottom>Pay cash & earn miner rewards</Typography>
+        <Typography variant='h5' style={{ fontWeight: 'bold' }}>I am a BTC Hodler</Typography>
+        <Typography color='secondary' style={{ fontWeight: 'bold' }} gutterBottom>Pay cash & earn mining rewards</Typography>
         <Button onClick={() => forwardTo('/buy')} className={classes.button} disabled={!ready}>BUY CONTRACTS</Button>
         <Divider className={classes.divider} />
-        <Typography variant='h5' style={{ fontWeight: 'bold' }}>I am a BTC miner</Typography>
+        <Typography variant='h5' style={{ fontWeight: 'bold' }}>I am a BTC Miner</Typography>
         <Typography color='secondary' style={{ fontWeight: 'bold' }}>Hedge risk & get cash up front</Typography>
         <Button onClick={() => forwardTo('/offer')} className={classes.button} disabled={!ready}>OFFER CONTRACTS</Button>
       </Grid>

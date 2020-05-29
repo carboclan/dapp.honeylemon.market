@@ -15,6 +15,7 @@
     "eslint": "6.8.0",
     "honeylemon": "file:../.",
     "react": "16.13.1",
+    "react-blockies": "^1.4.1",
     "react-dom": "16.13.1",
     "react-router-dom": "5.1.2",
     "react-scripts": "3.4.1",
