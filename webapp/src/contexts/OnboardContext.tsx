@@ -6,6 +6,7 @@ import Notify from 'bnc-notify';
 import { API as OnboardApi, Wallet } from 'bnc-onboard/dist/src/interfaces';
 import { API as NotifyApi } from 'bnc-notify/dist/src/interfaces';
 import { fromWei } from 'web3-utils';
+import { networkName } from '../helpers/ethereumNetworkUtils';
 
 export type OnboardProviderProps = {
   dappId: string;
@@ -37,7 +38,7 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
   const [notify, setNotify] = useState<NotifyApi | undefined>(undefined)
 
   const infuraId = process.env.REACT_APP_INFURA_ID
-  const infuraRpc = "https://kovan.infura.io/v3/3025ae52e6ba43d7baa3dfc2490468db"
+  const infuraRpc = `https://${networkName(network)}.infura.io/v3/${infuraId}`
 
   useEffect(() => {
     const onboard = Onboard({
@@ -54,11 +55,9 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
           {
             walletName: 'imToken',
             rpcUrl: infuraRpc,
-            preferred: true
           },
-          { walletName: "coinbase" },
+          { walletName: "coinbase", preferred: true },
           { walletName: "dapper" },
-          { walletName: "fortmatic", apiKey: process.env.REACT_APP_FORTMATIC_KEY},
           {
             walletName: "walletConnect",
             infuraKey: infuraId
