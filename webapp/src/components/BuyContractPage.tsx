@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { Button, Typography, Grid, makeStyles, FilledInput, Link, InputAdornment, Tabs, Tab, Paper } from '@material-ui/core';
+import { BigNumber } from '@0x/utils';
 import { useHoneylemon } from '../contexts/HoneylemonContext';
 import { useOnboard } from '../contexts/OnboardContext';
 import { forwardTo } from '../helpers/history';
-const { BigNumber } = require('@0x/utils');
+import { Link as RouterLink } from 'react-router-dom';
 
 const useStyles = makeStyles(({ spacing, palette }) => ({
   rightAlign: {
@@ -83,7 +84,7 @@ const BuyContractPage: React.SFC = () => {
       setOrderQuantity(0);
       return;
     }
-    const newValue = parseFloat(newValueString);
+    const newValue = parseInt(newValueString);
     !isNaN(newValue) && setOrderQuantity(newValue);
 
     try {
@@ -199,13 +200,15 @@ const BuyContractPage: React.SFC = () => {
               inputProps={{
                 className: classes.inputBase,
                 min: 0,
-                max: 10000000000, //Max Liquidity or takerTokenBalance
-                step: 1
+                step: 0.0000001
               }}
               startAdornment={<InputAdornment position="start">$</InputAdornment>}
               onChange={validateOrderValue}
               value={budget}
-              type='number' />
+              type='number'
+              onBlur={e => {
+                e.target.value = e.target.value.replace(/^(-)?0+(0\.|\d)/, '$1$2')
+              }} />
           </Grid>
           <Grid item xs={2} className={classes.rightAlign}>
             <Typography style={{ fontWeight: 'bold' }} color='secondary'>USDT</Typography>
@@ -219,12 +222,14 @@ const BuyContractPage: React.SFC = () => {
               inputProps={{
                 className: classes.inputBase,
                 min: 0,
-                max: 10000000000, //Max Liquidity or takerTokenBalance
                 step: 1
               }}
               onChange={validateOrderQuantity}
               value={orderQuantity}
-              type='number' />
+              type='number' 
+              onBlur={e => {
+                e.target.value = e.target.value.replace(/^(-)?0+(0\.|\d)/, '$1$2')
+              }}/>
           </Grid>
           <Grid item xs={2} className={classes.rightAlign}>
             <Typography style={{ fontWeight: 'bold' }} color='secondary'>TH</Typography>
@@ -234,7 +239,7 @@ const BuyContractPage: React.SFC = () => {
         <Grid item xs={12}>
           <Typography>
             You will pay ${orderValue} to buy {orderQuantity} Th of hasrate for {CONTRACT_DURATION} days for ${hashPrice.toPrecision(6)}
-            Th/day. You will receive the average value of the <Link href='#'>Mining Revenue Index</Link> over {CONTRACT_DURATION} days.
+            Th/day. You will receive the average value of the <Link component={RouterLink} to="#">Mining Revenue Index</Link> over {CONTRACT_DURATION} days.
             Representing {orderQuantity} Th of mining power per day per contract.
         </Typography>
         </Grid>

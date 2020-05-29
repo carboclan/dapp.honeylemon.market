@@ -136,7 +136,10 @@ const OfferContractPage: React.SFC = () => {
             }}
             value={hashPrice}
             type='number'
-            disabled={!isValid} />
+            disabled={!isValid}
+            onBlur={e => {
+              e.target.value = e.target.value.replace(/^(-)?0+(0\.|\d)/, '$1$2')
+            }} />
         </Grid>
         <Grid item xs={2} className={classes.rightAlign}>
           <Typography style={{ fontWeight: 'bold' }} color='secondary'>Th/day</Typography>
@@ -157,12 +160,15 @@ const OfferContractPage: React.SFC = () => {
                 setHashAmount(0);
                 return;
               }
-              const newValue = parseFloat(newValueString);
+              const newValue = parseInt(newValueString);
               !isNaN(newValue) && setHashAmount(newValue);
             }}
             value={hashAmount}
             type='number'
-            disabled={!ERC20ApprovalComplete} />
+            disabled={!ERC20ApprovalComplete}
+            onBlur={e => {
+              e.target.value = e.target.value.replace(/^(-)?0+(0\.|\d)/, '$1$2')
+            }} />
         </Grid>
         <Grid item xs={2} className={classes.rightAlign}>
           <Typography style={{ fontWeight: 'bold' }} color='secondary'>Th</Typography>
