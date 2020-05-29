@@ -34,7 +34,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
   const [isDsProxyDeployed, setIsDsProxyDeployed] = useState<Boolean>(false);
 
   useEffect(() => {
-    if (isReady && wallet && network) {
+    if (isReady && wallet && network && address) {
       const initHoneylemonService = async () => {
         let wrappedSubprovider;
         const web3 = new Web3(wallet.provider)
@@ -102,13 +102,12 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
       }
     }
     let poller: NodeJS.Timeout;
-    if (honeylemonService) {
+    if (honeylemonService && address) {
       checkBalances();
       poller = setInterval(checkBalances, 5000);
     }
 
     return () => {
-      console.log(`destroying balance poller for ${address}`);
       clearInterval(poller);
     }
   }, [honeylemonService, address])
