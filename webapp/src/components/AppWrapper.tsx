@@ -10,6 +10,7 @@ import { ReactComponent as HoneyLemonLogo } from '../images/honeylemon-logo.svg'
 import { useOnboard } from '../contexts/OnboardContext';
 import { useHoneylemon } from '../contexts/HoneylemonContext';
 import { useOnClickOutside } from '../helpers/useOnClickOutside';
+import { networkName } from '../helpers/ethereumNetworkUtils';
 
 const drawerWidth = 300;
 
@@ -79,7 +80,7 @@ function AppWrapper(props: { children: ReactNode }) {
   const classes = useStyles();
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
-  const { isReady, address, resetOnboard } = useOnboard();
+  const { isReady, address, network, resetOnboard } = useOnboard();
   const { collateralTokenBalance, COLLATERAL_TOKEN_DECIMALS, paymentTokenBalance, PAYMENT_TOKEN_DECIMALS } = useHoneylemon();
 
   const handleLogout = () => {
@@ -168,7 +169,7 @@ function AppWrapper(props: { children: ReactNode }) {
                 align: 'right',
                 noWrap: true}
               }>
-              <Link href={`https://kovan.etherscan.io/address/${address}`} target="_blank" rel='noopener' underline='always' >
+              <Link href={`https://${networkName(network)}.etherscan.io/address/${address}`} target="_blank" rel='noopener' underline='always' >
                 {address}
               </Link>
             </ListItemText>
