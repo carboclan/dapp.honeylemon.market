@@ -208,7 +208,7 @@ const OfferContractPage: React.SFC = () => {
         <Grid item xs={12}>
           <Typography>
             You will offer {hashAmount} contracts at ${hashPrice} Th/day.
-          If a hodler buys your offer you will receive ${totalHashPrice.toFixed(2)} USDT.
+          If a hodler buys your offer you will receive ${totalHashPrice.toFixed(2)} USDC.
           You will be asked to post the hodlers max win of {collateralAmount} BTC as collateral.
           The amount of that collateral that the hodler receives will be determined
           by the average value of the <Link href='#' underline='always'>Mining Revenue Index</Link> over the&nbsp;

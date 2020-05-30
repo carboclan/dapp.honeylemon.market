@@ -179,7 +179,7 @@ function AppWrapper(props: { children: ReactNode }) {
         <List>
           <ListItem>
             <ListItemIcon>
-              <img src='imBtc.png' style={{ width: '40px' }} />
+              <img src='imBtc.png' style={{ width: '40px' }} alt='imbtc logo'/>
             </ListItemIcon>
             <ListItemText
               primary={`${collateralTokenBalance.toLocaleString(undefined, {
@@ -197,7 +197,7 @@ function AppWrapper(props: { children: ReactNode }) {
           </ListItem>
           <ListItem>
             <ListItemIcon>
-              <img src='usdc.png' style={{ width: '40px' }} />
+              <img src='usdc.png' style={{ width: '40px' }} alt='usdc logo'/>
             </ListItemIcon>
             <ListItemText
               primary={`${paymentTokenBalance.toLocaleString(undefined, {
