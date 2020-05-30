@@ -132,6 +132,7 @@ const BuyContractPage: React.SFC = () => {
         await honeylemonService.approvePaymentToken(address, new BigNumber(orderValue).shiftedBy(PAYMENT_TOKEN_DECIMALS));
       }
 
+      // TODO: I dont think this should be hardcoded in here
       const gasPrice = 5e9; // 5 GWEI
 
       const tx = await honeylemonService.getFillOrdersTx(
@@ -200,7 +201,7 @@ const BuyContractPage: React.SFC = () => {
               inputProps={{
                 className: classes.inputBase,
                 min: 0,
-                step: 0.0000001
+                step: 0.000001
               }}
               startAdornment={<InputAdornment position="start">$</InputAdornment>}
               onChange={validateOrderValue}

@@ -167,10 +167,10 @@ function AppWrapper(props: { children: ReactNode }) {
             <ListItemText
               primaryTypographyProps={{
                 align: 'right',
-                noWrap: true}
-              }>
+                noWrap: true
+              }}>
               <Link href={`https://${networkName(network)}.etherscan.io/address/${address}`} target="_blank" rel='noopener' underline='always' >
-                {address}
+                {address || '0x'}
               </Link>
             </ListItemText>
           </ListItem>
