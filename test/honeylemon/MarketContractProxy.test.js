@@ -75,7 +75,7 @@ contract(
       // get deployed payment token
       usdc = await PaymentToken.deployed();
       // get deployed MarketContractFactoryMPX
-      marketContractFactory = await MarketContractFactoryMPX.deployed();
+      marketContractFactoryMpx = await MarketContractFactoryMPX.deployed();
       // get deployed MinterBridge
       minterBridge = await MinterBridge.deployed();
       // get deployed MarketContractProxy
@@ -198,18 +198,6 @@ contract(
           _expiration,
           dailySpecs[6].toString(),
           'Expiration timestamp mismatch'
-        );
-      });
-
-      it('should revert deploying market contract from non-owner', async () => {
-        await expectRevert.unspecified(
-          marketContractProxy.dailySettlement(
-            '0',
-            _currentMri,
-            _marketAndsTokenNames,
-            _expiration,
-            { from: random }
-          )
         );
       });
 
@@ -668,6 +656,124 @@ contract(
           );
         });
       });
+
+      describe('Arbitrate settlement', async () => {
+        let amount = new BigNumber(10);
+        let marketContractMpx, makerReturnedCollateralBeforeArbitrate, takerReturnedCollateralBeforeArbitrate, makerReturnedCollateralAfterArbitrate, takerrReturnedCollateralAfterArbitrate;
+
+        before(async () => {
+          let marketsContracts = await marketContractProxy.getAllMarketContracts();
+          marketContractMpx = await MarketContractMPX.at(marketsContracts[2]);
+
+          //await time.increaseTo((await marketContractMpx.EXPIRATION()).toNumber() + 10);
+
+          let _mri = new BigNumber(pc.getMRIDataForDay(31)).multipliedBy(
+            new BigNumber(1e8)
+          );
+          // settle contract
+          await marketContractProxy.settleMarketContract(_mri, marketsContracts[2], { from: honeyLemonOracle });
+
+          makerReturnedCollateralBeforeArbitrate = calculateExpectedCollateralToReturn(
+            new BigNumber((await marketContractMpx.PRICE_FLOOR()).toString()),
+            new BigNumber((await marketContractMpx.PRICE_CAP()).toString()),
+            new BigNumber((await marketContractMpx.QTY_MULTIPLIER()).toString()),
+            new BigNumber(0),
+            amount,
+            new BigNumber((await marketContractMpx.settlementPrice()).toString())
+          );
+          takerReturnedCollateralBeforeArbitrate = calculateExpectedCollateralToReturn(
+            new BigNumber((await marketContractMpx.PRICE_FLOOR()).toString()),
+            new BigNumber((await marketContractMpx.PRICE_CAP()).toString()),
+            new BigNumber((await marketContractMpx.QTY_MULTIPLIER()).toString()),
+            amount,
+            new BigNumber(0),
+            new BigNumber((await marketContractMpx.settlementPrice()).toString())
+          );
+
+          assert.equal(
+            (await marketContractMpx.lastPrice()).toString(),
+            _mri.toString(),
+            'last price value mismatch'
+          );
+          assert.equal(
+            await marketContractMpx.isSettled(),
+            true,
+            'market not settled'
+          )
+        });
+
+        it('arbitrate settlement value', async () => {
+          let makerImbtcBalanceBefore = new BigNumber(
+            (await imbtc.balanceOf(makerAddress)).toString()
+          );
+          let takerImbtcBalanceBefore = new BigNumber(
+            (await imbtc.balanceOf(takerAddress)).toString()
+          );
+
+          let _mri = new BigNumber(pc.getMRIDataForDay(32)).multipliedBy(
+            new BigNumber(1e8)
+          );
+          
+          await marketContractMpx.arbitrateSettlement(_mri, { from: honeyLemonOracle });
+
+          assert.equal(
+            (await marketContractMpx.lastPrice()).toString(),
+            _mri.toString(),
+            'last price value mismatch'
+          );
+          assert.equal(
+            await marketContractMpx.isSettled(),
+            true,
+            'market not settled'
+          );
+
+          makerReturnedCollateralAfterArbitrate = calculateExpectedCollateralToReturn(
+            new BigNumber((await marketContractMpx.PRICE_FLOOR()).toString()),
+            new BigNumber((await marketContractMpx.PRICE_CAP()).toString()),
+            new BigNumber((await marketContractMpx.QTY_MULTIPLIER()).toString()),
+            new BigNumber(0),
+            amount,
+            new BigNumber((await marketContractMpx.settlementPrice()).toString())
+          );
+          takerrReturnedCollateralAfterArbitrate = calculateExpectedCollateralToReturn(
+            new BigNumber((await marketContractMpx.PRICE_FLOOR()).toString()),
+            new BigNumber((await marketContractMpx.PRICE_CAP()).toString()),
+            new BigNumber((await marketContractMpx.QTY_MULTIPLIER()).toString()),
+            amount,
+            new BigNumber(0),
+            new BigNumber((await marketContractMpx.settlementPrice()).toString())
+          );
+
+          assert.notEqual(makerReturnedCollateralAfterArbitrate.toString(), makerReturnedCollateralBeforeArbitrate.toString());
+          assert.notEqual(takerrReturnedCollateralAfterArbitrate.toString(), takerReturnedCollateralBeforeArbitrate.toString());
+
+          // miner & investor redeem
+          await marketContractPool.settleAndClose(marketContractMpx.address, amount, 0, {
+            from: takerAddress
+          });
+          await marketContractPool.settleAndClose(marketContractMpx.address, 0, amount, {
+            from: makerAddress
+          });
+          
+          let makerImbtcBalanceAfter = new BigNumber(
+            (await imbtc.balanceOf(makerAddress)).toString()
+          );
+          let takerImbtcBalanceAfter = new BigNumber(
+            (await imbtc.balanceOf(takerAddress)).toString()
+          );
+
+          assert.equal(
+            makerImbtcBalanceAfter.minus(makerImbtcBalanceBefore).toString(),
+            makerReturnedCollateralAfterArbitrate.toString(),
+            'maker returned collateral mismatch'
+          );
+          assert.equal(
+            takerImbtcBalanceAfter.minus(takerImbtcBalanceBefore).toString(),
+            takerrReturnedCollateralAfterArbitrate.toString(),
+            'taker returned collateral mismatch'
+          );
+        });
+      });
     });
 
     describe('DSProxy', () => {
@@ -682,7 +788,7 @@ contract(
         let takerDsProxyWallet = await marketContractProxy.getUserAddressOrDSProxy(takerAddress);
 
         assert.equal(makerAddress, await marketContractProxy.dSProxyToAddress(makerDsProxyWallet), 'maker address mismatch');
-        assert.equal(takerAddress, await marketContractProxy.dSProxyToAddress(takerDsProxyWallet), 'taker address mismatch')
+        assert.equal(takerAddress, await marketContractProxy.dSProxyToAddress(takerDsProxyWallet), 'taker address mismatch');
       });
 
       it('batch redeem', async () => {
