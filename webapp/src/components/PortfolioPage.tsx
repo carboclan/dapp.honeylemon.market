@@ -113,7 +113,7 @@ const PorfolioPage: React.SFC = () => {
       const results = await honeylemonService.batchRedeem(address);
       setRefresh(true);
     } catch (error) {
-      console.log("Something went wrong during the withdrawal");
+      console.log("Something went wrong during the withdrawl");
       console.log(error);
     }
     setIsWithdrawing(false);
@@ -147,10 +147,10 @@ const PorfolioPage: React.SFC = () => {
 
         const activePositions = allPositions.filter((p: any) => !p?.contract.settlement)
         setActivePositions(activePositions);
-        const sctw = allPositions.filter((p: any) => !!p?.contract.settlement /** &&  outstanding withdraw flag */)
+        const sctw = allPositions.filter((p: any) => !!p?.contract.settlement /** &&  available withdraw flag */)
         setSettledPositionsToWithdraw(sctw);
         setCollateralForWithdraw(sctw.reduce((total: Number, contract: any) => total += contract?.finalReward, 0));
-        const finalized = allPositions.filter((p: any) => !!p?.contract.settlement /** &&  !outstanding withdraw flag */)
+        const finalized = allPositions.filter((p: any) => !!p?.contract.settlement /** &&  !available withdraw flag */)
         setSettledPositions(finalized);
         setRefresh(false);
         setIsLoading(false)
