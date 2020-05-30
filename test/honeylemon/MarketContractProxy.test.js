@@ -560,6 +560,9 @@ contract(
             (await imbtc.balanceOf(takerAddress)).toString()
           );
 
+          // advance time after settlement delay
+          await time.increaseTo((await marketContractMpx.settlementTimeStamp()).toNumber() + (3600 * 24));
+
           // miner & investor redeem
           await marketContractPool.settleAndClose(marketContractMpx.address, amount, 0, {
             from: takerAddress
@@ -773,6 +776,12 @@ contract(
             await marketContractMpx.isSettled(),
             true
           );
+
+          // time should be after last token's contract passed + settlement delay
+          if (marketContract.length-1 == i) {
+            // advance time after settlement delay
+            await time.increaseTo((await marketContractMpx.settlementTimeStamp()).toNumber() + (3600 * 24));
+          }
         }
 
         let makerImbtcBalanceBefore = new BigNumber(
