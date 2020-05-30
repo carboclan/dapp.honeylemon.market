@@ -221,7 +221,7 @@ const BuyContractPage: React.SFC = () => {
               disabled={isBuying} />
           </Grid>
           <Grid item xs={2} className={classes.rightAlign}>
-            <Typography style={{ fontWeight: 'bold' }} color='secondary'>USDT</Typography>
+            <Typography style={{ fontWeight: 'bold' }} color='secondary'>USDC</Typography>
           </Grid>
         </TabPanel>
         <TabPanel value={buyType} index={1}>
