@@ -11,6 +11,7 @@ import { useOnboard } from '../contexts/OnboardContext';
 import { useHoneylemon } from '../contexts/HoneylemonContext';
 import { useOnClickOutside } from '../helpers/useOnClickOutside';
 import { networkName } from '../helpers/ethereumNetworkUtils';
+import { displayAddress } from '../helpers/displayAddress';
 
 const drawerWidth = 300;
 
@@ -170,7 +171,7 @@ function AppWrapper(props: { children: ReactNode }) {
                 noWrap: true
               }}>
               <Link href={`https://${networkName(network)}.etherscan.io/address/${address}`} target="_blank" rel='noopener' underline='always' >
-                {address || '0x'}
+                {displayAddress(address || '0x', 20) }
               </Link>
             </ListItemText>
           </ListItem>
