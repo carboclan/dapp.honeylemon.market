@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Button, Typography, Grid, makeStyles, FilledInput, Link, InputAdornment, Tabs, Tab, Paper } from '@material-ui/core';
+import { Button, Typography, Grid, makeStyles, FilledInput, Link, InputAdornment, Tabs, Tab, Paper, CircularProgress } from '@material-ui/core';
 import { BigNumber } from '@0x/utils';
 import { useHoneylemon } from '../contexts/HoneylemonContext';
 import { useOnboard } from '../contexts/OnboardContext';
@@ -25,6 +25,12 @@ const useStyles = makeStyles(({ spacing, palette }) => ({
     '&:hover': {
       backgroundColor: palette.secondary.dark,
     }
+  },
+  loadingSpinner: {
+    width: 20,
+    flexBasis: 'end',
+    flexGrow: 0,
+    color: palette.secondary.main,
   },
 }))
 
@@ -71,7 +77,8 @@ const BuyContractPage: React.SFC = () => {
 
   const [resultOrders, setResultOrders] = useState([]);
   const [takerAssetFillAmounts, setTakerFillAmounts] = useState([]);
-  const [buyType, setBuyType] = React.useState<BuyType>(BuyType.budget);
+  const [buyType, setBuyType] = useState<BuyType>(BuyType.budget);
+  const [isBuying, setIsBuying] = useState(false); 
 
   const handleChangeBuyType = (event: React.ChangeEvent<{}>, newValue: BuyType) => {
     setBuyType(newValue);
@@ -127,6 +134,7 @@ const BuyContractPage: React.SFC = () => {
   }
 
   const buyOffer = async () => {
+    setIsBuying(true);
     try {
       if (paymentTokenAllowance < orderValue) {
         await honeylemonService.approvePaymentToken(address, new BigNumber(orderValue).shiftedBy(PAYMENT_TOKEN_DECIMALS));
@@ -162,6 +170,7 @@ const BuyContractPage: React.SFC = () => {
       console.log('Something went wrong buying this contract');
       console.log(error);
     }
+    setIsBuying(false);
   }
 
   return (
@@ -187,8 +196,7 @@ const BuyContractPage: React.SFC = () => {
             indicatorColor="secondary"
             variant="fullWidth"
             textColor="primary"
-            scrollButtons="auto"
-          >
+            scrollButtons="auto" >
             <Tab label="Enter budget" />
             <Tab label="Enter amount" />
           </Tabs>
@@ -209,7 +217,8 @@ const BuyContractPage: React.SFC = () => {
               type='number'
               onBlur={e => {
                 e.target.value = e.target.value.replace(/^(-)?0+(0\.|\d)/, '$1$2')
-              }} />
+              }}
+              disabled={isBuying} />
           </Grid>
           <Grid item xs={2} className={classes.rightAlign}>
             <Typography style={{ fontWeight: 'bold' }} color='secondary'>USDT</Typography>
@@ -230,13 +239,22 @@ const BuyContractPage: React.SFC = () => {
               type='number' 
               onBlur={e => {
                 e.target.value = e.target.value.replace(/^(-)?0+(0\.|\d)/, '$1$2')
-              }}/>
+              }}
+              disabled={isBuying}/>
           </Grid>
           <Grid item xs={2} className={classes.rightAlign}>
             <Typography style={{ fontWeight: 'bold' }} color='secondary'>TH</Typography>
           </Grid>
         </TabPanel>
-        <Grid item xs={12}><Button fullWidth onClick={() => buyOffer()} disabled={!isValid || !isDsProxyDeployed}>BUY NOW</Button></Grid>
+        <Grid item xs={12}>
+          <Button 
+            fullWidth 
+            onClick={buyOffer} 
+            disabled={(!isValid || !isDsProxyDeployed) || isBuying}>
+              BUY NOW &nbsp
+              {isBuying && <CircularProgress className={classes.loadingSpinner} size={20} />}
+            </Button>
+        </Grid>
         <Grid item xs={12}>
           <Typography>
             You will pay ${orderValue} to buy {orderQuantity} Th of hasrate for {CONTRACT_DURATION} days for ${hashPrice.toPrecision(6)}

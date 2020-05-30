@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Typography, Grid, makeStyles, FilledInput, Link, InputAdornment, Paper } from '@material-ui/core';
+import { Button, Typography, Grid, makeStyles, FilledInput, Link, InputAdornment, Paper, CircularProgress } from '@material-ui/core';
 import { useHoneylemon } from '../contexts/HoneylemonContext';
 import { useOnboard } from '../contexts/OnboardContext';
 import { BigNumber } from '@0x/utils';
@@ -28,6 +28,12 @@ const useStyles = makeStyles(({ spacing, palette }) => ({
   offerForm: {
     marginTop: 0,
   },
+  loadingSpinner: {
+    width: 20,
+    flexBasis: 'end',
+    flexGrow: 0,
+    color: palette.secondary.main,
+  },
 }))
 
 const OfferContractPage: React.SFC = () => {
@@ -46,6 +52,7 @@ const OfferContractPage: React.SFC = () => {
   const [hashAmount, setHashAmount] = useState(0);
   const [totalHashPrice, setTotalHashPrice] = useState(0);
   const [collateralAmount, setCollateralAmount] = useState(0);
+  const [isCreatingOffer, setIsCreatingOffer] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -77,6 +84,7 @@ const OfferContractPage: React.SFC = () => {
   }, [])
   
   const createOffer = async () => {
+    setIsCreatingOffer(true);
     try {
       const order = honeylemonService.createOrder(address, new BigNumber(hashAmount), new BigNumber(CONTRACT_DURATION).multipliedBy(hashPrice));
       const signedOrder = await honeylemonService.signOrder(order);
@@ -146,7 +154,8 @@ const OfferContractPage: React.SFC = () => {
             type='number'
             onBlur={e => {
               e.target.value = e.target.value.replace(/^(-)?0+(0\.|\d)/, '$1$2')
-            }} />
+            }} 
+            disabled={isCreatingOffer} />
         </Grid>
         <Grid item xs={2} className={classes.rightAlign}>
           <Typography style={{ fontWeight: 'bold' }} color='secondary'>Th/day</Typography>
@@ -174,26 +183,43 @@ const OfferContractPage: React.SFC = () => {
             type='number'
             onBlur={e => {
               e.target.value = e.target.value.replace(/^(-)?0+(0\.|\d)/, '$1$2')
-            }} />
+            }}
+            disabled={isCreatingOffer} />
         </Grid>
         <Grid item xs={2} className={classes.rightAlign}>
           <Typography style={{ fontWeight: 'bold' }} color='secondary'>Th</Typography>
         </Grid>
         <Grid item xs={6}><Typography style={{ fontWeight: 'bold' }}>Total:</Typography></Grid>
         <Grid item xs={4} style={{ textAlign: 'center' }}><Typography style={{ fontWeight: 'bold' }}>${totalHashPrice.toFixed(2)}</Typography></Grid>
-        <Grid item xs={12}><Typography style={{ fontStyle: 'italic', fontSize: 12 }}>${hashPrice} Th/day * {CONTRACT_DURATION} Days * {hashAmount} Contracts</Typography></Grid>
-        <Grid item xs={12}><Button fullWidth onClick={createOffer} disabled={!isValid || !isDsProxyDeployed}>CREATE OFFER</Button></Grid>
+        <Grid item xs={12}>
+          <Typography style={{ fontStyle: 'italic', fontSize: 12 }}>
+            ${hashPrice} Th/day * {CONTRACT_DURATION} Days * {hashAmount} Contracts
+          </Typography>
+        </Grid>
+        <Grid item xs={12}>
+          <Button 
+            fullWidth 
+            onClick={createOffer} 
+            disabled={(!isValid || !isDsProxyDeployed) || isCreatingOffer}>
+              CREATE OFFER &nbsp
+              {isCreatingOffer && <CircularProgress className={classes.loadingSpinner} size={20} />}
+          </Button>
+        </Grid>
         <Grid item xs={12}>
           <Typography>
             You will offer {hashAmount} contracts at ${hashPrice} Th/day.
           If a hodler buys your offer you will receive ${totalHashPrice.toFixed(2)} USDT.
           You will be asked to post the hodlers max win of {collateralAmount} BTC as collateral.
           The amount of that collateral that the hodler receives will be determined
-          by the average value of the <Link href='#'>Mining Revenue Index</Link> over the&nbsp;
+          by the average value of the <Link href='#' underline='always'>Mining Revenue Index</Link> over the&nbsp;
           {CONTRACT_DURATION} days starting when the hodler pays you.
         </Typography>
         </Grid>
-        <Grid item xs={12}><Typography>See <Link href='#'>full contract specification here.</Link></Typography></Grid>
+        <Grid item xs={12}>
+          <Typography>
+            See <Link href='#' underline='always'>full contract specification here.</Link>
+          </Typography>
+        </Grid>
       </Grid>
     </>
   )
