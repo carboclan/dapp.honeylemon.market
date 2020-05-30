@@ -6,7 +6,8 @@
 // At redemption time the user can use the DSProxy to execute batch transaction on their
 // behalf by calling a `script` within the `MarketContractProxy`. DSProxy uses delegate
 // call and as such this function execution can modify state within the DSProxy, without
-// the DSProxy needing to story the logic for unwinding.
+// the DSProxy needing to story the logic for unwinding. This implementation is mostly
+// the same as the stock dapphub version except for one new modifier.
 
 pragma solidity 0.5.2;
 
@@ -37,7 +38,11 @@ contract DSNote {
 
 
 contract DSAuthority {
-    function canCall(address src, address dst, bytes4 sig) public view returns (bool);
+    function canCall(
+        address src,
+        address dst,
+        bytes4 sig
+    ) public view returns (bool);
 }
 
 
@@ -93,10 +98,6 @@ contract DSAuth is DSAuthEvents {
 contract DSProxy is DSAuth, DSNote {
     DSProxyCache public cache; // global cache for contracts
 
-    constructor(address _cacheAddr) public {
-        setCache(_cacheAddr);
-    }
-
     function() external payable {}
 
     // use the proxy to execute calldata _data on contract _code
@@ -121,7 +122,7 @@ contract DSProxy is DSAuth, DSNote {
         note
         returns (bytes memory response)
     {
-        require(_target != address(0), 'ds-proxy-target-address-required');
+        require(_target != address(0), "ds-proxy-target-address-required");
 
         // call contract in current context
         assembly {
@@ -146,14 +147,6 @@ contract DSProxy is DSAuth, DSNote {
                     revert(add(response, 0x20), size)
                 }
         }
-        // emit LogEvent(msg.sender, address(this));
-    }
-
-    //set new cache
-    function setCache(address _cacheAddr) public payable auth note returns (bool) {
-        require(_cacheAddr != address(0), 'ds-proxy-cache-address-required');
-        cache = DSProxyCache(_cacheAddr); // overwrite cache
-        return true;
     }
 }
 
@@ -162,25 +155,20 @@ contract DSProxy is DSAuth, DSNote {
 // This factory deploys new proxy instances through build()
 // Deployed proxy addresses are logged
 contract DSProxyFactory {
-    event Created(
-        address indexed sender,
-        address indexed owner,
-        address proxy,
-        address cache
-    );
+    event Created(address indexed sender, address indexed owner, address proxy);
     mapping(address => bool) public isProxy;
     DSProxyCache public cache;
     address marketContractProxy;
 
     constructor() public {
         marketContractProxy = msg.sender;
-        cache = new DSProxyCache();
+        // cache = new DSProxyCache();
     }
 
     modifier onlyMarketContractProxy() {
         require(
             msg.sender == marketContractProxy,
-            'Only callable by MarketContractProxy'
+            "Only callable by MarketContractProxy"
         );
         _;
     }
@@ -192,8 +180,8 @@ contract DSProxyFactory {
         onlyMarketContractProxy()
         returns (address payable proxy)
     {
-        proxy = address(new DSProxy(address(cache)));
-        emit Created(msg.sender, owner, address(proxy), address(cache));
+        proxy = address(new DSProxy());
+        emit Created(msg.sender, owner, address(proxy));
         DSProxy(proxy).setOwner(owner);
         isProxy[proxy] = true;
     }
