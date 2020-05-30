@@ -35,7 +35,7 @@ const useStyles = makeStyles(({ spacing, palette }) => ({
     color: palette.secondary.main,
   },
   errorList: {
-    color: 'red',
+    color: palette.secondary.main,
   }
 }))
 
