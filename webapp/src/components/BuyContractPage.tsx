@@ -1,6 +1,23 @@
 import React, { useState } from 'react';
-import { Button, Typography, Grid, makeStyles, FilledInput, Link, InputAdornment, Tabs, Tab, Paper, CircularProgress } from '@material-ui/core';
+import {
+  Button,
+  Typography,
+  Grid,
+  makeStyles,
+  FilledInput,
+  Link,
+  InputAdornment,
+  Tabs,
+  Tab,
+  Paper,
+  CircularProgress,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+} from '@material-ui/core';
 import { BigNumber } from '@0x/utils';
+import { TabPanel } from './TabPanel';
 import { useHoneylemon } from '../contexts/HoneylemonContext';
 import { useOnboard } from '../contexts/OnboardContext';
 import { forwardTo } from '../helpers/history';
@@ -32,27 +49,10 @@ const useStyles = makeStyles(({ spacing, palette }) => ({
     flexGrow: 0,
     color: palette.secondary.main,
   },
+  errorList: {
+    color: 'red',
+  }
 }))
-
-interface TabPanelProps {
-  children?: React.ReactNode;
-  index: any;
-  value: any;
-}
-
-const TabPanel = ({ children, value, index, ...other }: TabPanelProps) => (
-  <Grid item xs={12}
-    role="tabpanel"
-    hidden={value !== index}
-    {...other}
-    style={{
-      display: 'flex',
-      padding: (value !== index) ? '0px' : '8px',
-    }}
-  >
-    {value === index && (children)}
-  </Grid>
-);
 
 enum BuyType { 'budget', 'quantity' };
 
@@ -64,6 +64,7 @@ const BuyContractPage: React.SFC = () => {
     paymentTokenAllowance,
     CONTRACT_DURATION,
     isDsProxyDeployed,
+    paymentTokenBalance,
     deployProxy
   } = useHoneylemon()
   const classes = useStyles();
@@ -73,12 +74,12 @@ const BuyContractPage: React.SFC = () => {
 
   const [hashPrice, setHashPrice] = useState(0);
   const [orderQuantity, setOrderQuantity] = useState(0);
-  const [isValid, setIsValid] = useState(false);
+  const [isLiquid, setIsLiquid] = useState(true);
 
   const [resultOrders, setResultOrders] = useState([]);
   const [takerAssetFillAmounts, setTakerFillAmounts] = useState([]);
   const [buyType, setBuyType] = useState<BuyType>(BuyType.budget);
-  const [isBuying, setIsBuying] = useState(false); 
+  const [isBuying, setIsBuying] = useState(false);
 
   const handleChangeBuyType = (event: React.ChangeEvent<{}>, newValue: BuyType) => {
     setBuyType(newValue);
@@ -96,8 +97,9 @@ const BuyContractPage: React.SFC = () => {
 
     try {
       const result = await honeylemonService.getQuoteForSize(new BigNumber(newValue))
-      const isLiquid = !!(Number(result?.remainingMakerFillAmount?.toString() || -1) === 0)
-      setIsValid(isLiquid);
+      const newIsLiquid = !!(Number(result?.remainingMakerFillAmount?.toString() || -1) === 0)
+      debugger;
+      setIsLiquid(newIsLiquid);
       setHashPrice(Number(result?.price?.dividedBy(CONTRACT_DURATION).toString()) || 0);
       setOrderValue(Number(result?.totalTakerFillAmount?.shiftedBy(-PAYMENT_TOKEN_DECIMALS).toString()) || 0);
       setResultOrders(result?.resultOrders || undefined);
@@ -105,7 +107,7 @@ const BuyContractPage: React.SFC = () => {
     } catch (error) {
       console.log('Error getting the current liquidity')
       console.log(error);
-      setIsValid(false);
+      setIsLiquid(false);
     }
   }
 
@@ -119,8 +121,9 @@ const BuyContractPage: React.SFC = () => {
     !isNaN(newValue) && setBudget(newValue)
     try {
       const result = await honeylemonService.getQuoteForBudget(newValue);
-      const isLiquid = !!(Number(result?.remainingTakerFillAmount?.toString() || -1) === 0);
-      setIsValid(isLiquid);
+      const newIsLiquid = !!(Number(result?.remainingTakerFillAmount?.toString() || -1) === 0)
+      debugger;
+      setIsLiquid(newIsLiquid);
       setHashPrice(Number(result?.price?.dividedBy(CONTRACT_DURATION).toString()) || 0);
       setOrderQuantity(Number(result?.totalMakerFillAmount?.toString()) || 0);
       setResultOrders(result.resultOrders || undefined);
@@ -129,7 +132,7 @@ const BuyContractPage: React.SFC = () => {
     } catch (error) {
       console.log('Error getting the current liquidity')
       console.log(error);
-      setIsValid(false);
+      setIsLiquid(false);
     }
   }
 
@@ -172,6 +175,15 @@ const BuyContractPage: React.SFC = () => {
     }
     setIsBuying(false);
   }
+
+  const sufficientPaymentTokens = paymentTokenBalance >= orderValue; 
+  const isValid = isDsProxyDeployed && isLiquid && sufficientPaymentTokens;
+
+  const errors = [];
+
+  !isDsProxyDeployed && errors.push("Deploy a wallet first");
+  !sufficientPaymentTokens && errors.push("You do not have enough USDC to proceed");
+  !isLiquid && errors.push("There are not enough contracts available right now");
 
   return (
     <>
@@ -236,24 +248,35 @@ const BuyContractPage: React.SFC = () => {
               }}
               onChange={validateOrderQuantity}
               value={orderQuantity}
-              type='number' 
+              type='number'
               onBlur={e => {
                 e.target.value = e.target.value.replace(/^(-)?0+(0\.|\d)/, '$1$2')
               }}
-              disabled={isBuying}/>
+              disabled={isBuying} />
           </Grid>
           <Grid item xs={2} className={classes.rightAlign}>
             <Typography style={{ fontWeight: 'bold' }} color='secondary'>TH</Typography>
           </Grid>
         </TabPanel>
+        {errors.length > 0 &&
+          <Grid item xs={12}>
+            <List className={classes.errorList}>
+              {errors.map((error, i) => 
+                <ListItem key={i}>
+                  <ListItemIcon>○</ListItemIcon>
+                  <ListItemText>{error}</ListItemText>
+                </ListItem>)}
+            </List>
+          </Grid>
+        }
         <Grid item xs={12}>
-          <Button 
-            fullWidth 
-            onClick={buyOffer} 
-            disabled={(!isValid || !isDsProxyDeployed) || isBuying}>
-              BUY NOW &nbsp
+          <Button
+            fullWidth
+            onClick={buyOffer}
+            disabled={(!isLiquid || !isDsProxyDeployed) || isBuying}>
+            BUY NOW &nbsp;
               {isBuying && <CircularProgress className={classes.loadingSpinner} size={20} />}
-            </Button>
+          </Button>
         </Grid>
         <Grid item xs={12}>
           <Typography>
