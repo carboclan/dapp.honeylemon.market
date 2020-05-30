@@ -50,7 +50,7 @@ const useStyles = makeStyles(({ spacing, palette }) => ({
     color: palette.secondary.main,
   },
   errorList: {
-    color: 'red',
+    color: palette.secondary.main,
   }
 }))
 
@@ -280,7 +280,7 @@ const BuyContractPage: React.SFC = () => {
         </Grid>
         <Grid item xs={12}>
           <Typography>
-            You will pay ${orderValue} to buy {orderQuantity} Th of hasrate for {CONTRACT_DURATION} days for ${hashPrice.toPrecision(6)}
+            You will pay ${orderValue} to buy {orderQuantity} Th of hashrate for {CONTRACT_DURATION} days for ${hashPrice.toPrecision(6)}
             Th/day. You will receive the average value of the <Link component={RouterLink} to="#">Mining Revenue Index</Link> over {CONTRACT_DURATION} days.
             Representing {orderQuantity} Th of mining power per day per contract.
         </Typography>
