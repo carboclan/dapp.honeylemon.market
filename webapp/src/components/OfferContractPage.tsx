@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Typography, Grid, makeStyles, FilledInput, Link, InputAdornment, Paper, CircularProgress } from '@material-ui/core';
+import { Button, Typography, Grid, makeStyles, FilledInput, Link, InputAdornment, Paper, CircularProgress, List, ListItem, ListItemIcon, ListItemText } from '@material-ui/core';
 import { useHoneylemon } from '../contexts/HoneylemonContext';
 import { useOnboard } from '../contexts/OnboardContext';
 import { BigNumber } from '@0x/utils';
@@ -34,6 +34,9 @@ const useStyles = makeStyles(({ spacing, palette }) => ({
     flexGrow: 0,
     color: palette.secondary.main,
   },
+  errorList: {
+    color: 'red',
+  }
 }))
 
 const OfferContractPage: React.SFC = () => {
@@ -105,8 +108,15 @@ const OfferContractPage: React.SFC = () => {
     }
   }
 
-  const ERC20ApprovalComplete = collateralTokenAllowance > 0
-  const isValid = ERC20ApprovalComplete && collateralAmount <= collateralTokenBalance;
+  const tokenApprovalGranted = collateralTokenAllowance > 0
+  const sufficientCollateral = collateralTokenBalance >= collateralAmount; 
+  const isValid = isDsProxyDeployed && tokenApprovalGranted &&sufficientCollateral;
+
+  const errors = [];
+
+  !isDsProxyDeployed && errors.push("Deploy a wallet first");
+  !tokenApprovalGranted && errors.push("Permission to spend imBTC needs to be granted");
+  !sufficientCollateral && errors.push("You do not have enough imBTC to proceed");
 
   return (
     <>
@@ -118,7 +128,7 @@ const OfferContractPage: React.SFC = () => {
           </Typography>
         </Paper>
       }
-      {isDsProxyDeployed && !ERC20ApprovalComplete &&
+      {isDsProxyDeployed && !tokenApprovalGranted &&
         <Paper className={classes.notification} square onClick={approveCollateralToken}>
           <Typography style={{ fontWeight: 'bold' }}>
             Please approve Honeylemon to spend your imBTC to continue
@@ -196,12 +206,23 @@ const OfferContractPage: React.SFC = () => {
             ${hashPrice} Th/day * {CONTRACT_DURATION} Days * {hashAmount} Contracts
           </Typography>
         </Grid>
+        {errors.length > 0 &&
+          <Grid item xs={12}>
+            <List className={classes.errorList}>
+            {errors.map((error, i) => 
+                <ListItem key={i}>
+                  <ListItemIcon>○</ListItemIcon>
+                  <ListItemText>{error}</ListItemText>
+                </ListItem>)}
+            </List>
+          </Grid>
+        }
         <Grid item xs={12}>
           <Button 
             fullWidth 
             onClick={createOffer} 
             disabled={(!isValid || !isDsProxyDeployed) || isCreatingOffer}>
-              CREATE OFFER &nbsp
+              CREATE OFFER &nbsp;
               {isCreatingOffer && <CircularProgress className={classes.loadingSpinner} size={20} />}
           </Button>
         </Grid>
