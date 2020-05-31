@@ -573,7 +573,7 @@ contract('HoneylemonService', () => {
       // in one transaction per user. Test to ensure the balance change as expected
 
       // Wait for subgraph to index the events
-      await delay(4000);
+      await delay(10000);
 
       const takerCollateralBalanceBefore = await collateralToken.balanceOf(takerAddress);
       const takerTxReturned = await honeylemonService.batchRedeem(takerAddress);
