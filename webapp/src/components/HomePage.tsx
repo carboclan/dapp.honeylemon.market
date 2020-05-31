@@ -93,8 +93,8 @@ const HomePage: React.SFC = () => {
 
   const handleSelectWalletAndConnect = async () => {
     setIsConnecting(true);
-    await onboard?.walletSelect();
-    await checkIsReady();
+    const result = await onboard?.walletSelect();
+    result && await checkIsReady();
     setIsConnecting(false);
   }
 
