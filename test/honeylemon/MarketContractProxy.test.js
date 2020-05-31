@@ -66,7 +66,7 @@ const ADDRESS_ZERO = '0x0000000000000000000000000000000000000000';
 
 contract(
   'MarketContractProxy',
-  ([honeyLemonOracle, makerAddress, takerAddress, , , , , , _0xBridgeProxy, random]) => {
+  ([honeyLemonOracle, makerAddress, takerAddress, , , , , _0xBridgeProxy, honeyMultisig, random]) => {
     let minterBridge, marketContractProxy, imbtc, usdc, pc, _currentMri, _expiration;
 
     before(async () => {
@@ -296,7 +296,7 @@ contract(
       before(async () => {
         // set minter bridge address (for testing purpose)
         await marketContractProxy.setMinterBridgeAddress(_0xBridgeProxy, {
-          from: honeyLemonOracle
+          from: honeyMultisig
         });
 
         // calculate needed collateral token
@@ -427,7 +427,7 @@ contract(
           let amount = new BigNumber(10);
           // set minter bridge address (for testing purpose)
           await marketContractProxy.setMinterBridgeAddress(_0xBridgeProxy, {
-            from: honeyLemonOracle
+            from: honeyMultisig
           });
           // calculate needed collateral token
           neededCollateral = await marketContractProxy.calculateRequiredCollateral(
@@ -665,8 +665,6 @@ contract(
           let marketsContracts = await marketContractProxy.getAllMarketContracts();
           marketContractMpx = await MarketContractMPX.at(marketsContracts[2]);
 
-          //await time.increaseTo((await marketContractMpx.EXPIRATION()).toNumber() + 10);
-
           let _mri = new BigNumber(pc.getMRIDataForDay(31)).multipliedBy(
             new BigNumber(1e8)
           );
@@ -714,7 +712,7 @@ contract(
             new BigNumber(1e8)
           );
           
-          await marketContractMpx.arbitrateSettlement(_mri, { from: honeyLemonOracle });
+          await marketContractMpx.arbitrateSettlement(_mri, { from: honeyMultisig });
 
           assert.equal(
             (await marketContractMpx.lastPrice()).toString(),
@@ -747,6 +745,15 @@ contract(
           assert.notEqual(makerReturnedCollateralAfterArbitrate.toString(), makerReturnedCollateralBeforeArbitrate.toString());
           assert.notEqual(takerrReturnedCollateralAfterArbitrate.toString(), takerReturnedCollateralBeforeArbitrate.toString());
 
+          // increate time to settlement time + settlement delay days 
+          await time.increaseTo((await marketContractMpx.settlementTimeStamp()).toNumber() + (3600 * 24));
+
+          // get market pool
+          let marketCollateralPoolAddr = await marketContractMpx.COLLATERAL_POOL_ADDRESS();
+          let marketContractPool = await MarketCollateralPool.at(
+            marketCollateralPoolAddr
+          );
+          
           // miner & investor redeem
           await marketContractPool.settleAndClose(marketContractMpx.address, amount, 0, {
             from: takerAddress
@@ -805,7 +812,7 @@ contract(
         let amount = new BigNumber(10);
 
         // deploy new markets to settle & batch redeem
-        for (let i = marketContract.length; i < 33; i++) {
+        /*for (let i = marketContract.length; i < 33; i++) {
           let _marketAndsTokenNames = [];
           _marketAndsTokenNames.push(web3.utils.fromAscii('BTC'));
           _marketAndsTokenNames.push(web3.utils.fromAscii('MRI-BTC-28D-00000000-Long'));
@@ -823,7 +830,7 @@ contract(
           );
           // set minter bridge address (for testing purpose)
           await marketContractProxy.setMinterBridgeAddress(_0xBridgeProxy, {
-            from: honeyLemonOracle
+            from: honeyMultisig
           });
           // calculate needed collateral token
           neededCollateral = await marketContractProxy.calculateRequiredCollateral(
@@ -842,7 +849,7 @@ contract(
             makerAddress,
             { from: _0xBridgeProxy }
           );
-        }
+        }*/
         // mri value to settle with
         let _mri = new BigNumber(1).multipliedBy(new BigNumber(1e8));
         let expectedMakerReturnedCollateral = new BigNumber(0);
@@ -886,7 +893,7 @@ contract(
           // time should be after last token's contract passed + settlement delay
           if (marketContract.length-1 == i) {
             // advance time after settlement delay
-            await time.increaseTo((await marketContractMpx.settlementTimeStamp()).toNumber() + (3600 * 24));
+            await time.increaseTo((await marketContractMpx.settlementTimeStamp()).toNumber() + (3600 * 25));
           }
         }
 

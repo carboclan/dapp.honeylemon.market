@@ -15,7 +15,7 @@ const ADDRESS_ZERO = '0x0000000000000000000000000000000000000000';
 
 contract(
   'MinterBridge',
-  ([owner, makerAddress, takerAddress, , , , , , _0xBridgeProxy, random]) => {
+  ([owner, makerAddress, takerAddress, , , , , _0xBridgeProxy, factoryOwner, random]) => {
     let minterBridge, marketContractProxy, collateralToken, sToken, lToken;
 
     before(async () => {
