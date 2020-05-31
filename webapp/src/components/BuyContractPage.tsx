@@ -209,8 +209,6 @@ const BuyContractPage: React.SFC = () => {
         <Grid item xs={12}>
           <Typography style={{ fontWeight: 'bold' }}>Buy Mining Rewards</Typography>
         </Grid>
-        <Grid item xs={6}><Typography style={{ fontWeight: 'bold' }}>PRICE</Typography></Grid>
-        <Grid item xs={6} className={classes.rightAlign}><Typography color='secondary'>${hashPrice.toPrecision(6)} Th/day</Typography></Grid>
         <Grid item xs={12}>
           <Tabs
             value={buyType}
@@ -309,7 +307,7 @@ const BuyContractPage: React.SFC = () => {
         <Button
           fullWidth
           onClick={buyOffer}
-          disabled={(!isLiquid || !isDsProxyDeployed) || isBuying}>
+          disabled={(!isLiquid || !isDsProxyDeployed) || isBuying || resultOrders.length === 0}>
           BUY NOW &nbsp;
               {isBuying && <CircularProgress className={classes.loadingSpinner} size={20} />}
         </Button>
@@ -318,8 +316,9 @@ const BuyContractPage: React.SFC = () => {
         <Typography>
           You will pay <strong>${orderValue.toLocaleString()}</strong> to buy <strong>{orderQuantity} Th</strong> of hashrate
           for <strong>{CONTRACT_DURATION} days</strong> for <strong>${hashPrice.toLocaleString()}/Th/day</strong>. You will
-          receive the average value of the <Link component={RouterLink} to="#" underline='always'>Mining Revenue Index</Link> over
-          <strong>{CONTRACT_DURATION} days </strong>representing <strong>{orderQuantity} Th</strong> of mining power per day per contract.
+          receive the average value of the <Link component={RouterLink} to="#" underline='always'>Mining Revenue Index</Link>&nbsp;
+          over <strong>{CONTRACT_DURATION} days </strong>representing <strong>{orderQuantity} Th</strong> of mining power per 
+          day per contract.
         </Typography>
       </Grid>
       <Grid item><Typography>See <Link href='#' underline='always'>full contract specification here.</Link></Typography></Grid>
