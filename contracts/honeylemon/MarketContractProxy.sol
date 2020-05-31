@@ -30,7 +30,6 @@ contract MarketContractProxy is ReentrancyGuard, Ownable {
     address public HONEY_LEMON_ORACLE_ADDRESS;
     address public MINTER_BRIDGE_ADDRESS;
     address public COLLATERAL_TOKEN_ADDRESS; //imBTC
-    address public HONEY_MULTISIG;
 
     string public ORACLE_URL = 'null';
     string public ORACLE_STATISTIC = 'null';
@@ -79,20 +78,17 @@ contract MarketContractProxy is ReentrancyGuard, Ownable {
         address _marketContractFactoryMPX,
         address _honeyLemonOracle,
         address _minterBridge,
-        address _imBTCTokenAddress,
-        address _honeyMultisig
+        address _imBTCTokenAddress
     ) public ReentrancyGuard() {
         require(_marketContractFactoryMPX != address(0), 'invalid MarketContractFactoryMPX address');
         require(_honeyLemonOracle != address(0), 'invalid HoneyLemonOracle address');
         require(_minterBridge != address(0), 'invalid MinterBridge address');
         require(_imBTCTokenAddress != address(0), 'invalid IMBTC address');
-        require(_honeyMultisig != address(0), 'invalid HoneyMultisig address');
 
         marketContractFactoryMPX = MarketContractFactoryMPX(_marketContractFactoryMPX);
         HONEY_LEMON_ORACLE_ADDRESS = _honeyLemonOracle;
         MINTER_BRIDGE_ADDRESS = _minterBridge;
         COLLATERAL_TOKEN_ADDRESS = _imBTCTokenAddress;
-        HONEY_MULTISIG = _honeyMultisig;
 
         //Deploy a new DSProxyFactory instance to faciliate hot wallet creation
         dSProxyFactory = new DSProxyFactory();
@@ -185,17 +181,6 @@ contract MarketContractProxy is ReentrancyGuard, Ownable {
      */
     function setMarketContractSpecs(uint[7] calldata _params) external onlyOwner {
         marketContractSpecs = _params;
-    }
-
-    /**
-     * @notice Set honey multisig address
-     * @dev can only be called by owner
-     * @param _honeyMultisig multisig address
-     */
-    function setHoneyMultisig(address _honeyMultisig) external onlyOwner {
-        require(_honeyMultisig != address(0), 'invalid HoneyMultisig address');
-
-        HONEY_MULTISIG = _honeyMultisig;
     }
 
     ////////////////////////
@@ -616,7 +601,7 @@ contract MarketContractProxy is ReentrancyGuard, Ownable {
         uint index = marketContracts.push(contractAddress) - 1;
         addressToMarketId[contractAddress] = index;
         MarketContractMPX marketContract = MarketContractMPX(contractAddress);
-        marketContract.transferOwnership(HONEY_MULTISIG);
+        marketContract.transferOwnership(owner());
         emit MarketContractDeployed(
             currentMRI,
             marketAndsTokenNames[0],

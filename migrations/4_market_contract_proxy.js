@@ -27,8 +27,7 @@ module.exports = async function(deployer, network, accounts) {
     marketContractFactoryMPX.address,
     accounts[0],
     minterBridge.address,
-    collateralToken.address,
-    process.env.HONEYLEMON_MULTISIG || accounts[8]
+    collateralToken.address
   );
 
   console.log('👉 Deployed Market Contract Proxy');
