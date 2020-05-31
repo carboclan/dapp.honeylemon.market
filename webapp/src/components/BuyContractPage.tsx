@@ -13,7 +13,6 @@ import {
   CircularProgress,
   List,
   ListItem,
-  ListItemIcon,
   ListItemText,
   TableRow,
   Table,
@@ -277,19 +276,19 @@ const BuyContractPage: React.SFC = () => {
           <Table size='small'>
             <TableBody>
               <TableRow>
-                <TableCell><strong>Total</strong></TableCell>
+                <TableCell>Total</TableCell>
                 <TableCell align='right'>{`$ ${orderValue.toLocaleString()}`}</TableCell>
               </TableRow>
               <TableRow>
-                <TableCell><strong>Quantity</strong></TableCell>
+                <TableCell>Quantity</TableCell>
                 <TableCell align='right'>{`${orderQuantity.toLocaleString()} TH`}</TableCell>
               </TableRow>
               <TableRow>
-                <TableCell>Contract Duration (Days)</TableCell>
+                <TableCell>Contract Duration</TableCell>
                 <TableCell align='right'>{CONTRACT_DURATION} days</TableCell>
               </TableRow>
               <TableRow>
-                <TableCell>Price ($)</TableCell>
+                <TableCell>Price</TableCell>
                 <TableCell align='right'>$ {hashPrice.toFixed(PAYMENT_TOKEN_DECIMALS)} /TH/day</TableCell>
               </TableRow>
             </TableBody>
@@ -318,12 +317,12 @@ const BuyContractPage: React.SFC = () => {
       <Grid item xs={12}>
         <Typography>
           You will pay <strong>${orderValue.toLocaleString()}</strong> to buy <strong>{orderQuantity} Th</strong> of hashrate
-            for {CONTRACT_DURATION} days for <strong>${hashPrice.toPrecision(6)} /Th/day</strong>. You will
-            receive the average value of the <Link component={RouterLink} to="#">Mining Revenue Index</Link> over
-            <strong>{CONTRACT_DURATION} days </strong>representing <strong>{orderQuantity} Th</strong> of mining power per day per contract.
-          </Typography>
+          for <strong>{CONTRACT_DURATION} days</strong> for <strong>${hashPrice.toLocaleString()}/Th/day</strong>. You will
+          receive the average value of the <Link component={RouterLink} to="#" underline='always'>Mining Revenue Index</Link> over
+          <strong>{CONTRACT_DURATION} days </strong>representing <strong>{orderQuantity} Th</strong> of mining power per day per contract.
+        </Typography>
       </Grid>
-      <Grid item><Typography>See <Link href='#'>full contract specification here.</Link></Typography></Grid>
+      <Grid item><Typography>See <Link href='#' underline='always'>full contract specification here.</Link></Typography></Grid>
     </Grid>
     </>
   )
