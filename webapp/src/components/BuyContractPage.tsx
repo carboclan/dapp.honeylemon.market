@@ -15,6 +15,10 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
+  TableRow,
+  Table,
+  TableCell,
+  TableBody,
 } from '@material-ui/core';
 import { BigNumber } from '@0x/utils';
 import { TabPanel } from './TabPanel';
@@ -22,6 +26,8 @@ import { useHoneylemon } from '../contexts/HoneylemonContext';
 import { useOnboard } from '../contexts/OnboardContext';
 import { forwardTo } from '../helpers/history';
 import { Link as RouterLink } from 'react-router-dom';
+import clsx from 'clsx';
+
 
 const useStyles = makeStyles(({ spacing, palette }) => ({
   rightAlign: {
@@ -51,6 +57,13 @@ const useStyles = makeStyles(({ spacing, palette }) => ({
   },
   errorList: {
     color: palette.secondary.main,
+  },
+  orderSummary: {
+    padding: spacing(2),
+    width: '100%'
+  },
+  orderSummaryBlur: {
+    filter: 'blur(2px)',
   }
 }))
 
@@ -98,7 +111,6 @@ const BuyContractPage: React.SFC = () => {
     try {
       const result = await honeylemonService.getQuoteForSize(new BigNumber(newValue))
       const newIsLiquid = !!(Number(result?.remainingMakerFillAmount?.toString() || -1) === 0)
-      debugger;
       setIsLiquid(newIsLiquid);
       setHashPrice(Number(result?.price?.dividedBy(CONTRACT_DURATION).toString()) || 0);
       setOrderValue(Number(result?.totalTakerFillAmount?.shiftedBy(-PAYMENT_TOKEN_DECIMALS).toString()) || 0);
@@ -122,7 +134,6 @@ const BuyContractPage: React.SFC = () => {
     try {
       const result = await honeylemonService.getQuoteForBudget(newValue);
       const newIsLiquid = !!(Number(result?.remainingTakerFillAmount?.toString() || -1) === 0)
-      debugger;
       setIsLiquid(newIsLiquid);
       setHashPrice(Number(result?.price?.dividedBy(CONTRACT_DURATION).toString()) || 0);
       setOrderQuantity(Number(result?.totalMakerFillAmount?.toString()) || 0);
@@ -176,7 +187,7 @@ const BuyContractPage: React.SFC = () => {
     setIsBuying(false);
   }
 
-  const sufficientPaymentTokens = paymentTokenBalance >= orderValue; 
+  const sufficientPaymentTokens = paymentTokenBalance >= orderValue;
   const isValid = isDsProxyDeployed && isLiquid && sufficientPaymentTokens;
 
   const errors = [];
@@ -258,35 +269,62 @@ const BuyContractPage: React.SFC = () => {
             <Typography style={{ fontWeight: 'bold' }} color='secondary'>TH</Typography>
           </Grid>
         </TabPanel>
-        {errors.length > 0 &&
+        <Grid item xs={12} container >
+          <Paper className={clsx(classes.orderSummary, {
+            [classes.orderSummaryBlur]: !isValid,
+          })}>
+            <Typography align='center'><strong>Order Summary</strong></Typography>
+          <Table size='small'>
+            <TableBody>
+              <TableRow>
+                <TableCell><strong>Total</strong></TableCell>
+                <TableCell align='right'>{`$ ${orderValue.toLocaleString()}`}</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell><strong>Quantity</strong></TableCell>
+                <TableCell align='right'>{`${orderQuantity.toLocaleString()} TH`}</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell>Contract Duration (Days)</TableCell>
+                <TableCell align='right'>{CONTRACT_DURATION} days</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell>Price ($)</TableCell>
+                <TableCell align='right'>$ {hashPrice.toFixed(PAYMENT_TOKEN_DECIMALS)} /TH/day</TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+          </Paper>
+      </Grid>
+      {errors.length > 0 &&
           <Grid item xs={12}>
             <List className={classes.errorList}>
-              {errors.map((error, i) => 
+              {errors.map((error, i) =>
                 <ListItem key={i}>
-                  <ListItemIcon>○</ListItemIcon>
                   <ListItemText>{error}</ListItemText>
                 </ListItem>)}
             </List>
           </Grid>
         }
-        <Grid item xs={12}>
-          <Button
-            fullWidth
-            onClick={buyOffer}
-            disabled={(!isLiquid || !isDsProxyDeployed) || isBuying}>
-            BUY NOW &nbsp;
+      <Grid item xs={12}>
+        <Button
+          fullWidth
+          onClick={buyOffer}
+          disabled={(!isLiquid || !isDsProxyDeployed) || isBuying}>
+          BUY NOW &nbsp;
               {isBuying && <CircularProgress className={classes.loadingSpinner} size={20} />}
-          </Button>
-        </Grid>
-        <Grid item xs={12}>
-          <Typography>
-            You will pay ${orderValue} to buy {orderQuantity} Th of hashrate for {CONTRACT_DURATION} days for ${hashPrice.toPrecision(6)}
-            Th/day. You will receive the average value of the <Link component={RouterLink} to="#">Mining Revenue Index</Link> over {CONTRACT_DURATION} days.
-            Representing {orderQuantity} Th of mining power per day per contract.
-        </Typography>
-        </Grid>
-        <Grid item><Typography>See <Link href='#'>full contract specification here.</Link></Typography></Grid>
+        </Button>
       </Grid>
+      <Grid item xs={12}>
+        <Typography>
+          You will pay <strong>${orderValue.toLocaleString()}</strong> to buy <strong>{orderQuantity} Th</strong> of hashrate
+            for {CONTRACT_DURATION} days for <strong>${hashPrice.toPrecision(6)} /Th/day</strong>. You will
+            receive the average value of the <Link component={RouterLink} to="#">Mining Revenue Index</Link> over
+            <strong>{CONTRACT_DURATION} days </strong>representing <strong>{orderQuantity} Th</strong> of mining power per day per contract.
+          </Typography>
+      </Grid>
+      <Grid item><Typography>See <Link href='#'>full contract specification here.</Link></Typography></Grid>
+    </Grid>
     </>
   )
 }
