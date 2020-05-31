@@ -30,18 +30,6 @@ const useStyles = makeStyles(({ palette, spacing }) => ({
   countdownSection: {
     textAlign: 'center',
   },
-  notification: {
-    backgroundColor: palette.secondary.main,
-    color: palette.common.black,
-    textAlign: 'center',
-    marginLeft: -spacing(2),
-    marginRight: -spacing(2),
-    marginTop: -spacing(2),
-    padding: spacing(2),
-    '&:hover': {
-      backgroundColor: palette.secondary.dark,
-    }
-  },
   connectSpacer: {
     paddingTop: `${spacing(8)}px !important`,
     textAlign: 'center'
