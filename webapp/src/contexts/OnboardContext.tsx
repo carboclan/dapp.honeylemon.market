@@ -37,7 +37,7 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
   const [isReady, setIsReady] = useState<boolean>(false);
   const [notify, setNotify] = useState<NotifyApi | undefined>(undefined)
 
-  const infuraId = process.env.REACT_APP_INFURA_ID
+  const infuraId = process.env.REACT_APP_INFURA_API_KEY
   const infuraRpc = `https://${networkName(network)}.infura.io/v3/${infuraId}`
 
   useEffect(() => {
