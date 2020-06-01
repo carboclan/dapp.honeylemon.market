@@ -39,18 +39,6 @@ const useStyles = makeStyles(({ spacing, palette }) => ({
     textAlign: 'end',
     padding: spacing(1)
   },
-  notification: {
-    backgroundColor: palette.secondary.main,
-    color: palette.common.black,
-    textAlign: 'center',
-    marginLeft: -spacing(2),
-    marginRight: -spacing(2),
-    marginTop: -spacing(2),
-    padding: spacing(2),
-    '&:hover': {
-      backgroundColor: palette.secondary.dark,
-    }
-  },
   offerForm: {
     marginTop: 0,
   },
@@ -227,7 +215,7 @@ const OfferContractPage: React.SFC = () => {
 
   return (
     <>
-      <Grid container alignItems='flex-start' justify='flex-start' spacing={2} className={classes.offerForm}>
+      <Grid container alignItems='flex-start' justify='flex-start' spacing={2}  className={classes.offerForm}>
         <Grid item xs={12}>
           <Typography style={{ fontWeight: 'bold' }}>Offer a {CONTRACT_DURATION} day Mining Revenue Contract</Typography>
         </Grid>
@@ -299,15 +287,15 @@ const OfferContractPage: React.SFC = () => {
             <Table size='small'>
               <TableBody>
                 <TableRow>
-                  <TableCell>Total</TableCell>
-                  <TableCell align='right'>{`$ ${totalContractPrice.toLocaleString()}`}</TableCell>
+                  <TableCell>Contract Total</TableCell>
+                  <TableCell align='right'>{`$ ${totalContractPrice.toLocaleString()} USDC`}</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell>Collateral Required</TableCell>
                   <TableCell align='right'>{`${collateralAmount.toLocaleString()} imBTC`}</TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell>Contract Duration</TableCell>
+                  <TableCell>Duration</TableCell>
                   <TableCell align='right'>{CONTRACT_DURATION} days</TableCell>
                 </TableRow>
                 <TableRow>
@@ -344,15 +332,16 @@ const OfferContractPage: React.SFC = () => {
         <Grid item xs={12}>
           <Typography>
             You will offer <strong>{hashAmount} contracts</strong> at <strong>${hashPrice} Th/day.</strong>. If
-            a hodler buys your offer you will receive <strong>${totalContractPrice.toFixed(2)} USDC</strong>. You
-            will be required to post the hodlers max win of <strong>{collateralAmount} imBTC</strong> as
-            collateral. The amount of that collateral that the hodler receives will be determined by
+            a hodler buys your offer you will receive <strong>${totalContractPrice.toLocaleString()} USDC</strong>. You
+            will be required to post the hodlers max win of <strong>{collateralAmount.toLocaleString()} imBTC</strong> as
+            collateral. The amount of collateral that the hodler receives will be determined by
             the average value of the <Link href='#' underline='always'>Mining Revenue Index</Link> over
-            the <strong>{CONTRACT_DURATION} days</strong> starting when the hodler pays you.
+            the <strong>{CONTRACT_DURATION} days</strong> starting when the hodler pays you. Any remaining
+            collateral will be returned to the miner upon expiry of the contract.
           </Typography>
         </Grid>
         <Grid item xs={12}>
-          <Typography>
+          <Typography align='center'>
             See <Link href='#' underline='always'>full contract specification here.</Link>
           </Typography>
         </Grid>
