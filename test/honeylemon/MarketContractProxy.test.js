@@ -12,7 +12,9 @@ const PositionToken = artifacts.require('PositionToken'); // Long & Short tokens
 const DSProxy = artifacts.require('DSProxy');
 
 // Helper libraries
-const { PayoutCalculator } = require('../../honeylemon-intergration-tests/helpers/payout-calculator');
+const {
+  PayoutCalculator
+} = require('../../honeylemon-intergration-tests/helpers/payout-calculator');
 
 const isMarketExpired = (contractIndex, contractDay) => {
   return contractIndex < contractDay ? false : true;
@@ -167,13 +169,6 @@ contract(
           })
         );
       });
-      it('should revert setting market contract specs by non-owner', async () => {
-        await expectRevert.unspecified(
-          marketContractProxy.setMarketContractSpecs([0, 0, 0, 0, 0, 0, 0], {
-            from: random
-          })
-        );
-      });
     });
 
     describe('deploy new market contract', async () => {
@@ -247,9 +242,9 @@ contract(
 
         let allMarketContractsAfter = await marketContractProxy.getAllMarketContracts();
         let latestMarket = await marketContractProxy.getLatestMarketContract();
-        let marketCollateralPool = await (await MarketContractMPX.at(
-          latestMarket
-        )).COLLATERAL_POOL_ADDRESS();
+        let marketCollateralPool = await (
+          await MarketContractMPX.at(latestMarket)
+        ).COLLATERAL_POOL_ADDRESS();
 
         assert.equal(
           (await marketContractProxy.getLatestMri()).toString(),
@@ -668,18 +663,38 @@ contract(
     });
 
     describe('DSProxy', () => {
-      it('create a proxy wallet for maker & taker', async() => {
-        assert.equal(await marketContractProxy.getUserAddressOrDSProxy(makerAddress), makerAddress, 'maker address mismatch');
-        assert.equal(await marketContractProxy.getUserAddressOrDSProxy(takerAddress), takerAddress, 'taker address mismatch');
+      it('create a proxy wallet for maker & taker', async () => {
+        assert.equal(
+          await marketContractProxy.getUserAddressOrDSProxy(makerAddress),
+          makerAddress,
+          'maker address mismatch'
+        );
+        assert.equal(
+          await marketContractProxy.getUserAddressOrDSProxy(takerAddress),
+          takerAddress,
+          'taker address mismatch'
+        );
 
         await marketContractProxy.createDSProxyWallet({ from: makerAddress });
         await marketContractProxy.createDSProxyWallet({ from: takerAddress });
 
-        let makerDsProxyWallet = await marketContractProxy.getUserAddressOrDSProxy(makerAddress);
-        let takerDsProxyWallet = await marketContractProxy.getUserAddressOrDSProxy(takerAddress);
+        let makerDsProxyWallet = await marketContractProxy.getUserAddressOrDSProxy(
+          makerAddress
+        );
+        let takerDsProxyWallet = await marketContractProxy.getUserAddressOrDSProxy(
+          takerAddress
+        );
 
-        assert.equal(makerAddress, await marketContractProxy.dSProxyToAddress(makerDsProxyWallet), 'maker address mismatch');
-        assert.equal(takerAddress, await marketContractProxy.dSProxyToAddress(takerDsProxyWallet), 'taker address mismatch')
+        assert.equal(
+          makerAddress,
+          await marketContractProxy.dSProxyToAddress(makerDsProxyWallet),
+          'maker address mismatch'
+        );
+        assert.equal(
+          takerAddress,
+          await marketContractProxy.dSProxyToAddress(takerDsProxyWallet),
+          'taker address mismatch'
+        );
       });
 
       it('batch redeem', async () => {
@@ -692,7 +707,7 @@ contract(
         let amounts = [];
 
         let marketContract = await marketContractProxy.getAllMarketContracts();
-        
+
         let amount = new BigNumber(10);
 
         // deploy new markets to settle & batch redeem
@@ -740,7 +755,7 @@ contract(
         let expectedTakerReturnedCollateral = new BigNumber(0);
         // settle last three contracts
         marketContract = await marketContractProxy.getAllMarketContracts();
-        for (let i = marketContract.length-3; i < marketContract.length; i++) {
+        for (let i = marketContract.length - 3; i < marketContract.length; i++) {
           let marketContractMpx = await MarketContractMPX.at(marketContract[i]);
 
           amounts.push(amount.toString());
@@ -750,29 +765,32 @@ contract(
           isLongToken.push(true);
           isShortToken.push(false);
 
-          await marketContractProxy.settleMarketContract(_mri, marketContract[i], { from: honeyLemonOracle });
+          await marketContractProxy.settleMarketContract(_mri, marketContract[i], {
+            from: honeyLemonOracle
+          });
 
-          expectedMakerReturnedCollateral = expectedMakerReturnedCollateral.plus(calculateExpectedCollateralToReturn(
-            new BigNumber((await marketContractMpx.PRICE_FLOOR()).toString()),
-            new BigNumber((await marketContractMpx.PRICE_CAP()).toString()),
-            new BigNumber((await marketContractMpx.QTY_MULTIPLIER()).toString()),
-            new BigNumber(0),
-            amount,
-            new BigNumber((await marketContractMpx.settlementPrice()).toString())
-          ));
-          expectedTakerReturnedCollateral = expectedTakerReturnedCollateral.plus(calculateExpectedCollateralToReturn(
-            new BigNumber((await marketContractMpx.PRICE_FLOOR()).toString()),
-            new BigNumber((await marketContractMpx.PRICE_CAP()).toString()),
-            new BigNumber((await marketContractMpx.QTY_MULTIPLIER()).toString()),
-            amount,
-            new BigNumber(0),
-            new BigNumber((await marketContractMpx.settlementPrice()).toString())
-          ));
-          
-          assert.equal(
-            await marketContractMpx.isSettled(),
-            true
+          expectedMakerReturnedCollateral = expectedMakerReturnedCollateral.plus(
+            calculateExpectedCollateralToReturn(
+              new BigNumber((await marketContractMpx.PRICE_FLOOR()).toString()),
+              new BigNumber((await marketContractMpx.PRICE_CAP()).toString()),
+              new BigNumber((await marketContractMpx.QTY_MULTIPLIER()).toString()),
+              new BigNumber(0),
+              amount,
+              new BigNumber((await marketContractMpx.settlementPrice()).toString())
+            )
           );
+          expectedTakerReturnedCollateral = expectedTakerReturnedCollateral.plus(
+            calculateExpectedCollateralToReturn(
+              new BigNumber((await marketContractMpx.PRICE_FLOOR()).toString()),
+              new BigNumber((await marketContractMpx.PRICE_CAP()).toString()),
+              new BigNumber((await marketContractMpx.QTY_MULTIPLIER()).toString()),
+              amount,
+              new BigNumber(0),
+              new BigNumber((await marketContractMpx.settlementPrice()).toString())
+            )
+          );
+
+          assert.equal(await marketContractMpx.isSettled(), true);
         }
 
         let makerImbtcBalanceBefore = new BigNumber(
@@ -783,25 +801,32 @@ contract(
         );
 
         // batch redeem call for long token
-        let longTokenBatchTx = marketContractProxy.contract.methods.batchRedeem(
-          longTokensAddresses,
-          marketContractsAddresses,
-          amounts,
-          isLongToken // to indicate the token is long
-        )
-        .encodeABI();
+        let longTokenBatchTx = marketContractProxy.contract.methods
+          .batchRedeem(
+            longTokensAddresses,
+            marketContractsAddresses,
+            amounts,
+            isLongToken // to indicate the token is long
+          )
+          .encodeABI();
         // batch redeem call for short token
-        let shortTokenBatchTx = marketContractProxy.contract.methods.batchRedeem(
-          shortTokensAddresses,
-          marketContractsAddresses,
-          amounts,
-          isShortToken // to indicate the token is short
-        ).encodeABI();
+        let shortTokenBatchTx = marketContractProxy.contract.methods
+          .batchRedeem(
+            shortTokensAddresses,
+            marketContractsAddresses,
+            amounts,
+            isShortToken // to indicate the token is short
+          )
+          .encodeABI();
 
         // DSProxy Wallet instance
-        let makerDsProxyWallet = await DSProxy.at(await marketContractProxy.getUserAddressOrDSProxy(makerAddress));
-        let takerDsProxyWallet = await DSProxy.at(await marketContractProxy.getUserAddressOrDSProxy(takerAddress));
-        
+        let makerDsProxyWallet = await DSProxy.at(
+          await marketContractProxy.getUserAddressOrDSProxy(makerAddress)
+        );
+        let takerDsProxyWallet = await DSProxy.at(
+          await marketContractProxy.getUserAddressOrDSProxy(takerAddress)
+        );
+
         // taker(investor) redeem long tokens
         await takerDsProxyWallet.execute(marketContractProxy.address, longTokenBatchTx, {
           from: takerAddress
