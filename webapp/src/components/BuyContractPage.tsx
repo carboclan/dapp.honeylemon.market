@@ -21,21 +21,18 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogContentText,
-  TextField,
-  DialogActions,
   Stepper,
   Step,
   StepLabel,
   StepContent,
 } from '@material-ui/core';
 import { BigNumber } from '@0x/utils';
+import { Link as RouterLink } from 'react-router-dom';
+import clsx from 'clsx';
 import { TabPanel } from './TabPanel';
 import { useHoneylemon } from '../contexts/HoneylemonContext';
 import { useOnboard } from '../contexts/OnboardContext';
 import { forwardTo } from '../helpers/history';
-import { Link as RouterLink } from 'react-router-dom';
-import clsx from 'clsx';
 
 
 const useStyles = makeStyles(({ spacing, palette }) => ({
@@ -83,7 +80,6 @@ const BuyContractPage: React.SFC = () => {
     CONTRACT_DURATION,
     isDsProxyDeployed,
     paymentTokenBalance,
-    deployProxy
   } = useHoneylemon()
   const classes = useStyles();
 
@@ -99,6 +95,7 @@ const BuyContractPage: React.SFC = () => {
   const [buyType, setBuyType] = useState<BuyType>(BuyType.budget);
   const [showBuyModal, setShowBuyModal] = useState(false);
   const [isTxActive, setTxActive] = useState(false);
+
   const handleChangeBuyType = (event: React.ChangeEvent<{}>, newValue: BuyType) => {
     setBuyType(newValue);
     setBudget(orderValue);
@@ -163,6 +160,7 @@ const BuyContractPage: React.SFC = () => {
     } catch (error) {
       console.log('Something went wrong deploying the DS Proxy wallet');
       console.log(error);
+      // TODO: Display error on modal
     }
     setTxActive(false);
   }
@@ -174,6 +172,7 @@ const BuyContractPage: React.SFC = () => {
     } catch (error) {
       console.log('Something went wrong approving the tokens');
       console.log(error);
+      // TODO: Display error on modal
     }
     setTxActive(false);
   }
@@ -211,6 +210,7 @@ const BuyContractPage: React.SFC = () => {
     } catch (error) {
       console.log('Something went wrong buying this contract');
       console.log(error);
+      // TODO: Display error on modal
     }
     setTxActive(false);
   }
@@ -402,22 +402,21 @@ const BuyContractPage: React.SFC = () => {
                 <StepContent>
                   <Typography>{getStepContent(index)}</Typography>
                   <div className={classes.actionsContainer}>
-                    <>
-                      <Button
-                        onClick={handleCloseBuyDialog}
-                        className={classes.button}>
-                        Cancel
-                      </Button>
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={() => handleStepperNext(activeStep)}
-                        className={classes.button}
-                        disabled={isTxActive}>
-                        {getStepButtonLabel(activeStep)}&nbsp;
+                    <Button
+                      onClick={handleCloseBuyDialog}
+                      className={classes.button}
+                      disabled={isTxActive}>
+                      Cancel
+                    </Button>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={() => handleStepperNext(activeStep)}
+                      className={classes.button}
+                      disabled={isTxActive}>
+                      {getStepButtonLabel(activeStep)}&nbsp;
                         {isTxActive && <CircularProgress className={classes.loadingSpinner} size={20} />}
-                      </Button>
-                    </>
+                    </Button>
                   </div>
                 </StepContent>
               </Step>

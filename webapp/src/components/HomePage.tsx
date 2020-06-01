@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link, Button, Typography, makeStyles, Grid, Divider, Paper, CircularProgress } from '@material-ui/core';
+import { Link, Button, Typography, makeStyles, Grid, Divider, CircularProgress } from '@material-ui/core';
 import { Link as RouterLink } from 'react-router-dom';
 import { forwardTo } from '../helpers/history';
 import dayjs, { Dayjs } from 'dayjs';
@@ -181,13 +181,13 @@ const HomePage: React.SFC = () => {
       }
       {onboard && wallet && isReady &&
         <>
-          <Typography variant='h5' style={{ fontWeight: 'bold' }}>I am a BTC Hodler</Typography>
-          <Typography color='secondary' style={{ fontWeight: 'bold' }} gutterBottom>Pay cash & earn mining rewards</Typography>
-          <Button onClick={() => forwardTo('/buy')} className={classes.button} disabled={!ready}>BUY CONTRACTS</Button>
-          <Divider className={classes.divider} />
           <Typography variant='h5' style={{ fontWeight: 'bold' }}>I am a BTC Miner</Typography>
           <Typography color='secondary' style={{ fontWeight: 'bold' }}>Hedge risk & get cash up front</Typography>
           <Button onClick={() => forwardTo('/offer')} className={classes.button} disabled={!ready}>OFFER CONTRACTS</Button>
+          <Divider className={classes.divider} />
+          <Typography variant='h5' style={{ fontWeight: 'bold' }}>I am a BTC Hodler</Typography>
+          <Typography color='secondary' style={{ fontWeight: 'bold' }} gutterBottom>Pay cash & earn mining rewards</Typography>
+          <Button onClick={() => forwardTo('/buy')} className={classes.button} disabled={!ready}>BUY CONTRACTS</Button>
         </>
       }
     </Grid>

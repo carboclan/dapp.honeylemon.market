@@ -15,7 +15,6 @@ export type HoneylemonContext = {
   PAYMENT_TOKEN_DECIMALS: number,
   CONTRACT_DURATION: number,
   isDsProxyDeployed: Boolean,
-  deployProxy(): void,
 };
 
 export type HoneylemonProviderProps = {
@@ -112,14 +111,6 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
     }
   }, [honeylemonService, address])
 
-  const deployProxy = async () => {
-    try {
-      await honeylemonService.deployDSProxyContract(address);
-    } catch (error) {
-      console.log('The transaction was declined. Please approve to continue');
-    }
-  }
-
   return (
     <HoneylemonContext.Provider
       value={{
@@ -132,7 +123,6 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
         PAYMENT_TOKEN_DECIMALS: 6, //TODO: Extract this from library when TS conversion is done
         CONTRACT_DURATION: 2, //TODO: Extract this from library when TS conversion is done
         isDsProxyDeployed,
-        deployProxy,
       }}
     >
       {children}
