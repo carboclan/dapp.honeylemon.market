@@ -14,9 +14,12 @@ import {
   Table,
   TableBody,
   Divider,
-  CircularProgress
+  CircularProgress,
+  ExpansionPanel,
+  ExpansionPanelSummary,
+  ExpansionPanelDetails
 } from '@material-ui/core';
-import { RadioButtonUnchecked } from '@material-ui/icons';
+import { ExpandMore, RadioButtonUnchecked } from '@material-ui/icons';
 import { useOnboard } from '../contexts/OnboardContext';
 import { useHoneylemon } from '../contexts/HoneylemonContext';
 
@@ -87,6 +90,11 @@ const PorfolioPage: React.SFC = () => {
   const [refresh, setRefresh] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [isWithdrawing, setIsWithdrawing] = useState(false);
+  const [showOpenOrders, setShowOpenOrders] = useState(false);
+  const [showActivePositions, setShowActivePositions] = useState(false);
+  const [showSettledPositionsToWithdraw, setShowSettledPositionsToWithdraw] = useState(false);
+  const [showSettledPositions, setShowSettledPositions] = useState(false);
+
 
   const handleSetActiveTab = (event: React.ChangeEvent<{}>, newValue: 'active' | 'settled') => {
     setActiveTab(newValue);
@@ -129,6 +137,7 @@ const PorfolioPage: React.SFC = () => {
       const positions = await honeylemonService.getPositions(address);
       if (!cancelled) {
         setOpenOrdersMetadata(openOrdersRes.records.map((openOrder: any) => openOrder.metaData))
+        !showOpenOrders && setShowOpenOrders(openOrdersRes.records.length > 0);
         setOpenOrders(Object.fromEntries(
           openOrdersRes.records.map(((openOrder: any) => [openOrder.metaData.orderHash, openOrder.order]))
         ));
@@ -146,13 +155,19 @@ const PorfolioPage: React.SFC = () => {
           finalReward: Number(p.finalReward?.shiftedBy(-COLLATERAL_TOKEN_DECIMALS).toString()) || 0,
         }));
 
-        const activePositions = allPositions.filter((p: any) => !p?.contract.settlement)
-        setActivePositions(activePositions);
-        const sctw = allPositions.filter((p: any) => !!p?.contract.settlement /** &&  available withdraw flag */)
-        setSettledPositionsToWithdraw(sctw);
-        setCollateralForWithdraw(sctw.reduce((total: Number, contract: any) => total += contract?.finalReward, 0));
+        const newActivePositions = allPositions.filter((p: any) => !p?.contract.settlement)
+        setActivePositions(newActivePositions);
+        !showActivePositions && setShowActivePositions(newActivePositions.length > 0)
+
+        const sptw = allPositions.filter((p: any) => !!p?.contract.settlement /** &&  available withdraw flag */)
+        setSettledPositionsToWithdraw(sptw);
+        !showSettledPositionsToWithdraw && setShowSettledPositionsToWithdraw(sptw.length > 0)
+        setCollateralForWithdraw(sptw.reduce((total: Number, contract: any) => total += contract?.finalReward, 0));
+
         const finalized = allPositions.filter((p: any) => !!p?.contract.settlement /** &&  !available withdraw flag */)
         setSettledPositions(finalized);
+        !showSettledPositions && setShowSettledPositions(finalized.length > 0)
+
         setRefresh(false);
         setIsLoading(false)
       }
@@ -169,6 +184,22 @@ const PorfolioPage: React.SFC = () => {
       clearInterval(poller)
     }
   }, [])
+
+  const handleToggleOpenOrdersPanel = () => {
+    setShowOpenOrders(!showOpenOrders);
+  }
+
+  const handleToggleActivePositionsPanel = () => {
+    setShowActivePositions(!showActivePositions);
+  }
+
+  const handleToggleSettledPositionsToWithdrawPanel = () => {
+    setShowSettledPositionsToWithdraw(!showSettledPositionsToWithdraw);
+  }
+
+  const handleToggleSettledPositionsPanel = () => {
+    setShowSettledPositions(!showSettledPositions);
+  }
 
   const classes = useStyles();
   return (
@@ -189,124 +220,171 @@ const PorfolioPage: React.SFC = () => {
         <div className={classes.tabContent}>
           {activeTab === 'active' ?
             <>
-              <Typography variant='h5' className={classes.sectionHeading}>
-                Unfilled Positions
-              </Typography>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Quantity</TableCell>
-                    <TableCell>Price</TableCell>
-                    <TableCell></TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {openOrdersMetadata && openOrdersMetadata?.map(order =>
-                    <TableRow key={order.orderHash}>
-                      <TableCell>{order?.remainingFillableMakerAssetAmount.toString()}</TableCell>
-                      <TableCell align='center'>${order?.price.dividedBy(CONTRACT_DURATION).toFixed(2)}</TableCell>
-                      <TableCell align='right'><Button onClick={() => cancelOpenOrder(order.orderHash)}>Cancel</Button></TableCell>
-                    </TableRow>
-                  )}
-                  <TableRow>
-                    <TableCell colSpan={3} align='center' className={classes.placeholderRow}>
-                      {isLoading && <CircularProgress className={classes.loadingSpinner} size={20} />}
-                      {!isLoading && openOrdersMetadata.length === 0 && "No open positions"}
-                    </TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
+              <ExpansionPanel expanded={showOpenOrders} onClick={handleToggleOpenOrdersPanel}>
+                <ExpansionPanelSummary
+                  expandIcon={!isLoading ? <ExpandMore /> : <CircularProgress className={classes.loadingSpinner} size={20} />}
+                  aria-controls="unfilled-panel-content"
+                  id="unfilled-panel-header">
+                  <Typography variant='h5' className={classes.sectionHeading}>
+                    Unfilled Positions
+                  </Typography>
+                </ExpansionPanelSummary>
+                <ExpansionPanelDetails>
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>Quantity</TableCell>
+                        <TableCell align='center'>Price</TableCell>
+                        <TableCell></TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {openOrdersMetadata && openOrdersMetadata?.map(order =>
+                        <TableRow key={order.orderHash}>
+                          <TableCell>{order?.remainingFillableMakerAssetAmount.toString()}</TableCell>
+                          <TableCell align='center'>${order?.price.dividedBy(CONTRACT_DURATION).toFixed(2)}</TableCell>
+                          <TableCell align='right'><Button onClick={() => cancelOpenOrder(order.orderHash)}>Cancel</Button></TableCell>
+                        </TableRow>
+                      )}
+                      {!isLoading && openOrdersMetadata.length === 0 &&
+                        <TableRow>
+                          <TableCell colSpan={3} align='center' className={classes.placeholderRow}>
+                            No open positions
+                          </TableCell>
+                        </TableRow>
+                      }
+                    </TableBody>
+                  </Table>
+                </ExpansionPanelDetails>
+              </ExpansionPanel>
               <Divider className={classes.sectionDivider} light variant='middle' />
-              <Typography variant='h5' className={classes.sectionHeading}>
-                Positions
-                </Typography>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Swap</TableCell>
-                    <TableCell>Quantity</TableCell>
-                    <TableCell>Days</TableCell>
-                    <TableCell align='right'>BTC Accrued</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {activePositions && activePositions?.map((position: any, i) =>
-                    <TableRow key={i}>
-                      <TableCell>{position.contractName}</TableCell>
-                      <TableCell align='center'>{position?.qtyToMint}</TableCell>
-                      <TableCell>{position.daysToMaturity}</TableCell>
-                      <TableCell>{position.pendingReward}</TableCell>
-                    </TableRow>
-                  )}
-                  <TableRow>
-                    <TableCell colSpan={4} align='center' className={classes.placeholderRow}>
-                      {isLoading && <CircularProgress className={classes.loadingSpinner} size={20} />}
-                      {!isLoading && activePositions.length === 0 && "No active positions"}
-                    </TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
+              <ExpansionPanel expanded={showActivePositions} onClick={handleToggleActivePositionsPanel}>
+                <ExpansionPanelSummary
+                  expandIcon={!isLoading ? <ExpandMore /> : <CircularProgress className={classes.loadingSpinner} size={20} />}
+                  aria-controls="active-orders-panel-content"
+                  id="active-orders-panel-header">
+                  <Typography variant='h5' className={classes.sectionHeading}>
+                    Positions
+                  </Typography>
+                </ExpansionPanelSummary>
+                <ExpansionPanelDetails>
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>Swap</TableCell>
+                        <TableCell align='center'>Quantity</TableCell>
+                        <TableCell align='center'>Days</TableCell>
+                        <TableCell align='right'>BTC</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {activePositions && activePositions?.map((position: any, i) =>
+                        <TableRow key={i}>
+                          <TableCell>{position.contractName}</TableCell>
+                          <TableCell align='center'>{position.qtyToMint}</TableCell>
+                          <TableCell align='center'>{position.daysToMaturity}</TableCell>
+                          <TableCell align='right'>{position.pendingReward}</TableCell>
+                        </TableRow>
+                      )}
+                      {!isLoading && activePositions.length === 0 &&
+                        <TableRow>
+                          <TableCell colSpan={4} align='center' className={classes.placeholderRow}>
+                            No active positions
+                          </TableCell>
+                        </TableRow>
+                      }
+                    </TableBody>
+                  </Table>
+                </ExpansionPanelDetails>
+              </ExpansionPanel>
             </> :
             <>
-              <Typography variant='h5' className={classes.sectionHeading}>Withdraw Pending</Typography>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Swap</TableCell>
-                    <TableCell>Position</TableCell>
-                    <TableCell>BTC</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {settledPositionsToWithdraw?.map((position: any, i) =>
-                    <TableRow key={i}>
-                      <TableCell>{position.contractName}</TableCell>
-                      <TableCell align='center'>{position.qtyToMint}</TableCell>
-                      <TableCell align='right'>{position.finalReward}</TableCell>
-                    </TableRow>
-                  )}
-                  <TableRow>
-                    <TableCell colSpan={3} align='center' className={classes.placeholderRow}>
-                      {isLoading && <CircularProgress className={classes.loadingSpinner} size={20} />}
-                      {!isLoading && settledPositionsToWithdraw.length === 0 && "No open positions"}
-                    </TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
-              <Button fullWidth disabled={collateralForWithdraw === 0} onClick={withdrawAvailable}>
-                {(!isWithdrawing) ?
-                  (collateralForWithdraw > 0) ?
-                    `WITHDRAW ALL (${collateralForWithdraw} BTC)` :
-                    <>WITHDRAW ALL <RadioButtonUnchecked className={classes.icon} /></> :
-                  <>WITHDRAW ALL <CircularProgress className={classes.loadingSpinner} size={20} /></>
-                }
-              </Button>
+              <ExpansionPanel expanded={showSettledPositionsToWithdraw} onClick={handleToggleSettledPositionsToWithdrawPanel}>
+                <ExpansionPanelSummary
+                  expandIcon={!isLoading ? <ExpandMore /> : <CircularProgress className={classes.loadingSpinner} size={20} />}
+                  aria-controls="settled-orders-withdraw-panel-content"
+                  id="settled-orders-withdraw-panel-header">
+                  <Typography variant='h5' className={classes.sectionHeading}>Withdraw Pending</Typography>
+                </ExpansionPanelSummary>
+                <ExpansionPanelDetails>
+                  <Grid container direction='row' spacing={2}>
+                    <Grid item xs={12}>
+                      <Table>
+                        <TableHead>
+                          <TableRow>
+                            <TableCell>Swap</TableCell>
+                            <TableCell align='center'>Position</TableCell>
+                            <TableCell align='right'>BTC</TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {settledPositionsToWithdraw?.map((position: any, i) =>
+                            <TableRow key={i}>
+                              <TableCell>{position.contractName}</TableCell>
+                              <TableCell align='center'>{position.qtyToMint}</TableCell>
+                              <TableCell align='right'>{position.finalReward}</TableCell>
+                            </TableRow>
+                          )}
+                          {!isLoading && settledPositionsToWithdraw.length === 0 &&
+                            <TableRow>
+                              <TableCell colSpan={3} align='center' className={classes.placeholderRow}>
+                                No positions to withdraw
+                              </TableCell>
+                            </TableRow>
+                          }
+                        </TableBody>
+                      </Table>
+                    </Grid>
+                    <Grid item xs={12}>
+                      <Button fullWidth disabled={collateralForWithdraw === 0} onClick={withdrawAvailable}>
+                        {(!isWithdrawing) ?
+                          (collateralForWithdraw > 0) ?
+                            `WITHDRAW ALL (${collateralForWithdraw.toLocaleString()} BTC)` :
+                            <>WITHDRAW ALL <RadioButtonUnchecked className={classes.icon} /></> :
+                          <>WITHDRAW ALL <CircularProgress className={classes.loadingSpinner} size={20} /></>
+                        }
+                      </Button>
+                    </Grid>
+                  </Grid>
+                </ExpansionPanelDetails>
+              </ExpansionPanel>
               <Divider className={classes.sectionDivider} light variant='middle' />
-              <Typography variant='h5' className={classes.sectionHeading}>Closed</Typography>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Swap</TableCell>
-                    <TableCell>Position</TableCell>
-                    <TableCell>BTC</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {settledPositions.map((position: any, i) =>
-                    <TableRow key={i}>
-                      <TableCell>{position.contractName}</TableCell>
-                      <TableCell align='center'>{position.qtyToMint}</TableCell>
-                      <TableCell align='right'>{position.finalReward}</TableCell>
-                    </TableRow>
-                  )}
-                  <TableRow>
-                    <TableCell colSpan={3} align='center' className={classes.placeholderRow}>
-                      {isLoading && <CircularProgress className={classes.loadingSpinner} size={20} />}
-                      {!isLoading && settledPositions.length === 0 && "No open positions"}
-                    </TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
+              <ExpansionPanel expanded={showSettledPositions} onClick={handleToggleSettledPositionsPanel}>
+                <ExpansionPanelSummary
+                  expandIcon={!isLoading ? <ExpandMore /> : <CircularProgress className={classes.loadingSpinner} size={20} />}
+                  aria-controls="settled-orders-panel-content"
+                  id="settled-orders-panel-header">
+                  <Typography variant='h5' className={classes.sectionHeading}>Closed</Typography>
+                </ExpansionPanelSummary>
+                <ExpansionPanelDetails>
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>Swap</TableCell>
+                        <TableCell align='center'>Position</TableCell>
+                        <TableCell align='right'>BTC</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {settledPositions.map((position: any, i) =>
+                        <TableRow key={i}>
+                          <TableCell>{position.contractName}</TableCell>
+                          <TableCell align='center'>{position.qtyToMint}</TableCell>
+                          <TableCell align='right'>{position.finalReward}</TableCell>
+                        </TableRow>
+                      )}
+                      {!isLoading && settledPositions.length === 0 &&
+                        <TableRow>
+                          <TableCell colSpan={3} align='center' className={classes.placeholderRow}>
+                            No closed positions
+                          </TableCell>
+                        </TableRow>
+                      }
+
+                    </TableBody>
+                  </Table>
+                </ExpansionPanelDetails>
+              </ExpansionPanel>
             </>
           }
         </div>
