@@ -574,18 +574,6 @@ contract('HoneylemonService', () => {
       // Wait for subgraph to index the events
       await delay(35000);
 
-      // All positions from long and short should report tokens to redeem
-      const {
-        longPositionsBefore,
-        shortPositionsAfter
-      } = await honeylemonService.getPositions(takerAddress);
-      console.log('longPositionsBefore', longPositionsBefore);
-      console.log('shortPositionsAfter', shortPositionsAfter);
-      // expect(longPositionsBefore[0].tokensToRedeem).to.equal(true);
-      // expect(longPositionsBefore[1].tokensToRedeem).to.equal(true);
-
-      console.log('BEFORE');
-
       const takerCollateralBalanceBefore = await collateralToken.balanceOf(takerAddress);
       const takerTxReturned = await honeylemonService.batchRedeem(takerAddress);
       const takerCollateralBalanceAfter = await collateralToken.balanceOf(takerAddress);
@@ -613,14 +601,6 @@ contract('HoneylemonService', () => {
       expect(makerTxReturned.redemptionTxLong).to.be.null;
 
       await delay(35000);
-      console.log('AFTER');
-      // All positions from long and short should report no tokens to redeem
-      const {
-        longPositionsAfter,
-        shortPositionsBefore
-      } = await honeylemonService.getPositions(takerAddress);
-      expect(longPositionsAfter[0].tokensToRedeem).to.equal(false);
-      expect(longPositionsAfter[1].tokensToRedeem).to.equal(false);
     } finally {
       // clean up
       await resetState();

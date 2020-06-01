@@ -402,9 +402,6 @@ class HoneylemonService {
     // Get position information for the recipient
     const { longPositions, shortPositions } = await this.getPositions(recipientAddress);
 
-    console.log('longPositions', longPositions);
-    console.log('shortPositions', shortPositions);
-
     // Place holders to return tx within if there was a batch redemption
     let redemptionTxLong = null,
       redemptionTxShort = null;
@@ -609,10 +606,7 @@ class HoneylemonService {
         position.pendingReward = pendingRewardPerUnit.multipliedBy(position.qtyToMint);
       }
       // Tokens to redeem
-      console.log('position.longTokenAddress', position.longTokenAddress);
       const longToken = new ERC20TokenContract(position.longTokenAddress, this.provider);
-
-      console.log('position.shortTokenAddress', position.shortTokenAddress);
       const shortToken = new ERC20TokenContract(
         position.shortTokenAddress,
         this.provider
