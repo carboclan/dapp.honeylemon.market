@@ -303,7 +303,7 @@ const OfferContractPage: React.SFC = () => {
                   <TableCell align='right'>{`$ ${totalContractPrice.toLocaleString()}`}</TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell>Collateral imBTC Required</TableCell>
+                  <TableCell>Collateral Required</TableCell>
                   <TableCell align='right'>{`${collateralAmount.toLocaleString()} imBTC`}</TableCell>
                 </TableRow>
                 <TableRow>
@@ -312,11 +312,11 @@ const OfferContractPage: React.SFC = () => {
                 </TableRow>
                 <TableRow>
                   <TableCell>Price</TableCell>
-                  <TableCell align='right'>$ {hashPrice}/TH/day</TableCell>
+                  <TableCell align='right'>$ {hashPrice.toLocaleString()} /TH/day</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell>Quantity</TableCell>
-                  <TableCell align='right'>$ {hashAmount}/TH/day</TableCell>
+                  <TableCell align='right'>{hashAmount.toLocaleString()} TH</TableCell>
                 </TableRow>
               </TableBody>
             </Table>
@@ -327,7 +327,6 @@ const OfferContractPage: React.SFC = () => {
             <List className={classes.errorList}>
               {errors.map((error, i) =>
                 <ListItem key={i}>
-                  <ListItemIcon>○</ListItemIcon>
                   <ListItemText>{error}</ListItemText>
                 </ListItem>)}
             </List>
