@@ -110,7 +110,8 @@ const PorfolioPage: React.SFC = () => {
   const withdrawAvailable = async () => {
     setIsWithdrawing(true);
     try {
-      const results = await honeylemonService.batchRedeem(address);
+      //const results = 
+      await honeylemonService.batchRedeem(address);
       setRefresh(true);
     } catch (error) {
       console.log("Something went wrong during the withdrawl");
@@ -158,7 +159,7 @@ const PorfolioPage: React.SFC = () => {
     }
     getPorfolio()
     return () => { cancelled = true }
-  }, [address, honeylemonService, refresh, CONTRACT_DURATION])
+  }, [address, honeylemonService, refresh, CONTRACT_DURATION, COLLATERAL_TOKEN_DECIMALS])
 
   useEffect(() => {
     var poller: NodeJS.Timeout;
