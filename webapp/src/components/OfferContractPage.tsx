@@ -108,7 +108,7 @@ const OfferContractPage: React.SFC = () => {
     }
   }
 
-  const tokenApprovalGranted = collateralTokenAllowance > 0
+  const tokenApprovalGranted = collateralTokenAllowance > collateralAmount;
   const sufficientCollateral = collateralTokenBalance >= collateralAmount; 
   const isValid = isDsProxyDeployed && tokenApprovalGranted &&sufficientCollateral;
 
