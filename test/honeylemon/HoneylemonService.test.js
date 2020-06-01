@@ -21,6 +21,7 @@ const {
   CONTRACTS_QUERY
 } = require('../../src/lib/HoneylemonService');
 const { revertToSnapShot, takeSnapshot } = require('../helpers/snapshot');
+const { resetSubgraph } = require('../helpers/subgraph');
 const delay = require('../helpers/delay');
 
 const web3Wrapper = new Web3Wrapper(web3.currentProvider);
@@ -44,8 +45,8 @@ let accounts = null,
   currentMRIScaled = null,
   // tested service
   honeylemonService = null,
-  // stubs
-  subgraphStub = null;
+  // store initial state
+  initialSnapshotId = null;
 
 before(async function() {
   accounts = await web3Wrapper.getAvailableAddressesAsync();
@@ -72,9 +73,6 @@ before(async function() {
 
   // Stub orders
   await stubOrders();
-
-  // Stub subgraph
-  subgraphStub = sinon.stub(honeylemonService.subgraphClient, 'request')
 
   // Starting MRI value
   mriInput = 0.00001833;
@@ -113,7 +111,31 @@ before(async function() {
   shortToken[currentDayCounter] = await PositionToken.at(
     await marketContract.SHORT_POSITION_TOKEN()
   );
+
+  // Take snapshot of initial state
+  const { result: _initialSnapshotId } = await takeSnapshot();
+  initialSnapshotId = _initialSnapshotId;
 });
+
+after(async () => {
+  // Reset original snapshot and subgraph states
+  await resetState();
+});
+
+afterEach(async () => {
+  if (honeylemonService.subgraphClient.request.restore)
+    honeylemonService.subgraphClient.request.restore();
+});
+
+const resetState = async () => {
+  await revertToSnapShot(initialSnapshotId);
+  // Take snapshot again, because it can only be used once (see https://github.com/trufflesuite/ganache-cli#custom-methods)
+  const { result: _initialSnapshotId } = await takeSnapshot();
+  initialSnapshotId = _initialSnapshotId;
+  await resetSubgraph();
+  await delay(5000); // wait for subgraph to recover
+  console.log('Reset state');
+};
 
 const stubOrders = async () => {
   const orderParams = [
@@ -167,10 +189,10 @@ const stubOrders = async () => {
   });
 };
 
-const stubPositions = (positionsAsMaker, positionsAsTaker, address) => {
+const stubPositions = (subgraphStub, positionsAsMaker, positionsAsTaker, address) => {
   subgraphStub
     .withArgs(POSITIONS_QUERY, sinon.match({ address: address.toLowerCase() }))
-    .returns({
+    .resolves({
       user: {
         positionsAsMaker,
         positionsAsTaker
@@ -178,15 +200,13 @@ const stubPositions = (positionsAsMaker, positionsAsTaker, address) => {
     });
 
   return subgraphStub;
-}
+};
 
-const stubContracts = (contracts, last = 28) => {
-  subgraphStub
-    .withArgs(CONTRACTS_QUERY, sinon.match({ last }))
-    .returns({ contracts });
+const stubContracts = (subgraphStub, contracts, last = 28) => {
+  subgraphStub.withArgs(CONTRACTS_QUERY, sinon.match({ last })).resolves({ contracts });
 
   return subgraphStub;
-}
+};
 
 contract('HoneylemonService', () => {
   it('should give correct quote for size', async () => {
@@ -313,7 +333,7 @@ contract('HoneylemonService', () => {
       takerAssetFillAmounts,
       takerAddress
     );
-    expect(gas).to.be.within(500000, 600000);
+    expect(gas).to.be.within(500000, 700000);
   });
 
   it('fills orders', async () => {
@@ -397,98 +417,105 @@ contract('HoneylemonService', () => {
     assert.equal(absoluteDriftError.lt(new BigNumber(0.001)), true);
   });
 
-  it('Retrieve open contracts', async () => {
-    const { result: snapshotId } = await takeSnapshot();
+  it('Retrieve open positions', async () => {
+    // reset state in case it is polluted
+    await resetState();
 
-    // Create positions for long and short token holder
-    const fillSize = new BigNumber(1);
+    try {
+      const fillSize = new BigNumber(1);
 
-    // Create two contracts. taker participates as a taker in both. Maker is only involved
-    // in the first contract.
-    await fill0xOrderForAddresses(1, takerAddress, makerAddress);
-    await fill0xOrderForAddresses(2, takerAddress, makerAddress);
-    await fill0xOrderForAddresses(3, takerAddress, makerAddress);
+      await fill0xOrderForAddresses(1, takerAddress, makerAddress);
+      await fill0xOrderForAddresses(2, takerAddress, makerAddress);
+      await fill0xOrderForAddresses(3, takerAddress, makerAddress);
 
-    // fast forward 28 days
-    await time.increase(28 * 24 * 60 * 60 + 1);
-    // we need to deploy 28 times in order to be able to settle
-    await Promise.all(
-      Array.from({ length: 28 }, (x, i) => {
-        return createNewMarketProtocolContract(
-          mriInput * 28,
-          mriInput,
-          'MRI-BTC-28D-test'
-        );
-      })
-    );
+      // fast forward 28 days
+      await time.increase(28 * 24 * 60 * 60 + 1);
+      // we need to deploy 28 times in order to be able to settle
+      await Promise.all(
+        Array.from({ length: 28 }, (x, i) => {
+          return createNewMarketProtocolContract(
+            mriInput * 28,
+            mriInput,
+            'MRI-BTC-28D-test'
+          );
+        })
+      );
 
-    await fill0xOrderForAddresses(4, takerAddress, makerAddress);
-    await createNewMarketProtocolContract(mriInput * 28, mriInput, 'MRI-BTC-28D-test');
-    await fill0xOrderForAddresses(5, takerAddress, makerAddress);
+      await fill0xOrderForAddresses(4, takerAddress, makerAddress);
+      await createNewMarketProtocolContract(mriInput * 28, mriInput, 'MRI-BTC-28D-test');
+      await fill0xOrderForAddresses(5, takerAddress, makerAddress);
 
-    // Wait for subgraph to index the events
-    await delay(3000);
+      // Wait for subgraph to index the events
+      await delay(3000);
 
-    // Get contracts object from HoneyLemonService
-    const { longPositions, shortPositions } = await honeylemonService.getPositions(
-      takerAddress
-    );
+      // Get contracts object from HoneyLemonService
+      const { longPositions, shortPositions } = await honeylemonService.getPositions(
+        takerAddress
+      );
 
-    const {
-      longPositions: longPositions2,
-      shortPositions: shortPositions2
-    } = await honeylemonService.getPositions(makerAddress);
+      const {
+        longPositions: longPositions2,
+        shortPositions: shortPositions2
+      } = await honeylemonService.getPositions(makerAddress);
 
-    // Validate positions
-    expect(longPositions.length).to.eq(6);
-    expect(shortPositions.length).to.eq(0);
-    expect(longPositions2.length).to.eq(0);
-    expect(shortPositions2.length).to.eq(6);
+      // Validate positions
+      expect(longPositions.length).to.eq(3);
+      expect(shortPositions.length).to.eq(0);
+      expect(longPositions2.length).to.eq(0);
+      expect(shortPositions2.length).to.eq(3);
 
-    // Expired contract
-    expect(longPositions[0].finalReward).to.eql(new BigNumber(51324));
-    expect(shortPositions2[0].finalReward).to.eql(new BigNumber(17963));
+      // Expired contract
+      expect(longPositions[0].finalReward).to.eql(new BigNumber(307944));
+      expect(shortPositions2[0].finalReward).to.eql(new BigNumber(107778));
 
-    // Active contract
-    expect(longPositions[3].pendingReward).to.eql(new BigNumber(7332));
-    expect(shortPositions2[3].pendingReward).to.eql(new BigNumber(269816));
-    expect(longPositions[3].finalReward).to.eql(new BigNumber(0));
-    expect(shortPositions2[3].finalReward).to.eql(new BigNumber(0));
+      // Active contract
+      expect(longPositions[1].pendingReward).to.eql(new BigNumber(7332));
+      expect(shortPositions2[1].pendingReward).to.eql(new BigNumber(269816));
+      expect(longPositions[1].finalReward).to.eql(new BigNumber(0));
+      expect(shortPositions2[1].finalReward).to.eql(new BigNumber(0));
 
-    // New contract
-    expect(longPositions[4].pendingReward).to.eql(new BigNumber(0));
-    expect(shortPositions2[4].pendingReward).to.eql(new BigNumber(346435));
-    expect(longPositions[4].finalReward).to.eql(new BigNumber(0));
-    expect(shortPositions2[4].finalReward).to.eql(new BigNumber(0));
+      // New contract
+      expect(longPositions[2].pendingReward).to.eql(new BigNumber(0));
+      expect(shortPositions2[2].pendingReward).to.eql(new BigNumber(346435));
+      expect(longPositions[2].finalReward).to.eql(new BigNumber(0));
+      expect(shortPositions2[2].finalReward).to.eql(new BigNumber(0));
 
-    console.log(`Reverting to snapshot ${snapshotId}`);
-    await revertToSnapShot(snapshotId);
+      // isRedeemed
+      expect(longPositions[0].isRedeemed).to.eq(false);
+      expect(shortPositions2[0].isRedeemed).to.eq(false);
+    } finally {
+      // clean up
+      await resetState();
+    }
   });
 
-  it.only('merges related positions', async () => {
+  it('merges related positions', async () => {
+    // Stub subgraph
+    subgraphStub = sinon.stub(honeylemonService.subgraphClient, 'request');
+
     // stub positions;
     const tx1 = {
-      id: "tx1",
+      id: 'tx1',
       fills: [
-        { makerAssetFilledAmount: "10", takerAssetFilledAmount: "10000" },
-        { makerAssetFilledAmount: "7", takerAssetFilledAmount: "8000" }
+        { makerAssetFilledAmount: '10', takerAssetFilledAmount: '10000' },
+        { makerAssetFilledAmount: '7', takerAssetFilledAmount: '8000' }
       ]
     };
     const tx2 = {
-      id: "tx2",
+      id: 'tx2',
       fills: [
-        { makerAssetFilledAmount: "5", takerAssetFilledAmount: "6000" },
-        { makerAssetFilledAmount: "9", takerAssetFilledAmount: "9500" }
+        { makerAssetFilledAmount: '5', takerAssetFilledAmount: '6000' },
+        { makerAssetFilledAmount: '9', takerAssetFilledAmount: '9500' }
       ]
     };
     const positions = [
-      positionStub({ marketId: "0", qtyToMint: "10", transaction: tx1 }),
-      positionStub({ marketId: "0", qtyToMint: "7", transaction: tx1 }),
-      positionStub({ marketId: "1", qtyToMint: "5", transaction: tx2 }),
-      positionStub({ marketId: "1", qtyToMint: "9", transaction: tx2 }),
+      positionStub({ marketId: '0', qtyToMint: '10', transaction: tx1 }),
+      positionStub({ marketId: '0', qtyToMint: '7', transaction: tx1 }),
+      positionStub({ marketId: '1', qtyToMint: '5', transaction: tx2 }),
+      positionStub({ marketId: '1', qtyToMint: '9', transaction: tx2 })
     ];
-    stubPositions(positions, [], makerAddress);
-    stubContracts([]);
+    stubPositions(subgraphStub, positions, [], makerAddress);
+    stubContracts(subgraphStub, []);
 
     const { longPositions, shortPositions } = await honeylemonService.getPositions(
       makerAddress
@@ -513,71 +540,87 @@ contract('HoneylemonService', () => {
     expect(record.metaData.remainingFillableMakerAssetAmount).to.eql(new BigNumber(1000));
   });
 
+  // This test only works with '.only' - no idea exactly why
   it.only('Batch Redemption', async () => {
-    const { result: snapshotId } = await takeSnapshot();
+    // reset state in case it is polluted
+    await resetState();
 
-    expect(await honeylemonService.addressHasDSProxy(takerAddress)).to.equal(false);
-    takerDSProxyAddress = await honeylemonService.deployDSProxyContract(takerAddress);
-    expect(await honeylemonService.addressHasDSProxy(takerAddress)).to.equal(true);
+    try {
+      expect(await honeylemonService.addressHasDSProxy(takerAddress)).to.equal(false);
+      takerDSProxyAddress = await honeylemonService.deployDSProxyContract(takerAddress);
+      expect(await honeylemonService.addressHasDSProxy(takerAddress)).to.equal(true);
 
-    makerDSProxyAddress = await honeylemonService.deployDSProxyContract(makerAddress);
+      makerDSProxyAddress = await honeylemonService.deployDSProxyContract(makerAddress);
 
-    // Create Three contracts. Two fill today and one fills tomorrow.
-    await fill0xOrderForAddresses(1, takerAddress, makerAddress);
-    await fill0xOrderForAddresses(2, takerAddress, makerAddress);
+      // Create Three contracts. Two fill today and one fills tomorrow.
+      await fill0xOrderForAddresses(1, takerAddress, makerAddress);
+      await fill0xOrderForAddresses(2, takerAddress, makerAddress);
 
-    // Increase the time by one day. Deploy a new contract to simulate having tokens over multiple days.
-    await time.increase(24 * 60 * 60 + 1);
-    await createNewMarketProtocolContract(mriInput * 28, mriInput, 'MRI-BTC-28D-test');
-    await fill0xOrderForAddresses(3, takerAddress, makerAddress);
+      // Increase the time by one day. Deploy a new contract to simulate having tokens over multiple days.
+      await time.increase(24 * 60 * 60 + 1);
+      await createNewMarketProtocolContract(mriInput * 28, mriInput, 'MRI-BTC-28D-test');
+      await fill0xOrderForAddresses(4, takerAddress, makerAddress);
 
-    // fast forward 28 days and deploy another 28 contracts to settle all those deployed.
-    await time.increase(28 * 24 * 60 * 60 + 1);
-    // we need to deploy 28 times in order to be able to settle
-    await Promise.all(
-      Array.from({ length: 28 }, (x, i) => {
-        return createNewMarketProtocolContract(
-          mriInput * 28,
-          mriInput,
-          'MRI-BTC-28D-test'
-        );
-      })
-    );
+      // fast forward 28 days and deploy another 28 contracts to settle all those deployed.
+      await time.increase(28 * 24 * 60 * 60 + 1);
+      // we need to deploy 28 times in order to be able to settle
+      await Promise.all(
+        Array.from({ length: 28 }, (x, i) => {
+          return createNewMarketProtocolContract(
+            mriInput * 28,
+            mriInput,
+            'MRI-BTC-28D-test'
+          );
+        })
+      );
 
-    // We should now be able to redeem all 3 sets of tokens, spanning two different markets
-    // in one transaction per user. Test to ensure the balance change as expected
+      // We should now be able to redeem all 3 sets of tokens, spanning two different markets
+      // in one transaction per user. Test to ensure the balance change as expected
 
-    // Wait for subgraph to index the events
-    await delay(3000);
+      // Wait for subgraph to index the events
+      await delay(3000);
 
-    const takerCollateralBalanceBefore = await collateralToken.balanceOf(takerAddress);
-    const takerTxReturned = await honeylemonService.batchRedeem(takerAddress);
-    const takerCollateralBalanceAfter = await collateralToken.balanceOf(takerAddress);
+      const takerCollateralBalanceBefore = await collateralToken.balanceOf(takerAddress);
+      const takerTxReturned = await honeylemonService.batchRedeem(takerAddress);
+      const takerCollateralBalanceAfter = await collateralToken.balanceOf(takerAddress);
 
-    // The collateral balance of the taker should have increased. Not going to test
-    // the exact returned values as these are done in other unit tests on smart contracts.
-    expect(takerCollateralBalanceAfter.toNumber()).to.be.above(
-      takerCollateralBalanceBefore.toNumber()
-    );
+      // The collateral balance of the taker should have increased. Not going to test
+      // the exact returned values as these are done in other unit tests on smart contracts.
+      expect(takerCollateralBalanceAfter.toNumber()).to.be.above(
+        takerCollateralBalanceBefore.toNumber()
+      );
 
-    // The taker should only have a long tx result. no short tx
-    expect(takerTxReturned.redemptionTxLong).to.not.be.null;
-    expect(takerTxReturned.redemptionTxShort).to.be.null;
+      // The taker should only have a long tx result. no short tx
+      expect(takerTxReturned.redemptionTxLong).to.not.be.null;
+      expect(takerTxReturned.redemptionTxShort).to.be.null;
 
-    const makerCollateralBalanceBefore = await collateralToken.balanceOf(makerAddress);
-    const makerTxReturned = await honeylemonService.batchRedeem(makerAddress);
-    const makerCollateralBalanceAfter = await collateralToken.balanceOf(makerAddress);
+      // Check positions update
+      const { longPositions } = await honeylemonService.getPositions(
+        takerAddress
+      );
+      expect(longPositions[0].isRedeemed).to.eq(true);
 
-    expect(makerCollateralBalanceAfter.toNumber()).to.be.above(
-      makerCollateralBalanceBefore.toNumber()
-    );
+      const makerCollateralBalanceBefore = await collateralToken.balanceOf(makerAddress);
+      const makerTxReturned = await honeylemonService.batchRedeem(makerAddress);
+      const makerCollateralBalanceAfter = await collateralToken.balanceOf(makerAddress);
 
-    // The maker should only have a short tx result. no long tx
-    expect(makerTxReturned.redemptionTxShort).to.not.be.null;
-    expect(makerTxReturned.redemptionTxLong).to.be.null;
+      expect(makerCollateralBalanceAfter.toNumber()).to.be.above(
+        makerCollateralBalanceBefore.toNumber()
+      );
 
-    console.log(`Reverting to snapshot ${snapshotId}`);
-    await revertToSnapShot(snapshotId);
+      // The maker should only have a short tx result. no long tx
+      expect(makerTxReturned.redemptionTxShort).to.not.be.null;
+      expect(makerTxReturned.redemptionTxLong).to.be.null;
+
+      // Check positions update
+      const { shortPositions } = await honeylemonService.getPositions(
+        makerAddress
+      );
+      expect(shortPositions[0].isRedeemed).to.eq(true);
+    } finally {
+      // clean up
+      await resetState();
+    }
   });
 
   it('retrieve open orders', async () => {

@@ -51,6 +51,7 @@ module.exports = {
   plugins: ['@chainsafe/truffle-plugin-abigen'],
   mocha: {
     enableTimeouts: false,
-    before_timeout: 120000
+    before_timeout: 120000,
+    after_timeout: 120000
   }
 };

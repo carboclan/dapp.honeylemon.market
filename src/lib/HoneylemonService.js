@@ -542,7 +542,9 @@ class HoneylemonService {
       const existing = res[mergeBy];
       if (existing) {
         // merge positions
-        existing.qtyToMint = new BigNumber(existing.qtyToMint).plus(pos.qtyToMint).toString();
+        existing.qtyToMint = new BigNumber(existing.qtyToMint)
+          .plus(pos.qtyToMint)
+          .toString();
       } else {
         res[mergeBy] = pos;
       }
@@ -552,12 +554,12 @@ class HoneylemonService {
     return Object.values(merged);
   }
 
-  async _processPositionsData(positions, contracts, short) {
+  async _processPositionsData(positions, contracts, isShort) {
     // 1. merge positions by transaction in order to correctly represent fills and price
-    positions = this._mergePositions(positions, (pos) => pos.transaction.id);
+    positions = this._mergePositions(positions, pos => pos.transaction.id);
 
     // 2. merge positions by marketId
-    positions = this._mergePositions(positions, (pos) => pos.marketId);
+    positions = this._mergePositions(positions, pos => pos.marketId);
 
     for (let i = 0; i < positions.length; i++) {
       const position = positions[i];
@@ -588,7 +590,7 @@ class HoneylemonService {
       position.finalReward = new BigNumber(0);
       if (position.contract.settlement) {
         const revenuePerUnit = new BigNumber(position.contract.settlement.revenuePerUnit);
-        const returnPerUnit = short
+        const returnPerUnit = isShort
           ? collateralPerUnit.minus(revenuePerUnit)
           : revenuePerUnit;
         position.finalReward = returnPerUnit.multipliedBy(position.qtyToMint);
@@ -598,9 +600,24 @@ class HoneylemonService {
         let pendingRewardPerUnit = contracts
           .filter(c => parseInt(c.index) > parseInt(position.marketId))
           .reduce((sum, c) => sum.plus(c.currentMRI), new BigNumber(0));
-        if (short) pendingRewardPerUnit = collateralPerUnit.minus(pendingRewardPerUnit);
+        if (isShort) pendingRewardPerUnit = collateralPerUnit.minus(pendingRewardPerUnit);
         position.pendingReward = pendingRewardPerUnit.multipliedBy(position.qtyToMint);
       }
+      // Tokens to redeem
+      const positionToken = new ERC20TokenContract(
+        isShort ? position.shortTokenAddress : position.longTokenAddress,
+        this.provider
+      );
+      const dsProxyAddress = isShort ? position.shortTokenDSProxy : position.longTokenDSProxy;
+
+      position.isRedeemed =
+        (await positionToken.balanceOf(dsProxyAddress).callAsync()).toString() == '0'
+          ? true
+          : false;
+
+      // position.tokensToRedeem = (x
+      //   await positionToken.balanceOf(dsProxyAddress).callAsync()
+      // ).toString();
     }
 
     return positions;
@@ -679,11 +696,11 @@ const CONTRACTS_QUERY = /* GraphQL */ `
   }
 `;
 
-module.exports =  { 
-  HoneylemonService, 
-  PAYMENT_TOKEN_DECIMALS, 
-  COLLATERAL_TOKEN_DECIMALS, 
-  POSITIONS_QUERY, 
-  CONTRACTS_QUERY, 
-  CONTRACT_DURATION 
+module.exports = {
+  HoneylemonService,
+  PAYMENT_TOKEN_DECIMALS,
+  COLLATERAL_TOKEN_DECIMALS,
+  POSITIONS_QUERY,
+  CONTRACTS_QUERY,
+  CONTRACT_DURATION
 };
