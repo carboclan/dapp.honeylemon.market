@@ -123,7 +123,8 @@ after(async () => {
 });
 
 afterEach(async () => {
-  if (honeylemonService.subgraphClient.request.restore) honeylemonService.subgraphClient.request.restore();
+  if (honeylemonService.subgraphClient.request.restore)
+    honeylemonService.subgraphClient.request.restore();
 });
 
 const resetState = async () => {
@@ -133,7 +134,7 @@ const resetState = async () => {
   initialSnapshotId = _initialSnapshotId;
   await resetSubgraph();
   console.log('Reset state');
-}
+};
 
 const stubOrders = async () => {
   const orderParams = [
@@ -198,15 +199,13 @@ const stubPositions = (subgraphStub, positionsAsMaker, positionsAsTaker, address
     });
 
   return subgraphStub;
-}
+};
 
 const stubContracts = (subgraphStub, contracts, last = 28) => {
-  subgraphStub
-    .withArgs(CONTRACTS_QUERY, sinon.match({ last }))
-    .resolves({ contracts });
+  subgraphStub.withArgs(CONTRACTS_QUERY, sinon.match({ last })).resolves({ contracts });
 
   return subgraphStub;
-}
+};
 
 contract('HoneylemonService', () => {
   it('should give correct quote for size', async () => {
@@ -491,24 +490,24 @@ contract('HoneylemonService', () => {
 
     // stub positions;
     const tx1 = {
-      id: "tx1",
+      id: 'tx1',
       fills: [
-        { makerAssetFilledAmount: "10", takerAssetFilledAmount: "10000" },
-        { makerAssetFilledAmount: "7", takerAssetFilledAmount: "8000" }
+        { makerAssetFilledAmount: '10', takerAssetFilledAmount: '10000' },
+        { makerAssetFilledAmount: '7', takerAssetFilledAmount: '8000' }
       ]
     };
     const tx2 = {
-      id: "tx2",
+      id: 'tx2',
       fills: [
-        { makerAssetFilledAmount: "5", takerAssetFilledAmount: "6000" },
-        { makerAssetFilledAmount: "9", takerAssetFilledAmount: "9500" }
+        { makerAssetFilledAmount: '5', takerAssetFilledAmount: '6000' },
+        { makerAssetFilledAmount: '9', takerAssetFilledAmount: '9500' }
       ]
     };
     const positions = [
-      positionStub({ marketId: "0", qtyToMint: "10", transaction: tx1 }),
-      positionStub({ marketId: "0", qtyToMint: "7", transaction: tx1 }),
-      positionStub({ marketId: "1", qtyToMint: "5", transaction: tx2 }),
-      positionStub({ marketId: "1", qtyToMint: "9", transaction: tx2 }),
+      positionStub({ marketId: '0', qtyToMint: '10', transaction: tx1 }),
+      positionStub({ marketId: '0', qtyToMint: '7', transaction: tx1 }),
+      positionStub({ marketId: '1', qtyToMint: '5', transaction: tx2 }),
+      positionStub({ marketId: '1', qtyToMint: '9', transaction: tx2 })
     ];
     stubPositions(subgraphStub, positions, [], makerAddress);
     stubContracts(subgraphStub, []);
@@ -536,7 +535,7 @@ contract('HoneylemonService', () => {
     expect(record.metaData.remainingFillableMakerAssetAmount).to.eql(new BigNumber(1000));
   });
 
-  it('Batch Redemption', async () => {
+  it.only('Batch Redemption', async () => {
     // reset state in case it is polluted
     await resetState();
 
@@ -554,7 +553,7 @@ contract('HoneylemonService', () => {
       // Increase the time by one day. Deploy a new contract to simulate having tokens over multiple days.
       await time.increase(24 * 60 * 60 + 1);
       await createNewMarketProtocolContract(mriInput * 28, mriInput, 'MRI-BTC-28D-test');
-      await fill0xOrderForAddresses(3, takerAddress, makerAddress);
+      await fill0xOrderForAddresses(4, takerAddress, makerAddress);
 
       // fast forward 28 days and deploy another 28 contracts to settle all those deployed.
       await time.increase(28 * 24 * 60 * 60 + 1);
@@ -573,7 +572,19 @@ contract('HoneylemonService', () => {
       // in one transaction per user. Test to ensure the balance change as expected
 
       // Wait for subgraph to index the events
-      await delay(4000);
+      await delay(35000);
+
+      // All positions from long and short should report tokens to redeem
+      const {
+        longPositionsBefore,
+        shortPositionsAfter
+      } = await honeylemonService.getPositions(takerAddress);
+      console.log('longPositionsBefore', longPositionsBefore);
+      console.log('shortPositionsAfter', shortPositionsAfter);
+      // expect(longPositionsBefore[0].tokensToRedeem).to.equal(true);
+      // expect(longPositionsBefore[1].tokensToRedeem).to.equal(true);
+
+      console.log('BEFORE');
 
       const takerCollateralBalanceBefore = await collateralToken.balanceOf(takerAddress);
       const takerTxReturned = await honeylemonService.batchRedeem(takerAddress);
@@ -600,6 +611,16 @@ contract('HoneylemonService', () => {
       // The maker should only have a short tx result. no long tx
       expect(makerTxReturned.redemptionTxShort).to.not.be.null;
       expect(makerTxReturned.redemptionTxLong).to.be.null;
+
+      await delay(35000);
+      console.log('AFTER');
+      // All positions from long and short should report no tokens to redeem
+      const {
+        longPositionsAfter,
+        shortPositionsBefore
+      } = await honeylemonService.getPositions(takerAddress);
+      expect(longPositionsAfter[0].tokensToRedeem).to.equal(false);
+      expect(longPositionsAfter[1].tokensToRedeem).to.equal(false);
     } finally {
       // clean up
       await resetState();
