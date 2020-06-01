@@ -1,16 +1,16 @@
 pragma solidity 0.5.2;
 
-import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
-import 'openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol';
-import 'openzeppelin-solidity/contracts/token/ERC20/ERC20.sol';
+import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
+import "openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol";
+import "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 import "openzeppelin-solidity/contracts/utils/ReentrancyGuard.sol";
 
-import '../libraries/MathLib.sol';
-import '../marketprotocol/MarketCollateralPool.sol';
-import '../marketprotocol/mpx/MarketContractMPX.sol';
-import '../marketprotocol/tokens/PositionToken.sol';
+import "../libraries/MathLib.sol";
+import "../marketprotocol/MarketCollateralPool.sol";
+import "../marketprotocol/mpx/MarketContractMPX.sol";
+import "../marketprotocol/tokens/PositionToken.sol";
 
-import './MarketContractProxy.sol';
+import "./MarketContractProxy.sol";
 
 
 contract MinterBridge is ReentrancyGuard, Ownable {
@@ -31,7 +31,7 @@ contract MinterBridge is ReentrancyGuard, Ownable {
      * @notice check that called is 0x minter bridge proxy address
      */
     modifier only0xBridgeProxy() {
-        require(msg.sender == ERC20_BRIDGE_PROXY_ADDRESS, 'invalid caller');
+        require(msg.sender == ERC20_BRIDGE_PROXY_ADDRESS, "invalid caller");
         _;
     }
     /**
@@ -40,7 +40,7 @@ contract MinterBridge is ReentrancyGuard, Ownable {
     modifier onlyIfSetMarketContractProxy() {
         require(
             MARKET_CONTRACT_PROXY_ADDRESS != address(0),
-            'MarketContractProxy not set'
+            "MarketContractProxy not set"
         );
         _;
     }
@@ -85,11 +85,17 @@ contract MinterBridge is ReentrancyGuard, Ownable {
         address to,
         uint256 amount,
         bytes calldata bridgeData
-    ) external onlyIfSetMarketContractProxy only0xBridgeProxy nonReentrant returns (bytes4 success) {
+    )
+        external
+        onlyIfSetMarketContractProxy
+        only0xBridgeProxy
+        nonReentrant
+        returns (bytes4 success)
+    {
         // The proxy acts as the taker token to make 0x think that the appropriate amount
         // was transferred and accept the trade as passing. Under the hood the  marketContractProxy
         // has minted long and short tokens and sent them to the the investor and miner.
-        require(tokenAddress == MARKET_CONTRACT_PROXY_ADDRESS, 'bad proxy address');
+        require(tokenAddress == MARKET_CONTRACT_PROXY_ADDRESS, "bad proxy address");
 
         // (imBTC) sent from the miner
         ERC20 collateralToken = ERC20(marketContractProxy.COLLATERAL_TOKEN_ADDRESS());
@@ -101,7 +107,7 @@ contract MinterBridge is ReentrancyGuard, Ownable {
 
         // to: long & taker (investor)
         // from: short & maker (miner)
-        marketContractProxy.mintPositionTokens(amount, to, from);
+        marketContractProxy.mintPositionTokens(amount, to, from, bridgeData);
 
         return BRIDGE_SUCCESS;
     }

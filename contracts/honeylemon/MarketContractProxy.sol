@@ -5,13 +5,13 @@ import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol";
 import "openzeppelin-solidity/contracts/utils/ReentrancyGuard.sol";
 
-import '../marketprotocol/MarketCollateralPool.sol';
-import '../marketprotocol/mpx/MarketContractFactoryMPX.sol';
-import '../marketprotocol/mpx/MarketContractMPX.sol';
+import "../marketprotocol/MarketCollateralPool.sol";
+import "../marketprotocol/mpx/MarketContractFactoryMPX.sol";
+import "../marketprotocol/mpx/MarketContractMPX.sol";
 
-import '../libraries/MathLib.sol';
+import "../libraries/MathLib.sol";
 
-import './DSProxy.sol';
+import "./DSProxy.sol";
 
 
 /// @title Market Contract Proxy.
@@ -31,8 +31,8 @@ contract MarketContractProxy is ReentrancyGuard, Ownable {
     address public MINTER_BRIDGE_ADDRESS;
     address public COLLATERAL_TOKEN_ADDRESS; //imBTC
 
-    string public ORACLE_URL = 'null';
-    string public ORACLE_STATISTIC = 'null';
+    string public ORACLE_URL = "null";
+    string public ORACLE_STATISTIC = "null";
 
     uint public CONTRACT_DURATION_DAYS = 28;
     uint public CONTRACT_DURATION = CONTRACT_DURATION_DAYS * 24 * 60 * 60; // 28 days in seconds
@@ -131,7 +131,7 @@ contract MarketContractProxy is ReentrancyGuard, Ownable {
      * @notice modifier to check that the caller is honeylemon oracle address
      */
     modifier onlyHoneyLemonOracle() {
-        require(msg.sender == HONEY_LEMON_ORACLE_ADDRESS, 'Only Honey Lemon Oracle');
+        require(msg.sender == HONEY_LEMON_ORACLE_ADDRESS, "Only Honey Lemon Oracle");
         _;
     }
 
@@ -139,7 +139,7 @@ contract MarketContractProxy is ReentrancyGuard, Ownable {
      * @notice mofidier to check that the caller is minter bridge address
      */
     modifier onlyMinterBridge() {
-        require(msg.sender == MINTER_BRIDGE_ADDRESS, 'Only Minter Bridge');
+        require(msg.sender == MINTER_BRIDGE_ADDRESS, "Only Minter Bridge");
         _;
     }
 
@@ -398,7 +398,7 @@ contract MarketContractProxy is ReentrancyGuard, Ownable {
             tokenAddresses.length == marketAddresses.length &&
                 tokenAddresses.length == tokensToRedeem.length &&
                 tokenAddresses.length == traderLong.length,
-            'Invalid input params'
+            "Invalid input params"
         );
         require(this.owner() == msg.sender, "You don't own this DSProxy GTFO");
         MarketContractMPX marketInstance;
@@ -456,7 +456,7 @@ contract MarketContractProxy is ReentrancyGuard, Ownable {
         bytes32[3] memory marketAndsTokenNames,
         uint newMarketExpiration
     ) public onlyHoneyLemonOracle {
-        require(currentIndexValue != 0, 'Current MRI value cant be zero');
+        require(currentIndexValue != 0, "Current MRI value cant be zero");
 
         // 1. Settle the past contract, if there is a price and contract exists.
         MarketContractMPX expiringMarketContract = getExpiringMarketContract();
@@ -507,12 +507,19 @@ contract MarketContractProxy is ReentrancyGuard, Ownable {
     function mintPositionTokens(
         uint qtyToMint,
         address longTokenRecipient,
-        address shortTokenRecipient
+        address shortTokenRecipient,
+        bytes calldata bridgeData
     ) public onlyMinterBridge nonReentrant {
         uint collateralNeeded = calculateRequiredCollateral(qtyToMint);
 
         // Create instance of the latest market contract for today
         MarketContractMPX latestMarketContract = getLatestMarketContract();
+
+        require(
+            addressToMarketId[address(latestMarketContract)] == uint256(bridgeData),
+            "Market id does not match takers provided ID"
+        );
+
         // Create instance of the market collateral pool
         MarketCollateralPool marketCollateralPool = getLatestMarketCollateralPool();
 
