@@ -97,15 +97,15 @@ const BuyContractPage: React.SFC = () => {
   const [resultOrders, setResultOrders] = useState([]);
   const [takerAssetFillAmounts, setTakerFillAmounts] = useState([]);
   const [buyType, setBuyType] = useState<BuyType>(BuyType.budget);
-  const [isBuying, setIsBuying] = useState(false);
-  const [isBuyTxActive, setIsBuyTxActive] = useState(false);
+  const [showBuyModal, setShowBuyModal] = useState(false);
+  const [isTxActive, setTxActive] = useState(false);
   const handleChangeBuyType = (event: React.ChangeEvent<{}>, newValue: BuyType) => {
     setBuyType(newValue);
     setBudget(orderValue);
   };
 
   const handleCloseBuyDialog = () => {
-    setIsBuying(false);
+    setShowBuyModal(false);
   }
 
   const validateOrderQuantity = async (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -156,17 +156,30 @@ const BuyContractPage: React.SFC = () => {
     }
   }
 
-  const approvePaymentToken = async () => {
+  const handleDeployDSProxy = async () => {
+    setTxActive(true);
+    try {
+      await honeylemonService.deployDSProxyContract(address);
+    } catch (error) {
+      console.log('Something went wrong deploying the DS Proxy wallet');
+      console.log(error);
+    }
+    setTxActive(false);
+  }
+
+  const handleApprovePaymentToken = async () => {
+    setTxActive(true);
     try {
       await honeylemonService.approvePaymentToken(address);
     } catch (error) {
       console.log('Something went wrong approving the tokens');
       console.log(error);
     }
+    setTxActive(false);
   }
 
-  const buyOffer = async () => {
-    setIsBuyTxActive(true);
+  const handleBuyOffer = async () => {
+    setTxActive(true);
     try {
       // TODO: I dont think this should be hardcoded in here
       const gasPrice = 5e9; // 5 GWEI
@@ -193,13 +206,13 @@ const BuyContractPage: React.SFC = () => {
         gasPrice,
         value
       });
-      setIsBuying(false);
+      setShowBuyModal(false);
       forwardTo('/portfolio')
     } catch (error) {
       console.log('Something went wrong buying this contract');
       console.log(error);
     }
-    setIsBuyTxActive(false);
+    setTxActive(false);
   }
 
   const sufficientPaymentTokens = paymentTokenBalance >= orderValue;
@@ -246,17 +259,17 @@ const BuyContractPage: React.SFC = () => {
   const handleStepperNext = (step: number) => {
     switch (step) {
       case 0:
-        return deployProxy();
+        return handleDeployDSProxy();
       case 1:
-        return approvePaymentToken();
+        return handleApprovePaymentToken();
       case 2:
-        return buyOffer();
+        return handleBuyOffer();
     }
   }
 
   const handleStartBuy = () => {
-    setIsBuying(true);
-    activeStep === 2 && buyOffer();
+    setShowBuyModal(true);
+    activeStep === 2 && handleBuyOffer();
   }
 
   return (
@@ -294,7 +307,7 @@ const BuyContractPage: React.SFC = () => {
               onBlur={e => {
                 e.target.value = e.target.value.replace(/^(-)?0+(0\.|\d)/, '$1$2')
               }}
-              disabled={isBuying} />
+              disabled={showBuyModal} />
           </Grid>
           <Grid item xs={2} className={classes.rightAlign}>
             <Typography style={{ fontWeight: 'bold' }} color='secondary'>USDC</Typography>
@@ -316,7 +329,7 @@ const BuyContractPage: React.SFC = () => {
               onBlur={e => {
                 e.target.value = e.target.value.replace(/^(-)?0+(0\.|\d)/, '$1$2')
               }}
-              disabled={isBuying} />
+              disabled={showBuyModal} />
           </Grid>
           <Grid item xs={2} className={classes.rightAlign}>
             <Typography style={{ fontWeight: 'bold' }} color='secondary'>TH</Typography>
@@ -363,9 +376,9 @@ const BuyContractPage: React.SFC = () => {
           <Button
             fullWidth
             onClick={handleStartBuy}
-            disabled={!isValid || isBuying || resultOrders.length === 0}>
+            disabled={!isValid || showBuyModal || resultOrders.length === 0}>
             BUY NOW &nbsp;
-              {isBuying && <CircularProgress className={classes.loadingSpinner} size={20} />}
+              {showBuyModal && <CircularProgress className={classes.loadingSpinner} size={20} />}
           </Button>
         </Grid>
         <Grid item xs={12}>
@@ -379,7 +392,7 @@ const BuyContractPage: React.SFC = () => {
         </Grid>
         <Grid item><Typography>See <Link href='#' underline='always'>full contract specification here.</Link></Typography></Grid>
       </Grid>
-      <Dialog open={isBuying} onClose={handleCloseBuyDialog} aria-labelledby="form-dialog-title">
+      <Dialog open={showBuyModal} onClose={handleCloseBuyDialog} aria-labelledby="form-dialog-title">
         <DialogTitle id="form-dialog-title">Buy Offer</DialogTitle>
         <DialogContent>
           <Stepper activeStep={activeStep} orientation="vertical">
@@ -400,9 +413,9 @@ const BuyContractPage: React.SFC = () => {
                         color="primary"
                         onClick={() => handleStepperNext(activeStep)}
                         className={classes.button}
-                        disabled={isBuyTxActive}>
-                        {getStepButtonLabel(activeStep)} &nbsp;
-                        {isBuyTxActive && <CircularProgress className={classes.loadingSpinner} size={20} />}
+                        disabled={isTxActive}>
+                        {getStepButtonLabel(activeStep)}&nbsp;
+                        {isTxActive && <CircularProgress className={classes.loadingSpinner} size={20} />}
                       </Button>
                     </>
                   </div>
