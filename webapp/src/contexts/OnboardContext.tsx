@@ -37,7 +37,9 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
   const [isReady, setIsReady] = useState<boolean>(false);
   const [notify, setNotify] = useState<NotifyApi | undefined>(undefined)
 
-  const infuraId = process.env.REACT_APP_INFURA_API_KEY
+  const infuraId = process.env.REACT_APP_INFURA_ID
+  const infuraKey = process.env.REACT_APP_INFURA_API_KEY;
+  // TODO: Update this for mainnet deployment
   const infuraRpc = `https://${networkName(network)}.infura.io/v3/${infuraId}`
 
   useEffect(() => {
@@ -60,7 +62,7 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
           { walletName: "dapper" },
           {
             walletName: "walletConnect",
-            infuraKey: infuraId
+            infuraKey: infuraKey
           },
           { walletName: "walletLink", rpcUrl: infuraRpc },
           { walletName: "opera" },
@@ -105,7 +107,7 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
       networkId: onboardProps.networkId,
       darkMode: true,
     }));
-  }, [onboardProps.dappId, onboardProps.networkId, infuraId])
+  }, [onboardProps.dappId, onboardProps.networkId])
 
   const checkIsReady = async () => {
     const isReady = await onboard?.walletCheck();
