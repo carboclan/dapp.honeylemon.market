@@ -522,14 +522,12 @@ class HoneylemonService {
     const shortPositionsProcessed = await this._processPositionsData(
       data.user.positionsAsMaker,
       contracts,
-      true,
-      address
+      true
     );
     const longPositionsProcessed = await this._processPositionsData(
       data.user.positionsAsTaker,
       contracts,
-      false,
-      address
+      false
     );
 
     return {
@@ -556,7 +554,7 @@ class HoneylemonService {
     return Object.values(merged);
   }
 
-  async _processPositionsData(positions, contracts, short, address) {
+  async _processPositionsData(positions, contracts, isShort) {
     // 1. merge positions by transaction in order to correctly represent fills and price
     positions = this._mergePositions(positions, pos => pos.transaction.id);
 
@@ -592,7 +590,7 @@ class HoneylemonService {
       position.finalReward = new BigNumber(0);
       if (position.contract.settlement) {
         const revenuePerUnit = new BigNumber(position.contract.settlement.revenuePerUnit);
-        const returnPerUnit = short
+        const returnPerUnit = isShort
           ? collateralPerUnit.minus(revenuePerUnit)
           : revenuePerUnit;
         position.finalReward = returnPerUnit.multipliedBy(position.qtyToMint);
@@ -602,35 +600,23 @@ class HoneylemonService {
         let pendingRewardPerUnit = contracts
           .filter(c => parseInt(c.index) > parseInt(position.marketId))
           .reduce((sum, c) => sum.plus(c.currentMRI), new BigNumber(0));
-        if (short) pendingRewardPerUnit = collateralPerUnit.minus(pendingRewardPerUnit);
+        if (isShort) pendingRewardPerUnit = collateralPerUnit.minus(pendingRewardPerUnit);
         position.pendingReward = pendingRewardPerUnit.multipliedBy(position.qtyToMint);
       }
       // Tokens to redeem
-      const longToken = new ERC20TokenContract(position.longTokenAddress, this.provider);
-      const shortToken = new ERC20TokenContract(
-        position.shortTokenAddress,
+      const positionToken = new ERC20TokenContract(
+        isShort ? position.shortTokenAddress : position.longTokenAddress,
         this.provider
       );
-      // If the token holder is long then look at their long DS Proxy balance
-      if (address == position.longTokenRecipient.id) {
-        position.tokensToRedeem =
-          (await longToken.balanceOf(position.longTokenDSProxy).callAsync()).toString() !=
-          '0'
-            ? true
-            : false;
-      }
-      // If the token holder is long then look at their short DS Proxy balance
-      if (address == position.shortTokenRecipient.id) {
-        position.tokensToRedeem =
-          (
-            await shortToken.balanceOf(position.shortTokenDSProxy).callAsync()
-          ).toString() != '0'
-            ? true
-            : false;
-      }
+      const dsProxyAddress = isShort ? position.shortTokenDSProxy : position.longTokenDSProxy;
 
-      // position.shortTokensToRedeem = (x
-      //   await shortToken.balanceOf(address).callAsync()
+      position.isRedeemed =
+        (await positionToken.balanceOf(dsProxyAddress).callAsync()).toString() == '0'
+          ? true
+          : false;
+
+      // position.tokensToRedeem = (x
+      //   await positionToken.balanceOf(dsProxyAddress).callAsync()
       // ).toString();
     }
 
