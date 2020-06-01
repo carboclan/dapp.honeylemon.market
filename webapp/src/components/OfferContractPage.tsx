@@ -349,7 +349,7 @@ const OfferContractPage: React.SFC = () => {
             collateral. The amount of that collateral that the hodler receives will be determined by
             the average value of the <Link href='#' underline='always'>Mining Revenue Index</Link> over
             the <strong>{CONTRACT_DURATION} days</strong> starting when the hodler pays you.
-        </Typography>
+          </Typography>
         </Grid>
         <Grid item xs={12}>
           <Typography>
