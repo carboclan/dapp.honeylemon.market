@@ -18,6 +18,16 @@ import {
   Table,
   TableCell,
   TableBody,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  TextField,
+  DialogActions,
+  Stepper,
+  Step,
+  StepLabel,
+  StepContent,
 } from '@material-ui/core';
 import { BigNumber } from '@0x/utils';
 import { TabPanel } from './TabPanel';
@@ -36,18 +46,6 @@ const useStyles = makeStyles(({ spacing, palette }) => ({
     textAlign: 'end',
     padding: spacing(1)
   },
-  notification: {
-    backgroundColor: palette.secondary.main,
-    color: palette.common.black,
-    textAlign: 'center',
-    marginLeft: -spacing(2),
-    marginRight: -spacing(2),
-    marginTop: -spacing(2),
-    padding: spacing(2),
-    '&:hover': {
-      backgroundColor: palette.secondary.dark,
-    }
-  },
   loadingSpinner: {
     width: 20,
     flexBasis: 'end',
@@ -63,7 +61,15 @@ const useStyles = makeStyles(({ spacing, palette }) => ({
   },
   orderSummaryBlur: {
     filter: 'blur(2px)',
-  }
+  },
+  button: {
+    marginTop: spacing(1),
+    marginRight: spacing(1),
+    color: palette.common.black,
+  },
+  actionsContainer: {
+    marginBottom: spacing(2),
+  },
 }))
 
 enum BuyType { 'budget', 'quantity' };
@@ -92,11 +98,15 @@ const BuyContractPage: React.SFC = () => {
   const [takerAssetFillAmounts, setTakerFillAmounts] = useState([]);
   const [buyType, setBuyType] = useState<BuyType>(BuyType.budget);
   const [isBuying, setIsBuying] = useState(false);
-
+  const [isBuyTxActive, setIsBuyTxActive] = useState(false);
   const handleChangeBuyType = (event: React.ChangeEvent<{}>, newValue: BuyType) => {
     setBuyType(newValue);
     setBudget(orderValue);
   };
+
+  const handleCloseBuyDialog = () => {
+    setIsBuying(false);
+  }
 
   const validateOrderQuantity = async (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const newValueString = e.target.value;
@@ -146,13 +156,18 @@ const BuyContractPage: React.SFC = () => {
     }
   }
 
-  const buyOffer = async () => {
-    setIsBuying(true);
+  const approvePaymentToken = async () => {
     try {
-      if (paymentTokenAllowance < orderValue) {
-        await honeylemonService.approvePaymentToken(address, new BigNumber(orderValue).shiftedBy(PAYMENT_TOKEN_DECIMALS));
-      }
+      await honeylemonService.approvePaymentToken(address);
+    } catch (error) {
+      console.log('Something went wrong approving the tokens');
+      console.log(error);
+    }
+  }
 
+  const buyOffer = async () => {
+    setIsBuyTxActive(true);
+    try {
       // TODO: I dont think this should be hardcoded in here
       const gasPrice = 5e9; // 5 GWEI
 
@@ -178,33 +193,74 @@ const BuyContractPage: React.SFC = () => {
         gasPrice,
         value
       });
+      setIsBuying(false);
       forwardTo('/portfolio')
     } catch (error) {
       console.log('Something went wrong buying this contract');
       console.log(error);
     }
-    setIsBuying(false);
+    setIsBuyTxActive(false);
   }
 
   const sufficientPaymentTokens = paymentTokenBalance >= orderValue;
-  const isValid = isDsProxyDeployed && isLiquid && sufficientPaymentTokens;
+  const tokenApprovalGranted = paymentTokenAllowance >= orderValue;
+  const isValid = isLiquid && sufficientPaymentTokens;
 
   const errors = [];
 
-  !isDsProxyDeployed && errors.push("Deploy a wallet first");
   !sufficientPaymentTokens && errors.push("You do not have enough USDC to proceed");
   !isLiquid && errors.push("There are not enough contracts available right now");
 
+  const getActiveStep = () => {
+    if (!isDsProxyDeployed) return 0;
+    if (!tokenApprovalGranted) return 1;
+    return 2;
+  };
+
+  const activeStep = getActiveStep()
+
+  const steps = ['Deploy Wallet', 'Approve USDC', 'Buy Contracts'];
+
+  const getStepContent = (step: number) => {
+    switch (step) {
+      case 0:
+        return `Deploy a wallet contract. This is a once-off operation`;
+      case 1:
+        return 'Approve USDC. This is a once-off operation';
+      case 2:
+        return `Finalize Purchase`;
+    }
+  }
+
+  const getStepButtonLabel = (step: number) => {
+    switch (step) {
+      case 0:
+        return `Deploy`;
+      case 1:
+        return 'Approve';
+      case 2:
+        return `Buy`;
+    }
+  }
+
+  const handleStepperNext = (step: number) => {
+    switch (step) {
+      case 0:
+        return deployProxy();
+      case 1:
+        return approvePaymentToken();
+      case 2:
+        return buyOffer();
+    }
+  }
+
+  const handleStartBuy = () => {
+    setIsBuying(true);
+    activeStep === 2 && buyOffer();
+  }
+
   return (
     <>
-      {
-        !isDsProxyDeployed &&
-        <Paper className={classes.notification} square onClick={deployProxy}>
-          <Typography style={{ fontWeight: 'bold' }}>
-            Deploy Wallet Contract
-          </Typography>
-        </Paper>
-      }
       <Grid container alignItems='stretch' justify='center' spacing={2}>
         <Grid item xs={12}>
           <Typography style={{ fontWeight: 'bold' }}>Buy Mining Rewards</Typography>
@@ -271,29 +327,29 @@ const BuyContractPage: React.SFC = () => {
             [classes.orderSummaryBlur]: !isValid,
           })}>
             <Typography align='center'><strong>Order Summary</strong></Typography>
-          <Table size='small'>
-            <TableBody>
-              <TableRow>
-                <TableCell>Total</TableCell>
-                <TableCell align='right'>{`$ ${orderValue.toLocaleString()}`}</TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>Quantity</TableCell>
-                <TableCell align='right'>{`${orderQuantity.toLocaleString()} TH`}</TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>Contract Duration</TableCell>
-                <TableCell align='right'>{CONTRACT_DURATION} days</TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>Price</TableCell>
-                <TableCell align='right'>$ {hashPrice.toFixed(PAYMENT_TOKEN_DECIMALS)} /TH/day</TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
+            <Table size='small'>
+              <TableBody>
+                <TableRow>
+                  <TableCell>Total</TableCell>
+                  <TableCell align='right'>{`$ ${orderValue.toLocaleString()}`}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>Quantity</TableCell>
+                  <TableCell align='right'>{`${orderQuantity.toLocaleString()} TH`}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>Contract Duration</TableCell>
+                  <TableCell align='right'>{CONTRACT_DURATION} days</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>Price</TableCell>
+                  <TableCell align='right'>$ {hashPrice.toFixed(PAYMENT_TOKEN_DECIMALS)} /TH/day</TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
           </Paper>
-      </Grid>
-      {errors.length > 0 &&
+        </Grid>
+        {errors.length > 0 &&
           <Grid item xs={12}>
             <List className={classes.errorList}>
               {errors.map((error, i) =>
@@ -303,28 +359,60 @@ const BuyContractPage: React.SFC = () => {
             </List>
           </Grid>
         }
-      <Grid item xs={12}>
-        <Button
-          fullWidth
-          onClick={buyOffer}
-          disabled={(!isLiquid || !isDsProxyDeployed) || isBuying || resultOrders.length === 0}>
-          BUY NOW &nbsp;
+        <Grid item xs={12}>
+          <Button
+            fullWidth
+            onClick={handleStartBuy}
+            disabled={!isValid || isBuying || resultOrders.length === 0}>
+            BUY NOW &nbsp;
               {isBuying && <CircularProgress className={classes.loadingSpinner} size={20} />}
-        </Button>
+          </Button>
+        </Grid>
+        <Grid item xs={12}>
+          <Typography>
+            You will pay <strong>${orderValue.toLocaleString()}</strong> to buy <strong>{orderQuantity} Th</strong> of hashrate
+            for <strong>{CONTRACT_DURATION} days</strong> for <strong>${hashPrice.toLocaleString()}/Th/day</strong>. You will
+            receive the average value of the <Link component={RouterLink} to="#" underline='always'>Mining Revenue Index</Link>&nbsp;
+            over <strong>{CONTRACT_DURATION} days </strong>representing <strong>{orderQuantity} Th</strong> of mining power per
+            day per contract.
+          </Typography>
+        </Grid>
+        <Grid item><Typography>See <Link href='#' underline='always'>full contract specification here.</Link></Typography></Grid>
       </Grid>
-      <Grid item xs={12}>
-        <Typography>
-          You will pay <strong>${orderValue.toLocaleString()}</strong> to buy <strong>{orderQuantity} Th</strong> of hashrate
-          for <strong>{CONTRACT_DURATION} days</strong> for <strong>${hashPrice.toLocaleString()}/Th/day</strong>. You will
-          receive the average value of the <Link component={RouterLink} to="#" underline='always'>Mining Revenue Index</Link>&nbsp;
-          over <strong>{CONTRACT_DURATION} days </strong>representing <strong>{orderQuantity} Th</strong> of mining power per 
-          day per contract.
-        </Typography>
-      </Grid>
-      <Grid item><Typography>See <Link href='#' underline='always'>full contract specification here.</Link></Typography></Grid>
-    </Grid>
+      <Dialog open={isBuying} onClose={handleCloseBuyDialog} aria-labelledby="form-dialog-title">
+        <DialogTitle id="form-dialog-title">Buy Offer</DialogTitle>
+        <DialogContent>
+          <Stepper activeStep={activeStep} orientation="vertical">
+            {steps.map((label, index) => (
+              <Step key={label}>
+                <StepLabel>{label}</StepLabel>
+                <StepContent>
+                  <Typography>{getStepContent(index)}</Typography>
+                  <div className={classes.actionsContainer}>
+                    <>
+                      <Button
+                        onClick={handleCloseBuyDialog}
+                        className={classes.button}>
+                        Cancel
+                      </Button>
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={() => handleStepperNext(activeStep)}
+                        className={classes.button}
+                        disabled={isBuyTxActive}>
+                        {getStepButtonLabel(activeStep)} &nbsp;
+                        {isBuyTxActive && <CircularProgress className={classes.loadingSpinner} size={20} />}
+                      </Button>
+                    </>
+                  </div>
+                </StepContent>
+              </Step>
+            ))}
+          </Stepper>
+        </DialogContent>
+      </Dialog>
     </>
   )
 }
-
 export default BuyContractPage;
