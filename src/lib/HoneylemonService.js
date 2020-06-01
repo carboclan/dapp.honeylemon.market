@@ -522,12 +522,14 @@ class HoneylemonService {
     const shortPositionsProcessed = await this._processPositionsData(
       data.user.positionsAsMaker,
       contracts,
-      true
+      true,
+      address
     );
     const longPositionsProcessed = await this._processPositionsData(
       data.user.positionsAsTaker,
       contracts,
-      false
+      false,
+      address
     );
 
     return {
@@ -542,7 +544,9 @@ class HoneylemonService {
       const existing = res[mergeBy];
       if (existing) {
         // merge positions
-        existing.qtyToMint = new BigNumber(existing.qtyToMint).plus(pos.qtyToMint).toString();
+        existing.qtyToMint = new BigNumber(existing.qtyToMint)
+          .plus(pos.qtyToMint)
+          .toString();
       } else {
         res[mergeBy] = pos;
       }
@@ -552,12 +556,12 @@ class HoneylemonService {
     return Object.values(merged);
   }
 
-  async _processPositionsData(positions, contracts, short) {
+  async _processPositionsData(positions, contracts, short, address) {
     // 1. merge positions by transaction in order to correctly represent fills and price
-    positions = this._mergePositions(positions, (pos) => pos.transaction.id);
+    positions = this._mergePositions(positions, pos => pos.transaction.id);
 
     // 2. merge positions by marketId
-    positions = this._mergePositions(positions, (pos) => pos.marketId);
+    positions = this._mergePositions(positions, pos => pos.marketId);
 
     for (let i = 0; i < positions.length; i++) {
       const position = positions[i];
@@ -601,6 +605,33 @@ class HoneylemonService {
         if (short) pendingRewardPerUnit = collateralPerUnit.minus(pendingRewardPerUnit);
         position.pendingReward = pendingRewardPerUnit.multipliedBy(position.qtyToMint);
       }
+      // Tokens to redeem
+      const longToken = new ERC20TokenContract(position.longTokenAddress, this.provider);
+      const shortToken = new ERC20TokenContract(
+        position.shortTokenAddress,
+        this.provider
+      );
+      // If the token holder is long then look at their long DS Proxy balance
+      if (address == position.longTokenRecipient.id) {
+        position.tokensToRedeem =
+          (await longToken.balanceOf(position.longTokenDSProxy).callAsync()).toString() !=
+          '0'
+            ? true
+            : false;
+      }
+      // If the token holder is long then look at their short DS Proxy balance
+      if (address == position.shortTokenRecipient.id) {
+        position.tokensToRedeem =
+          (
+            await shortToken.balanceOf(position.shortTokenDSProxy).callAsync()
+          ).toString() != '0'
+            ? true
+            : false;
+      }
+
+      // position.shortTokensToRedeem = (x
+      //   await shortToken.balanceOf(address).callAsync()
+      // ).toString();
     }
 
     return positions;
@@ -679,11 +710,11 @@ const CONTRACTS_QUERY = /* GraphQL */ `
   }
 `;
 
-module.exports =  { 
-  HoneylemonService, 
-  PAYMENT_TOKEN_DECIMALS, 
-  COLLATERAL_TOKEN_DECIMALS, 
-  POSITIONS_QUERY, 
-  CONTRACTS_QUERY, 
-  CONTRACT_DURATION 
+module.exports = {
+  HoneylemonService,
+  PAYMENT_TOKEN_DECIMALS,
+  COLLATERAL_TOKEN_DECIMALS,
+  POSITIONS_QUERY,
+  CONTRACTS_QUERY,
+  CONTRACT_DURATION
 };
