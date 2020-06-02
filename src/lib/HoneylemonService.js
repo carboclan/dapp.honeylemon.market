@@ -2,6 +2,7 @@ const { GraphQLClient } = require('graphql-request');
 const { HttpClient, OrderbookRequest } = require('@0x/connect');
 const MinterBridgeArtefacts = require('../../build/contracts/MinterBridge.json');
 const MarketContractProxyArtefacts = require('../../build/contracts/MarketContractProxy.json');
+const MarketContractMPX = require('../../build/contracts/MarketContractMPX.json');
 const DSProxyArtefacts = require('../../build/contracts/DSProxy.json');
 const CollateralTokenArtefacts = require('../../build/contracts/CollateralToken.json');
 const PaymentTokenArtefacts = require('../../build/contracts/PaymentToken.json');
@@ -618,6 +619,17 @@ class HoneylemonService {
       // position.tokensToRedeem = (x
       //   await positionToken.balanceOf(dsProxyAddress).callAsync()
       // ).toString();
+
+      // Settlement delay
+      const marketContract = new web3.eth.Contract(
+        MarketContractMPX.abi,
+        position.contract.id
+      );
+      marketContract.setProvider(this.provider);
+
+      position.canRedeem = await marketContract.methods
+        .isPostSettlementDelay()
+        .call();
     }
 
     return positions;
