@@ -483,6 +483,12 @@ contract('HoneylemonService', () => {
       // isRedeemed
       expect(longPositions[0].isRedeemed).to.eq(false);
       expect(shortPositions2[0].isRedeemed).to.eq(false);
+
+      // canRedeem
+      expect(longPositions[0].canRedeem).to.eq(true);
+      expect(shortPositions2[0].canRedeem).to.eq(true);
+      expect(longPositions[2].canRedeem).to.eq(false);
+      expect(shortPositions2[2].canRedeem).to.eq(false);
     } finally {
       // clean up
       await resetState();
