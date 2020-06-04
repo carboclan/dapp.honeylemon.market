@@ -177,7 +177,7 @@ const OfferContractPage: React.SFC = () => {
 
   const activeStep = getActiveStep();
 
-  const steps = ['Deploy Wallet', 'Approve USDC', 'Buy Contracts'];
+  const steps = ['Deploy Wallet', 'Approve USDT', 'Buy Contracts'];
 
   const getStepContent = (step: number) => {
     switch (step) {
@@ -292,7 +292,7 @@ const OfferContractPage: React.SFC = () => {
               <TableBody>
                 <TableRow>
                   <TableCell>Contract Total</TableCell>
-                  <TableCell align='right'>{`$ ${totalContractPrice.toLocaleString()} USDC`}</TableCell>
+                  <TableCell align='right'>{`$ ${totalContractPrice.toLocaleString()} USDT`}</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell>Collateral Required</TableCell>
@@ -337,7 +337,7 @@ const OfferContractPage: React.SFC = () => {
           <Typography>
             You will offer <strong>{hashAmount.toLocaleString()} contracts</strong> at&nbsp;
             <strong>${hashPrice.toLocaleString()} Th/day.</strong>. If a hodler buys your offer you will 
-            receive <strong>${totalContractPrice.toLocaleString()} USDC</strong>. You will be required to 
+            receive <strong>${totalContractPrice.toLocaleString()} USDT</strong>. You will be required to 
             post the hodlers max win of <strong>{collateralAmount.toLocaleString()} imBTC</strong> as
             collateral. The amount of collateral that the hodler receives will be determined by
             the average value of the <Link href='#' underline='always'>Mining Revenue Index</Link> over

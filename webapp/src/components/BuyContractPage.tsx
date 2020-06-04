@@ -35,6 +35,7 @@ import { useOnboard } from '../contexts/OnboardContext';
 import { forwardTo } from '../helpers/history';
 import ContractSpecificationModal from './ContractSpecificationModal'
 import MRIInformationModal from './MRIInformationModal'
+import dayjs from 'dayjs';
 
 
 const useStyles = makeStyles(({ spacing, palette }) => ({
@@ -57,6 +58,9 @@ const useStyles = makeStyles(({ spacing, palette }) => ({
   orderSummary: {
     padding: spacing(2),
     width: '100%'
+  },
+  orderSummaryEstimate: {
+    color: palette.secondary.main,
   },
   orderSummaryBlur: {
     filter: 'blur(2px)',
@@ -226,7 +230,7 @@ const BuyContractPage: React.SFC = () => {
 
   const errors = [];
 
-  !sufficientPaymentTokens && errors.push("You do not have enough USDC to proceed");
+  !sufficientPaymentTokens && errors.push("You do not have enough USDT to proceed");
   !isLiquid && errors.push("There are not enough contracts available right now");
 
   const getActiveStep = () => {
@@ -237,14 +241,14 @@ const BuyContractPage: React.SFC = () => {
 
   const activeStep = getActiveStep()
 
-  const steps = ['Deploy Wallet', 'Approve USDC', 'Buy Contracts'];
+  const steps = ['Deploy Wallet', 'Approve USDT', 'Buy Contracts'];
 
   const getStepContent = (step: number) => {
     switch (step) {
       case 0:
         return `Deploy a wallet contract. This is a once-off operation`;
       case 1:
-        return 'Approve USDC. This is a once-off operation';
+        return 'Approve USDT. This is a once-off operation';
       case 2:
         return `Finalize Purchase`;
     }
@@ -281,7 +285,7 @@ const BuyContractPage: React.SFC = () => {
     <>
       <Grid container alignItems='stretch' justify='center' spacing={2}>
         <Grid item xs={12}>
-          <Typography style={{ fontWeight: 'bold' }}>Buy Mining Rewards</Typography>
+          <Typography style={{ fontWeight: 'bold' }}>Buy a {CONTRACT_DURATION}-Day Bitcoin Mining Revenue Contract</Typography>
         </Grid>
         <Grid item xs={12}>
           <Tabs
@@ -291,8 +295,9 @@ const BuyContractPage: React.SFC = () => {
             variant="fullWidth"
             textColor="primary"
             scrollButtons="auto" >
-            <Tab label="Enter budget" />
-            <Tab label="Enter amount" />
+            <Tab label="ENTER BUDGET" />
+            <Tab label="or" disabled />
+            <Tab label="ENTER QUANTITY" />
           </Tabs>
         </Grid>
         <TabPanel value={buyType} index={0}>
@@ -314,11 +319,11 @@ const BuyContractPage: React.SFC = () => {
               }}
               disabled={showBuyModal} />
           </Grid>
-          <Grid item xs={2} className={classes.rightAlign}>
-            <Typography style={{ fontWeight: 'bold' }} color='secondary'>USDC</Typography>
+          <Grid item xs={3} className={classes.rightAlign}>
+            <Typography style={{ fontWeight: 'bold' }} color='secondary'>USDT</Typography>
           </Grid>
         </TabPanel>
-        <TabPanel value={buyType} index={1}>
+        <TabPanel value={buyType} index={2}>
           <Grid item xs={9} className={classes.rightAlign}>
             <FilledInput
               fullWidth
@@ -336,36 +341,79 @@ const BuyContractPage: React.SFC = () => {
               }}
               disabled={showBuyModal} />
           </Grid>
-          <Grid item xs={2} className={classes.rightAlign}>
-            <Typography style={{ fontWeight: 'bold' }} color='secondary'>TH</Typography>
+          <Grid item xs={3} className={classes.rightAlign}>
+            <Typography style={{ fontWeight: 'bold' }} color='secondary'>TH/28 Days</Typography>
           </Grid>
         </TabPanel>
-        <Grid item xs={12} container >
-          <Paper className={clsx(classes.orderSummary, {
-            [classes.orderSummaryBlur]: !isValid,
-          })}>
-            <Typography align='center'><strong>Order Summary</strong></Typography>
-            <Table size='small'>
-              <TableBody>
-                <TableRow>
-                  <TableCell>Total</TableCell>
-                  <TableCell align='right'>{`$ ${orderValue.toLocaleString()}`}</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell>Quantity</TableCell>
-                  <TableCell align='right'>{`${orderQuantity.toLocaleString()} TH`}</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell>Contract Duration</TableCell>
-                  <TableCell align='right'>{CONTRACT_DURATION} days</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell>Price</TableCell>
-                  <TableCell align='right'>$ {hashPrice.toFixed(PAYMENT_TOKEN_DECIMALS)} /TH/day</TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-          </Paper>
+        <Grid item xs={12} container spacing={1}>
+          <Grid item xs={12} style={{ paddingLeft: 0, paddingRight: 0 }}>
+            <Paper className={clsx(classes.orderSummary, {
+              [classes.orderSummaryBlur]: !isValid,
+            })}>
+              <Typography align='center'><strong>Order Summary</strong></Typography>
+              <Table size='small'>
+                <TableBody>
+                  <TableRow>
+                    <TableCell>
+                      Unit Price <br />
+                    Quantity
+                  </TableCell>
+                    <TableCell align='right'>
+                      $ {hashPrice.toFixed(PAYMENT_TOKEN_DECIMALS)} /TH/day <br />
+                      {`${orderQuantity.toLocaleString()} TH`}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>Total</TableCell>
+                    <TableCell align='right'>{`$ ${orderValue.toLocaleString()}`}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>
+                      Start <br />
+                    Expiration<br />
+                    Settlement
+                  </TableCell>
+                    <TableCell align='right'>
+                      {dayjs().format('YYYY/MM/DD')} <br />
+                      {dayjs().add(CONTRACT_DURATION, 'd').format('YYYY/MM/DD')} <br />
+                      {dayjs().add(CONTRACT_DURATION + 1, 'd').format('YYYY/MM/DD')}
+                    </TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </Paper>
+          </Grid>
+          <Grid item xs={12} style={{ paddingLeft: 0, paddingRight: 0 }}>
+            <Paper className={clsx(classes.orderSummary, {
+              [classes.orderSummaryBlur]: !isValid,
+            })}>
+              <Table size='small'>
+                <TableBody>
+                  <TableRow>
+                    <TableCell className={classes.orderSummaryEstimate}>
+                      Discount vs Spot BTC Price *
+                    </TableCell>
+                    <TableCell align='right' className={classes.orderSummaryEstimate}>
+                      1.5%
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className={classes.orderSummaryEstimate}>
+                      Expected Accrual *
+                    </TableCell>
+                    <TableCell align='right' className={classes.orderSummaryEstimate}>
+                      {`BTC ${(0.05).toLocaleString()}`}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell colSpan={2}>
+                      * Assuming constant price and difficulty
+                    </TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </Paper>
+          </Grid>
         </Grid>
         {errors.length > 0 &&
           <Grid item xs={12}>
@@ -388,7 +436,7 @@ const BuyContractPage: React.SFC = () => {
         </Grid>
         <Grid item xs={12}>
           <Typography>
-            You will pay <strong>${orderValue.toLocaleString()}</strong> to buy <strong>{orderQuantity} Th</strong> of hashrate
+            You will pay <strong>$ {orderValue.toLocaleString()}</strong> to buy <strong>{orderQuantity}Th</strong> of hashrate
             for <strong>{CONTRACT_DURATION} days</strong> for <strong>${hashPrice.toLocaleString()}/Th/day</strong>. You will
             receive the average value of the <Link component={RouterLink} to="#" underline='always' onClick={() => setShowMRIInformationModal(true)}>Mining Revenue Index</Link>&nbsp;
             over <strong>{CONTRACT_DURATION} days </strong>representing <strong>{orderQuantity} Th</strong> of mining power per
@@ -429,9 +477,8 @@ const BuyContractPage: React.SFC = () => {
           </Stepper>
         </DialogContent>
       </Dialog>
-      <ContractSpecificationModal open={showContractSpecificationModal} onClose={() => setShowContractSpecificationModal(false)}/>
-      <MRIInformationModal open={showMRIInformationModal} onClose={() => setShowMRIInformationModal(false)}/>
-    
+      <ContractSpecificationModal open={showContractSpecificationModal} onClose={() => setShowContractSpecificationModal(false)} />
+      <MRIInformationModal open={showMRIInformationModal} onClose={() => setShowMRIInformationModal(false)} />
     </>
   )
 }

@@ -37,6 +37,7 @@ const useStyles = makeStyles((theme) => ({
   },
   logo: {
     flexGrow: 0,
+    cursor: 'pointer'
   },
   title: {
     flexGrow: 1,
@@ -198,7 +199,7 @@ function AppWrapper(props: { children: ReactNode }) {
           </ListItem>
           <ListItem>
             <ListItemIcon>
-              <img src='usdc.png' style={{ width: '40px' }} alt='usdc logo'/>
+              <img src='usdt.png' style={{ width: '40px' }} alt='usdt logo'/>
             </ListItemIcon>
             <ListItemText
               primary={`${paymentTokenBalance.toLocaleString(undefined, {
@@ -206,7 +207,7 @@ function AppWrapper(props: { children: ReactNode }) {
                 maximumFractionDigits: PAYMENT_TOKEN_DECIMALS,
                 minimumFractionDigits: 2,
               })}`}
-              secondary='USDC'
+              secondary='USDT'
               primaryTypographyProps={{
                 align: 'right',
                 noWrap: true,
