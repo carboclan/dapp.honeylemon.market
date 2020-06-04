@@ -118,7 +118,6 @@ const PorfolioPage: React.SFC = () => {
   const withdrawAvailable = async () => {
     setIsWithdrawing(true);
     try {
-      //const results =
       await honeylemonService.batchRedeem(address);
       setRefresh(true);
     } catch (error) {
