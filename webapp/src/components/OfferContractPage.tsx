@@ -324,7 +324,7 @@ const OfferContractPage: React.SFC = () => {
           <Button
             fullWidth
             onClick={handleStartOffer}
-            disabled={!sufficientCollateral || showOfferModal}>
+            disabled={hashAmount === 0 || !sufficientCollateral || showOfferModal}>
             CREATE OFFER &nbsp;
               {showOfferModal && <CircularProgress className={classes.loadingSpinner} size={20} />}
           </Button>

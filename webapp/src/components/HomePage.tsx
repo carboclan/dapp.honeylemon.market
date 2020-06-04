@@ -2,9 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { Link, Button, Typography, makeStyles, Grid, Divider, CircularProgress } from '@material-ui/core';
 import { Link as RouterLink } from 'react-router-dom';
 import { forwardTo } from '../helpers/history';
-import dayjs, { Dayjs } from 'dayjs';
+import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
 import { useOnboard } from '../contexts/OnboardContext';
+import { useHoneylemon } from '../contexts/HoneylemonContext';
 dayjs.extend(duration);
 
 const useStyles = makeStyles(({ palette, spacing }) => ({
@@ -44,8 +45,8 @@ const useStyles = makeStyles(({ palette, spacing }) => ({
 
 const HomePage: React.SFC = () => {
   const { wallet, onboard, isReady, checkIsReady } = useOnboard();
+  const { marketData: {btcDifficultyAdjustmentDate} } = useHoneylemon();
   const [isConnecting, setIsConnecting] = useState(false);
-  const [difficultyAdjustmentDate, setDifficultyAdjustmentDate] = useState<Dayjs | undefined>(undefined);
   const [adjustmentInterval, setAdjustmentInterval] = useState({
     days: '00',
     hours: '00',
@@ -54,38 +55,19 @@ const HomePage: React.SFC = () => {
   })
 
   useEffect(() => {
-    const getDifficultyAdjustmentDate = async () => {
-      try {
-        const currentBlockHeight: number = await (await fetch('https://blockchain.info/q/getblockcount')).json()
-        const avgBlockTime: number = await (await fetch('https://blockchain.info/q/interval')).json()
-        // work out remaining blocks in current epoc (current Block mod 2016) 
-        const currentEpochBlocks = currentBlockHeight % 2016;
-        const remainingEpochTime = (2016 - currentEpochBlocks) * avgBlockTime;
-        const date = dayjs().add(remainingEpochTime, 's');
-        setDifficultyAdjustmentDate(date);
-      } catch (error) {
-        console.log('Error getting next difficulty adjustment date');
-      }
-    }
-    if (!difficultyAdjustmentDate) {
-      getDifficultyAdjustmentDate()
-    }
-  })
-
-  useEffect(() => {
     const interval = setInterval(() => {
       setAdjustmentInterval({
-        days: Math.floor(dayjs.duration(dayjs(difficultyAdjustmentDate).diff(dayjs())).asDays()).toString().padStart(2, '0'),
-        hours: dayjs.duration(dayjs(difficultyAdjustmentDate).diff(dayjs())).hours().toString().padStart(2, '0'),
-        minutes: dayjs.duration(dayjs(difficultyAdjustmentDate).diff(dayjs())).minutes().toString().padStart(2, '0'),
-        seconds: dayjs.duration(dayjs(difficultyAdjustmentDate).diff(dayjs())).seconds().toString().padStart(2, '0'),
+        days: Math.floor(dayjs.duration(dayjs(btcDifficultyAdjustmentDate).diff(dayjs())).asDays()).toString().padStart(2, '0'),
+        hours: dayjs.duration(dayjs(btcDifficultyAdjustmentDate).diff(dayjs())).hours().toString().padStart(2, '0'),
+        minutes: dayjs.duration(dayjs(btcDifficultyAdjustmentDate).diff(dayjs())).minutes().toString().padStart(2, '0'),
+        seconds: dayjs.duration(dayjs(btcDifficultyAdjustmentDate).diff(dayjs())).seconds().toString().padStart(2, '0'),
       })
     }, 1000)
 
     return () => {
       clearInterval(interval)
     }
-  }, [difficultyAdjustmentDate])
+  }, [btcDifficultyAdjustmentDate])
 
   const classes = useStyles();
 
@@ -105,7 +87,6 @@ const HomePage: React.SFC = () => {
   }
 
   return (
-
     <Grid container direction='column' spacing={2}>
       <Grid item>
         <Typography color="secondary" variant='h5' align='center'>Sweet Deals In Crypto Mining</Typography>
@@ -152,7 +133,7 @@ const HomePage: React.SFC = () => {
           <span>Secs</span>
         </Grid>
         <Grid item xs={12}>
-          <Typography style={{ fontWeight: 'bold' }}>Estimate: {difficultyAdjustmentDate?.format('MMM DD, YYYY HH:mm:ss')}</Typography>
+          <Typography style={{ fontWeight: 'bold' }}>Estimate: {dayjs(btcDifficultyAdjustmentDate).format('MMM DD, YYYY HH:mm:ss')}</Typography>
         </Grid>
       </Grid>
       {onboard && !wallet &&

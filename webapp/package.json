@@ -13,6 +13,8 @@
     "dayjs": "1.8.26",
     "dotenv": "8.2.0",
     "eslint": "6.8.0",
+    "highcharts": "^8.1.0",
+    "highcharts-react-official": "^3.0.0",
     "honeylemon": "file:../.",
     "react": "16.13.1",
     "react-blockies": "^1.4.1",
