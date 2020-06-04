@@ -16,6 +16,7 @@
     "@0x/subproviders": "6.0.8",
     "@0x/utils": "5.4.1",
     "@0x/web3-wrapper": "7.0.7",
+    "abi-decoder": "^2.3.0",
     "graphql-request": "^1.8.2"
   },
   "devDependencies": {
