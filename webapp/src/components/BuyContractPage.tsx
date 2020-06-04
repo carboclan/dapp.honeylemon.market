@@ -33,6 +33,8 @@ import { TabPanel } from './TabPanel';
 import { useHoneylemon } from '../contexts/HoneylemonContext';
 import { useOnboard } from '../contexts/OnboardContext';
 import { forwardTo } from '../helpers/history';
+import ContractSpecificationModal from './ContractSpecificationModal'
+import MRIInformationModal from './MRIInformationModal'
 
 
 const useStyles = makeStyles(({ spacing, palette }) => ({
@@ -95,6 +97,9 @@ const BuyContractPage: React.SFC = () => {
   const [buyType, setBuyType] = useState<BuyType>(BuyType.budget);
   const [showBuyModal, setShowBuyModal] = useState(false);
   const [isTxActive, setTxActive] = useState(false);
+  const [showContractSpecificationModal, setShowContractSpecificationModal] = useState(false);
+  const [showMRIInformationModal, setShowMRIInformationModal] = useState(false);
+
 
   const handleChangeBuyType = (event: React.ChangeEvent<{}>, newValue: BuyType) => {
     setBuyType(newValue);
@@ -385,12 +390,12 @@ const BuyContractPage: React.SFC = () => {
           <Typography>
             You will pay <strong>${orderValue.toLocaleString()}</strong> to buy <strong>{orderQuantity} Th</strong> of hashrate
             for <strong>{CONTRACT_DURATION} days</strong> for <strong>${hashPrice.toLocaleString()}/Th/day</strong>. You will
-            receive the average value of the <Link component={RouterLink} to="#" underline='always'>Mining Revenue Index</Link>&nbsp;
+            receive the average value of the <Link component={RouterLink} to="#" underline='always' onClick={() => setShowMRIInformationModal(true)}>Mining Revenue Index</Link>&nbsp;
             over <strong>{CONTRACT_DURATION} days </strong>representing <strong>{orderQuantity} Th</strong> of mining power per
             day per contract.
           </Typography>
         </Grid>
-        <Grid item><Typography>See <Link href='#' underline='always'>full contract specification here.</Link></Typography></Grid>
+        <Grid item><Typography>See <Link href='#' underline='always' onClick={() => setShowContractSpecificationModal(true)}>full contract specification here.</Link></Typography></Grid>
       </Grid>
       <Dialog open={showBuyModal} onClose={handleCloseBuyDialog} aria-labelledby="form-dialog-title">
         <DialogTitle id="form-dialog-title">Buy Offer</DialogTitle>
@@ -424,6 +429,9 @@ const BuyContractPage: React.SFC = () => {
           </Stepper>
         </DialogContent>
       </Dialog>
+      <ContractSpecificationModal open={showContractSpecificationModal} onClose={() => setShowContractSpecificationModal(false)}/>
+      <MRIInformationModal open={showMRIInformationModal} onClose={() => setShowMRIInformationModal(false)}/>
+    
     </>
   )
 }

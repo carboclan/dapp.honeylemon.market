@@ -30,6 +30,8 @@ import { BigNumber } from '@0x/utils';
 import { useHoneylemon } from '../contexts/HoneylemonContext';
 import { useOnboard } from '../contexts/OnboardContext';
 import { forwardTo } from '../helpers/history';
+import ContractSpecificationModal from './ContractSpecificationModal';
+import MRIInformationModal from './MRIInformationModal';
 
 const useStyles = makeStyles(({ spacing, palette }) => ({
   rightAlign: {
@@ -85,7 +87,9 @@ const OfferContractPage: React.SFC = () => {
   const [collateralAmount, setCollateralAmount] = useState(0);
   const [showOfferModal, setShowOfferModal] = useState(false);
   const [isTxActive, setIsTxActive] = useState(false);
-
+  const [showContractSpecificationModal, setShowContractSpecificationModal] = useState(false);
+  const [showMRIInformationModal, setShowMRIInformationModal] = useState(false);
+  
   useEffect(() => {
     let cancelled = false;
     const getCollateralForContract = async () => {
@@ -379,6 +383,8 @@ const OfferContractPage: React.SFC = () => {
           </Stepper>
         </DialogContent>
       </Dialog>
+      <ContractSpecificationModal open={showContractSpecificationModal} onClose={() => setShowContractSpecificationModal(false)}/>
+      <MRIInformationModal open={showMRIInformationModal} onClose={() => setShowMRIInformationModal(false)}/>
     </>
   )
 }
