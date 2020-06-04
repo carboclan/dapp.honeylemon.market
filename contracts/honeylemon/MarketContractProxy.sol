@@ -381,15 +381,11 @@ contract MarketContractProxy is ReentrancyGuard, Ownable {
      * Only one side can be redeemed at a time. This is to simplify redemption as the same caller
      * will likely never be both long and short in the same contract.
      * @param tokenAddresses long/short token addresses
-     * @param marketAddresses market contracts addresses
      * @param tokensToRedeem amount of token to redeem
-     * @param traderLong true => trader long; false => trader short
      */
     function batchRedeem(
         address[] memory tokenAddresses, // Address of the long or short token to redeem
-        address[] memory marketAddresses, // Address of the market protocol
-        uint256[] memory tokensToRedeem, // the number of tokens to redeem
-        bool[] memory traderLong // if the trader is long or short
+        uint256[] memory tokensToRedeem // the number of tokens to redeem
     ) public nonReentrant {
         require(
             tokenAddresses.length == marketAddresses.length &&
@@ -398,18 +394,26 @@ contract MarketContractProxy is ReentrancyGuard, Ownable {
             "Invalid input params"
         );
         require(this.owner() == msg.sender, "You don't own this DSProxy GTFO");
+
         MarketContractMPX marketInstance;
         MarketCollateralPool marketCollateralPool;
-        ERC20 tokenInstance;
+        PositionToken tokenInstance;
+
         // Loop through all tokens and preform redemption
         for (uint256 i = 0; i < tokenAddresses.length; i++) {
-            marketInstance = MarketContractMPX(marketAddresses[i]);
+            tokenInstance = PositionToken(tokenAddresses[i]);
+
+            require(
+                tokenInstance.balanceOf(address(this)) >= tokensToRedeem[i],
+                'Insufficient position token balance'
+            );
+
+            marketInstance = MarketContractMPX(tokenInstance.owner());
             marketCollateralPool = getCollateralPool(marketInstance);
-            tokenInstance = ERC20(tokenAddresses[i]);
 
             tokenInstance.approve(address(marketInstance), tokensToRedeem[i]);
 
-            if (traderLong[i]) {
+            if (uint8(tokenInstance.MARKET_SIDE()) == 0) {
                 // redeem n long tokens and 0 short tokens
                 marketCollateralPool.settleAndClose(
                     address(marketInstance),

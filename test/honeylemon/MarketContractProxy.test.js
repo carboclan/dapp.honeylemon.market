@@ -785,17 +785,13 @@ contract(
         // batch redeem call for long token
         let longTokenBatchTx = marketContractProxy.contract.methods.batchRedeem(
           longTokensAddresses,
-          marketContractsAddresses,
-          amounts,
-          isLongToken // to indicate the token is long
+          amounts
         )
         .encodeABI();
         // batch redeem call for short token
         let shortTokenBatchTx = marketContractProxy.contract.methods.batchRedeem(
           shortTokensAddresses,
-          marketContractsAddresses,
-          amounts,
-          isShortToken // to indicate the token is short
+          amounts
         ).encodeABI();
 
         // DSProxy Wallet instance

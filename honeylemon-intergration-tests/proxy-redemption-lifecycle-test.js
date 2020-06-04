@@ -392,9 +392,7 @@ async function runExport() {
   const unwindLongTokenTx = marketContractProxy.contract.methods
     .batchRedeem(
       [longToken.address],
-      [marketContract.address],
-      [makerAmountToMint],
-      [true] // to indicate the token is long
+      [makerAmountToMint]
     )
     .encodeABI();
 
@@ -406,9 +404,7 @@ async function runExport() {
   const unwindShortTokenTx = marketContractProxy.contract.methods
     .batchRedeem(
       [shortToken.address],
-      [marketContract.address],
-      [makerAmountToMint],
-      [false] // to indicate the token is short
+      [makerAmountToMint]
     )
     .encodeABI();
 
