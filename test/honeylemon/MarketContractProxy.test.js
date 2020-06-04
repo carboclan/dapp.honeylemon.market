@@ -167,13 +167,6 @@ contract(
           })
         );
       });
-      it('should revert setting market contract specs by non-owner', async () => {
-        await expectRevert.unspecified(
-          marketContractProxy.setMarketContractSpecs([0, 0, 0, 0, 0, 0, 0], {
-            from: random
-          })
-        );
-      });
     });
 
     describe('deploy new market contract', async () => {

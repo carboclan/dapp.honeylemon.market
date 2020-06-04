@@ -162,15 +162,6 @@ contract MarketContractProxy is ReentrancyGuard, Ownable {
         MINTER_BRIDGE_ADDRESS = _minterBridgeAddress;
     }
 
-    /**
-     * @notice Set market contract specs
-     * @dev can only be called by owner
-     * @param _params array of specs
-     */
-    function setMarketContractSpecs(uint[7] calldata _params) external onlyOwner {
-        marketContractSpecs = _params;
-    }
-
     ////////////////////////
     //// PUBLIC GETTERS ////
     ////////////////////////
