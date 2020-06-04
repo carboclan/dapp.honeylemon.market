@@ -89,7 +89,7 @@ const OfferContractPage: React.SFC = () => {
   const [isTxActive, setIsTxActive] = useState(false);
   const [showContractSpecificationModal, setShowContractSpecificationModal] = useState(false);
   const [showMRIInformationModal, setShowMRIInformationModal] = useState(false);
-  
+
   useEffect(() => {
     let cancelled = false;
     const getCollateralForContract = async () => {
@@ -219,7 +219,7 @@ const OfferContractPage: React.SFC = () => {
 
   return (
     <>
-      <Grid container alignItems='flex-start' justify='flex-start' spacing={2}  className={classes.offerForm}>
+      <Grid container alignItems='flex-start' justify='flex-start' spacing={2} className={classes.offerForm}>
         <Grid item xs={12}>
           <Typography style={{ fontWeight: 'bold' }}>Offer a {CONTRACT_DURATION} day Mining Revenue Contract</Typography>
         </Grid>
@@ -335,19 +335,21 @@ const OfferContractPage: React.SFC = () => {
         </Grid>
         <Grid item xs={12}>
           <Typography>
-            You will offer <strong>{hashAmount.toLocaleString()} contracts</strong> at&nbsp;
-            <strong>${hashPrice.toLocaleString()} Th/day.</strong>. If a hodler buys your offer you will 
-            receive <strong>${totalContractPrice.toLocaleString()} USDT</strong>. You will be required to 
-            post the hodlers max win of <strong>{collateralAmount.toLocaleString()} imBTC</strong> as
-            collateral. The amount of collateral that the hodler receives will be determined by
-            the average value of the <Link href='#' underline='always'>Mining Revenue Index</Link> over
-            the <strong>{CONTRACT_DURATION} days</strong> starting when the hodler pays you. Any remaining
-            collateral will be returned to the miner upon expiry of the contract.
+            You are offering a <strong>{hashAmount.toLocaleString()}TH contract</strong> at&nbsp;
+            <strong>USDT {hashPrice.toLocaleString()} Th/day.</strong>. You will need to
+            post <strong>{collateralAmount.toLocaleString()} imBTC</strong> as collateral.
+            The contract will start when your order is filled and you will receive payment in USDT
+            upfront. At the end of <strong>{CONTRACT_DURATION} days</strong>, your counterparty will
+            receive the network average BTC block reward & transaction fees per TH based on the average
+            value of the Bitcoin <Link href='#' underline='always' onClick={() => setShowMRIInformationModal(true)}>Mining Revenue Index (MRI)</Link> over
+            the next <strong>{CONTRACT_DURATION} days</strong> up to a max win capped by your collateral.
+            The payoff will be directly deducted from your collateral then, and you can withdraw the
+            remainder of your collateral post settlement.
           </Typography>
         </Grid>
         <Grid item xs={12}>
           <Typography align='center'>
-            See <Link href='#' underline='always'>full contract specification here.</Link>
+            See <Link href='#' underline='always' onClick={() => setShowContractSpecificationModal(true)}>full contract specification here.</Link>
           </Typography>
         </Grid>
       </Grid>
@@ -383,8 +385,8 @@ const OfferContractPage: React.SFC = () => {
           </Stepper>
         </DialogContent>
       </Dialog>
-      <ContractSpecificationModal open={showContractSpecificationModal} onClose={() => setShowContractSpecificationModal(false)}/>
-      <MRIInformationModal open={showMRIInformationModal} onClose={() => setShowMRIInformationModal(false)}/>
+      <ContractSpecificationModal open={showContractSpecificationModal} onClose={() => setShowContractSpecificationModal(false)} />
+      <MRIInformationModal open={showMRIInformationModal} onClose={() => setShowMRIInformationModal(false)} />
     </>
   )
 }

@@ -86,6 +86,8 @@ const BuyContractPage: React.SFC = () => {
     CONTRACT_DURATION,
     isDsProxyDeployed,
     paymentTokenBalance,
+    CONTRACT_COLLATERAL_RATIO,
+    COLLATERAL_TOKEN_DECIMALS
   } = useHoneylemon()
   const classes = useStyles();
 
@@ -103,7 +105,7 @@ const BuyContractPage: React.SFC = () => {
   const [isTxActive, setTxActive] = useState(false);
   const [showContractSpecificationModal, setShowContractSpecificationModal] = useState(false);
   const [showMRIInformationModal, setShowMRIInformationModal] = useState(false);
-
+  const [expectedBTCAccrual, setExpectedBTCAccrual] = useState(0);
 
   const handleChangeBuyType = (event: React.ChangeEvent<{}>, newValue: BuyType) => {
     setBuyType(newValue);
@@ -131,6 +133,9 @@ const BuyContractPage: React.SFC = () => {
       setOrderValue(Number(result?.totalTakerFillAmount?.shiftedBy(-PAYMENT_TOKEN_DECIMALS).toString()) || 0);
       setResultOrders(result?.resultOrders || undefined);
       setTakerFillAmounts(result?.takerAssetFillAmounts || undefined);
+      debugger;
+      const collateraRequired = new BigNumber(await honeylemonService.calculateRequiredCollateral(newValue)).shiftedBy(-COLLATERAL_TOKEN_DECIMALS)
+      setExpectedBTCAccrual(Number(collateraRequired.dividedBy(CONTRACT_COLLATERAL_RATIO).toString()));
     } catch (error) {
       console.log('Error getting the current liquidity')
       console.log(error);
@@ -155,6 +160,9 @@ const BuyContractPage: React.SFC = () => {
       setResultOrders(result.resultOrders || undefined);
       setTakerFillAmounts(result.takerAssetFillAmounts || undefined);
       setOrderValue(Number(result?.totalTakerFillAmount?.shiftedBy(-PAYMENT_TOKEN_DECIMALS).toString()) || 0);
+      debugger;
+      const collateraRequired = new BigNumber(await honeylemonService.calculateRequiredCollateral(result?.totalMakerFillAmount.toString())).shiftedBy(-COLLATERAL_TOKEN_DECIMALS)
+      setExpectedBTCAccrual(Number(collateraRequired.dividedBy(CONTRACT_COLLATERAL_RATIO).toString()));
     } catch (error) {
       console.log('Error getting the current liquidity')
       console.log(error);
@@ -402,7 +410,7 @@ const BuyContractPage: React.SFC = () => {
                       Expected Accrual *
                     </TableCell>
                     <TableCell align='right' className={classes.orderSummaryEstimate}>
-                      {`BTC ${(0.05).toLocaleString()}`}
+                      {`BTC ${(expectedBTCAccrual).toLocaleString()}`}
                     </TableCell>
                   </TableRow>
                   <TableRow>
@@ -438,8 +446,8 @@ const BuyContractPage: React.SFC = () => {
           <Typography>
             You will pay <strong>$ {orderValue.toLocaleString()}</strong> to buy <strong>{orderQuantity}Th</strong> of hashrate
             for <strong>{CONTRACT_DURATION} days</strong> for <strong>${hashPrice.toLocaleString()}/Th/day</strong>. You will
-            receive the average value of the <Link component={RouterLink} to="#" underline='always' onClick={() => setShowMRIInformationModal(true)}>Mining Revenue Index</Link>&nbsp;
-            over <strong>{CONTRACT_DURATION} days </strong>representing <strong>{orderQuantity} Th</strong> of mining power per
+            receive the average value of the <Link href="#" underline='always' onClick={() => setShowMRIInformationModal(true)}>Mining Revenue Index</Link>&nbsp;
+            over <strong>{CONTRACT_DURATION} days</strong> representing <strong>{orderQuantity} Th</strong> of mining power per
             day per contract.
           </Typography>
         </Grid>

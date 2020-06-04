@@ -17,6 +17,7 @@ export type HoneylemonContext = {
   PAYMENT_TOKEN_DECIMALS: number,
   CONTRACT_DURATION: number,
   isDsProxyDeployed: Boolean,
+  CONTRACT_COLLATERAL_RATIO: number,
   marketData: {
     miningContracts: Array<any>,
     currentMRI: number,
@@ -208,6 +209,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
         PAYMENT_TOKEN_DECIMALS: 6, //TODO: Extract this from library when TS conversion is done
         CONTRACT_DURATION: 2, //TODO: Extract this from library when TS conversion is done
         isDsProxyDeployed,
+        CONTRACT_COLLATERAL_RATIO: 1.35,
         marketData: {
           miningContracts,
           currentBTCSpotPrice,
