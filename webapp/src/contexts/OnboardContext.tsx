@@ -38,7 +38,6 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
   const [notify, setNotify] = useState<NotifyApi | undefined>(undefined)
 
   const infuraId = process.env.REACT_APP_INFURA_ID
-  const infuraKey = process.env.REACT_APP_INFURA_API_KEY;
   // TODO: Update this for mainnet deployment
   const infuraRpc = `https://${networkName(network)}.infura.io/v3/${infuraId}`
 
@@ -62,7 +61,7 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
           { walletName: "dapper" },
           {
             walletName: "walletConnect",
-            infuraKey: infuraKey
+            infuraKey: infuraId
           },
           { walletName: "walletLink", rpcUrl: infuraRpc },
           { walletName: "opera" },

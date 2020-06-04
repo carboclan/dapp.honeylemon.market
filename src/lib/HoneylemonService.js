@@ -418,8 +418,7 @@ class HoneylemonService {
 
       // For each trade they've entered, add the position information to the params.
       for (let position of longPositions) {
-        // If the settlement information is not null the token is redeemable.
-        if (position.contract.settlement != null) {
+        if (position.canRedeem) {
           // Grab the index of the address within the array. This is done to group by address
           // As a trader could be in multiple instance of one token for each given day.
           const arrayIndex = longParams.tokenAddresses.findIndex(
@@ -470,7 +469,7 @@ class HoneylemonService {
       };
 
       for (let position of shortPositions) {
-        if (position.contract.settlement != null) {
+        if (position.canRedeem) {
           const arrayIndex = shortParams.tokenAddresses.findIndex(
             addr => addr == position.shortTokenAddress
           );
@@ -627,7 +626,7 @@ class HoneylemonService {
       );
       marketContract.setProvider(this.provider);
 
-      position.canRedeem = await marketContract.methods
+      position.canRedeem = !position.isRedeemed && await marketContract.methods
         .isPostSettlementDelay()
         .call();
     }

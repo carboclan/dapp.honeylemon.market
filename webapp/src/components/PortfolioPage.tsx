@@ -118,7 +118,7 @@ const PorfolioPage: React.SFC = () => {
   const withdrawAvailable = async () => {
     setIsWithdrawing(true);
     try {
-      //const results = 
+      //const results =
       await honeylemonService.batchRedeem(address);
       setRefresh(true);
     } catch (error) {
@@ -159,12 +159,12 @@ const PorfolioPage: React.SFC = () => {
         setActivePositions(newActivePositions);
         !showActivePositions && setShowActivePositions(newActivePositions.length > 0)
 
-        const sptw = allPositions.filter((p: any) => !!p?.contract.settlement /** &&  available withdraw flag */)
+        const sptw = allPositions.filter((p: any) => p.canRedeem)
         setSettledPositionsToWithdraw(sptw);
         !showSettledPositionsToWithdraw && setShowSettledPositionsToWithdraw(sptw.length > 0)
         setCollateralForWithdraw(sptw.reduce((total: Number, contract: any) => total += contract?.finalReward, 0));
 
-        const finalized = allPositions.filter((p: any) => !!p?.contract.settlement /** &&  !available withdraw flag */)
+        const finalized = allPositions.filter((p: any) => p.isRedeemed)
         setSettledPositions(finalized);
         !showSettledPositions && setShowSettledPositions(finalized.length > 0)
 
