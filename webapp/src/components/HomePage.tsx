@@ -6,6 +6,8 @@ import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
 import { useOnboard } from '../contexts/OnboardContext';
 import { useHoneylemon } from '../contexts/HoneylemonContext';
+import ConnectWalletButton from './ConnectWalletButton';
+
 dayjs.extend(duration);
 
 const useStyles = makeStyles(({ palette, spacing }) => ({
@@ -45,7 +47,7 @@ const useStyles = makeStyles(({ palette, spacing }) => ({
 
 const HomePage: React.SFC = () => {
   const { wallet, onboard, isReady, checkIsReady } = useOnboard();
-  const { marketData: {btcDifficultyAdjustmentDate} } = useHoneylemon();
+  const { marketData: { btcDifficultyAdjustmentDate } } = useHoneylemon();
   const [isConnecting, setIsConnecting] = useState(false);
   const [adjustmentInterval, setAdjustmentInterval] = useState({
     days: '00',
@@ -72,20 +74,6 @@ const HomePage: React.SFC = () => {
   const classes = useStyles();
 
   const ready = onboard && wallet && isReady;
-
-  const handleSelectWalletAndConnect = async () => {
-    setIsConnecting(true);
-    const result = await onboard?.walletSelect();
-    result && await checkIsReady();
-    setIsConnecting(false);
-  }
-
-  const handleConnect = async () => {
-    setIsConnecting(true);
-    await checkIsReady();
-    setIsConnecting(false);
-  }
-
   return (
     <Grid container direction='column' spacing={2}>
       <Grid item>
@@ -136,31 +124,10 @@ const HomePage: React.SFC = () => {
           <Typography style={{ fontWeight: 'bold' }}>Estimate: {dayjs(btcDifficultyAdjustmentDate).format('MMM DD, YYYY HH:mm:ss')}</Typography>
         </Grid>
       </Grid>
-      {onboard && !wallet &&
+      {!isReady ?
         <Grid item xs={12} className={classes.connectSpacer}>
-          <Button 
-            onClick={() => { handleSelectWalletAndConnect() }} 
-            className={classes.button} 
-            fullWidth
-            disabled={isConnecting}>
-              Connect wallet &nbsp;
-                {isConnecting && <CircularProgress className={classes.loadingSpinner} size={20} />}
-          </Button>
-        </Grid>
-      }
-      {onboard && wallet && !isReady &&
-        <Grid item xs={12} className={classes.connectSpacer}>
-          <Button 
-            onClick={() => { handleConnect() }} 
-            className={classes.button} 
-            fullWidth
-            disabled={isConnecting}>
-              Connect wallet &nbsp;
-                {isConnecting && <CircularProgress className={classes.loadingSpinner} size={20} />}
-          </Button>
-        </Grid>
-      }
-      {onboard && wallet && isReady &&
+          <ConnectWalletButton />
+        </Grid> :
         <>
           <Typography variant='h5' style={{ fontWeight: 'bold' }}>I am a BTC Miner</Typography>
           <Typography color='secondary' style={{ fontWeight: 'bold' }}>Hedge risk & get cash up front</Typography>
