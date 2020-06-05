@@ -364,7 +364,7 @@ class HoneylemonService {
 
   async calculateRequiredCollateral(amount) {
     return await this.marketContractProxy.methods
-      .calculateRequiredCollateral(amount)
+      .calculateRequiredCollateral(amount.toString())
       .call();
   }
 
