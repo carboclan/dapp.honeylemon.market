@@ -340,8 +340,8 @@ const OfferContractPage: React.SFC = () => {
             The contract will start when your order is filled and you will receive payment in USDT
             upfront. At the end of <strong>{CONTRACT_DURATION} days</strong>, your counterparty will
             receive the network average BTC block reward & transaction fees per TH based on the average
-            value of the Bitcoin <Link href='#' underline='always' onClick={() => setShowMRIInformationModal(true)}>&nbsp;
-            Mining Revenue Index (MRI)</Link> over the next <strong>{CONTRACT_DURATION} days</strong> up to a max 
+            value of the <Link href='#' underline='always' onClick={() => setShowMRIInformationModal(true)}>
+            Bitcoin Mining Revenue Index (MRI)</Link> over the next <strong>{CONTRACT_DURATION} days</strong> up to a max 
             win capped by your collateral. The payoff will be directly deducted from your collateral then, and you 
             can withdraw the remainder of your collateral post settlement.
           </Typography>

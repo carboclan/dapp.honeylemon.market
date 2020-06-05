@@ -106,11 +106,11 @@ function AppWrapper(props: { children: ReactNode }) {
 
   const ref = useRef(null);
   useOnClickOutside(ref, () => {
-    if(open){
+    if (open) {
       setOpen(false)
     }
   })
-  
+
   return (
     <div className={classes.root}>
       <AppBar
@@ -172,7 +172,7 @@ function AppWrapper(props: { children: ReactNode }) {
                 noWrap: true
               }}>
               <Link href={`https://${networkName(network)}.etherscan.io/address/${address}`} target="_blank" rel='noopener' underline='always' >
-                {displayAddress(address || '0x', 20) }
+                {displayAddress(address || '0x', 20)}
               </Link>
             </ListItemText>
           </ListItem>
@@ -181,7 +181,7 @@ function AppWrapper(props: { children: ReactNode }) {
         <List>
           <ListItem>
             <ListItemIcon>
-              <img src='imBtc.png' style={{ width: '40px' }} alt='imbtc logo'/>
+              <img src='imBtc.png' style={{ width: '40px' }} alt='imbtc logo' />
             </ListItemIcon>
             <ListItemText
               primary={`${collateralTokenBalance.toLocaleString(undefined, {
@@ -199,7 +199,7 @@ function AppWrapper(props: { children: ReactNode }) {
           </ListItem>
           <ListItem>
             <ListItemIcon>
-              <img src='usdt.png' style={{ width: '40px' }} alt='usdt logo'/>
+              <img src='usdt.png' style={{ width: '40px' }} alt='usdt logo' />
             </ListItemIcon>
             <ListItemText
               primary={`${paymentTokenBalance.toLocaleString(undefined, {

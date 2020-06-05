@@ -45,8 +45,8 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
   useEffect(() => {
     const initializeOnboard = async () => {
       try {
-        // const montserrat = new FontFaceObserver('Montserrat')
-        // await montserrat.load(undefined, 10000);
+        const montserrat = new FontFaceObserver('Montserrat')
+        await montserrat.load(undefined);
         
         const onboard = Onboard({
           dappId: onboardProps.dappId,

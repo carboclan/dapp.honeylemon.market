@@ -39,18 +39,14 @@ const ConnectWalletButton: React.SFC = () => {
   }
 
   return (
-    <>
-      {/* {!wallet || !isReady && */}
-        <Button
-          onClick={() => { handleSelectWalletAndConnect() }}
-          className={classes.button}
-          fullWidth
-          disabled={!onboard || isConnecting}>
-          Connect wallet &nbsp;
-          {isConnecting && <CircularProgress className={classes.loadingSpinner} size={20} />}
-        </Button>
-      {/* } */}
-    </>
+    <Button
+      onClick={() => { handleSelectWalletAndConnect() }}
+      className={classes.button}
+      fullWidth
+      disabled={!onboard || isConnecting}>
+      Connect wallet &nbsp;
+      {isConnecting && <CircularProgress className={classes.loadingSpinner} size={20} />}
+    </Button>
   )
 }
 
