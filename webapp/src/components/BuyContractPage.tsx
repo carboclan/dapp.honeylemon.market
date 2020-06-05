@@ -133,7 +133,6 @@ const BuyContractPage: React.SFC = () => {
       setOrderValue(Number(result?.totalTakerFillAmount?.shiftedBy(-PAYMENT_TOKEN_DECIMALS).toString()) || 0);
       setResultOrders(result?.resultOrders || undefined);
       setTakerFillAmounts(result?.takerAssetFillAmounts || undefined);
-      debugger;
       const collateraRequired = new BigNumber(await honeylemonService.calculateRequiredCollateral(newValue)).shiftedBy(-COLLATERAL_TOKEN_DECIMALS)
       setExpectedBTCAccrual(Number(collateraRequired.dividedBy(CONTRACT_COLLATERAL_RATIO).toString()));
     } catch (error) {
@@ -160,7 +159,6 @@ const BuyContractPage: React.SFC = () => {
       setResultOrders(result.resultOrders || undefined);
       setTakerFillAmounts(result.takerAssetFillAmounts || undefined);
       setOrderValue(Number(result?.totalTakerFillAmount?.shiftedBy(-PAYMENT_TOKEN_DECIMALS).toString()) || 0);
-      debugger;
       const collateraRequired = new BigNumber(await honeylemonService.calculateRequiredCollateral(result?.totalMakerFillAmount.toString())).shiftedBy(-COLLATERAL_TOKEN_DECIMALS)
       setExpectedBTCAccrual(Number(collateraRequired.dividedBy(CONTRACT_COLLATERAL_RATIO).toString()));
     } catch (error) {
