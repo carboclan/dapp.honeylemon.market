@@ -9,29 +9,30 @@ import { forwardTo } from '../helpers/history';
 import { ReactComponent as HoneyLemonLogo } from '../images/honeylemon-logo.svg';
 import { useOnboard } from '../contexts/OnboardContext';
 import { useHoneylemon } from '../contexts/HoneylemonContext';
+import Footer from './Footer';
 import { useOnClickOutside } from '../helpers/useOnClickOutside';
 import { networkName } from '../helpers/ethereumNetworkUtils';
 import { displayAddress } from '../helpers/displayAddress';
 
 const drawerWidth = 300;
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(({transitions, palette, mixins, spacing}) => ({
   root: {
     display: 'flex',
   },
   appBar: {
-    transition: theme.transitions.create(['margin', 'width'], {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.leavingScreen,
+    transition: transitions.create(['margin', 'width'], {
+      easing: transitions.easing.sharp,
+      duration: transitions.duration.leavingScreen,
     }),
     backgroundColor: '#424242',
-    color: theme.palette.primary.main
+    color: palette.primary.main
   },
   appBarShift: {
     width: `calc(100% - ${drawerWidth}px)`,
-    transition: theme.transitions.create(['margin', 'width'], {
-      easing: theme.transitions.easing.easeOut,
-      duration: theme.transitions.duration.enteringScreen,
+    transition: transitions.create(['margin', 'width'], {
+      easing: transitions.easing.easeOut,
+      duration: transitions.duration.enteringScreen,
     }),
     marginRight: drawerWidth,
   },
@@ -50,14 +51,13 @@ const useStyles = makeStyles((theme) => ({
     display: 'none',
   },
   hamburger: {
-    color: theme.palette.secondary.main,
+    color: palette.secondary.main,
   },
   drawer: {
     flexShrink: 0,
   },
   drawerPaper: {
     width: 0,
-    // backgroundColor: theme.palette.common.white,
   },
   drawerOpen: {
     width: drawerWidth,
@@ -65,9 +65,9 @@ const useStyles = makeStyles((theme) => ({
   drawerHeader: {
     display: 'flex',
     alignItems: 'center',
-    padding: theme.spacing(0, 1),
+    padding: spacing(0, 1),
     // necessary for content to be below app bar
-    ...theme.mixins.toolbar,
+    ...mixins.toolbar,
     justifyContent: 'flex-start',
   },
   content: {
@@ -106,11 +106,11 @@ function AppWrapper(props: { children: ReactNode }) {
 
   const ref = useRef(null);
   useOnClickOutside(ref, () => {
-    if(open){
+    if (open) {
       setOpen(false)
     }
   })
-  
+
   return (
     <div className={classes.root}>
       <AppBar
@@ -138,6 +138,7 @@ function AppWrapper(props: { children: ReactNode }) {
       </AppBar>
       <main className={clsx(classes.content, { [classes.contentDrawerOpen]: open })}>
         {props.children}
+        <Footer />
       </main>
       <Drawer
         ref={ref}
@@ -172,7 +173,7 @@ function AppWrapper(props: { children: ReactNode }) {
                 noWrap: true
               }}>
               <Link href={`https://${networkName(network)}.etherscan.io/address/${address}`} target="_blank" rel='noopener' underline='always' >
-                {displayAddress(address || '0x', 20) }
+                {displayAddress(address || '0x', 20)}
               </Link>
             </ListItemText>
           </ListItem>
@@ -181,7 +182,7 @@ function AppWrapper(props: { children: ReactNode }) {
         <List>
           <ListItem>
             <ListItemIcon>
-              <img src='imBtc.png' style={{ width: '40px' }} alt='imbtc logo'/>
+              <img src='imBtc.png' style={{ width: '40px' }} alt='imbtc logo' />
             </ListItemIcon>
             <ListItemText
               primary={`${collateralTokenBalance.toLocaleString(undefined, {
@@ -199,7 +200,7 @@ function AppWrapper(props: { children: ReactNode }) {
           </ListItem>
           <ListItem>
             <ListItemIcon>
-              <img src='usdt.png' style={{ width: '40px' }} alt='usdt logo'/>
+              <img src='usdt.png' style={{ width: '40px' }} alt='usdt logo' />
             </ListItemIcon>
             <ListItemText
               primary={`${paymentTokenBalance.toLocaleString(undefined, {

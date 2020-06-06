@@ -11,7 +11,6 @@ import {
   CircularProgress,
   List,
   ListItem,
-  ListItemIcon,
   ListItemText,
   Table,
   TableBody,
@@ -336,15 +335,15 @@ const OfferContractPage: React.SFC = () => {
         <Grid item xs={12}>
           <Typography>
             You are offering a <strong>{hashAmount.toLocaleString()}TH contract</strong> at&nbsp;
-            <strong>USDT {hashPrice.toLocaleString()} Th/day.</strong>. You will need to
+            <strong>USDT {hashPrice.toLocaleString()}/Th/day.</strong>. You will need to
             post <strong>{collateralAmount.toLocaleString()} imBTC</strong> as collateral.
             The contract will start when your order is filled and you will receive payment in USDT
             upfront. At the end of <strong>{CONTRACT_DURATION} days</strong>, your counterparty will
             receive the network average BTC block reward & transaction fees per TH based on the average
-            value of the Bitcoin <Link href='#' underline='always' onClick={() => setShowMRIInformationModal(true)}>Mining Revenue Index (MRI)</Link> over
-            the next <strong>{CONTRACT_DURATION} days</strong> up to a max win capped by your collateral.
-            The payoff will be directly deducted from your collateral then, and you can withdraw the
-            remainder of your collateral post settlement.
+            value of the <Link href='#' underline='always' onClick={() => setShowMRIInformationModal(true)}>
+            Bitcoin Mining Revenue Index (MRI)</Link> over the next <strong>{CONTRACT_DURATION} days</strong> up to a max 
+            win capped by your collateral. The payoff will be directly deducted from your collateral then, and you 
+            can withdraw the remainder of your collateral post settlement.
           </Typography>
         </Grid>
         <Grid item xs={12}>

@@ -3,7 +3,12 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .bn-onboard-custom.bn-onboard-modal {
-  font-family: 'unset !important';
+  font-family: 'Montserrat';
+  border-radius: 5px;
+}
+
+.bn-onboard-custom.bn-onboard-modal-content {
+  background-color: #424242;
 }
 
 /* Chrome, Safari, Edge, Opera */

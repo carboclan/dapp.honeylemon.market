@@ -1,11 +1,12 @@
 import * as React from 'react';
 import { useState, useEffect } from 'react';
 import Onboard from 'bnc-onboard';
-
 import Notify from 'bnc-notify';
 import { API as OnboardApi, Wallet } from 'bnc-onboard/dist/src/interfaces';
 import { API as NotifyApi } from 'bnc-notify/dist/src/interfaces';
 import { fromWei } from 'web3-utils';
+import FontFaceObserver from 'fontfaceobserver';
+
 import { networkName } from '../helpers/ethereumNetworkUtils';
 
 export type OnboardProviderProps = {
@@ -42,70 +43,81 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
   const infuraRpc = `https://${networkName(network)}.infura.io/v3/${infuraId}`
 
   useEffect(() => {
-    const onboard = Onboard({
-      dappId: onboardProps.dappId,
-      networkId: onboardProps.networkId,
-      darkMode: true,
-      walletSelect: {
-        wallets: [
-          { walletName: 'metamask', preferred: true },
-          {
-            walletName: "portis",
-            apiKey: process.env.REACT_APP_PORTIS_API_KEY,
+    const initializeOnboard = async () => {
+      try {
+        const montserrat = new FontFaceObserver('Montserrat')
+        await montserrat.load(undefined);
+        
+        const onboard = Onboard({
+          dappId: onboardProps.dappId,
+          networkId: onboardProps.networkId,
+          darkMode: true,
+          walletSelect: {
+            wallets: [
+              { walletName: 'metamask', preferred: true },
+              {
+                walletName: "portis",
+                apiKey: process.env.REACT_APP_PORTIS_API_KEY,
+              },
+              {
+                walletName: 'imToken',
+                rpcUrl: 'https://eth-testnet.tokenlon.im', //TODO update this for mainnet mainnet-eth.token.im
+              },
+              { walletName: "coinbase", preferred: true },
+              { walletName: "dapper" },
+              {
+                walletName: "walletConnect",
+                infuraKey: infuraId
+              },
+              { walletName: "walletLink", rpcUrl: infuraRpc },
+              { walletName: "opera" },
+              { walletName: "operaTouch" },
+              { walletName: "torus" },
+              { walletName: "status" },
+              { walletName: "unilogin" },
+            ]
           },
-          {
-            walletName: 'imToken',
-            rpcUrl: infuraRpc,
-          },
-          { walletName: "coinbase", preferred: true },
-          { walletName: "dapper" },
-          {
-            walletName: "walletConnect",
-            infuraKey: infuraId
-          },
-          { walletName: "walletLink", rpcUrl: infuraRpc },
-          { walletName: "opera" },
-          { walletName: "operaTouch" },
-          { walletName: "torus" },
-          { walletName: "status" },
-          { walletName: "unilogin" },
-        ]
-      },
-      walletCheck: [
-        { checkName: 'connect' },
-        { checkName: 'accounts' },
-        { checkName: 'network' },
-        { checkName: 'balance', minimumBalance: '0' }
-      ],
-      subscriptions: {
-        address: setAddress,
-        network: setNetwork,
-        balance: (balance: string) => {
-          (balance)
-            ? setBalance(Number(fromWei(balance, 'ether')))
-            : setBalance(0);
-        },
-        wallet: (wallet: Wallet) => {
-          if (wallet.provider) {
-            wallet.name && localStorage.setItem('honeylemon.selectedWallet', wallet.name)
-            setWallet(wallet)
-          } else {
-            setWallet(undefined)
+          walletCheck: [
+            { checkName: 'connect' },
+            { checkName: 'accounts' },
+            { checkName: 'network' },
+            { checkName: 'balance', minimumBalance: '0' }
+          ],
+          subscriptions: {
+            address: setAddress,
+            network: setNetwork,
+            balance: (balance: string) => {
+              (balance)
+                ? setBalance(Number(fromWei(balance, 'ether')))
+                : setBalance(0);
+            },
+            wallet: (wallet: Wallet) => {
+              if (wallet.provider) {
+                wallet.name && localStorage.setItem('honeylemon.selectedWallet', wallet.name)
+                setWallet(wallet)
+              } else {
+                setWallet(undefined)
+              }
+            }
           }
-        }
+        })
+
+        const savedWallet = localStorage.getItem('honeylemon.selectedWallet');
+        savedWallet && onboard.walletSelect(savedWallet);
+
+        setOnboard(onboard);
+
+        setNotify(Notify({
+          dappId: onboardProps.dappId,
+          networkId: onboardProps.networkId,
+          darkMode: true,
+        }));
+      } catch (error) {
+        console.log('Error initializing onboard');
+        console.log(error);
       }
-    })
-
-    const savedWallet = localStorage.getItem('honeylemon.selectedWallet');
-    savedWallet && onboard.walletSelect(savedWallet);
-
-    setOnboard(onboard);
-
-    setNotify(Notify({
-      dappId: onboardProps.dappId,
-      networkId: onboardProps.networkId,
-      darkMode: true,
-    }));
+    }
+    initializeOnboard();
   }, [onboardProps.dappId, onboardProps.networkId])
 
   const checkIsReady = async () => {
