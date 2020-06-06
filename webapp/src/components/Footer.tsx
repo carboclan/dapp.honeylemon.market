@@ -43,7 +43,7 @@ const Footer: React.SFC = () => {
   return (
     <Paper square className={classes.footer}>
       <Container maxWidth='sm'>
-        <Grid container direction='row' spacing={2} className={classes.footerContents}>
+        <Grid container direction='row' spacing={1} className={classes.footerContents} justify='space-between' alignContent='center'>
           <FooterLink label='GITHUB' url='https://github.com/carboclan/dapp.honeylemon.market'>
             <GitHub />
           </FooterLink>
