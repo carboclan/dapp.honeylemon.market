@@ -1,5 +1,5 @@
-import React from 'react';
-import { makeStyles, Paper, Container, Grid, Typography, Divider } from '@material-ui/core';
+import React, { ReactChild } from 'react';
+import { makeStyles, Paper, Container, Grid, Typography, Divider, SvgIconProps } from '@material-ui/core';
 import { GitHub, Telegram, School } from '@material-ui/icons';
 
 const useStyles = makeStyles(({ palette, spacing }) => ({
@@ -15,7 +15,6 @@ const useStyles = makeStyles(({ palette, spacing }) => ({
   },
   divider: {
     margin: spacing(1),
-    width: '100%',
   },
   footerLink: {
     cursor: 'pointer',
@@ -25,7 +24,6 @@ const useStyles = makeStyles(({ palette, spacing }) => ({
 interface FooterLinkProps {
   url: string,
   label: string,
-  children: any
 }
 
 const FooterLink: React.SFC<FooterLinkProps> = ({ url, label, children }) => {
@@ -46,10 +44,18 @@ const Footer: React.SFC = () => {
     <Paper square className={classes.footer}>
       <Container maxWidth='sm'>
         <Grid container direction='row' spacing={2} className={classes.footerContents}>
-          <FooterLink label='GITHUB' url='https://github.com/carboclan/dapp.honeylemon.market'><GitHub /></FooterLink>
-          <FooterLink label='WHITEPAPER' url='https://github.com/carboclan/pm/blob/master/research/Honeylemon/HoneyLemonWhitepaper.md'><School /></FooterLink>
-          <FooterLink label='TELEGRAM' url='https://t.me/joinchat/I9o0JBU3JKkxb-yRSkIFvA'><Telegram /></FooterLink>
-          <Divider className={classes.divider} light variant='fullWidth' orientation='horizontal'/>
+          <FooterLink label='GITHUB' url='https://github.com/carboclan/dapp.honeylemon.market'>
+            <GitHub />
+          </FooterLink>
+          <FooterLink label='WHITEPAPER' url='https://github.com/carboclan/pm/blob/master/research/Honeylemon/HoneyLemonWhitepaper.md'>
+            <School />
+          </FooterLink>
+          <FooterLink label='TELEGRAM' url='https://t.me/joinchat/I9o0JBU3JKkxb-yRSkIFvA'>
+            <Telegram />
+          </FooterLink>
+          <Grid item xs={12}>
+            <Divider className={classes.divider} light variant='fullWidth' />
+          </Grid>
           <Grid item xs={12}>
             <Typography>Copyright © 2020 honeylemon.market</Typography>
           </Grid>
