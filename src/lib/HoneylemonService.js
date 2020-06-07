@@ -381,6 +381,14 @@ class HoneylemonService {
     return address;
   }
 
+  async getDSProxyAddress(ownerAddress) {
+    const address = await this.marketContractProxy.methods
+      .getUserAddressOrDSProxy(ownerAddress)
+      .call({ from: ownerAddress });
+
+    return address;
+  }
+
   async addressHasDSProxy(address) {
     const DSProxyAddress = await this.marketContractProxy.methods
       .getUserAddressOrDSProxy(address)

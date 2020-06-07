@@ -26,7 +26,7 @@ import {
 } from '@material-ui/core';
 import clsx from 'clsx';
 import { BigNumber } from '@0x/utils';
-import { useHoneylemon } from '../contexts/HoneylemonContext';
+import { useHoneylemon, TokenType } from '../contexts/HoneylemonContext';
 import { useOnboard } from '../contexts/OnboardContext';
 import { forwardTo } from '../helpers/history';
 import ContractSpecificationModal from './ContractSpecificationModal';
@@ -78,6 +78,8 @@ const OfferContractPage: React.SFC = () => {
     CONTRACT_DURATION,
     isDsProxyDeployed,
     PAYMENT_TOKEN_NAME,
+    deployDSProxyContract,
+    approveToken,
   } = useHoneylemon();
   const { address = '0x' } = useOnboard();
   const classes = useStyles();
@@ -87,7 +89,7 @@ const OfferContractPage: React.SFC = () => {
   const [totalContractPrice, setTotalContractPrice] = useState(0);
   const [collateralAmount, setCollateralAmount] = useState(0);
   const [showOfferModal, setShowOfferModal] = useState(false);
-  const [isTxActive, setIsTxActive] = useState(false);
+  const [txActive, setTxActive] = useState(false);
   const [showContractSpecificationModal, setShowContractSpecificationModal] = useState(false);
   const [showMRIInformationModal, setShowMRIInformationModal] = useState(false);
 
@@ -131,31 +133,19 @@ const OfferContractPage: React.SFC = () => {
   }
 
   const handleDeployDSProxy = async () => {
-    setIsTxActive(true);
-    try {
-      await honeylemonService.deployDSProxyContract(address);
-    } catch (error) {
-      console.log('Something went wrong deploying the DS Proxy wallet');
-      console.log(error);
-      // TODO Display error on modal
-    }
-    setIsTxActive(false);
+    setTxActive(true);
+    await deployDSProxyContract();
+    setTxActive(false);
   }
 
   const handleApproveCollateralToken = async () => {
-    setIsTxActive(true);
-    try {
-      await honeylemonService.approveCollateralToken(address);
-    } catch (error) {
-      console.log('Something went wrong approving the tokens');
-      console.log(error);
-      // TODO Display error on modal
-    }
-    setIsTxActive(false);
+    setTxActive(true);
+    await approveToken(TokenType.CollateralToken)
+    setTxActive(false);
   }
 
   const handleCreateOffer = async () => {
-    setIsTxActive(true);
+    setTxActive(true);
     try {
       const order = honeylemonService.createOrder(address, new BigNumber(hashAmount), new BigNumber(CONTRACT_DURATION).multipliedBy(hashPrice));
       const signedOrder = await honeylemonService.signOrder(order);
@@ -167,7 +157,7 @@ const OfferContractPage: React.SFC = () => {
       console.log(error);
       // TODO: Display error on modal
     }
-    setIsTxActive(false);
+    setTxActive(false);
   }
 
   const getActiveStep = () => {
@@ -367,7 +357,7 @@ const OfferContractPage: React.SFC = () => {
                     <Button
                       onClick={handleCloseOfferDialog}
                       className={classes.button}
-                      disabled={isTxActive}>
+                      disabled={txActive}>
                       Cancel
                     </Button>
                     <Button
@@ -375,9 +365,9 @@ const OfferContractPage: React.SFC = () => {
                       color="primary"
                       onClick={() => handleStepperNext(activeStep)}
                       className={classes.button}
-                      disabled={isTxActive}>
+                      disabled={txActive}>
                       {getStepButtonLabel(activeStep)}&nbsp;
-                        {isTxActive && <CircularProgress className={classes.loadingSpinner} size={20} />}
+                        {txActive && <CircularProgress className={classes.loadingSpinner} size={20} />}
                     </Button>
                   </div>
                 </StepContent>

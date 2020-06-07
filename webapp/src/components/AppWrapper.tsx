@@ -88,11 +88,12 @@ function AppWrapper(props: { children: ReactNode }) {
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
   const { isReady, address, network, resetOnboard } = useOnboard();
-  const { 
-    collateralTokenBalance, 
-    COLLATERAL_TOKEN_DECIMALS, 
+  const { isDsProxyDeployed, dsProxyAddress, deployDSProxyContract, approveToken } = useHoneylemon();
+  const {
+    collateralTokenBalance,
+    COLLATERAL_TOKEN_DECIMALS,
     COLLATERAL_TOKEN_NAME,
-    paymentTokenBalance, 
+    paymentTokenBalance,
     PAYMENT_TOKEN_DECIMALS,
     PAYMENT_TOKEN_NAME,
   } = useHoneylemon();
@@ -134,7 +135,7 @@ function AppWrapper(props: { children: ReactNode }) {
           <HoneyLemonLogo className={classes.logo} onClick={() => forwardTo('/')} />
           <Typography
             className={clsx(classes.title,
-              { [classes.hide]: open})}
+              { [classes.hide]: open })}
             onClick={() => forwardTo('/')}>
             honeylemon.market
           </Typography>
@@ -153,7 +154,7 @@ function AppWrapper(props: { children: ReactNode }) {
         <div className={classes.contentWrapper}>
           {props.children}
         </div>
-        <Footer footerHeight={footerHeight}/>
+        <Footer footerHeight={footerHeight} />
       </main>
       <Drawer
         ref={ref}
@@ -192,6 +193,37 @@ function AppWrapper(props: { children: ReactNode }) {
               </Link>
             </ListItemText>
           </ListItem>
+          {isDsProxyDeployed ?
+            <ListItem>
+              <ListItemIcon>
+                <Avatar>
+                  <Blockies seed={dsProxyAddress || '0x'} size={10} />
+                </Avatar>
+              </ListItemIcon>
+              <ListItemText
+                primaryTypographyProps={{
+                  align: 'right',
+                  noWrap: true
+                }}
+                secondary='Proxy Wallet Address'
+                secondaryTypographyProps={{
+                  align: 'right'
+                }}>
+                <Link href={`https://${networkName(network)}.etherscan.io/address/${dsProxyAddress}`} target="_blank" rel='noopener' underline='always' >
+                  {displayAddress(dsProxyAddress || '0x', 20)}
+                </Link>
+              </ListItemText>
+            </ListItem> :
+            <ListItem>
+              <ListItemText
+                primaryTypographyProps={{
+                  align: 'right',
+                  noWrap: true
+                }}>
+                No DS Proxy deployed yet
+              </ListItemText>
+            </ListItem>
+          }
         </List>
         <Divider />
         <List>

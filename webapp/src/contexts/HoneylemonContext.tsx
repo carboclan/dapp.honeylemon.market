@@ -7,6 +7,11 @@ import { useOnboard } from "./OnboardContext";
 import { ethers } from 'ethers';
 import dayjs from 'dayjs';
 
+enum TokenType {
+  CollateralToken,
+  PaymentToken
+}
+
 export type HoneylemonContext = {
   honeylemonService: any; //TODO update this when types exist
   collateralTokenBalance: number,
@@ -18,7 +23,8 @@ export type HoneylemonContext = {
   PAYMENT_TOKEN_DECIMALS: number,
   PAYMENT_TOKEN_NAME: string,
   CONTRACT_DURATION: number,
-  isDsProxyDeployed: Boolean,
+  isDsProxyDeployed: boolean,
+  dsProxyAddress: string,
   CONTRACT_COLLATERAL_RATIO: number,
   marketData: {
     miningContracts: Array<any>,
@@ -26,6 +32,8 @@ export type HoneylemonContext = {
     currentBTCSpotPrice: number,
     btcDifficultyAdjustmentDate: Date,
   }
+  deployDSProxyContract(): Promise<void>,
+  approveToken(tokenType: TokenType): Promise<void>,
 };
 
 export type HoneylemonProviderProps = {
@@ -41,7 +49,8 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
   const [collateralTokenAllowance, setCollateralTokenAllowance] = useState<number>(0);
   const [paymentTokenBalance, setPaymentTokenBalance] = useState<number>(0);
   const [paymentTokenAllowance, setPaymentTokenAllowance] = useState<number>(0);
-  const [isDsProxyDeployed, setIsDsProxyDeployed] = useState<Boolean>(false);
+  const [isDsProxyDeployed, setIsDsProxyDeployed] = useState<boolean>(false);
+  const [dsProxyAddress, setDsProxyAddress] = useState<string>('');
   const [miningContracts, setMiningContracts] = useState<Array<any>>([]);
   const [currentMRI, setCurrentMRI] = useState(0);
   const [currentBTCSpotPrice, setCurrentBTCSpotPrice] = useState(0);
@@ -77,8 +86,12 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
         const payment = await honeylemonService.getPaymentTokenAmounts(address);
         setPaymentTokenAllowance(Number(payment.allowance.shiftedBy(-6).toString()));
         setPaymentTokenBalance(Number(payment.balance.shiftedBy(-6).toString()));
-        const proxyDeployed = await honeylemonService.addressHasDSProxy(address)
+        const proxyDeployed: boolean = await honeylemonService.addressHasDSProxy(address)
         setIsDsProxyDeployed(proxyDeployed);
+        if (proxyDeployed ) {
+          const proxyAddress = await honeylemonService.getDSProxyAddress(address);
+          setDsProxyAddress(proxyAddress);
+        }
         if (address && notify) {
           const { emitter } = notify.account(address);
           emitter.on('all', tx => ({
@@ -95,6 +108,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
         setPaymentTokenAllowance(0);
         setPaymentTokenBalance(0);
         setIsDsProxyDeployed(false);
+        setDsProxyAddress('');
         notify?.unsubscribe(address || "0x");
       }
     }
@@ -105,18 +119,19 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
   useEffect(() => {
     const getMarketData = async () => {
       try {
-        const marketDataApiUrl = process.env.REACT_APP_MARKET_DATA_API;
+        const marketDataApiUrl = process.env.REACT_APP_MARKET_DATA_API_URL;
         if (marketDataApiUrl) {
-          var miningContracts = await (await fetch(marketDataApiUrl)).json()
+          const { contracts, ...rest } = await (await fetch(marketDataApiUrl)).json();
+          console.log(rest);
+          setMiningContracts(contracts);
         }
-        setMiningContracts(miningContracts);
       } catch (error) {
         console.log('There was an error getting the market data')
       }
     }
 
-    !miningContracts && getMarketData();
-  }, [honeylemonService, address])
+    getMarketData();
+  }, [])
 
   useEffect(() => {
     const getDifficultyAdjustmentDate = async () => {
@@ -146,10 +161,6 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
       const payment = await honeylemonService.getPaymentTokenAmounts(address);
       setPaymentTokenAllowance(Number(payment.allowance.shiftedBy(-6).toString()));
       setPaymentTokenBalance(Number(payment.balance.shiftedBy(-6).toString()));
-      if (!isDsProxyDeployed) {
-        const proxyDeployed = await honeylemonService.addressHasDSProxy(address)
-        setIsDsProxyDeployed(proxyDeployed);
-      }
     }
     if (honeylemonService && address) {
       checkBalancesAndApprovals();
@@ -199,6 +210,43 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
 
   }, [honeylemonService, address])
 
+  const deployDSProxyContract = async () => {
+    try {
+      const dsProxyAddress = await honeylemonService.deployDSProxyContract(address);
+      setIsDsProxyDeployed(true);
+      setDsProxyAddress(dsProxyAddress);
+    } catch (error) {
+      console.log('Something went wrong deploying the DS Proxy wallet');
+      console.log(error);
+      // TODO: Display error on modal
+    }
+  }
+
+  const approveToken = async (tokenType: TokenType): Promise<void> => {
+    try {
+      switch (tokenType) {
+        case TokenType.CollateralToken:
+          await honeylemonService.approveCollateralToken(address);
+          const collateral = await honeylemonService.getCollateralTokenAmounts(address);
+          setCollateralTokenAllowance(Number(collateral.allowance.shiftedBy(-8).toString()));
+          setCollateralTokenBalance(Number(collateral.balance.shiftedBy(-8).toString()));
+          break;
+        case TokenType.PaymentToken:
+          await honeylemonService.approvePaymentToken(address);
+          const payment = await honeylemonService.getPaymentTokenAmounts(address);
+          setPaymentTokenAllowance(Number(payment.allowance.shiftedBy(-6).toString()));
+          setPaymentTokenBalance(Number(payment.balance.shiftedBy(-6).toString()));
+          break;
+        default:
+          break;
+      }
+    } catch (error) {
+      console.log('Something went wrong approving the tokens');
+      console.log(error);
+      // TODO: Display error on modal
+    }
+  }
+
   return (
     <HoneylemonContext.Provider
       value={{
@@ -213,13 +261,16 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
         PAYMENT_TOKEN_NAME: 'USDT',
         CONTRACT_DURATION: 2, //TODO: Extract this from library when TS conversion is done
         isDsProxyDeployed,
+        dsProxyAddress,
         CONTRACT_COLLATERAL_RATIO: 1.35, //TODO: Extract this from library when TS conversion is done
         marketData: {
           miningContracts,
           currentBTCSpotPrice,
           currentMRI,
           btcDifficultyAdjustmentDate,
-        }
+        },
+        deployDSProxyContract,
+        approveToken,
       }}
     >
       {children}
@@ -235,4 +286,4 @@ function useHoneylemon() {
   return context;
 }
 
-export { HoneylemonProvider, useHoneylemon };
+export { HoneylemonProvider, useHoneylemon, TokenType };

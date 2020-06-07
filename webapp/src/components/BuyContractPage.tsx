@@ -30,7 +30,7 @@ import { BigNumber } from '@0x/utils';
 import { Link as RouterLink } from 'react-router-dom';
 import clsx from 'clsx';
 import { TabPanel } from './TabPanel';
-import { useHoneylemon } from '../contexts/HoneylemonContext';
+import { useHoneylemon, TokenType } from '../contexts/HoneylemonContext';
 import { useOnboard } from '../contexts/OnboardContext';
 import { forwardTo } from '../helpers/history';
 import ContractSpecificationModal from './ContractSpecificationModal'
@@ -88,7 +88,9 @@ const BuyContractPage: React.SFC = () => {
     isDsProxyDeployed,
     paymentTokenBalance,
     CONTRACT_COLLATERAL_RATIO,
-    COLLATERAL_TOKEN_DECIMALS
+    COLLATERAL_TOKEN_DECIMALS,
+    deployDSProxyContract,
+    approveToken,
   } = useHoneylemon()
   const classes = useStyles();
 
@@ -103,7 +105,7 @@ const BuyContractPage: React.SFC = () => {
   const [takerAssetFillAmounts, setTakerFillAmounts] = useState([]);
   const [buyType, setBuyType] = useState<BuyType>(BuyType.budget);
   const [showBuyModal, setShowBuyModal] = useState(false);
-  const [isTxActive, setTxActive] = useState(false);
+  const [txActive, setTxActive] = useState(false);
   const [showContractSpecificationModal, setShowContractSpecificationModal] = useState(false);
   const [showMRIInformationModal, setShowMRIInformationModal] = useState(false);
   const [expectedBTCAccrual, setExpectedBTCAccrual] = useState(0);
@@ -171,25 +173,13 @@ const BuyContractPage: React.SFC = () => {
 
   const handleDeployDSProxy = async () => {
     setTxActive(true);
-    try {
-      await honeylemonService.deployDSProxyContract(address);
-    } catch (error) {
-      console.log('Something went wrong deploying the DS Proxy wallet');
-      console.log(error);
-      // TODO: Display error on modal
-    }
+    await deployDSProxyContract();
     setTxActive(false);
   }
 
   const handleApprovePaymentToken = async () => {
     setTxActive(true);
-    try {
-      await honeylemonService.approvePaymentToken(address);
-    } catch (error) {
-      console.log('Something went wrong approving the tokens');
-      console.log(error);
-      // TODO: Display error on modal
-    }
+    await approveToken(TokenType.CollateralToken)
     setTxActive(false);
   }
 
@@ -465,7 +455,7 @@ const BuyContractPage: React.SFC = () => {
                     <Button
                       onClick={handleCloseBuyDialog}
                       className={classes.button}
-                      disabled={isTxActive}>
+                      disabled={txActive}>
                       Cancel
                     </Button>
                     <Button
@@ -473,9 +463,9 @@ const BuyContractPage: React.SFC = () => {
                       color="primary"
                       onClick={() => handleStepperNext(activeStep)}
                       className={classes.button}
-                      disabled={isTxActive}>
+                      disabled={txActive}>
                       {getStepButtonLabel(activeStep)}&nbsp;
-                        {isTxActive && <CircularProgress className={classes.loadingSpinner} size={20} />}
+                        {txActive && <CircularProgress className={classes.loadingSpinner} size={20} />}
                     </Button>
                   </div>
                 </StepContent>
