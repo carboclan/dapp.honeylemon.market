@@ -439,10 +439,7 @@ class HoneylemonService {
       }
       // encode the function call to send to DSProxy
       const batchRedemptionLongTx = this.marketContractProxy.methods
-        .batchRedeem(
-          longParams.tokenAddresses,
-          longParams.numTokens
-        )
+        .batchRedeem(longParams.tokenAddresses, longParams.numTokens)
         .encodeABI();
 
       // Execute function call on DSProxy
@@ -475,10 +472,7 @@ class HoneylemonService {
       }
 
       const batchRedemptionShortTx = this.marketContractProxy.methods
-        .batchRedeem(
-          shortParams.tokenAddresses,
-          shortParams.numTokens
-        )
+        .batchRedeem(shortParams.tokenAddresses, shortParams.numTokens)
         .encodeABI();
 
       redemptionTxShort = await traderDSProxy.methods
@@ -589,7 +583,9 @@ class HoneylemonService {
         isShort ? position.shortTokenAddress : position.longTokenAddress,
         this.provider
       );
-      const dsProxyAddress = isShort ? position.shortTokenDSProxy : position.longTokenDSProxy;
+      const dsProxyAddress = isShort
+        ? position.shortTokenDSProxy
+        : position.longTokenDSProxy;
 
       position.isRedeemed =
         (await positionToken.balanceOf(dsProxyAddress).callAsync()).toString() == '0'
@@ -607,9 +603,7 @@ class HoneylemonService {
       );
       marketContract.setProvider(this.provider);
 
-      position.canRedeem = await marketContract.methods
-        .isPostSettlementDelay()
-        .call();
+      position.canRedeem = await marketContract.methods.isPostSettlementDelay().call();
     }
 
     return positions;

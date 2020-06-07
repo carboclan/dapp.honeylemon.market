@@ -1,17 +1,17 @@
 pragma solidity 0.5.2;
 
-import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
-import "openzeppelin-solidity/contracts/math/SafeMath.sol";
-import "openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol";
-import "openzeppelin-solidity/contracts/utils/ReentrancyGuard.sol";
+import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
+import 'openzeppelin-solidity/contracts/math/SafeMath.sol';
+import 'openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol';
+import 'openzeppelin-solidity/contracts/utils/ReentrancyGuard.sol';
 
-import "../marketprotocol/MarketCollateralPool.sol";
-import "../marketprotocol/mpx/MarketContractFactoryMPX.sol";
-import "../marketprotocol/mpx/MarketContractMPX.sol";
+import '../marketprotocol/MarketCollateralPool.sol';
+import '../marketprotocol/mpx/MarketContractFactoryMPX.sol';
+import '../marketprotocol/mpx/MarketContractMPX.sol';
 
-import "../libraries/MathLib.sol";
+import '../libraries/MathLib.sol';
 
-import "./DSProxy.sol";
+import './DSProxy.sol';
 
 
 /// @title Market Contract Proxy.
@@ -77,7 +77,10 @@ contract MarketContractProxy is ReentrancyGuard, Ownable {
         address _minterBridge,
         address _imBTCTokenAddress
     ) public ReentrancyGuard() {
-        require(_marketContractFactoryMPX != address(0), 'invalid MarketContractFactoryMPX address');
+        require(
+            _marketContractFactoryMPX != address(0),
+            'invalid MarketContractFactoryMPX address'
+        );
         require(_honeyLemonOracle != address(0), 'invalid HoneyLemonOracle address');
         require(_minterBridge != address(0), 'invalid MinterBridge address');
         require(_imBTCTokenAddress != address(0), 'invalid IMBTC address');
@@ -133,7 +136,7 @@ contract MarketContractProxy is ReentrancyGuard, Ownable {
      * @notice modifier to check that the caller is honeylemon oracle address
      */
     modifier onlyHoneyLemonOracle() {
-        require(msg.sender == HONEY_LEMON_ORACLE_ADDRESS, "Only Honey Lemon Oracle");
+        require(msg.sender == HONEY_LEMON_ORACLE_ADDRESS, 'Only Honey Lemon Oracle');
         _;
     }
 
@@ -141,7 +144,7 @@ contract MarketContractProxy is ReentrancyGuard, Ownable {
      * @notice mofidier to check that the caller is minter bridge address
      */
     modifier onlyMinterBridge() {
-        require(msg.sender == MINTER_BRIDGE_ADDRESS, "Only Minter Bridge");
+        require(msg.sender == MINTER_BRIDGE_ADDRESS, 'Only Minter Bridge');
         _;
     }
 
@@ -155,7 +158,10 @@ contract MarketContractProxy is ReentrancyGuard, Ownable {
      * @param _honeyLemonOracleAddress oracle address
      */
     function setOracleAddress(address _honeyLemonOracleAddress) external onlyOwner {
-        require(_honeyLemonOracleAddress != address(0), 'invalid HoneyLemonOracle address');
+        require(
+            _honeyLemonOracleAddress != address(0),
+            'invalid HoneyLemonOracle address'
+        );
 
         HONEY_LEMON_ORACLE_ADDRESS = _honeyLemonOracleAddress;
     }
@@ -387,7 +393,7 @@ contract MarketContractProxy is ReentrancyGuard, Ownable {
         address[] memory tokenAddresses, // Address of the long or short token to redeem
         uint256[] memory tokensToRedeem // the number of tokens to redeem
     ) public nonReentrant {
-        require(tokenAddresses.length == tokensToRedeem.length, "Invalid input params");
+        require(tokenAddresses.length == tokensToRedeem.length, 'Invalid input params');
         require(this.owner() == msg.sender, "You don't own this DSProxy GTFO");
 
         MarketContractMPX marketInstance;
@@ -452,7 +458,7 @@ contract MarketContractProxy is ReentrancyGuard, Ownable {
         bytes32[3] memory marketAndsTokenNames,
         uint newMarketExpiration
     ) public onlyHoneyLemonOracle {
-        require(currentIndexValue != 0, "Current MRI value cant be zero");
+        require(currentIndexValue != 0, 'Current MRI value cant be zero');
 
         // 1. Settle the past contract, if there is a price and contract exists.
         MarketContractMPX expiringMarketContract = getExpiringMarketContract();
@@ -478,8 +484,8 @@ contract MarketContractProxy is ReentrancyGuard, Ownable {
         public
         onlyHoneyLemonOracle
     {
-        require(mri != 0, "The mri loockback value can not be 0");
-        require(marketContractAddress != address(0x0), "Invalid market contract address");
+        require(mri != 0, 'The mri loockback value can not be 0');
+        require(marketContractAddress != address(0x0), 'Invalid market contract address');
 
         MarketContractMPX marketContract = MarketContractMPX(marketContractAddress);
         marketContract.oracleCallBack(mri);
@@ -580,8 +586,8 @@ contract MarketContractProxy is ReentrancyGuard, Ownable {
             marketAndsTokenNames,
             COLLATERAL_TOKEN_ADDRESS,
             generateContractSpecs(currentMRI, expiration),
-            "null", //ORACLE_URL
-            "null" // ORACLE_STATISTIC
+            'null', //ORACLE_URL
+            'null' // ORACLE_STATISTIC
         );
 
         // Add new market to storage

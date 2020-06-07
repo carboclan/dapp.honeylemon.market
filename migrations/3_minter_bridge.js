@@ -7,7 +7,7 @@ async function getErc20BridgeProxyAddress() {
 }
 
 module.exports = async function(deployer, network, accounts) {
-  if (network == "skip-migrations") return;
+  if (network == 'skip-migrations') return;
 
   await deployer.deploy(MinterBridge);
   const minterBridge = await MinterBridge.deployed();

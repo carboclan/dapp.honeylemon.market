@@ -10,9 +10,9 @@ module.exports = {
     libraryTarget: 'commonjs2'
   },
   optimization: {
-    minimize: false,
+    minimize: false
   },
-  devtool: "eval-source-map",
+  devtool: 'eval-source-map',
   module: {
     rules: [
       {

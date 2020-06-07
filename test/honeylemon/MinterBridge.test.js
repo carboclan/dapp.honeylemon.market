@@ -38,7 +38,9 @@ contract(
       it('check 0x Brdige Proxy address', async () => {
         assert.equal(
           (await minterBridge.ERC20_BRIDGE_PROXY_ADDRESS()).toLowerCase(),
-          (getContractAddressesForChainOrThrow(await web3.eth.net.getId()).erc20BridgeProxy).toLowerCase(),
+          getContractAddressesForChainOrThrow(
+            await web3.eth.net.getId()
+          ).erc20BridgeProxy.toLowerCase(),
           '0x bridge proxy address missmatch'
         );
       });
