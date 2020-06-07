@@ -875,7 +875,12 @@ contract(
         let amount = new BigNumber(10);
 
         // deploy new markets to settle & batch redeem
-        for (let i = marketContract.length; i < 33; i++) {
+        const contractsToDeploy = 3;
+        for (
+          let i = marketContract.length;
+          i < marketContract.length + contractsToDeploy;
+          i++
+        ) {
           let _marketAndsTokenNames = [];
           _marketAndsTokenNames.push(web3.utils.fromAscii("BTC"));
           _marketAndsTokenNames.push(web3.utils.fromAscii("MRI-BTC-28D-00000000-Long"));
@@ -922,7 +927,11 @@ contract(
         let expectedTakerReturnedCollateral = new BigNumber(0);
         // settle last three contracts
         marketContract = await marketContractProxy.getAllMarketContracts();
-        for (let i = marketContract.length - 2; i < marketContract.length; i++) {
+        for (
+          let i = marketContract.length - contractsToDeploy;
+          i < marketContract.length;
+          i++
+        ) {
           let marketContractMpx = await MarketContractMPX.at(marketContract[i]);
 
           amounts.push(amount.toString());
