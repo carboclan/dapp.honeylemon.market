@@ -88,7 +88,7 @@ const HomePage: React.SFC = () => {
           </Typography>
         </Link>
       </Grid>
-      <Grid item container direction='row' className={classes.countdownSection} spacing={2}>
+      <Grid item container direction='row' className={classes.countdownSection} spacing={2} justify='space-between' alignItems='stretch'>
         <Grid item xs={12}>
           <Typography style={{ fontWeight: 'bold' }}>Next Difficulty Adjustment</Typography>
         </Grid>

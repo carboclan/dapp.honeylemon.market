@@ -15,8 +15,9 @@ import { networkName } from '../helpers/ethereumNetworkUtils';
 import { displayAddress } from '../helpers/displayAddress';
 
 const drawerWidth = 300;
+const footerHeight = 150;
 
-const useStyles = makeStyles(({transitions, palette, mixins, spacing}) => ({
+const useStyles = makeStyles(({ transitions, palette, mixins, spacing }) => ({
   root: {
     display: 'flex',
   },
@@ -75,6 +76,9 @@ const useStyles = makeStyles(({transitions, palette, mixins, spacing}) => ({
   },
   contentDrawerOpen: {
     marginRight: -drawerWidth
+  },
+  contentWrapper: {
+    paddingBottom: footerHeight,
   }
 }));
 
@@ -137,8 +141,10 @@ function AppWrapper(props: { children: ReactNode }) {
         </Toolbar>
       </AppBar>
       <main className={clsx(classes.content, { [classes.contentDrawerOpen]: open })}>
-        {props.children}
-        <Footer />
+        <div className={classes.contentWrapper}>
+          {props.children}
+        </div>
+        <Footer footerHeight={footerHeight}/>
       </main>
       <Drawer
         ref={ref}

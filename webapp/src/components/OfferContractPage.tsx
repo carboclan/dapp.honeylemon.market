@@ -335,7 +335,7 @@ const OfferContractPage: React.SFC = () => {
         <Grid item xs={12}>
           <Typography>
             You are offering a <strong>{hashAmount.toLocaleString()}TH contract</strong> at&nbsp;
-            <strong>USDT {hashPrice.toLocaleString()}/Th/day.</strong>. You will need to
+            <strong>USDT {hashPrice.toLocaleString()}/Th/day</strong>. You will need to
             post <strong>{collateralAmount.toLocaleString()} imBTC</strong> as collateral.
             The contract will start when your order is filled and you will receive payment in USDT
             upfront. At the end of <strong>{CONTRACT_DURATION} days</strong>, your counterparty will

@@ -1,10 +1,11 @@
-import React, { ReactChild } from 'react';
+import React from 'react';
 import { makeStyles, Paper, Container, Grid, Typography, Divider, SvgIconProps } from '@material-ui/core';
 import { GitHub, Telegram, School } from '@material-ui/icons';
 
 const useStyles = makeStyles(({ palette, spacing }) => ({
   footer: {
-    marginTop: spacing(8),
+    position: 'fixed',
+    top: (props: any) => `calc(100vh - ${props.heightOfFooter})`,
     bottom: 0,
     left: 0,
     right: 0,
@@ -37,8 +38,12 @@ const FooterLink: React.SFC<FooterLinkProps> = ({ url, label, children }) => {
   )
 }
 
-const Footer: React.SFC = () => {
-  const classes = useStyles();
+interface FooterProps {
+  footerHeight: number
+}
+
+const Footer: React.SFC<FooterProps> = (props: FooterProps) => {
+  const classes = useStyles(props);
 
   return (
     <Paper square className={classes.footer}>
