@@ -25,7 +25,7 @@ const TH_DECIMALS = 0; // TH has 6 decimals
 const PAYMENT_TOKEN_DECIMALS = 6; // USDC has 6 decimals
 const COLLATERAL_TOKEN_DECIMALS = 8; // imBTC has 8 decimals
 const SHIFT_PRICE_BY = TH_DECIMALS - PAYMENT_TOKEN_DECIMALS;
-const CONTRACT_DURATION = 28; // 28 days
+const CONTRACT_DURATION = 28 // Days
 
 class HoneylemonService {
   constructor(
@@ -347,7 +347,7 @@ class HoneylemonService {
   }
 
   async getOpenOrders(makerAddress) {
-    const ordersResponse = await this.apiClient.getOrdersAsync({ makerAddress });
+    const ordersResponse = await this.apiClient.getOrdersAsync({ makerAddress: makerAddress.toLowerCase() });
     ordersResponse.records.map(({ order, metaData }) => {
       metaData.price = order.takerAssetAmount
         .dividedBy(order.makerAssetAmount)
@@ -364,7 +364,7 @@ class HoneylemonService {
 
   async calculateRequiredCollateral(amount) {
     return await this.marketContractProxy.methods
-      .calculateRequiredCollateral(amount)
+      .calculateRequiredCollateral(amount.toString())
       .call();
   }
 
@@ -416,8 +416,7 @@ class HoneylemonService {
 
       // For each trade they've entered, add the position information to the params.
       for (let position of longPositions) {
-        // If the settlement information is not null the token is redeemable.
-        if (position.contract.settlement != null) {
+        if (position.canRedeem) {
           // Grab the index of the address within the array. This is done to group by address
           // As a trader could be in multiple instance of one token for each given day.
           const arrayIndex = longParams.tokenAddresses.findIndex(
@@ -443,9 +442,9 @@ class HoneylemonService {
         .encodeABI();
 
       // Execute function call on DSProxy
-      redemptionTxLong = await traderDSProxy.methods
-        .execute(this.marketContractProxyAddress, batchRedemptionLongTx)
-        .send({ from: recipientAddress, gas: 9000000 });
+      const method = traderDSProxy.methods.execute(this.marketContractProxyAddress, batchRedemptionLongTx);
+      const gas = await method.estimateGas({ from: recipientAddress, gas: 9000000 });
+      redemptionTxLong = await method.send({ from: recipientAddress, gas });
     }
 
     if (shortPositions.length > 0) {
@@ -455,7 +454,7 @@ class HoneylemonService {
       };
 
       for (let position of shortPositions) {
-        if (position.contract.settlement != null) {
+        if (position.canRedeem) {
           const arrayIndex = shortParams.tokenAddresses.findIndex(
             addr => addr == position.shortTokenAddress
           );
@@ -475,9 +474,9 @@ class HoneylemonService {
         .batchRedeem(shortParams.tokenAddresses, shortParams.numTokens)
         .encodeABI();
 
-      redemptionTxShort = await traderDSProxy.methods
-        .execute(this.marketContractProxyAddress, batchRedemptionShortTx)
-        .send({ from: recipientAddress, gas: 9000000 });
+      const method = traderDSProxy.methods.execute(this.marketContractProxyAddress, batchRedemptionShortTx);
+      const gas = await method.estimateGas({ from: recipientAddress, gas: 9000000 });
+      redemptionTxShort = method.send({ from: recipientAddress, gas });
     }
     return { redemptionTxLong, redemptionTxShort };
   }
@@ -603,7 +602,9 @@ class HoneylemonService {
       );
       marketContract.setProvider(this.provider);
 
-      position.canRedeem = await marketContract.methods.isPostSettlementDelay().call();
+      position.canRedeem = !position.isRedeemed && await marketContract.methods
+        .isPostSettlementDelay()
+        .call();
     }
 
     return positions;
@@ -682,11 +683,11 @@ const CONTRACTS_QUERY = /* GraphQL */ `
   }
 `;
 
-module.exports = {
+module.exports =  {
   HoneylemonService,
   PAYMENT_TOKEN_DECIMALS,
   COLLATERAL_TOKEN_DECIMALS,
   POSITIONS_QUERY,
   CONTRACTS_QUERY,
-  CONTRACT_DURATION
+  CONTRACT_DURATION,
 };

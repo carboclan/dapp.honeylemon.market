@@ -3,8 +3,17 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .bn-onboard-custom.bn-onboard-modal {
-  font-family: 'unset !important';
+  font-family: 'Montserrat';
+  border-radius: 5px;
 }
+
+.bn-onboard-custom.bn-onboard-modal-content {
+  background: #424242;
+}
+/* 
+.bn-onboard-custom.bn-onboard-modal-content button {
+  border-color: #FFE500;
+} */
 
 /* Chrome, Safari, Edge, Opera */
 input::-webkit-outer-spin-button,

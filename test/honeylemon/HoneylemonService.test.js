@@ -18,15 +18,15 @@ const MarketCollateralPool = artifacts.require('MarketCollateralPool');
 const {
   HoneylemonService,
   POSITIONS_QUERY,
-  CONTRACTS_QUERY
+  CONTRACTS_QUERY,
+  PAYMENT_TOKEN_DECIMALS,
+  CONTRACT_DURATION,
 } = require('../../src/lib/HoneylemonService');
 const { revertToSnapShot, takeSnapshot } = require('../helpers/snapshot');
 const { resetSubgraph } = require('../helpers/subgraph');
 const delay = require('../helpers/delay');
 
 const web3Wrapper = new Web3Wrapper(web3.currentProvider);
-
-const PAYMENT_TOKEN_DECIMALS = 6; // USDC has 6 decimals
 
 let accounts = null,
   // addresses
@@ -89,12 +89,12 @@ before(async function() {
 
   // Create Todays market protocol contract
   await marketContractProxy.dailySettlement(
-    currentMRIScaled.multipliedBy(28).toString(), // lookback index
+    currentMRIScaled.multipliedBy(CONTRACT_DURATION).toString(), // lookback index
     currentMRIScaled.toString(), // current index value
     [
-      web3.utils.utf8ToHex('MRI-BTC-28D-20200501'),
-      web3.utils.utf8ToHex('MRI-BTC-28D-20200501-Long'),
-      web3.utils.utf8ToHex('MRI-BTC-28D-20200501-Short')
+      web3.utils.utf8ToHex(`MRI-BTC-${CONTRACT_DURATION}D-20200501`),
+      web3.utils.utf8ToHex(`MRI-BTC-${CONTRACT_DURATION}D-20200501-Long`),
+      web3.utils.utf8ToHex(`MRI-BTC-${CONTRACT_DURATION}D-20200501-Short`)
     ], // new market name
     expirationTime.toString(), // new market expiration
     {
@@ -202,7 +202,7 @@ const stubPositions = (subgraphStub, positionsAsMaker, positionsAsTaker, address
   return subgraphStub;
 };
 
-const stubContracts = (subgraphStub, contracts, last = 28) => {
+const stubContracts = (subgraphStub, contracts, last = CONTRACT_DURATION) => {
   subgraphStub.withArgs(CONTRACTS_QUERY, sinon.match({ last })).resolves({ contracts });
 
   return subgraphStub;
@@ -396,8 +396,8 @@ contract('HoneylemonService', () => {
     // COLLATERAL_PER_UNIT value.
     const expectedCollateralRequirement = amount
       .multipliedBy(currentMRIScaled)
-      .multipliedBy(new BigNumber(28))
-      .multipliedBy(new BigNumber(1.35));
+      .multipliedBy(CONTRACT_DURATION)
+      .multipliedBy(1.35);
 
     const actualCollateralRequirement = await honeylemonService.calculateRequiredCollateral(
       amount.toString()
@@ -429,20 +429,20 @@ contract('HoneylemonService', () => {
       await fill0xOrderForAddresses(3, takerAddress, makerAddress);
 
       // fast forward 28 days
-      await time.increase(28 * 24 * 60 * 60 + 1);
+      await time.increase(CONTRACT_DURATION * 24 * 60 * 60 + 1);
       // we need to deploy 28 times in order to be able to settle
       await Promise.all(
-        Array.from({ length: 28 }, (x, i) => {
+        Array.from({ length: CONTRACT_DURATION }, (x, i) => {
           return createNewMarketProtocolContract(
-            mriInput * 28,
+            mriInput * CONTRACT_DURATION,
             mriInput,
-            'MRI-BTC-28D-test'
+            `MRI-BTC-${CONTRACT_DURATION}D-test`
           );
         })
       );
 
       await fill0xOrderForAddresses(4, takerAddress, makerAddress);
-      await createNewMarketProtocolContract(mriInput * 28, mriInput, 'MRI-BTC-28D-test');
+      await createNewMarketProtocolContract(mriInput * CONTRACT_DURATION, mriInput, `MRI-BTC-${CONTRACT_DURATION}D-test`);
       await fill0xOrderForAddresses(5, takerAddress, makerAddress);
 
       // Wait for subgraph to index the events
@@ -549,7 +549,7 @@ contract('HoneylemonService', () => {
   // This test only works with '.only' - no idea exactly why
   it.skip('Batch Redemption', async () => {
     // reset state in case it is polluted
-    await resetState();
+    // await resetState();
 
     try {
       expect(await honeylemonService.addressHasDSProxy(takerAddress)).to.equal(false);
@@ -564,18 +564,18 @@ contract('HoneylemonService', () => {
 
       // Increase the time by one day. Deploy a new contract to simulate having tokens over multiple days.
       await time.increase(24 * 60 * 60 + 1);
-      await createNewMarketProtocolContract(mriInput * 28, mriInput, 'MRI-BTC-28D-test');
+      await createNewMarketProtocolContract(mriInput * CONTRACT_DURATION, mriInput, `MRI-BTC-${CONTRACT_DURATION}D-test`);
       await fill0xOrderForAddresses(4, takerAddress, makerAddress);
 
       // fast forward 28 days and deploy another 28 contracts to settle all those deployed.
-      await time.increase(28 * 24 * 60 * 60 + 1);
+      await time.increase(CONTRACT_DURATION * 24 * 60 * 60 + 1);
       // we need to deploy 28 times in order to be able to settle
       await Promise.all(
-        Array.from({ length: 28 }, (x, i) => {
+        Array.from({ length: CONTRACT_DURATION }, (x, i) => {
           return createNewMarketProtocolContract(
-            mriInput * 28,
+            mriInput * CONTRACT_DURATION,
             mriInput,
-            'MRI-BTC-28D-test'
+            `MRI-BTC-${CONTRACT_DURATION}D-test`
           );
         })
       );

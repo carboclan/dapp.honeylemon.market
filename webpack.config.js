@@ -1,7 +1,7 @@
 const path = require('path');
 
 module.exports = {
-  mode: 'development',
+  mode: 'production',
   entry: './src/lib/index.js',
   output: {
     path: path.resolve(__dirname, 'dist'),
@@ -10,9 +10,8 @@ module.exports = {
     libraryTarget: 'commonjs2'
   },
   optimization: {
-    minimize: false
+    minimize: true,
   },
-  devtool: 'eval-source-map',
   module: {
     rules: [
       {

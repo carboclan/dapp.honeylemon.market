@@ -1,9 +1,36 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Typography, Grid, makeStyles, FilledInput, Link, InputAdornment, Paper } from '@material-ui/core';
+import {
+  Button,
+  Typography,
+  Grid,
+  makeStyles,
+  FilledInput,
+  Link,
+  InputAdornment,
+  Paper,
+  CircularProgress,
+  List,
+  ListItem,
+  ListItemText,
+  Table,
+  TableBody,
+  TableRow,
+  TableCell,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  Stepper,
+  Step,
+  StepLabel,
+  StepContent
+} from '@material-ui/core';
+import clsx from 'clsx';
+import { BigNumber } from '@0x/utils';
 import { useHoneylemon } from '../contexts/HoneylemonContext';
 import { useOnboard } from '../contexts/OnboardContext';
-import { BigNumber } from '@0x/utils';
 import { forwardTo } from '../helpers/history';
+import ContractSpecificationModal from './ContractSpecificationModal';
+import MRIInformationModal from './MRIInformationModal';
 
 const useStyles = makeStyles(({ spacing, palette }) => ({
   rightAlign: {
@@ -13,32 +40,54 @@ const useStyles = makeStyles(({ spacing, palette }) => ({
     textAlign: 'end',
     padding: spacing(1)
   },
-  notification: {
-    backgroundColor: palette.secondary.main,
-    color: palette.common.black,
-    textAlign: 'center',
-    marginLeft: -spacing(2),
-    marginRight: -spacing(2),
-    marginTop: -spacing(2),
-    padding: spacing(2),
-    '&:hover': {
-      backgroundColor: palette.secondary.dark,
-    }
-  },
   offerForm: {
     marginTop: 0,
+  },
+  offerSummary: {
+    padding: spacing(2),
+    width: '100%'
+  },
+  offerSummaryBlur: {
+    filter: 'blur(2px)',
+  },
+  loadingSpinner: {
+    width: 20,
+    flexBasis: 'end',
+    flexGrow: 0,
+    color: palette.secondary.main,
+  },
+  errorList: {
+    color: palette.secondary.main,
+  },
+  button: {
+    marginTop: spacing(1),
+    marginRight: spacing(1),
+    color: palette.common.black,
+  },
+  actionsContainer: {
+    marginBottom: spacing(2),
   },
 }))
 
 const OfferContractPage: React.SFC = () => {
-  const { honeylemonService, COLLATERAL_TOKEN_DECIMALS, collateralTokenAllowance, collateralTokenBalance, CONTRACT_DURATION } = useHoneylemon();
+  const { honeylemonService,
+    COLLATERAL_TOKEN_DECIMALS,
+    collateralTokenAllowance,
+    collateralTokenBalance,
+    CONTRACT_DURATION,
+    isDsProxyDeployed,
+  } = useHoneylemon();
   const { address = '0x' } = useOnboard();
   const classes = useStyles();
 
   const [hashPrice, setHashPrice] = useState(0);
   const [hashAmount, setHashAmount] = useState(0);
-  const [totalHashPrice, setTotalHashPrice] = useState(0);
+  const [totalContractPrice, setTotalContractPrice] = useState(0);
   const [collateralAmount, setCollateralAmount] = useState(0);
+  const [showOfferModal, setShowOfferModal] = useState(false);
+  const [isTxActive, setIsTxActive] = useState(false);
+  const [showContractSpecificationModal, setShowContractSpecificationModal] = useState(false);
+  const [showMRIInformationModal, setShowMRIInformationModal] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -58,42 +107,117 @@ const OfferContractPage: React.SFC = () => {
   }, [hashAmount, honeylemonService, COLLATERAL_TOKEN_DECIMALS]);
 
   useEffect(() => {
-    setTotalHashPrice(hashPrice * hashAmount * CONTRACT_DURATION)
+    setTotalContractPrice(hashPrice * hashAmount * CONTRACT_DURATION)
   }, [hashPrice, hashAmount, CONTRACT_DURATION])
 
-  const createOffer = async () => {
-    try {
-      const order = honeylemonService.createOrder(address, new BigNumber(hashAmount), new BigNumber(CONTRACT_DURATION).multipliedBy(hashPrice));
-      const signedOrder = await honeylemonService.signOrder(order);
-      await honeylemonService.submitOrder(signedOrder);
-      forwardTo('/portfolio')
-    } catch (error) {
-      console.log('Something went wrong creating the offer');
-      console.log(error);
+  useEffect(() => {
+    const getCurrentHashPrice = async () => {
+      const result = await honeylemonService.getQuoteForSize(new BigNumber(1))
+      setHashPrice(Number(result?.price?.dividedBy(CONTRACT_DURATION).toString()) || 0);
     }
+    getCurrentHashPrice();
+  }, [CONTRACT_DURATION, honeylemonService])
+
+  const tokenApprovalGranted = collateralTokenAllowance > collateralAmount;
+  const sufficientCollateral = collateralTokenBalance >= collateralAmount;
+
+  const errors = [];
+  !sufficientCollateral && errors.push("You do not have enough imBTC to proceed");
+
+  const handleCloseOfferDialog = () => {
+    setShowOfferModal(false);
   }
 
-  const approveCollateralToken = async () => {
+  const handleDeployDSProxy = async () => {
+    setIsTxActive(true);
+    try {
+      await honeylemonService.deployDSProxyContract(address);
+    } catch (error) {
+      console.log('Something went wrong deploying the DS Proxy wallet');
+      console.log(error);
+      // TODO Display error on modal
+    }
+    setIsTxActive(false);
+  }
+
+  const handleApproveCollateralToken = async () => {
+    setIsTxActive(true);
     try {
       await honeylemonService.approveCollateralToken(address);
     } catch (error) {
       console.log('Something went wrong approving the tokens');
       console.log(error);
+      // TODO Display error on modal
+    }
+    setIsTxActive(false);
+  }
+
+  const handleCreateOffer = async () => {
+    setIsTxActive(true);
+    try {
+      const order = honeylemonService.createOrder(address, new BigNumber(hashAmount), new BigNumber(CONTRACT_DURATION).multipliedBy(hashPrice));
+      const signedOrder = await honeylemonService.signOrder(order);
+      await honeylemonService.submitOrder(signedOrder);
+      setShowOfferModal(false)
+      forwardTo('/portfolio')
+    } catch (error) {
+      console.log('Something went wrong creating the offer');
+      console.log(error);
+      // TODO: Display error on modal
+    }
+    setIsTxActive(false);
+  }
+
+  const getActiveStep = () => {
+    if (!isDsProxyDeployed) return 0;
+    if (!tokenApprovalGranted) return 1;
+    return 2;
+  };
+
+  const activeStep = getActiveStep();
+
+  const steps = ['Deploy Wallet', 'Approve USDT', 'Buy Contracts'];
+
+  const getStepContent = (step: number) => {
+    switch (step) {
+      case 0:
+        return `Deploy a wallet contract. This is a once-off operation`;
+      case 1:
+        return 'Approve imBTC. This is a once-off operation';
+      case 2:
+        return `Finalize Offer`;
     }
   }
 
-  const ERC20ApprovalComplete = collateralTokenAllowance > 0
-  const isValid = ERC20ApprovalComplete && collateralAmount <= collateralTokenBalance;
+  const getStepButtonLabel = (step: number) => {
+    switch (step) {
+      case 0:
+        return `Deploy`;
+      case 1:
+        return 'Approve';
+      case 2:
+        return `Offer`;
+    }
+  }
+
+  const handleStepperNext = (step: number) => {
+    switch (step) {
+      case 0:
+        return handleDeployDSProxy();
+      case 1:
+        return handleApproveCollateralToken();
+      case 2:
+        return handleCreateOffer();
+    }
+  }
+
+  const handleStartOffer = () => {
+    setShowOfferModal(true);
+    activeStep === 2 && handleCreateOffer();
+  }
 
   return (
     <>
-      {!ERC20ApprovalComplete &&
-        <Paper className={classes.notification} square onClick={approveCollateralToken}>
-          <Typography style={{ fontWeight: 'bold' }}>
-            Please approve Honeylemon to spend your imBTC to continue
-          </Typography>
-        </Paper>
-      }
       <Grid container alignItems='flex-start' justify='flex-start' spacing={2} className={classes.offerForm}>
         <Grid item xs={12}>
           <Typography style={{ fontWeight: 'bold' }}>Offer a {CONTRACT_DURATION} day Mining Revenue Contract</Typography>
@@ -113,7 +237,7 @@ const OfferContractPage: React.SFC = () => {
               const newValueString = e.target.value;
               if (!newValueString) {
                 setHashPrice(0);
-                setTotalHashPrice(0);
+                setTotalContractPrice(0);
                 return;
               }
               const newValue = parseFloat(newValueString);
@@ -121,7 +245,10 @@ const OfferContractPage: React.SFC = () => {
             }}
             value={hashPrice}
             type='number'
-            disabled={!isValid} />
+            onBlur={e => {
+              e.target.value = e.target.value.replace(/^(-)?0+(0\.|\d)/, '$1$2')
+            }}
+            disabled={showOfferModal} />
         </Grid>
         <Grid item xs={2} className={classes.rightAlign}>
           <Typography style={{ fontWeight: 'bold' }} color='secondary'>Th/day</Typography>
@@ -142,32 +269,123 @@ const OfferContractPage: React.SFC = () => {
                 setHashAmount(0);
                 return;
               }
-              const newValue = parseFloat(newValueString);
+              const newValue = parseInt(newValueString);
               !isNaN(newValue) && setHashAmount(newValue);
             }}
             value={hashAmount}
             type='number'
-            disabled={!ERC20ApprovalComplete} />
+            onBlur={e => {
+              e.target.value = e.target.value.replace(/^(-)?0+(0\.|\d)/, '$1$2')
+            }}
+            disabled={showOfferModal} />
         </Grid>
         <Grid item xs={2} className={classes.rightAlign}>
           <Typography style={{ fontWeight: 'bold' }} color='secondary'>Th</Typography>
         </Grid>
-        <Grid item xs={6}><Typography style={{ fontWeight: 'bold' }}>Total:</Typography></Grid>
-        <Grid item xs={4} style={{ textAlign: 'center' }}><Typography style={{ fontWeight: 'bold' }}>${totalHashPrice.toFixed(2)}</Typography></Grid>
-        <Grid item xs={12}><Typography style={{ fontStyle: 'italic', fontSize: 12 }}>${hashPrice} Th/day * {CONTRACT_DURATION} Days * {hashAmount} Contracts</Typography></Grid>
-        <Grid item xs={12}><Button fullWidth onClick={createOffer} disabled={!isValid}>CREATE OFFER</Button></Grid>
+        <Grid item xs={12} container >
+          <Paper className={clsx(classes.offerSummary, {
+            [classes.offerSummaryBlur]: !sufficientCollateral,
+          })}>
+            <Typography align='center'><strong>Offer Summary</strong></Typography>
+            <Table size='small'>
+              <TableBody>
+                <TableRow>
+                  <TableCell>Contract Total</TableCell>
+                  <TableCell align='right'>{`$ ${totalContractPrice.toLocaleString()} USDT`}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>Collateral Required</TableCell>
+                  <TableCell align='right'>{`${collateralAmount.toLocaleString()} imBTC`}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>Duration</TableCell>
+                  <TableCell align='right'>{CONTRACT_DURATION} days</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>Price</TableCell>
+                  <TableCell align='right'>$ {hashPrice.toLocaleString()} /TH/day</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>Quantity</TableCell>
+                  <TableCell align='right'>{hashAmount.toLocaleString()} TH</TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </Paper>
+        </Grid>
+        {errors.length > 0 &&
+          <Grid item xs={12}>
+            <List className={classes.errorList}>
+              {errors.map((error, i) =>
+                <ListItem key={i}>
+                  <ListItemText>{error}</ListItemText>
+                </ListItem>)}
+            </List>
+          </Grid>
+        }
+        <Grid item xs={12}>
+          <Button
+            fullWidth
+            onClick={handleStartOffer}
+            disabled={hashAmount === 0 || !sufficientCollateral || showOfferModal}>
+            CREATE OFFER &nbsp;
+              {showOfferModal && <CircularProgress className={classes.loadingSpinner} size={20} />}
+          </Button>
+        </Grid>
         <Grid item xs={12}>
           <Typography>
-            You will offer {hashAmount} contracts at ${hashPrice} Th/day.
-          If a hodler buys your offer you will receive ${totalHashPrice.toFixed(2)} USDT.
-          You will be asked to post the hodlers max win of {collateralAmount} BTC as collateral.
-          The amount of that collateral that the hodler receives will be determined
-          by the average value of the <Link href='#'>Mining Revenue Index</Link> over the&nbsp;
-          {CONTRACT_DURATION} days starting when the hodler pays you.
-        </Typography>
+            You are offering a <strong>{hashAmount.toLocaleString()}TH contract</strong> at&nbsp;
+            <strong>USDT {hashPrice.toLocaleString()}/Th/day</strong>. You will need to
+            post <strong>{collateralAmount.toLocaleString()} imBTC</strong> as collateral.
+            The contract will start when your order is filled and you will receive payment in USDT
+            upfront. At the end of <strong>{CONTRACT_DURATION} days</strong>, your counterparty will
+            receive the network average BTC block reward & transaction fees per TH based on the average
+            value of the <Link href='#' underline='always' onClick={() => setShowMRIInformationModal(true)}>
+            Bitcoin Mining Revenue Index (MRI)</Link> over the next <strong>{CONTRACT_DURATION} days</strong> up to a max 
+            win capped by your collateral. The payoff will be directly deducted from your collateral then, and you 
+            can withdraw the remainder of your collateral post settlement.
+          </Typography>
         </Grid>
-        <Grid item xs={12}><Typography>See <Link href='#'>full contract specification here.</Link></Typography></Grid>
+        <Grid item xs={12}>
+          <Typography align='center'>
+            See <Link href='#' underline='always' onClick={() => setShowContractSpecificationModal(true)}>full contract specification here.</Link>
+          </Typography>
+        </Grid>
       </Grid>
+      <Dialog open={showOfferModal} onClose={handleCloseOfferDialog} aria-labelledby="form-dialog-title">
+        <DialogTitle id="form-dialog-title">Create Offer</DialogTitle>
+        <DialogContent>
+          <Stepper activeStep={activeStep} orientation="vertical">
+            {steps.map((label, index) => (
+              <Step key={label}>
+                <StepLabel>{label}</StepLabel>
+                <StepContent>
+                  <Typography>{getStepContent(index)}</Typography>
+                  <div className={classes.actionsContainer}>
+                    <Button
+                      onClick={handleCloseOfferDialog}
+                      className={classes.button}
+                      disabled={isTxActive}>
+                      Cancel
+                    </Button>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={() => handleStepperNext(activeStep)}
+                      className={classes.button}
+                      disabled={isTxActive}>
+                      {getStepButtonLabel(activeStep)}&nbsp;
+                        {isTxActive && <CircularProgress className={classes.loadingSpinner} size={20} />}
+                    </Button>
+                  </div>
+                </StepContent>
+              </Step>
+            ))}
+          </Stepper>
+        </DialogContent>
+      </Dialog>
+      <ContractSpecificationModal open={showContractSpecificationModal} onClose={() => setShowContractSpecificationModal(false)} />
+      <MRIInformationModal open={showMRIInformationModal} onClose={() => setShowMRIInformationModal(false)} />
     </>
   )
 }

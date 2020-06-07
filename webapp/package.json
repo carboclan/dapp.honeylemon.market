@@ -4,17 +4,23 @@
   "private": true,
   "dependencies": {
     "@0x/utils": "5.4.1",
+    "@babel/runtime": "^7.10.2",
     "@material-ui/core": "4.9.12",
     "@material-ui/icons": "4.9.1",
     "@truffle/contract": "4.2.3",
     "@truffle/debug-utils": "4.1.1",
+    "@types/fontfaceobserver": "0.0.6",
     "bnc-notify": "1.2.1",
-    "bnc-onboard": "1.9.0",
+    "bnc-onboard": "1.9.4",
     "dayjs": "1.8.26",
     "dotenv": "8.2.0",
     "eslint": "6.8.0",
+    "fontfaceobserver": "^2.1.0",
+    "highcharts": "^8.1.0",
+    "highcharts-react-official": "^3.0.0",
     "honeylemon": "file:../.",
     "react": "16.13.1",
+    "react-blockies": "^1.4.1",
     "react-dom": "16.13.1",
     "react-router-dom": "5.1.2",
     "react-scripts": "3.4.1",
@@ -31,13 +37,15 @@
     "@types/react-dom": "16.9.0",
     "@types/react-router": "5.1.7",
     "@types/react-router-dom": "5.1.5",
+    "source-map-explorer": "^2.4.2",
     "typescript": "3.9.2"
   },
   "scripts": {
     "start": "react-scripts --max_old_space_size=8192 start",
     "build": "react-scripts --max_old_space_size=8192 build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "analyze": "source-map-explorer 'build/static/js/*.js'"
   },
   "eslintConfig": {
     "extends": "react-app"

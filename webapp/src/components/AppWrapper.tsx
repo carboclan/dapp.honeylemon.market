@@ -1,36 +1,45 @@
-import React from 'react';
+import React, { ReactNode, useRef } from 'react';
 import clsx from 'clsx';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
-import { Drawer, AppBar, Toolbar, Divider, IconButton, Typography, ListItem, ListItemIcon, ListItemText, List, ClickAwayListener } from '@material-ui/core';
-import { Menu, ChevronLeft, ChevronRight, AccountBalance } from '@material-ui/icons';
+import { Drawer, AppBar, Toolbar, Divider, IconButton, Typography, ListItem, ListItemIcon, ListItemText, List, Avatar, Link } from '@material-ui/core';
+import { Menu, ChevronLeft, ChevronRight, AccountBalance, Assessment, MonetizationOn, Whatshot, ExitToApp } from '@material-ui/icons';
+import Blockies from 'react-blockies';
 
 import { forwardTo } from '../helpers/history';
 import { ReactComponent as HoneyLemonLogo } from '../images/honeylemon-logo.svg';
+import { useOnboard } from '../contexts/OnboardContext';
+import { useHoneylemon } from '../contexts/HoneylemonContext';
+import Footer from './Footer';
+import { useOnClickOutside } from '../helpers/useOnClickOutside';
+import { networkName } from '../helpers/ethereumNetworkUtils';
+import { displayAddress } from '../helpers/displayAddress';
 
-const drawerWidth = 240;
+const drawerWidth = 300;
+const footerHeight = 150;
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(({ transitions, palette, mixins, spacing }) => ({
   root: {
     display: 'flex',
   },
   appBar: {
-    transition: theme.transitions.create(['margin', 'width'], {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.leavingScreen,
+    transition: transitions.create(['margin', 'width'], {
+      easing: transitions.easing.sharp,
+      duration: transitions.duration.leavingScreen,
     }),
     backgroundColor: '#424242',
-    color: theme.palette.primary.main
+    color: palette.primary.main
   },
   appBarShift: {
     width: `calc(100% - ${drawerWidth}px)`,
-    transition: theme.transitions.create(['margin', 'width'], {
-      easing: theme.transitions.easing.easeOut,
-      duration: theme.transitions.duration.enteringScreen,
+    transition: transitions.create(['margin', 'width'], {
+      easing: transitions.easing.easeOut,
+      duration: transitions.duration.enteringScreen,
     }),
     marginRight: drawerWidth,
   },
   logo: {
     flexGrow: 0,
+    cursor: 'pointer'
   },
   title: {
     flexGrow: 1,
@@ -43,7 +52,7 @@ const useStyles = makeStyles((theme) => ({
     display: 'none',
   },
   hamburger: {
-    color: theme.palette.secondary.main,
+    color: palette.secondary.main,
   },
   drawer: {
     flexShrink: 0,
@@ -57,9 +66,9 @@ const useStyles = makeStyles((theme) => ({
   drawerHeader: {
     display: 'flex',
     alignItems: 'center',
-    padding: theme.spacing(0, 1),
+    padding: spacing(0, 1),
     // necessary for content to be below app bar
-    ...theme.mixins.toolbar,
+    ...mixins.toolbar,
     justifyContent: 'flex-start',
   },
   content: {
@@ -67,13 +76,24 @@ const useStyles = makeStyles((theme) => ({
   },
   contentDrawerOpen: {
     marginRight: -drawerWidth
+  },
+  contentWrapper: {
+    paddingBottom: footerHeight,
   }
 }));
 
-function AppWrapper(props: { children: any }) {
+function AppWrapper(props: { children: ReactNode }) {
   const classes = useStyles();
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
+  const { isReady, address, network, resetOnboard } = useOnboard();
+  const { collateralTokenBalance, COLLATERAL_TOKEN_DECIMALS, paymentTokenBalance, PAYMENT_TOKEN_DECIMALS } = useHoneylemon();
+
+  const handleLogout = () => {
+    resetOnboard();
+    setOpen(false);
+    forwardTo('/');
+  }
 
   const handleDrawerOpen = () => {
     setOpen(true);
@@ -87,6 +107,14 @@ function AppWrapper(props: { children: any }) {
     forwardTo(path);
     setOpen(false);
   }
+
+  const ref = useRef(null);
+  useOnClickOutside(ref, () => {
+    if (open) {
+      setOpen(false)
+    }
+  })
+
   return (
     <div className={classes.root}>
       <AppBar
@@ -95,7 +123,7 @@ function AppWrapper(props: { children: any }) {
           [classes.appBarShift]: open,
         })}>
         <Toolbar>
-          <HoneyLemonLogo className={classes.logo} />
+          <HoneyLemonLogo className={classes.logo} onClick={() => forwardTo('/')} />
           <Typography
             className={classes.title}
             onClick={() => forwardTo('/')}>
@@ -106,43 +134,123 @@ function AppWrapper(props: { children: any }) {
             edge="end"
             onClick={handleDrawerOpen}
             className={clsx(classes.hamburger,
-              { [classes.hide]: open })}>
+              { [classes.hide]: open })}
+            disabled={!isReady} >
             <Menu fontSize='large' />
           </IconButton>
         </Toolbar>
       </AppBar>
-      <main className={clsx(classes.content, {[classes.contentDrawerOpen]: open})}>
-        {props.children}
+      <main className={clsx(classes.content, { [classes.contentDrawerOpen]: open })}>
+        <div className={classes.contentWrapper}>
+          {props.children}
+        </div>
+        <Footer footerHeight={footerHeight}/>
       </main>
-      <ClickAwayListener onClickAway={() => console.log('click away')}>
-        <Drawer
-          className={clsx(classes.drawer, {
-            [classes.drawerOpen]: open,
-          })}
-          variant="persistent"
-          anchor="right"
-          open={open}
-          classes={{
-            paper: clsx(classes.drawerPaper, {
-              [classes.drawerOpen]: open
-            }),
-          }}
-        >
-          <div className={classes.drawerHeader}>
-            <IconButton onClick={handleDrawerClose}>
-              {theme.direction === 'rtl' ? <ChevronLeft fontSize='large' /> : <ChevronRight fontSize='large' />}
-            </IconButton>
-          </div>
-          <Divider />
-          <List>
-            <ListItem button onClick={() => handleNavigate('/portfolio')}>
-              <ListItemIcon><AccountBalance /></ListItemIcon>
-              <ListItemText primary="Portfolio" />
-            </ListItem>
-          </List>
-          <Divider />
-        </Drawer>
-      </ClickAwayListener>
+      <Drawer
+        ref={ref}
+        className={clsx(classes.drawer, {
+          [classes.drawerOpen]: open,
+        })}
+        variant="persistent"
+        anchor="right"
+        open={open}
+        classes={{
+          paper: clsx(classes.drawerPaper, {
+            [classes.drawerOpen]: open
+          }),
+        }}
+      >
+        <div className={classes.drawerHeader}>
+          <IconButton onClick={handleDrawerClose}>
+            {theme.direction === 'rtl' ? <ChevronLeft fontSize='large' /> : <ChevronRight fontSize='large' />}
+          </IconButton>
+        </div>
+        <Divider />
+        <List>
+          <ListItem>
+            <ListItemIcon>
+              <Avatar>
+                <Blockies seed={address || '0x'} size={10} />
+              </Avatar>
+            </ListItemIcon>
+            <ListItemText
+              primaryTypographyProps={{
+                align: 'right',
+                noWrap: true
+              }}>
+              <Link href={`https://${networkName(network)}.etherscan.io/address/${address}`} target="_blank" rel='noopener' underline='always' >
+                {displayAddress(address || '0x', 20)}
+              </Link>
+            </ListItemText>
+          </ListItem>
+        </List>
+        <Divider />
+        <List>
+          <ListItem>
+            <ListItemIcon>
+              <img src='imBtc.png' style={{ width: '40px' }} alt='imbtc logo' />
+            </ListItemIcon>
+            <ListItemText
+              primary={`${collateralTokenBalance.toLocaleString(undefined, {
+                useGrouping: true,
+                maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS,
+              })}`}
+              secondary='imBTC'
+              primaryTypographyProps={{
+                align: 'right',
+                noWrap: true,
+              }}
+              secondaryTypographyProps={{
+                align: 'right'
+              }} />
+          </ListItem>
+          <ListItem>
+            <ListItemIcon>
+              <img src='usdt.png' style={{ width: '40px' }} alt='usdt logo' />
+            </ListItemIcon>
+            <ListItemText
+              primary={`${paymentTokenBalance.toLocaleString(undefined, {
+                useGrouping: true,
+                maximumFractionDigits: PAYMENT_TOKEN_DECIMALS,
+                minimumFractionDigits: 2,
+              })}`}
+              secondary='USDT'
+              primaryTypographyProps={{
+                align: 'right',
+                noWrap: true,
+              }}
+              secondaryTypographyProps={{
+                align: 'right'
+              }} />
+          </ListItem>
+        </List>
+        <Divider />
+        <List>
+          <ListItem button onClick={() => handleNavigate('/portfolio')}>
+            <ListItemIcon><AccountBalance /></ListItemIcon>
+            <ListItemText primary="Portfolio" />
+          </ListItem>
+          <ListItem button onClick={() => handleNavigate('/offer')}>
+            <ListItemIcon><Assessment /></ListItemIcon>
+            <ListItemText primary="Offer Contract" />
+          </ListItem>
+          <ListItem button onClick={() => handleNavigate('/buy')}>
+            <ListItemIcon><MonetizationOn /></ListItemIcon>
+            <ListItemText primary="Buy Contract" />
+          </ListItem>
+          <ListItem button onClick={() => handleNavigate('/stats')}>
+            <ListItemIcon><Whatshot /></ListItemIcon>
+            <ListItemText primary="Live Market Stats" />
+          </ListItem>
+        </List>
+        <Divider />
+        <List>
+          <ListItem button onClick={handleLogout}>
+            <ListItemIcon><ExitToApp /></ListItemIcon>
+            <ListItemText primary="Log out" />
+          </ListItem>
+        </List>
+      </Drawer>
     </div>
   );
 }

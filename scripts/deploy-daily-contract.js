@@ -40,7 +40,6 @@ const MarketCollateralPool = artifacts.require('MarketCollateralPool');
 
 // Calculation constants
 const necessaryCollateralRatio = 0.35; // for 135% collateralization
-const multiplier = 28; // contract duration in days
 const collateralDecimals = 1e8; // scaling for imBTC (8 decimal points)
 const paymentDecimals = 1e6; // scaling for USDT or USDC (6 decimals)
 
