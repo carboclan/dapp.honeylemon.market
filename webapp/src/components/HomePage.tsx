@@ -46,7 +46,7 @@ const useStyles = makeStyles(({ palette, spacing }) => ({
 }))
 
 const HomePage: React.SFC = () => {
-  const { wallet, onboard, isReady } = useOnboard();
+  const { isReady } = useOnboard();
   const { marketData: { btcDifficultyAdjustmentDate } } = useHoneylemon();
   const [adjustmentInterval, setAdjustmentInterval] = useState({
     days: '00',

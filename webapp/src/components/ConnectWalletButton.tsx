@@ -22,7 +22,7 @@ const useStyles = makeStyles(({ palette, spacing }) => ({
 }))
 
 const ConnectWalletButton: React.SFC = () => {
-  const { wallet, onboard, isReady, checkIsReady } = useOnboard();
+  const { wallet, onboard, checkIsReady } = useOnboard();
   const [isConnecting, setIsConnecting] = useState(false);
   const classes = useStyles();
 

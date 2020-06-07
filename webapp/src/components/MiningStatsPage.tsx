@@ -20,7 +20,7 @@ const useStyles = makeStyles(({ palette }) => ({
 
 const MiningStatsPage: React.SFC = () => {
   const classes = useStyles();
-  const {marketData} = useHoneylemon();
+  // const {marketData} = useHoneylemon();
   const chartOptions: Highcharts.Options | undefined = undefined
   //  graphData && {
   //   title: {

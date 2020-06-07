@@ -1,5 +1,5 @@
 import React from 'react';
-import { Typography, makeStyles, Dialog, DialogTitle, DialogContent, List, ListItem } from '@material-ui/core';
+import { makeStyles, Dialog, DialogTitle, DialogContent } from '@material-ui/core';
 
 const useStyles = makeStyles(({ palette }) => ({
   mriFormula: {

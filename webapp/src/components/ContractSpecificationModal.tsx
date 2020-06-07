@@ -1,9 +1,5 @@
 import React from 'react';
-import { Typography, makeStyles, Grid, Table, TableHead, TableRow, TableCell, TableBody, DialogProps, Dialog, DialogTitle, DialogContent } from '@material-ui/core';
-
-const useStyles = makeStyles(({ palette }) => ({
-
-}))
+import { Table, TableRow, TableCell, TableBody, Dialog, DialogTitle, DialogContent } from '@material-ui/core';
 
 interface ContractSpecificationModalProps {
   open: boolean,
@@ -12,7 +8,6 @@ interface ContractSpecificationModalProps {
 
 const ContractSpecificationModal: React.SFC<ContractSpecificationModalProps> = 
   ({open, onClose}: ContractSpecificationModalProps) => {
-  const classes = useStyles();
 
   return (
     <Dialog open={open} onClose={onClose} aria-labelledby="dialog-title" maxWidth='sm' fullWidth>
@@ -127,7 +122,6 @@ const ContractSpecificationModal: React.SFC<ContractSpecificationModalProps> =
         </Table>
       </DialogContent>
     </Dialog>
-
   )
 }
 
