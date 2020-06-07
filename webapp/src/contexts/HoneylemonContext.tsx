@@ -211,7 +211,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
         paymentTokenBalance,
         PAYMENT_TOKEN_DECIMALS: 6, //TODO: Extract this from library when TS conversion is done
         PAYMENT_TOKEN_NAME: 'USDT',
-        CONTRACT_DURATION: 28, //TODO: Extract this from library when TS conversion is done
+        CONTRACT_DURATION: 2, //TODO: Extract this from library when TS conversion is done
         isDsProxyDeployed,
         CONTRACT_COLLATERAL_RATIO: 1.35, //TODO: Extract this from library when TS conversion is done
         marketData: {
