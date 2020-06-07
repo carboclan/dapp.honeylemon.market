@@ -347,7 +347,7 @@ class HoneylemonService {
   }
 
   async getOpenOrders(makerAddress) {
-    const ordersResponse = await this.apiClient.getOrdersAsync({ makerAddress });
+    const ordersResponse = await this.apiClient.getOrdersAsync({ makerAddress: makerAddress.toLowerCase() });
     ordersResponse.records.map(({ order, metaData }) => {
       metaData.price = order.takerAssetAmount
         .dividedBy(order.makerAssetAmount)
@@ -455,9 +455,9 @@ class HoneylemonService {
         .encodeABI();
 
       // Execute function call on DSProxy
-      redemptionTxLong = await traderDSProxy.methods
-        .execute(this.marketContractProxyAddress, batchRedemptionLongTx)
-        .send({ from: recipientAddress, gas: 9000000 });
+      const method = traderDSProxy.methods.execute(this.marketContractProxyAddress, batchRedemptionLongTx);
+      const gas = await method.estimateGas({ from: recipientAddress, gas: 9000000 });
+      redemptionTxLong = await method.send({ from: recipientAddress, gas });
     }
 
     if (shortPositions.length > 0) {
@@ -500,9 +500,9 @@ class HoneylemonService {
         )
         .encodeABI();
 
-      redemptionTxShort = await traderDSProxy.methods
-        .execute(this.marketContractProxyAddress, batchRedemptionShortTx)
-        .send({ from: recipientAddress, gas: 9000000 });
+      const method = traderDSProxy.methods.execute(this.marketContractProxyAddress, batchRedemptionShortTx);
+      const gas = await method.estimateGas({ from: recipientAddress, gas: 9000000 });
+      redemptionTxShort = method.send({ from: recipientAddress, gas });
     }
     return { redemptionTxLong, redemptionTxShort };
   }
