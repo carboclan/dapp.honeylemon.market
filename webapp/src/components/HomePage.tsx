@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link, Button, Typography, makeStyles, Grid, Divider, CircularProgress } from '@material-ui/core';
+import { Link, Button, Typography, makeStyles, Grid, Divider } from '@material-ui/core';
 import { Link as RouterLink } from 'react-router-dom';
 import { forwardTo } from '../helpers/history';
 import dayjs from 'dayjs';
@@ -46,9 +46,8 @@ const useStyles = makeStyles(({ palette, spacing }) => ({
 }))
 
 const HomePage: React.SFC = () => {
-  const { wallet, onboard, isReady, checkIsReady } = useOnboard();
+  const { wallet, onboard, isReady } = useOnboard();
   const { marketData: { btcDifficultyAdjustmentDate } } = useHoneylemon();
-  const [isConnecting, setIsConnecting] = useState(false);
   const [adjustmentInterval, setAdjustmentInterval] = useState({
     days: '00',
     hours: '00',
@@ -73,7 +72,6 @@ const HomePage: React.SFC = () => {
 
   const classes = useStyles();
 
-  const ready = onboard && wallet && isReady;
   return (
     <Grid container direction='column' spacing={2}>
       <Grid item>
@@ -83,8 +81,8 @@ const HomePage: React.SFC = () => {
         <Link component={RouterLink} to='/stats' underline='always'>
           <Typography align='center' style={{ fontWeight: 'bold' }} gutterBottom>
             <span role="img" aria-label="fire">🔥</span>
-              Mining Market Live Stats
-              <span role="img" aria-label="fire">🔥</span>
+            Mining Market Live Stats
+            <span role="img" aria-label="fire">🔥</span>
           </Typography>
         </Link>
       </Grid>
@@ -131,11 +129,11 @@ const HomePage: React.SFC = () => {
         <>
           <Typography variant='h5' style={{ fontWeight: 'bold' }}>I am a BTC Miner</Typography>
           <Typography color='secondary' style={{ fontWeight: 'bold' }}>Hedge risk & get cash up front</Typography>
-          <Button onClick={() => forwardTo('/offer')} className={classes.button} disabled={!ready}>OFFER CONTRACTS</Button>
+          <Button onClick={() => forwardTo('/offer')} className={classes.button}>OFFER CONTRACTS</Button>
           <Divider className={classes.divider} />
           <Typography variant='h5' style={{ fontWeight: 'bold' }}>I am a BTC Hodler</Typography>
           <Typography color='secondary' style={{ fontWeight: 'bold' }} gutterBottom>Pay cash & earn mining rewards</Typography>
-          <Button onClick={() => forwardTo('/buy')} className={classes.button} disabled={!ready}>BUY CONTRACTS</Button>
+          <Button onClick={() => forwardTo('/buy')} className={classes.button}>BUY CONTRACTS</Button>
         </>
       }
     </Grid>

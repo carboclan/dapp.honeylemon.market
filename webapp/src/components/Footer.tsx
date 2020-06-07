@@ -1,5 +1,5 @@
 import React from 'react';
-import { makeStyles, Paper, Container, Grid, Typography, Divider, SvgIconProps } from '@material-ui/core';
+import { makeStyles, Paper, Container, Grid, Typography, Divider } from '@material-ui/core';
 import { GitHub, Telegram, School } from '@material-ui/icons';
 
 const useStyles = makeStyles(({ palette, spacing }) => ({

@@ -27,7 +27,6 @@ import {
   StepContent,
 } from '@material-ui/core';
 import { BigNumber } from '@0x/utils';
-import { Link as RouterLink } from 'react-router-dom';
 import clsx from 'clsx';
 import { TabPanel } from './TabPanel';
 import { useHoneylemon, TokenType } from '../contexts/HoneylemonContext';
