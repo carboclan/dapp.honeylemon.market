@@ -381,6 +381,9 @@ async function runExport() {
     }
   );
 
+  // Advance time again to get past the settlement delay
+  await time.increase(contractDuration);
+
   /**********************************************
    * Redeem long and short tokens against market *
    ***********************************************/

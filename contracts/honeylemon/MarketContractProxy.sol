@@ -387,12 +387,7 @@ contract MarketContractProxy is ReentrancyGuard, Ownable {
         address[] memory tokenAddresses, // Address of the long or short token to redeem
         uint256[] memory tokensToRedeem // the number of tokens to redeem
     ) public nonReentrant {
-        require(
-            tokenAddresses.length == marketAddresses.length &&
-                tokenAddresses.length == tokensToRedeem.length &&
-                tokenAddresses.length == traderLong.length,
-            "Invalid input params"
-        );
+        require(tokenAddresses.length == tokensToRedeem.length, "Invalid input params");
         require(this.owner() == msg.sender, "You don't own this DSProxy GTFO");
 
         MarketContractMPX marketInstance;
