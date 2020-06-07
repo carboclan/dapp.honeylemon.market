@@ -41,7 +41,7 @@ contract MarketContract is Ownable {
     uint public COLLATERAL_TOKEN_FEE_PER_UNIT;
     uint public MKT_TOKEN_FEE_PER_UNIT;
     uint public EXPIRATION;
-    uint public SETTLEMENT_DELAY = 0;
+    uint public SETTLEMENT_DELAY = 1 days;
     address public LONG_POSITION_TOKEN;
     address public SHORT_POSITION_TOKEN;
 

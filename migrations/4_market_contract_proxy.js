@@ -32,6 +32,8 @@ module.exports = async function(deployer, network, accounts) {
 
   console.log('👉 Deployed Market Contract Proxy');
 
+  marketContractProxy.transferOwnership(process.env.HONEYLEMON_MULTISIG || accounts[8])
+
   // Transfer all appropriate rights from the deployed market protocol to marketContractProxy:
   // Point the 0x MinterBridge to the marketContractProxy
   await minterBridge.setMarketContractProxyAddress(marketContractProxy.address);

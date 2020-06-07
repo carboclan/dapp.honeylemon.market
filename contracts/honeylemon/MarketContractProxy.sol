@@ -77,6 +77,11 @@ contract MarketContractProxy is ReentrancyGuard, Ownable {
         address _minterBridge,
         address _imBTCTokenAddress
     ) public ReentrancyGuard() {
+        require(_marketContractFactoryMPX != address(0), 'invalid MarketContractFactoryMPX address');
+        require(_honeyLemonOracle != address(0), 'invalid HoneyLemonOracle address');
+        require(_minterBridge != address(0), 'invalid MinterBridge address');
+        require(_imBTCTokenAddress != address(0), 'invalid IMBTC address');
+
         marketContractFactoryMPX = MarketContractFactoryMPX(_marketContractFactoryMPX);
         HONEY_LEMON_ORACLE_ADDRESS = _honeyLemonOracle;
         MINTER_BRIDGE_ADDRESS = _minterBridge;
@@ -150,6 +155,8 @@ contract MarketContractProxy is ReentrancyGuard, Ownable {
      * @param _honeyLemonOracleAddress oracle address
      */
     function setOracleAddress(address _honeyLemonOracleAddress) external onlyOwner {
+        require(_honeyLemonOracleAddress != address(0), 'invalid HoneyLemonOracle address');
+
         HONEY_LEMON_ORACLE_ADDRESS = _honeyLemonOracleAddress;
     }
 
@@ -159,6 +166,8 @@ contract MarketContractProxy is ReentrancyGuard, Ownable {
      * @param _minterBridgeAddress 0x minter bridge address
      */
     function setMinterBridgeAddress(address _minterBridgeAddress) external onlyOwner {
+        require(_minterBridgeAddress != address(0), 'invalid MinterBridge address');
+
         MINTER_BRIDGE_ADDRESS = _minterBridgeAddress;
     }
 
@@ -378,12 +387,7 @@ contract MarketContractProxy is ReentrancyGuard, Ownable {
         address[] memory tokenAddresses, // Address of the long or short token to redeem
         uint256[] memory tokensToRedeem // the number of tokens to redeem
     ) public nonReentrant {
-        require(
-            tokenAddresses.length == marketAddresses.length &&
-                tokenAddresses.length == tokensToRedeem.length &&
-                tokenAddresses.length == traderLong.length,
-            "Invalid input params"
-        );
+        require(tokenAddresses.length == tokensToRedeem.length, "Invalid input params");
         require(this.owner() == msg.sender, "You don't own this DSProxy GTFO");
 
         MarketContractMPX marketInstance;
@@ -584,6 +588,7 @@ contract MarketContractProxy is ReentrancyGuard, Ownable {
         uint index = marketContracts.push(contractAddress) - 1;
         addressToMarketId[contractAddress] = index;
         MarketContractMPX marketContract = MarketContractMPX(contractAddress);
+        marketContract.transferOwnership(owner());
         emit MarketContractDeployed(
             currentMRI,
             marketAndsTokenNames[0],
