@@ -580,11 +580,14 @@ contract('HoneylemonService', () => {
         })
       );
 
+      // Fast forward another day to be past the settlement delay
+      await time.increase(CONTRACT_DURATION * 24 * 60 * 60 + 1);
+
       // We should now be able to redeem all 3 sets of tokens, spanning two different markets
       // in one transaction per user. Test to ensure the balance change as expected
 
       // Wait for subgraph to index the events
-      await delay(3000);
+      await delay(12000);
 
       const takerCollateralBalanceBefore = await collateralToken.balanceOf(takerAddress);
       const takerTxReturned = await honeylemonService.batchRedeem(takerAddress);
