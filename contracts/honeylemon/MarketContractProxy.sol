@@ -33,7 +33,7 @@ contract MarketContractProxy is ReentrancyGuard, Ownable {
 
     uint public CONTRACT_DURATION_DAYS = 28;
     uint public CONTRACT_DURATION = CONTRACT_DURATION_DAYS * 24 * 60 * 60; // 28 days in seconds
-    uint public CONTRACT_COLLATERAL_RATIO = 135000000; //1.35e8; 1.35, with 8 decimal places
+    uint public CONTRACT_COLLATERAL_RATIO = 125000000; //1.25e8; 1.25, with 8 decimal places
 
     uint[7] public marketContractSpecs = [
         0, // floorPrice - the lower bound price for the CFD [constant]
