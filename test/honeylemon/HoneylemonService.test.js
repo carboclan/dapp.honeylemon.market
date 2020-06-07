@@ -18,16 +18,15 @@ const MarketCollateralPool = artifacts.require('MarketCollateralPool');
 const {
   HoneylemonService,
   POSITIONS_QUERY,
-  CONTRACTS_QUERY
+  CONTRACTS_QUERY,
+  PAYMENT_TOKEN_DECIMALS,
+  CONTRACT_DURATION,
 } = require('../../src/lib/HoneylemonService');
 const { revertToSnapShot, takeSnapshot } = require('../helpers/snapshot');
 const { resetSubgraph } = require('../helpers/subgraph');
 const delay = require('../helpers/delay');
 
 const web3Wrapper = new Web3Wrapper(web3.currentProvider);
-
-const PAYMENT_TOKEN_DECIMALS = 6; // USDC has 6 decimals
-const CONTRACT_DURATION = 2; // 2 days
 
 let accounts = null,
   // addresses
