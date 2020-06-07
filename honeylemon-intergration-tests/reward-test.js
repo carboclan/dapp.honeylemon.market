@@ -8,7 +8,11 @@ const delay = require('../test/helpers/delay');
 
 const MarketContractProxy = artifacts.require('MarketContractProxy');
 
-let honeylemonService, marketContractProxy, ownerAddress, makerAddress, takerAddress = null;
+let honeylemonService,
+  marketContractProxy,
+  ownerAddress,
+  makerAddress,
+  takerAddress = null;
 
 async function fill0xOrderForAddresses(size, taker, maker) {
   const fillSize = new BigNumber(size);
@@ -132,9 +136,11 @@ async function main() {
   // fast forward 28 days
   await time.increase(28 * 24 * 60 * 60 + 1);
   // we need to deploy 28 times in order to be able to settle
-  await Promise.all(Array.from({ length: 28 }, (x, i) => {
-    return createNewMarketProtocolContract(mriInput * 28, mriInput, 'MRI-BTC-28D-test');
-  }));
+  await Promise.all(
+    Array.from({ length: 28 }, (x, i) => {
+      return createNewMarketProtocolContract(mriInput * 28, mriInput, 'MRI-BTC-28D-test');
+    })
+  );
 
   console.log('Filling one more order...');
   await fill0xOrderForAddresses(4, takerAddress, makerAddress);
@@ -151,14 +157,14 @@ async function main() {
     takerAddress
   );
 
-  const { longPositions: longPositions2, shortPositions: shortPositions2 } = await honeylemonService.getPositions(
-    makerAddress
-  );
+  const {
+    longPositions: longPositions2,
+    shortPositions: shortPositions2
+  } = await honeylemonService.getPositions(makerAddress);
 
   console.log('longPositions:', JSON.stringify(longPositions, null, 4));
   console.log('shortPositions2:', JSON.stringify(shortPositions2, null, 4));
 }
-
 
 module.exports = async () => {
   try {

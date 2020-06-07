@@ -35,9 +35,11 @@ contract PositionToken is ERC20, Ownable {
     MarketSide public MARKET_SIDE; // 0 = Long, 1 = Short
     enum MarketSide { Long, Short }
 
-    constructor(string memory tokenName, string memory tokenSymbol, uint8 marketSide)
-        public
-    {
+    constructor(
+        string memory tokenName,
+        string memory tokenSymbol,
+        uint8 marketSide
+    ) public {
         name = tokenName;
         symbol = tokenSymbol;
         decimals = 5;

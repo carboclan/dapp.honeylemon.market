@@ -393,10 +393,7 @@ async function runExport() {
   // This works by forwarding the call to the using Delegate call.
   // batchRedeem script within the `marketContractProxy`
   const unwindLongTokenTx = marketContractProxy.contract.methods
-    .batchRedeem(
-      [longToken.address],
-      [makerAmountToMint]
-    )
+    .batchRedeem([longToken.address], [makerAmountToMint])
     .encodeABI();
 
   await takerDSProxy.execute(marketContractProxy.address, unwindLongTokenTx, {
@@ -405,10 +402,7 @@ async function runExport() {
 
   // Also create the token for the short side to redeem.
   const unwindShortTokenTx = marketContractProxy.contract.methods
-    .batchRedeem(
-      [shortToken.address],
-      [makerAmountToMint]
-    )
+    .batchRedeem([shortToken.address], [makerAmountToMint])
     .encodeABI();
 
   await makerDSProxy.execute(marketContractProxy.address, unwindShortTokenTx, {

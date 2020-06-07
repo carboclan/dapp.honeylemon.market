@@ -1,20 +1,20 @@
-const BigNumber = require("bignumber.js");
-const { expectRevert, ether, time } = require("@openzeppelin/test-helpers");
+const BigNumber = require('bignumber.js');
+const { expectRevert, ether, time } = require('@openzeppelin/test-helpers');
 
-const MinterBridge = artifacts.require("MinterBridge");
-const MarketContractProxy = artifacts.require("MarketContractProxy");
-const CollateralToken = artifacts.require("CollateralToken"); // IMBTC
-const PaymentToken = artifacts.require("PaymentToken"); // USDC
-const MarketContractFactoryMPX = artifacts.require("MarketContractFactoryMPX");
-const MarketContractMPX = artifacts.require("MarketContractMPX");
-const MarketCollateralPool = artifacts.require("MarketCollateralPool");
-const PositionToken = artifacts.require("PositionToken"); // Long & Short tokens
-const DSProxy = artifacts.require("DSProxy");
+const MinterBridge = artifacts.require('MinterBridge');
+const MarketContractProxy = artifacts.require('MarketContractProxy');
+const CollateralToken = artifacts.require('CollateralToken'); // IMBTC
+const PaymentToken = artifacts.require('PaymentToken'); // USDC
+const MarketContractFactoryMPX = artifacts.require('MarketContractFactoryMPX');
+const MarketContractMPX = artifacts.require('MarketContractMPX');
+const MarketCollateralPool = artifacts.require('MarketCollateralPool');
+const PositionToken = artifacts.require('PositionToken'); // Long & Short tokens
+const DSProxy = artifacts.require('DSProxy');
 
 // Helper libraries
 const {
   PayoutCalculator
-} = require("../../honeylemon-intergration-tests/helpers/payout-calculator");
+} = require('../../honeylemon-intergration-tests/helpers/payout-calculator');
 
 const isMarketExpired = (contractIndex, contractDay) => {
   return contractIndex < contractDay ? false : true;
@@ -64,10 +64,10 @@ const calculateExpectedCollateralToReturn = (
   return neededCollateral;
 };
 
-const ADDRESS_ZERO = "0x0000000000000000000000000000000000000000";
+const ADDRESS_ZERO = '0x0000000000000000000000000000000000000000';
 
 contract(
-  "MarketContractProxy",
+  'MarketContractProxy',
   ([
     honeyLemonOracle,
     makerAddress,
@@ -101,79 +101,79 @@ contract(
       _expiration = Math.round(new Date().getTime() / 1000) + 3600 * 24 * 28;
     });
 
-    describe("Check deployment config", () => {
-      it("check honeylemon oracle address", async () => {
+    describe('Check deployment config', () => {
+      it('check honeylemon oracle address', async () => {
         assert.equal(
           await marketContractProxy.HONEY_LEMON_ORACLE_ADDRESS(),
           honeyLemonOracle,
-          "Honeylemon oracle address mismatch"
+          'Honeylemon oracle address mismatch'
         );
       });
-      it("check 0x minter bridge address", async () => {
+      it('check 0x minter bridge address', async () => {
         assert.equal(
           await marketContractProxy.MINTER_BRIDGE_ADDRESS(),
           minterBridge.address,
-          "0x minter bridge address mismatch"
+          '0x minter bridge address mismatch'
         );
       });
-      it("check collateral token address", async () => {
+      it('check collateral token address', async () => {
         assert.equal(
           await marketContractProxy.COLLATERAL_TOKEN_ADDRESS(),
           imbtc.address,
-          "Collateral token address mismatch"
+          'Collateral token address mismatch'
         );
       });
-      it("check floor price", async () => {
+      it('check floor price', async () => {
         assert.equal(
           (await marketContractProxy.marketContractSpecs(0)).toString(),
-          "0",
-          "Floor price mismatch"
+          '0',
+          'Floor price mismatch'
         );
       });
-      it("check cap price", async () => {
+      it('check cap price', async () => {
         assert.equal(
           (await marketContractProxy.marketContractSpecs(1)).toString(),
-          "0",
-          "Cap price mismatch"
+          '0',
+          'Cap price mismatch'
         );
       });
-      it("check cap price", async () => {
+      it('check cap price', async () => {
         assert.equal(
           (await marketContractProxy.marketContractSpecs(2)).toString(),
-          "8",
-          "Price decimal places mismatch"
+          '8',
+          'Price decimal places mismatch'
         );
       });
-      it("check quantity multiplier", async () => {
+      it('check quantity multiplier', async () => {
         assert.equal(
           (await marketContractProxy.marketContractSpecs(3)).toString(),
-          "1",
-          "Qty multiplier places mismatch"
+          '1',
+          'Qty multiplier places mismatch'
         );
       });
-      it("check fee in basis points", async () => {
+      it('check fee in basis points', async () => {
         assert.equal(
           (await marketContractProxy.marketContractSpecs(4)).toString(),
-          "0",
-          "Fee in basis points mismatch"
+          '0',
+          'Fee in basis points mismatch'
         );
       });
-      it("check market fee in basis points", async () => {
+      it('check market fee in basis points', async () => {
         assert.equal(
           (await marketContractProxy.marketContractSpecs(5)).toString(),
-          "0",
-          "Market fee in basis points mismatch"
+          '0',
+          'Market fee in basis points mismatch'
         );
       });
     });
 
-    describe("Check permissions", async () => {
-      it("should revert setting oracle address by non-owner", async () => {
+    describe('Check permissions', async () => {
+      it('should revert setting oracle address by non-owner', async () => {
         await expectRevert.unspecified(
           marketContractProxy.setOracleAddress(honeyLemonOracle, { from: random })
         );
       });
-      it("should revert setting minter bridge address by non-owner", async () => {
+      it('should revert setting minter bridge address by non-owner', async () => {
         await expectRevert.unspecified(
           marketContractProxy.setMinterBridgeAddress(minterBridge.address, {
             from: random
@@ -182,13 +182,13 @@ contract(
       });
     });
 
-    describe("deploy new market contract", async () => {
+    describe('deploy new market contract', async () => {
       const _marketAndsTokenNames = [];
-      _marketAndsTokenNames.push(web3.utils.fromAscii("BTC"));
-      _marketAndsTokenNames.push(web3.utils.fromAscii("MRI-BTC-28D-00000000-Long"));
-      _marketAndsTokenNames.push(web3.utils.fromAscii("MRI-BTC-28D-00000000-Short"));
+      _marketAndsTokenNames.push(web3.utils.fromAscii('BTC'));
+      _marketAndsTokenNames.push(web3.utils.fromAscii('MRI-BTC-28D-00000000-Long'));
+      _marketAndsTokenNames.push(web3.utils.fromAscii('MRI-BTC-28D-00000000-Short'));
 
-      it("generate contract specs", async () => {
+      it('generate contract specs', async () => {
         let _capPrice = calculateCapPrice(28, _currentMri);
         let dailySpecs = await marketContractProxy.generateContractSpecs(
           _currentMri,
@@ -198,16 +198,16 @@ contract(
         assert.equal(
           _capPrice.precision(4).toString(),
           new BigNumber(dailySpecs[1].toString()).precision(4).toString(),
-          "Cap price mismatch"
+          'Cap price mismatch'
         );
         assert.equal(
           _expiration,
           dailySpecs[6].toString(),
-          "Expiration timestamp mismatch"
+          'Expiration timestamp mismatch'
         );
       });
 
-      it("should revert daily settlement from address other than honeylemon oracle", async () => {
+      it('should revert daily settlement from address other than honeylemon oracle', async () => {
         await expectRevert.unspecified(
           marketContractProxy.dailySettlement(
             0,
@@ -219,16 +219,16 @@ contract(
         );
       });
 
-      it("should revert daily settlement when passed MRI equal to zero", async () => {
+      it('should revert daily settlement when passed MRI equal to zero', async () => {
         await expectRevert(
           marketContractProxy.dailySettlement(0, 0, _marketAndsTokenNames, _expiration, {
             from: honeyLemonOracle
           }),
-          "Current MRI value cant be zero"
+          'Current MRI value cant be zero'
         );
       });
 
-      it("daily settlement", async () => {
+      it('daily settlement', async () => {
         let allMarketContractsBefore = await marketContractProxy.getAllMarketContracts();
 
         await marketContractProxy.dailySettlement(
@@ -248,28 +248,28 @@ contract(
         assert.equal(
           (await marketContractProxy.getLatestMri()).toString(),
           _currentMri,
-          "latest MRI value mismatch"
+          'latest MRI value mismatch'
         );
         assert.equal(
           allMarketContractsAfter.length - allMarketContractsBefore.length,
           1,
-          "Market contracts array length mismatch"
+          'Market contracts array length mismatch'
         );
         assert.equal(
           await marketContractProxy.getLatestMarketContract(),
           allMarketContractsAfter[0],
-          "Latest market contract address mismatch"
+          'Latest market contract address mismatch'
         );
         assert.equal(
           await marketContractProxy.getLatestMarketCollateralPool(),
           marketCollateralPool,
-          "Latest market collateral pool address mismatch"
+          'Latest market collateral pool address mismatch'
         );
       });
     });
 
-    describe("Collateral requirement", () => {
-      it("calculate required collateral", async () => {
+    describe('Collateral requirement', () => {
+      it('calculate required collateral', async () => {
         let amount = new BigNumber(100);
         let expectedCollateralRequirement = amount
           .multipliedBy(_currentMri)
@@ -290,12 +290,12 @@ contract(
         assert.equal(
           absoluteDriftError.lt(new BigNumber(0.001)),
           true,
-          "collateral required mismatch"
+          'collateral required mismatch'
         );
       });
     });
 
-    describe("Mint positions token", () => {
+    describe('Mint positions token', () => {
       const amount = new BigNumber(100);
       let neededCollateral;
 
@@ -319,7 +319,7 @@ contract(
         );
       });
 
-      it("should revert minting positions tokens if caller is not minter bridge contract", async () => {
+      it('should revert minting positions tokens if caller is not minter bridge contract', async () => {
         await expectRevert(
           marketContractProxy.mintPositionTokens(
             amount.toString(),
@@ -327,11 +327,11 @@ contract(
             makerAddress,
             { from: random }
           ),
-          "Only Minter Bridge"
+          'Only Minter Bridge'
         );
       });
 
-      it("mint positions tokens", async () => {
+      it('mint positions tokens', async () => {
         // get market contract
         let latestMarketContractAddr = await marketContractProxy.getLatestMarketContract();
         let latestMarketContract = await MarketContractMPX.at(latestMarketContractAddr);
@@ -373,38 +373,38 @@ contract(
             .minus(makerLongTokenBalanceBefore)
             .toString(),
           0,
-          "Miner long token balance mismatch"
+          'Miner long token balance mismatch'
         );
         assert.equal(
           new BigNumber((await marketContractProxy.balanceOf(takerAddress)).toString())
             .minus(takerLongTokenBalanceBefore)
             .toString(),
           amount.toString(),
-          "Investor long token balance mismatch"
+          'Investor long token balance mismatch'
         );
         assert.equal(
           new BigNumber((await sToken.balanceOf(makerAddress)).toString())
             .minus(makerShortTokenBalanceBefore)
             .toString(),
           amount.toString(),
-          "Miner short token balance mismatch"
+          'Miner short token balance mismatch'
         );
         assert.equal(
           new BigNumber((await sToken.balanceOf(takerAddress)).toString())
             .minus(takerShortTokenBalanceBefore)
             .toString(),
           0,
-          "Investor short token balance mismatch"
+          'Investor short token balance mismatch'
         );
         assert.equal(
           (await imbtc.balanceOf(marketCollateralPool.address)).toString(),
           neededCollateral.toString(),
-          "Market collateral pool balance mismatch"
+          'Market collateral pool balance mismatch'
         );
       });
     });
 
-    describe("Contract settlement", () => {
+    describe('Contract settlement', () => {
       before(async () => {
         // deploy 27 more contract to get expired ones
         let targetLength = new BigNumber(
@@ -414,9 +414,9 @@ contract(
 
         for (let i = 0; i < targetLength - currentLength; i++) {
           let _marketAndsTokenNames = [];
-          _marketAndsTokenNames.push(web3.utils.fromAscii("BTC"));
-          _marketAndsTokenNames.push(web3.utils.fromAscii("MRI-BTC-28D-00000000-Long"));
-          _marketAndsTokenNames.push(web3.utils.fromAscii("MRI-BTC-28D-00000000-Short"));
+          _marketAndsTokenNames.push(web3.utils.fromAscii('BTC'));
+          _marketAndsTokenNames.push(web3.utils.fromAscii('MRI-BTC-28D-00000000-Long'));
+          _marketAndsTokenNames.push(web3.utils.fromAscii('MRI-BTC-28D-00000000-Short'));
           let _mri = new BigNumber(pc.getMRIDataForDay(i + 1)).multipliedBy(
             new BigNumber(1e8)
           );
@@ -459,24 +459,24 @@ contract(
         assert.equal(
           new BigNumber(await marketContractProxy.CONTRACT_DURATION_DAYS()).toFixed(),
           targetLength,
-          "market length mismatch"
+          'market length mismatch'
         );
       });
 
-      describe("case: latestMri > PRICE_CAP", async () => {
-        it("deploy new contract and settle contract #1: case Mri > PRICE_CAP", async () => {
+      describe('case: latestMri > PRICE_CAP', async () => {
+        it('deploy new contract and settle contract #1: case Mri > PRICE_CAP', async () => {
           let marketsContracts = await marketContractProxy.getAllMarketContracts();
           assert.equal(
             (await marketContractProxy.getExpiringMarketContract()).toString(),
             marketsContracts[0],
-            "expiring market contract mismatch"
+            'expiring market contract mismatch'
           );
 
           // deploy new contract & settle first market contract
           let _marketAndsTokenNames = [];
-          _marketAndsTokenNames.push(web3.utils.fromAscii("BTC"));
-          _marketAndsTokenNames.push(web3.utils.fromAscii("MRI-BTC-28D-00000000-Long"));
-          _marketAndsTokenNames.push(web3.utils.fromAscii("MRI-BTC-28D-00000000-Short"));
+          _marketAndsTokenNames.push(web3.utils.fromAscii('BTC'));
+          _marketAndsTokenNames.push(web3.utils.fromAscii('MRI-BTC-28D-00000000-Long'));
+          _marketAndsTokenNames.push(web3.utils.fromAscii('MRI-BTC-28D-00000000-Short'));
           let _loopbackMri = new BigNumber(1).multipliedBy(new BigNumber(1e8));
           let _mri = new BigNumber(pc.getMRIDataForDay(29)).multipliedBy(
             new BigNumber(1e8)
@@ -496,21 +496,21 @@ contract(
           assert.equal(
             (await marketContractMpx.lastPrice()).toString(),
             _loopbackMri.toString(),
-            "last MRI value mismatch"
+            'last MRI value mismatch'
           );
           assert.isAbove(
             (await marketContractMpx.lastPrice()).toNumber(),
             (await marketContractMpx.PRICE_CAP()).toNumber(),
-            "latest pushed MRI is not above price cap"
+            'latest pushed MRI is not above price cap'
           );
           assert.equal(
             await marketContractMpx.isSettled(),
             true,
-            "market contract did not settle when latest MRI above price cap"
+            'market contract did not settle when latest MRI above price cap'
           );
         });
 
-        it("should revert settling an already settled contract", async () => {
+        it('should revert settling an already settled contract', async () => {
           let marketsContracts = await marketContractProxy.getAllMarketContracts();
 
           await expectRevert.unspecified(
@@ -522,7 +522,7 @@ contract(
           );
         });
 
-        it("redeem long&short token", async () => {
+        it('redeem long&short token', async () => {
           let marketsContracts = await marketContractProxy.getAllMarketContracts();
           let marketContractMpx = await MarketContractMPX.at(marketsContracts[0]);
 
@@ -593,17 +593,17 @@ contract(
           assert.equal(
             makerImbtcBalanceAfter.minus(makerImbtcBalanceBefore).toString(),
             expectedMakerReturnedCollateral.toString(),
-            "maker returned collateral mismatch"
+            'maker returned collateral mismatch'
           );
           assert.equal(
             takerImbtcBalanceAfter.minus(takerImbtcBalanceBefore).toString(),
             expectedTakerReturnedCollateral.toString(),
-            "taker returned collateral mismatch"
+            'taker returned collateral mismatch'
           );
         });
       });
 
-      describe("case: current date passed expiration date", async () => {
+      describe('case: current date passed expiration date', async () => {
         before(async () => {
           let marketsContracts = await marketContractProxy.getAllMarketContracts();
           let marketContractMpx = await MarketContractMPX.at(marketsContracts[1]);
@@ -611,19 +611,19 @@ contract(
           await time.increaseTo((await marketContractMpx.EXPIRATION()).toNumber() + 10);
         });
 
-        it("deploy new contract and settle contract #2: case now > EXPIRATION", async () => {
+        it('deploy new contract and settle contract #2: case now > EXPIRATION', async () => {
           let marketsContracts = await marketContractProxy.getAllMarketContracts();
           assert.equal(
             (await marketContractProxy.getExpiringMarketContract()).toString(),
             marketsContracts[1],
-            "expiring market contract mismatch"
+            'expiring market contract mismatch'
           );
 
           // deploy new contract & settle first market contract
           let _marketAndsTokenNames = [];
-          _marketAndsTokenNames.push(web3.utils.fromAscii("BTC"));
-          _marketAndsTokenNames.push(web3.utils.fromAscii("MRI-BTC-28D-00000000-Long"));
-          _marketAndsTokenNames.push(web3.utils.fromAscii("MRI-BTC-28D-00000000-Short"));
+          _marketAndsTokenNames.push(web3.utils.fromAscii('BTC'));
+          _marketAndsTokenNames.push(web3.utils.fromAscii('MRI-BTC-28D-00000000-Long'));
+          _marketAndsTokenNames.push(web3.utils.fromAscii('MRI-BTC-28D-00000000-Short'));
           let _loopbackMri = new BigNumber(pc.getMRIDataForDay(30)).multipliedBy(
             new BigNumber(1e8)
           );
@@ -645,27 +645,27 @@ contract(
           assert.equal(
             (await marketContractMpx.lastPrice()).toString(),
             _loopbackMri.toString(),
-            "last MRI value mismatch"
+            'last MRI value mismatch'
           );
           assert.isBelow(
             (await marketContractMpx.lastPrice()).toNumber(),
             (await marketContractMpx.PRICE_CAP()).toNumber(),
-            "latest pushed MRI is not below price cap"
+            'latest pushed MRI is not below price cap'
           );
           assert.isAbove(
             (await marketContractMpx.lastPrice()).toNumber(),
             (await marketContractMpx.PRICE_FLOOR()).toNumber(),
-            "latest pushed MRI is not above price floor"
+            'latest pushed MRI is not above price floor'
           );
           assert.equal(
             await marketContractMpx.isSettled(),
             true,
-            "market contract did not settle when latest MRI above price cap"
+            'market contract did not settle when latest MRI above price cap'
           );
         });
       });
 
-      describe("Arbitrate settlement", async () => {
+      describe('Arbitrate settlement', async () => {
         let amount = new BigNumber(10);
         let marketContractMpx,
           makerReturnedCollateralBeforeArbitrate,
@@ -678,9 +678,9 @@ contract(
           marketContractMpx = await MarketContractMPX.at(marketsContracts[2]);
 
           let _marketAndsTokenNames = [];
-          _marketAndsTokenNames.push(web3.utils.fromAscii("BTC"));
-          _marketAndsTokenNames.push(web3.utils.fromAscii("MRI-BTC-28D-00000000-Long"));
-          _marketAndsTokenNames.push(web3.utils.fromAscii("MRI-BTC-28D-00000000-Short"));
+          _marketAndsTokenNames.push(web3.utils.fromAscii('BTC'));
+          _marketAndsTokenNames.push(web3.utils.fromAscii('MRI-BTC-28D-00000000-Long'));
+          _marketAndsTokenNames.push(web3.utils.fromAscii('MRI-BTC-28D-00000000-Short'));
           let _mri = new BigNumber(pc.getMRIDataForDay(30)).multipliedBy(
             new BigNumber(1e8)
           );
@@ -734,12 +734,12 @@ contract(
           assert.equal(
             (await marketContractMpx.lastPrice()).toString(),
             _mri.toString(),
-            "last price value mismatch"
+            'last price value mismatch'
           );
-          assert.equal(await marketContractMpx.isSettled(), true, "market not settled");
+          assert.equal(await marketContractMpx.isSettled(), true, 'market not settled');
         });
 
-        it("arbitrate settlement value", async () => {
+        it('arbitrate settlement value', async () => {
           let makerImbtcBalanceBefore = new BigNumber(
             (await imbtc.balanceOf(makerAddress)).toString()
           );
@@ -756,9 +756,9 @@ contract(
           assert.equal(
             (await marketContractMpx.lastPrice()).toString(),
             _mri.toString(),
-            "last price value mismatch"
+            'last price value mismatch'
           );
-          assert.equal(await marketContractMpx.isSettled(), true, "market not settled");
+          assert.equal(await marketContractMpx.isSettled(), true, 'market not settled');
 
           makerReturnedCollateralAfterArbitrate = calculateExpectedCollateralToReturn(
             new BigNumber((await marketContractMpx.PRICE_FLOOR()).toString()),
@@ -815,28 +815,28 @@ contract(
           assert.equal(
             makerImbtcBalanceAfter.minus(makerImbtcBalanceBefore).toString(),
             makerReturnedCollateralAfterArbitrate.toString(),
-            "maker returned collateral mismatch"
+            'maker returned collateral mismatch'
           );
           assert.equal(
             takerImbtcBalanceAfter.minus(takerImbtcBalanceBefore).toString(),
             takerrReturnedCollateralAfterArbitrate.toString(),
-            "taker returned collateral mismatch"
+            'taker returned collateral mismatch'
           );
         });
       });
     });
 
-    describe("DSProxy", () => {
-      it("create a proxy wallet for maker & taker", async () => {
+    describe('DSProxy', () => {
+      it('create a proxy wallet for maker & taker', async () => {
         assert.equal(
           await marketContractProxy.getUserAddressOrDSProxy(makerAddress),
           makerAddress,
-          "maker address mismatch"
+          'maker address mismatch'
         );
         assert.equal(
           await marketContractProxy.getUserAddressOrDSProxy(takerAddress),
           takerAddress,
-          "taker address mismatch"
+          'taker address mismatch'
         );
 
         await marketContractProxy.createDSProxyWallet({ from: makerAddress });
@@ -852,16 +852,16 @@ contract(
         assert.equal(
           makerAddress,
           await marketContractProxy.dSProxyToAddress(makerDsProxyWallet),
-          "maker address mismatch"
+          'maker address mismatch'
         );
         assert.equal(
           takerAddress,
           await marketContractProxy.dSProxyToAddress(takerDsProxyWallet),
-          "taker address mismatch"
+          'taker address mismatch'
         );
       });
 
-      it("batch redeem", async () => {
+      it('batch redeem', async () => {
         // for batch redeem txs
         let longTokensAddresses = [];
         let shortTokensAddresses = [];
@@ -882,9 +882,9 @@ contract(
           i++
         ) {
           let _marketAndsTokenNames = [];
-          _marketAndsTokenNames.push(web3.utils.fromAscii("BTC"));
-          _marketAndsTokenNames.push(web3.utils.fromAscii("MRI-BTC-28D-00000000-Long"));
-          _marketAndsTokenNames.push(web3.utils.fromAscii("MRI-BTC-28D-00000000-Short"));
+          _marketAndsTokenNames.push(web3.utils.fromAscii('BTC'));
+          _marketAndsTokenNames.push(web3.utils.fromAscii('MRI-BTC-28D-00000000-Long'));
+          _marketAndsTokenNames.push(web3.utils.fromAscii('MRI-BTC-28D-00000000-Short'));
           let _loopbackMri = new BigNumber(pc.getMRIDataForDay(i)).multipliedBy(
             new BigNumber(1e8)
           );
@@ -1023,12 +1023,12 @@ contract(
         assert.equal(
           makerImbtcBalanceAfter.minus(makerImbtcBalanceBefore).toString(),
           expectedMakerReturnedCollateral.toString(),
-          "maker returned collateral mismatch"
+          'maker returned collateral mismatch'
         );
         assert.equal(
           takerImbtcBalanceAfter.minus(takerImbtcBalanceBefore).toString(),
           expectedTakerReturnedCollateral.toString(),
-          "taker returned collateral mismatch"
+          'taker returned collateral mismatch'
         );
       });
     });

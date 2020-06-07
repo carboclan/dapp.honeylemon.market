@@ -32,11 +32,11 @@ library MathLib {
         return c;
     }
 
-    function divideFractional(uint256 a, uint256 numerator, uint256 denominator)
-        internal
-        pure
-        returns (uint256)
-    {
+    function divideFractional(
+        uint256 a,
+        uint256 numerator,
+        uint256 denominator
+    ) internal pure returns (uint256) {
         return multiply(a, numerator) / denominator;
     }
 
@@ -94,11 +94,11 @@ library MathLib {
     }
 
     /// @notice determines the amount of needed collateral for minting a long and short position token
-    function calculateTotalCollateral(uint priceFloor, uint priceCap, uint qtyMultiplier)
-        internal
-        pure
-        returns (uint)
-    {
+    function calculateTotalCollateral(
+        uint priceFloor,
+        uint priceCap,
+        uint qtyMultiplier
+    ) internal pure returns (uint) {
         return multiply(subtract(priceCap, priceFloor), qtyMultiplier);
     }
 

@@ -3,7 +3,9 @@
 // of tokens are what are expected.
 
 // Helper libraries
-const { PayoutCalculator } = require('../honeylemon-intergration-tests/helpers/payout-calculator');
+const {
+  PayoutCalculator
+} = require('../honeylemon-intergration-tests/helpers/payout-calculator');
 
 //Ox libs and tools
 const {
