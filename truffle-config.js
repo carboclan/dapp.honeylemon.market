@@ -10,7 +10,7 @@ module.exports = {
       port: process.env.TRUFFLE_DEVELOP_PORT || 8545,
       network_id: '*' // Match any network id
     },
-    "skip-migrations": {
+    'skip-migrations': {
       host: process.env.TRUFFLE_DEVELOP_HOST || 'localhost',
       port: process.env.TRUFFLE_DEVELOP_PORT || 8545,
       network_id: '*' // Match any network id

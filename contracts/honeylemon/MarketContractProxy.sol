@@ -1,9 +1,9 @@
 pragma solidity 0.5.2;
 
-import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
-import "openzeppelin-solidity/contracts/math/SafeMath.sol";
-import "openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol";
-import "openzeppelin-solidity/contracts/utils/ReentrancyGuard.sol";
+import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
+import 'openzeppelin-solidity/contracts/math/SafeMath.sol';
+import 'openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol';
+import 'openzeppelin-solidity/contracts/utils/ReentrancyGuard.sol';
 
 import '../marketprotocol/MarketCollateralPool.sol';
 import '../marketprotocol/mpx/MarketContractFactoryMPX.sol';
@@ -31,12 +31,9 @@ contract MarketContractProxy is ReentrancyGuard, Ownable {
     address public MINTER_BRIDGE_ADDRESS;
     address public COLLATERAL_TOKEN_ADDRESS; //imBTC
 
-    string public ORACLE_URL = 'null';
-    string public ORACLE_STATISTIC = 'null';
-
     uint public CONTRACT_DURATION_DAYS = 28;
     uint public CONTRACT_DURATION = CONTRACT_DURATION_DAYS * 24 * 60 * 60; // 28 days in seconds
-    uint public CONTRACT_COLLATERAL_RATIO = 135000000; //1.35e8; 1.35, with 8 decimal places
+    uint public CONTRACT_COLLATERAL_RATIO = 125000000; //1.25e8; 1.25, with 8 decimal places
 
     uint[7] public marketContractSpecs = [
         0, // floorPrice - the lower bound price for the CFD [constant]
@@ -80,6 +77,14 @@ contract MarketContractProxy is ReentrancyGuard, Ownable {
         address _minterBridge,
         address _imBTCTokenAddress
     ) public ReentrancyGuard() {
+        require(
+            _marketContractFactoryMPX != address(0),
+            'invalid MarketContractFactoryMPX address'
+        );
+        require(_honeyLemonOracle != address(0), 'invalid HoneyLemonOracle address');
+        require(_minterBridge != address(0), 'invalid MinterBridge address');
+        require(_imBTCTokenAddress != address(0), 'invalid IMBTC address');
+
         marketContractFactoryMPX = MarketContractFactoryMPX(_marketContractFactoryMPX);
         HONEY_LEMON_ORACLE_ADDRESS = _honeyLemonOracle;
         MINTER_BRIDGE_ADDRESS = _minterBridge;
@@ -153,6 +158,11 @@ contract MarketContractProxy is ReentrancyGuard, Ownable {
      * @param _honeyLemonOracleAddress oracle address
      */
     function setOracleAddress(address _honeyLemonOracleAddress) external onlyOwner {
+        require(
+            _honeyLemonOracleAddress != address(0),
+            'invalid HoneyLemonOracle address'
+        );
+
         HONEY_LEMON_ORACLE_ADDRESS = _honeyLemonOracleAddress;
     }
 
@@ -162,16 +172,9 @@ contract MarketContractProxy is ReentrancyGuard, Ownable {
      * @param _minterBridgeAddress 0x minter bridge address
      */
     function setMinterBridgeAddress(address _minterBridgeAddress) external onlyOwner {
-        MINTER_BRIDGE_ADDRESS = _minterBridgeAddress;
-    }
+        require(_minterBridgeAddress != address(0), 'invalid MinterBridge address');
 
-    /**
-     * @notice Set market contract specs
-     * @dev can only be called by owner
-     * @param _params array of specs
-     */
-    function setMarketContractSpecs(uint[7] calldata _params) external onlyOwner {
-        marketContractSpecs = _params;
+        MINTER_BRIDGE_ADDRESS = _minterBridgeAddress;
     }
 
     ////////////////////////
@@ -384,35 +387,34 @@ contract MarketContractProxy is ReentrancyGuard, Ownable {
      * Only one side can be redeemed at a time. This is to simplify redemption as the same caller
      * will likely never be both long and short in the same contract.
      * @param tokenAddresses long/short token addresses
-     * @param marketAddresses market contracts addresses
      * @param tokensToRedeem amount of token to redeem
-     * @param traderLong true => trader long; false => trader short
      */
     function batchRedeem(
         address[] memory tokenAddresses, // Address of the long or short token to redeem
-        address[] memory marketAddresses, // Address of the market protocol
-        uint256[] memory tokensToRedeem, // the number of tokens to redeem
-        bool[] memory traderLong // if the trader is long or short
+        uint256[] memory tokensToRedeem // the number of tokens to redeem
     ) public nonReentrant {
-        require(
-            tokenAddresses.length == marketAddresses.length &&
-                tokenAddresses.length == tokensToRedeem.length &&
-                tokenAddresses.length == traderLong.length,
-            'Invalid input params'
-        );
+        require(tokenAddresses.length == tokensToRedeem.length, 'Invalid input params');
         require(this.owner() == msg.sender, "You don't own this DSProxy GTFO");
+
         MarketContractMPX marketInstance;
         MarketCollateralPool marketCollateralPool;
-        ERC20 tokenInstance;
+        PositionToken tokenInstance;
+
         // Loop through all tokens and preform redemption
         for (uint256 i = 0; i < tokenAddresses.length; i++) {
-            marketInstance = MarketContractMPX(marketAddresses[i]);
+            tokenInstance = PositionToken(tokenAddresses[i]);
+
+            require(
+                tokenInstance.balanceOf(address(this)) >= tokensToRedeem[i],
+                'Insufficient position token balance'
+            );
+
+            marketInstance = MarketContractMPX(tokenInstance.owner());
             marketCollateralPool = getCollateralPool(marketInstance);
-            tokenInstance = ERC20(tokenAddresses[i]);
 
             tokenInstance.approve(address(marketInstance), tokensToRedeem[i]);
 
-            if (traderLong[i]) {
+            if (uint8(tokenInstance.MARKET_SIDE()) == 0) {
                 // redeem n long tokens and 0 short tokens
                 marketCollateralPool.settleAndClose(
                     address(marketInstance),
@@ -482,8 +484,8 @@ contract MarketContractProxy is ReentrancyGuard, Ownable {
         public
         onlyHoneyLemonOracle
     {
-        require(mri != 0, "The mri loockback value can not be 0");
-        require(marketContractAddress != address(0x0), "Invalid market contract address");
+        require(mri != 0, 'The mri loockback value can not be 0');
+        require(marketContractAddress != address(0x0), 'Invalid market contract address');
 
         MarketContractMPX marketContract = MarketContractMPX(marketContractAddress);
         marketContract.oracleCallBack(mri);
@@ -584,14 +586,15 @@ contract MarketContractProxy is ReentrancyGuard, Ownable {
             marketAndsTokenNames,
             COLLATERAL_TOKEN_ADDRESS,
             generateContractSpecs(currentMRI, expiration),
-            ORACLE_URL,
-            ORACLE_STATISTIC
+            'null', //ORACLE_URL
+            'null' // ORACLE_STATISTIC
         );
 
         // Add new market to storage
         uint index = marketContracts.push(contractAddress) - 1;
         addressToMarketId[contractAddress] = index;
         MarketContractMPX marketContract = MarketContractMPX(contractAddress);
+        marketContract.transferOwnership(owner());
         emit MarketContractDeployed(
             currentMRI,
             marketAndsTokenNames[0],

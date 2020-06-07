@@ -15,7 +15,7 @@ const ADDRESS_ZERO = '0x0000000000000000000000000000000000000000';
 
 contract(
   'MinterBridge',
-  ([owner, makerAddress, takerAddress, , , , , , _0xBridgeProxy, random]) => {
+  ([owner, makerAddress, takerAddress, , , , , _0xBridgeProxy, factoryOwner, random]) => {
     let minterBridge, marketContractProxy, collateralToken, sToken, lToken;
 
     before(async () => {
@@ -38,7 +38,9 @@ contract(
       it('check 0x Brdige Proxy address', async () => {
         assert.equal(
           (await minterBridge.ERC20_BRIDGE_PROXY_ADDRESS()).toLowerCase(),
-          (getContractAddressesForChainOrThrow(await web3.eth.net.getId()).erc20BridgeProxy).toLowerCase(),
+          getContractAddressesForChainOrThrow(
+            await web3.eth.net.getId()
+          ).erc20BridgeProxy.toLowerCase(),
           '0x bridge proxy address missmatch'
         );
       });

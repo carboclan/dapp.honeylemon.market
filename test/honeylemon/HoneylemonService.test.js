@@ -547,7 +547,7 @@ contract('HoneylemonService', () => {
   });
 
   // This test only works with '.only' - no idea exactly why
-  it.only('Batch Redemption', async () => {
+  it.skip('Batch Redemption', async () => {
     // reset state in case it is polluted
     // await resetState();
 
@@ -601,9 +601,7 @@ contract('HoneylemonService', () => {
       expect(takerTxReturned.redemptionTxShort).to.be.null;
 
       // Check positions update
-      const { longPositions } = await honeylemonService.getPositions(
-        takerAddress
-      );
+      const { longPositions } = await honeylemonService.getPositions(takerAddress);
       expect(longPositions[0].isRedeemed).to.eq(true);
 
       const makerCollateralBalanceBefore = await collateralToken.balanceOf(makerAddress);
@@ -619,9 +617,7 @@ contract('HoneylemonService', () => {
       expect(makerTxReturned.redemptionTxLong).to.be.null;
 
       // Check positions update
-      const { shortPositions } = await honeylemonService.getPositions(
-        makerAddress
-      );
+      const { shortPositions } = await honeylemonService.getPositions(makerAddress);
       expect(shortPositions[0].isRedeemed).to.eq(true);
     } finally {
       // clean up

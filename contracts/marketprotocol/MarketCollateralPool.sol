@@ -24,7 +24,8 @@ import './MarketContractRegistryInterface.sol';
 import 'openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol';
 import 'openzeppelin-solidity/contracts/token/ERC20/ERC20.sol';
 import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
-import "openzeppelin-solidity/contracts/utils/ReentrancyGuard.sol";
+import 'openzeppelin-solidity/contracts/utils/ReentrancyGuard.sol';
+
 
 /// @title MarketCollateralPool
 /// @notice This collateral pool houses all of the collateral for all market contracts currently in circulation.
@@ -58,7 +59,10 @@ contract MarketCollateralPool is ReentrancyGuard, Ownable {
         uint collateralUnlocked
     );
 
-    constructor(address marketContractRegistryAddress, address mktTokenAddress) public ReentrancyGuard() {
+    constructor(address marketContractRegistryAddress, address mktTokenAddress)
+        public
+        ReentrancyGuard()
+    {
         marketContractRegistry = marketContractRegistryAddress;
         mktToken = mktTokenAddress;
     }

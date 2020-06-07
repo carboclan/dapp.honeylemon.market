@@ -44,7 +44,7 @@ const MarketContractMPX = artifacts.require('marketContractMPX');
 const MarketCollateralPool = artifacts.require('MarketCollateralPool');
 
 // Calculation constants
-const necessaryCollateralRatio = 0.35; // for 135% collateralization
+const necessaryCollateralRatio = 0.25; // for 125% collateralization
 const multiplier = 28; // contract duration in days
 const collateralDecimals = 1e8; // scaling for BTC (8 decimal points)
 const paymentDecimals = 1e6; // scaling for USDT or USD (6 decimals)
@@ -381,6 +381,9 @@ async function runExport() {
     }
   );
 
+  // Advance time again to get past the settlement delay
+  await time.increase(contractDuration);
+
   /**********************************************
    * Redeem long and short tokens against market *
    ***********************************************/
@@ -390,12 +393,7 @@ async function runExport() {
   // This works by forwarding the call to the using Delegate call.
   // batchRedeem script within the `marketContractProxy`
   const unwindLongTokenTx = marketContractProxy.contract.methods
-    .batchRedeem(
-      [longToken.address],
-      [marketContract.address],
-      [makerAmountToMint],
-      [true] // to indicate the token is long
-    )
+    .batchRedeem([longToken.address], [makerAmountToMint])
     .encodeABI();
 
   await takerDSProxy.execute(marketContractProxy.address, unwindLongTokenTx, {
@@ -404,12 +402,7 @@ async function runExport() {
 
   // Also create the token for the short side to redeem.
   const unwindShortTokenTx = marketContractProxy.contract.methods
-    .batchRedeem(
-      [shortToken.address],
-      [marketContract.address],
-      [makerAmountToMint],
-      [false] // to indicate the token is short
-    )
+    .batchRedeem([shortToken.address], [makerAmountToMint])
     .encodeABI();
 
   await makerDSProxy.execute(marketContractProxy.address, unwindShortTokenTx, {
@@ -428,10 +421,10 @@ async function runExport() {
   console.log('6.1 Correct BTC collateral from maker👇');
   // Upper Bound = Miner Revenue Index * (1 + Necessary Collateral Ratio)
   // Necessary Collateral = Upper Bound * Multiplier
-  const upperBound = mriInput * (1 + necessaryCollateralRatio); //1 + 0.35
+  const upperBound = mriInput * (1 + necessaryCollateralRatio); //1 + 0.25
   const necessaryCollateralPerMRI = upperBound * multiplier * collateralDecimals; // upper bound over contract duration
   const expectedCollateralTaken = new BigNumber(mriInput)
-    .multipliedBy(new BigNumber('1.35'))
+    .multipliedBy(new BigNumber('1.25'))
     .multipliedBy(new BigNumber(multiplier))
     .multipliedBy(new BigNumber(collateralDecimals))
     .multipliedBy(new BigNumber(makerAmountToMint));

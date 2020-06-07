@@ -7,7 +7,7 @@ module.exports = {
       host: 'localhost',
       database: 'graph-node',
       password: 'password',
-      port: 5432,
+      port: 5432
     });
     await client.connect();
 
@@ -32,4 +32,4 @@ module.exports = {
       client.end();
     }
   }
-}
+};

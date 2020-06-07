@@ -6,7 +6,7 @@ const CollateralToken = artifacts.require('CollateralToken');
 const MarketContractFactoryMPX = artifacts.require('MarketContractFactoryMPX');
 
 module.exports = async function(deployer, network, accounts) {
-  if (network == "skip-migrations") return;
+  if (network == 'skip-migrations') return;
 
   // Deploy imBTC token
   await deployer.deploy(CollateralToken, 'Mock imBTC', 'imBTC', 1000000000000000, 8);
@@ -31,6 +31,8 @@ module.exports = async function(deployer, network, accounts) {
   );
 
   console.log('👉 Deployed Market Contract Proxy');
+
+  marketContractProxy.transferOwnership(process.env.HONEYLEMON_MULTISIG || accounts[8]);
 
   // Transfer all appropriate rights from the deployed market protocol to marketContractProxy:
   // Point the 0x MinterBridge to the marketContractProxy
