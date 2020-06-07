@@ -96,13 +96,14 @@ const MiningStatsPage: React.SFC = () => {
             opacity: 1
           }
         },
-        // dataLabels: {
-        //   enabled: true,
-        //   formatter: function () {
-        //     return this.point.name + '<br/>' + Highcharts.numberFormat(this.y || 0, 4);
-        //   },
-        //   style: { color: '#cece4b' }
-        // },
+        dataLabels: {
+          enabled: true,
+          formatter: function () {
+            // @ts-ignore
+            return this.point.desc + '<br/>' + Highcharts.numberFormat(this.y || 0, 4);
+          },
+          style: { color: '#cece4b' }
+        },
         enableMouseTracking: true
       }
     },
@@ -115,38 +116,31 @@ const MiningStatsPage: React.SFC = () => {
         valueSuffix: `$/TH/Day`
       },
       data: [
-        ...marketData.miningContracts.filter(c => c.duration <= 730).map(c => ({
-          x: Date.now() + c.duration * 1000 * 86400,
-          y: c.contract_cost,
-          desc: c.durationAlias,
+        ...marketData.miningContracts
+          .sort((c1, c2) => c1.duration < c2.duration ? -1 : 1)
+          .filter(c => c.duration <= 730).map(c => ({
+            x: Date.now() + c.duration * 1000 * 86400,
+            y: c.contract_cost,
+            desc: c.durationAlias,
         }))
       ]
     }, 
-  // {
-  //     name: 'Avg daily block rewards<br/>(assume constant price & difficulty)',
-  //     type: 'spline',
-  //     yAxis: 0,
-  //     color: 'white',
-  //     enableMouseTracking: false,
-  //     dataLabels: { enabled: false },
-  //     marker: {
-  //       enabled: false
-  //     },
-  //     dashStyle: 'Dash',
-  //     data: [
-  //       [Date.now(), miningPayoff],
-  //       ...(blockchain[coin].halvingTs > Date.now()) ?
-  //         _
-  //           .range(blockchain[coin].halvingTs, Date.now() + Math.min(maxDuration, 730) * 1000 * 86400, 1000 * 86400)
-  //           .map(ts => [
-  //             ts,
-  //             miningPayoff * (blockchain[coin].halvingTs - Date.now() + (ts - blockchain[coin].halvingTs) / 2) / (ts - Date.now())
-  //           ])
-  //         : [
-  //           [Date.now() + 730 * 1000 * 86400, miningPayoff]
-  //         ]
-  //     ]
-    // }
+  {
+      name: 'Avg daily block rewards<br/>(assume constant price & difficulty)',
+      type: 'spline',
+      yAxis: 0,
+      color: 'white',
+      enableMouseTracking: false,
+      dataLabels: { enabled: false },
+      marker: {
+        enabled: false
+      },
+      dashStyle: 'Dash',
+      data: [
+        [Date.now(), marketData.miningPayoff],
+        [Date.now() + 730 * 1000 * 86400, marketData.miningPayoff]
+      ]
+    }
   ]}
 
   return (

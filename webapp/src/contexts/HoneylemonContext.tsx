@@ -31,6 +31,7 @@ export type HoneylemonContext = {
     currentMRI: number,
     currentBTCSpotPrice: number,
     btcDifficultyAdjustmentDate: Date,
+    miningPayoff: number,
   }
   deployDSProxyContract(): Promise<void>,
   approveToken(tokenType: TokenType): Promise<void>,
@@ -121,8 +122,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
       try {
         const marketDataApiUrl = process.env.REACT_APP_MARKET_DATA_API_URL;
         if (marketDataApiUrl) {
-          const { contracts, ...rest } = await (await fetch(marketDataApiUrl)).json();
-          console.log(rest);
+          const { contracts } = await (await fetch(marketDataApiUrl)).json();
           setMiningContracts(contracts);
         }
       } catch (error) {
@@ -268,6 +268,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
           currentBTCSpotPrice,
           currentMRI,
           btcDifficultyAdjustmentDate,
+          miningPayoff: 0.0953,
         },
         deployDSProxyContract,
         approveToken,
