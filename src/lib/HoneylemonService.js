@@ -25,7 +25,7 @@ const TH_DECIMALS = 0; // TH has 6 decimals
 const PAYMENT_TOKEN_DECIMALS = 6; // USDT has 6 decimals
 const COLLATERAL_TOKEN_DECIMALS = 8; // imBTC has 8 decimals
 const SHIFT_PRICE_BY = TH_DECIMALS - PAYMENT_TOKEN_DECIMALS;
-const CONTRACT_DURATION = 28 // Days
+const CONTRACT_DURATION = 28; // Days
 
 class HoneylemonService {
   constructor(
@@ -347,7 +347,9 @@ class HoneylemonService {
   }
 
   async getOpenOrders(makerAddress) {
-    const ordersResponse = await this.apiClient.getOrdersAsync({ makerAddress: makerAddress.toLowerCase() });
+    const ordersResponse = await this.apiClient.getOrdersAsync({
+      makerAddress: makerAddress.toLowerCase()
+    });
     ordersResponse.records.map(({ order, metaData }) => {
       metaData.price = order.takerAssetAmount
         .dividedBy(order.makerAssetAmount)
@@ -442,7 +444,10 @@ class HoneylemonService {
         .encodeABI();
 
       // Execute function call on DSProxy
-      const method = traderDSProxy.methods.execute(this.marketContractProxyAddress, batchRedemptionLongTx);
+      const method = traderDSProxy.methods.execute(
+        this.marketContractProxyAddress,
+        batchRedemptionLongTx
+      );
       const gas = await method.estimateGas({ from: recipientAddress, gas: 9000000 });
       redemptionTxLong = await method.send({ from: recipientAddress, gas });
     }
@@ -474,7 +479,10 @@ class HoneylemonService {
         .batchRedeem(shortParams.tokenAddresses, shortParams.numTokens)
         .encodeABI();
 
-      const method = traderDSProxy.methods.execute(this.marketContractProxyAddress, batchRedemptionShortTx);
+      const method = traderDSProxy.methods.execute(
+        this.marketContractProxyAddress,
+        batchRedemptionShortTx
+      );
       const gas = await method.estimateGas({ from: recipientAddress, gas: 9000000 });
       redemptionTxShort = method.send({ from: recipientAddress, gas });
     }
@@ -602,9 +610,9 @@ class HoneylemonService {
       );
       marketContract.setProvider(this.provider);
 
-      position.canRedeem = !position.isRedeemed && await marketContract.methods
-        .isPostSettlementDelay()
-        .call();
+      position.canRedeem =
+        !position.isRedeemed &&
+        (await marketContract.methods.isPostSettlementDelay().call());
     }
 
     return positions;
@@ -683,11 +691,11 @@ const CONTRACTS_QUERY = /* GraphQL */ `
   }
 `;
 
-module.exports =  {
+module.exports = {
   HoneylemonService,
   PAYMENT_TOKEN_DECIMALS,
   COLLATERAL_TOKEN_DECIMALS,
   POSITIONS_QUERY,
   CONTRACTS_QUERY,
-  CONTRACT_DURATION,
+  CONTRACT_DURATION
 };

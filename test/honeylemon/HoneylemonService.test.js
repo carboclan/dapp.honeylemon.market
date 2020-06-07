@@ -20,7 +20,7 @@ const {
   POSITIONS_QUERY,
   CONTRACTS_QUERY,
   PAYMENT_TOKEN_DECIMALS,
-  CONTRACT_DURATION,
+  CONTRACT_DURATION
 } = require('../../src/lib/HoneylemonService');
 const { revertToSnapShot, takeSnapshot } = require('../helpers/snapshot');
 const { resetSubgraph } = require('../helpers/subgraph');
@@ -442,7 +442,11 @@ contract('HoneylemonService', () => {
       );
 
       await fill0xOrderForAddresses(4, takerAddress, makerAddress);
-      await createNewMarketProtocolContract(mriInput * CONTRACT_DURATION, mriInput, `MRI-BTC-${CONTRACT_DURATION}D-test`);
+      await createNewMarketProtocolContract(
+        mriInput * CONTRACT_DURATION,
+        mriInput,
+        `MRI-BTC-${CONTRACT_DURATION}D-test`
+      );
       await fill0xOrderForAddresses(5, takerAddress, makerAddress);
 
       // Wait for subgraph to index the events
@@ -564,7 +568,11 @@ contract('HoneylemonService', () => {
 
       // Increase the time by one day. Deploy a new contract to simulate having tokens over multiple days.
       await time.increase(24 * 60 * 60 + 1);
-      await createNewMarketProtocolContract(mriInput * CONTRACT_DURATION, mriInput, `MRI-BTC-${CONTRACT_DURATION}D-test`);
+      await createNewMarketProtocolContract(
+        mriInput * CONTRACT_DURATION,
+        mriInput,
+        `MRI-BTC-${CONTRACT_DURATION}D-test`
+      );
       await fill0xOrderForAddresses(4, takerAddress, makerAddress);
 
       // fast forward 28 days and deploy another 28 contracts to settle all those deployed.
@@ -580,11 +588,14 @@ contract('HoneylemonService', () => {
         })
       );
 
+      // Fast forward another day to be past the settlement delay
+      await time.increase(CONTRACT_DURATION * 24 * 60 * 60 + 1);
+
       // We should now be able to redeem all 3 sets of tokens, spanning two different markets
       // in one transaction per user. Test to ensure the balance change as expected
 
       // Wait for subgraph to index the events
-      await delay(3000);
+      await delay(12000);
 
       const takerCollateralBalanceBefore = await collateralToken.balanceOf(takerAddress);
       const takerTxReturned = await honeylemonService.batchRedeem(takerAddress);
