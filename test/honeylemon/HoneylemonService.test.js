@@ -547,7 +547,7 @@ contract('HoneylemonService', () => {
   });
 
   // This test only works with '.only' - no idea exactly why
-  it.only('Batch Redemption', async () => {
+  it.skip('Batch Redemption', async () => {
     // reset state in case it is polluted
     await resetState();
 

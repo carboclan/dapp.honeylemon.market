@@ -23,7 +23,7 @@ const isMarketExpired = (contractIndex, contractDay) => {
 const calculateCapPrice = (duration, mri) => {
   return new BigNumber(duration)
     .multipliedBy(mri)
-    .multipliedBy(1.35e8)
+    .multipliedBy(1.25e8)
     .dividedBy(1e8);
 };
 
@@ -274,7 +274,7 @@ contract(
         let expectedCollateralRequirement = amount
           .multipliedBy(_currentMri)
           .multipliedBy(28)
-          .multipliedBy(1.35);
+          .multipliedBy(1.25);
         let collateralRequired = await marketContractProxy.calculateRequiredCollateral(
           amount.toString()
         );
