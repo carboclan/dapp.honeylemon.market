@@ -72,10 +72,12 @@ const useStyles = makeStyles(({ spacing, palette }) => ({
 const OfferContractPage: React.SFC = () => {
   const { honeylemonService,
     COLLATERAL_TOKEN_DECIMALS,
+    COLLATERAL_TOKEN_NAME,
     collateralTokenAllowance,
     collateralTokenBalance,
     CONTRACT_DURATION,
     isDsProxyDeployed,
+    PAYMENT_TOKEN_NAME,
   } = useHoneylemon();
   const { address = '0x' } = useOnboard();
   const classes = useStyles();
@@ -122,7 +124,7 @@ const OfferContractPage: React.SFC = () => {
   const sufficientCollateral = collateralTokenBalance >= collateralAmount;
 
   const errors = [];
-  !sufficientCollateral && errors.push("You do not have enough imBTC to proceed");
+  !sufficientCollateral && errors.push(`You do not have enough ${COLLATERAL_TOKEN_NAME} to proceed`);
 
   const handleCloseOfferDialog = () => {
     setShowOfferModal(false);
@@ -176,14 +178,14 @@ const OfferContractPage: React.SFC = () => {
 
   const activeStep = getActiveStep();
 
-  const steps = ['Deploy Wallet', 'Approve USDT', 'Buy Contracts'];
+  const steps = ['Deploy Wallet', `Approve ${COLLATERAL_TOKEN_NAME}`, 'Offer Contracts'];
 
   const getStepContent = (step: number) => {
     switch (step) {
       case 0:
         return `Deploy a wallet contract. This is a once-off operation`;
       case 1:
-        return 'Approve imBTC. This is a once-off operation';
+        return `Approve ${COLLATERAL_TOKEN_NAME}. This is a once-off operation`;
       case 2:
         return `Finalize Offer`;
     }
@@ -291,11 +293,11 @@ const OfferContractPage: React.SFC = () => {
               <TableBody>
                 <TableRow>
                   <TableCell>Contract Total</TableCell>
-                  <TableCell align='right'>{`$ ${totalContractPrice.toLocaleString()} USDT`}</TableCell>
+                  <TableCell align='right'>{`$ ${totalContractPrice.toLocaleString()} ${PAYMENT_TOKEN_NAME}`}</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell>Collateral Required</TableCell>
-                  <TableCell align='right'>{`${collateralAmount.toLocaleString()} imBTC`}</TableCell>
+                  <TableCell align='right'>{`${collateralAmount.toLocaleString()} ${COLLATERAL_TOKEN_NAME}`}</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell>Duration</TableCell>
@@ -335,9 +337,9 @@ const OfferContractPage: React.SFC = () => {
         <Grid item xs={12}>
           <Typography>
             You are offering a <strong>{hashAmount.toLocaleString()}TH contract</strong> at&nbsp;
-            <strong>USDT {hashPrice.toLocaleString()}/Th/day</strong>. You will need to
-            post <strong>{collateralAmount.toLocaleString()} imBTC</strong> as collateral.
-            The contract will start when your order is filled and you will receive payment in USDT
+            <strong>{PAYMENT_TOKEN_NAME} {hashPrice.toLocaleString()}/Th/day</strong>. You will need to
+            post <strong>{collateralAmount.toLocaleString()} {COLLATERAL_TOKEN_NAME}</strong> as collateral.
+            The contract will start when your order is filled and you will receive payment in ${PAYMENT_TOKEN_NAME}&nbsp;
             upfront. At the end of <strong>{CONTRACT_DURATION} days</strong>, your counterparty will
             receive the network average BTC block reward & transaction fees per TH based on the average
             value of the <Link href='#' underline='always' onClick={() => setShowMRIInformationModal(true)}>

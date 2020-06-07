@@ -69,6 +69,7 @@ const useStyles = makeStyles(({ transitions, palette, mixins, spacing }) => ({
     padding: spacing(0, 1),
     // necessary for content to be below app bar
     ...mixins.toolbar,
+    minHeight: '64px',
     justifyContent: 'flex-start',
   },
   content: {
@@ -87,7 +88,14 @@ function AppWrapper(props: { children: ReactNode }) {
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
   const { isReady, address, network, resetOnboard } = useOnboard();
-  const { collateralTokenBalance, COLLATERAL_TOKEN_DECIMALS, paymentTokenBalance, PAYMENT_TOKEN_DECIMALS } = useHoneylemon();
+  const { 
+    collateralTokenBalance, 
+    COLLATERAL_TOKEN_DECIMALS, 
+    COLLATERAL_TOKEN_NAME,
+    paymentTokenBalance, 
+    PAYMENT_TOKEN_DECIMALS,
+    PAYMENT_TOKEN_NAME,
+  } = useHoneylemon();
 
   const handleLogout = () => {
     resetOnboard();
@@ -125,7 +133,8 @@ function AppWrapper(props: { children: ReactNode }) {
         <Toolbar>
           <HoneyLemonLogo className={classes.logo} onClick={() => forwardTo('/')} />
           <Typography
-            className={classes.title}
+            className={clsx(classes.title,
+              { [classes.hide]: open})}
             onClick={() => forwardTo('/')}>
             honeylemon.market
           </Typography>
@@ -195,7 +204,7 @@ function AppWrapper(props: { children: ReactNode }) {
                 useGrouping: true,
                 maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS,
               })}`}
-              secondary='imBTC'
+              secondary={COLLATERAL_TOKEN_NAME}
               primaryTypographyProps={{
                 align: 'right',
                 noWrap: true,
@@ -214,7 +223,7 @@ function AppWrapper(props: { children: ReactNode }) {
                 maximumFractionDigits: PAYMENT_TOKEN_DECIMALS,
                 minimumFractionDigits: 2,
               })}`}
-              secondary='USDT'
+              secondary={PAYMENT_TOKEN_NAME}
               primaryTypographyProps={{
                 align: 'right',
                 noWrap: true,

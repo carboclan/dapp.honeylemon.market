@@ -82,6 +82,7 @@ const BuyContractPage: React.SFC = () => {
   const {
     honeylemonService,
     PAYMENT_TOKEN_DECIMALS,
+    PAYMENT_TOKEN_NAME,
     paymentTokenAllowance,
     CONTRACT_DURATION,
     isDsProxyDeployed,
@@ -236,7 +237,7 @@ const BuyContractPage: React.SFC = () => {
 
   const errors = [];
 
-  !sufficientPaymentTokens && errors.push("You do not have enough USDT to proceed");
+  !sufficientPaymentTokens && errors.push(`You do not have enough ${PAYMENT_TOKEN_NAME} to proceed`);
   !isLiquid && errors.push("There are not enough contracts available right now");
 
   const getActiveStep = () => {
@@ -247,14 +248,14 @@ const BuyContractPage: React.SFC = () => {
 
   const activeStep = getActiveStep()
 
-  const steps = ['Deploy Wallet', 'Approve USDT', 'Buy Contracts'];
+  const steps = ['Deploy Wallet', `Approve ${PAYMENT_TOKEN_NAME}`, 'Buy Contracts'];
 
   const getStepContent = (step: number) => {
     switch (step) {
       case 0:
         return `Deploy a wallet contract. This is a once-off operation`;
       case 1:
-        return 'Approve USDT. This is a once-off operation';
+        return `Approve ${PAYMENT_TOKEN_NAME}. This is a once-off operation`;
       case 2:
         return `Finalize Purchase`;
     }
@@ -326,7 +327,7 @@ const BuyContractPage: React.SFC = () => {
               disabled={showBuyModal} />
           </Grid>
           <Grid item xs={3} className={classes.rightAlign}>
-            <Typography style={{ fontWeight: 'bold' }} color='secondary'>USDT</Typography>
+            <Typography style={{ fontWeight: 'bold' }} color='secondary'>{PAYMENT_TOKEN_NAME}</Typography>
           </Grid>
         </TabPanel>
         <TabPanel value={buyType} index={2}>
