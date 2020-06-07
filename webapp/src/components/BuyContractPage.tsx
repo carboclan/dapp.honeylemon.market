@@ -349,7 +349,7 @@ const BuyContractPage: React.SFC = () => {
               disabled={showBuyModal} />
           </Grid>
           <Grid item xs={3} className={classes.rightAlign}>
-            <Typography style={{ fontWeight: 'bold' }} color='secondary'>TH/28 Days</Typography>
+            <Typography style={{ fontWeight: 'bold' }} color='secondary'>TH/{CONTRACT_DURATION} Days</Typography>
           </Grid>
         </TabPanel>
         <Grid item xs={12} container spacing={1}>
