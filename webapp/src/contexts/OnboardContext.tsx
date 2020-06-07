@@ -56,6 +56,10 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
             wallets: [
               { walletName: 'metamask', preferred: true },
               {
+                walletName: 'ledger',
+                rpcUrl: infuraRpc,
+              },
+              {
                 walletName: "portis",
                 apiKey: process.env.REACT_APP_PORTIS_API_KEY,
               },
