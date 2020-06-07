@@ -10,7 +10,7 @@ module.exports = {
     libraryTarget: 'commonjs2'
   },
   optimization: {
-    minimize: true,
+    minimize: true
   },
   module: {
     rules: [
