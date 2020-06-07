@@ -20,111 +20,109 @@ const useStyles = makeStyles(({ palette }) => ({
 
 const MiningStatsPage: React.SFC = () => {
   const classes = useStyles();
-  // const {marketData} = useHoneylemon();
-  const chartOptions: Highcharts.Options | undefined = undefined
-  //  graphData && {
-  //   title: {
-  //     text: `BTC Mining Contracts Price over Maturities`,
-  //     style: {
-  //       fontSize: '15',
-  //       color: 'white'
-  //     }
-  //   },
+  const {marketData} = useHoneylemon();
+  const chartOptions: Highcharts.Options | undefined = 
+   marketData && {
+    title: {
+      text: `BTC Mining Contracts Price over Maturities`,
+      style: {
+        fontSize: '15',
+        color: 'white'
+      }
+    },
 
-  //   credits: {
-  //     enabled: true,
-  //     href: 'https://honeylemon.market/',
-  //     text: 'honeylemon.market'
-  //   },
+    credits: {
+      enabled: true,
+      href: 'https://honeylemon.market/',
+      text: 'honeylemon.market'
+    },
 
-  //   chart: {
-  //     backgroundColor: '#000',
-  //     style: {
-  //       fontFamily: '"Roboto", Helvetica, Arial, sans-serif'
-  //     }
-  //   },
+    chart: {
+      backgroundColor: '#000',
+      style: {
+        fontFamily: '"Roboto", Helvetica, Arial, sans-serif'
+      }
+    },
 
-  //   colors: ['#cece4b'],
+    colors: ['#cece4b'],
 
-  //   yAxis: [{
-  //     title: {
-  //       text: `Best Price ($/TH/Day)`,
-  //       style: { color: 'white' }
-  //     },
-  //     labels: {
-  //       style: { color: '#ccc' }
-  //     },
-  //     gridLineWidth: 0,
-  //     minorGridLineWidth: 0,
-  //     min: 0,
-  //   }],
+    yAxis: [{
+      title: {
+        text: `Best Price ($/TH/Day)`,
+        style: { color: 'white' }
+      },
+      labels: {
+        style: { color: '#ccc' }
+      },
+      gridLineWidth: 0,
+      minorGridLineWidth: 0,
+      min: 0,
+    }],
 
-  //   xAxis: {
-  //     type: 'datetime',
-  //     title: {
-  //       text: 'Expiration Date',
-  //       style: { color: 'white' }
-  //     },
-  //     labels: {
-  //       style: { color: '#ccc' }
-  //     },
-  //     dateTimeLabelFormats: {
-  //       month: '%b %Y',
-  //       year: '%b %Y'
-  //     },
-  //     tickInterval: 365 * 86400 * 1000,
-  //     gridLineWidth: 0,
-  //     tickWidth: 0,
-  //     endOnTick: false
-  //   },
+    xAxis: {
+      type: 'datetime',
+      title: {
+        text: 'Expiration Date',
+        style: { color: 'white' }
+      },
+      labels: {
+        style: { color: '#ccc' }
+      },
+      dateTimeLabelFormats: {
+        month: '%b %Y',
+        year: '%b %Y'
+      },
+      tickInterval: 365 * 86400 * 1000,
+      gridLineWidth: 0,
+      tickWidth: 0,
+      endOnTick: false
+    },
 
-  //   legend: {
-  //     enabled: false
-  //   },
+    legend: {
+      enabled: false
+    },
 
-  //   plotOptions: {
-  //     spline: {
-  //       states: {
-  //         inactive: {
-  //           opacity: 1
-  //         }
-  //       }
-  //     },
-  //     line: {
-  //       states: {
-  //         inactive: {
-  //           opacity: 1
-  //         }
-  //       },
-  //       dataLabels: {
-  //         enabled: true,
-  //         formatter: function () {
-  //           return this.point.name + '<br/>' + Highcharts.numberFormat(this.y || 0, 4);
-  //         },
-  //         style: { color: '#cece4b' }
-  //       },
-  //       enableMouseTracking: true
-  //     }
-  //   },
-  //   series: [{
-  //     name: '',
-  //     type: 'line',
-  //     yAxis: 0,
-  //     tooltip: {
-  //       valueDecimals: 4,
-  //       valueSuffix: `$/TH/Day`
-  //     },
-  //     data: [
-  //       { x: Date.now(), y: nicehash.priceUsd * coinDesc[coin].unitFactor, desc: 'NiceHash', platforms: '' },
-  //       ...this.summary.contracts.filter(c => c.duration <= 730).map(c => ({
-  //         x: Date.now() + c.duration * 1000 * 86400,
-  //         y: c.daily.preHalving.cost * coinDesc[coin].unitFactor,
-  //         desc: c.durationAlias,
-  //         duration: c.duration,
-  //         platforms: 'Platforms: ' + this.summary.durationIssuers.get(c.durationAlias).size
-  //       }))
-  //     ]
-  //   }, {
+    plotOptions: {
+      spline: {
+        states: {
+          inactive: {
+            opacity: 1
+          }
+        }
+      },
+      line: {
+        states: {
+          inactive: {
+            opacity: 1
+          }
+        },
+        // dataLabels: {
+        //   enabled: true,
+        //   formatter: function () {
+        //     return this.point.name + '<br/>' + Highcharts.numberFormat(this.y || 0, 4);
+        //   },
+        //   style: { color: '#cece4b' }
+        // },
+        enableMouseTracking: true
+      }
+    },
+    series: [{
+      name: '',
+      type: 'line',
+      yAxis: 0,
+      tooltip: {
+        valueDecimals: 4,
+        valueSuffix: `$/TH/Day`
+      },
+      data: [
+        ...marketData.miningContracts.filter(c => c.duration <= 730).map(c => ({
+          x: Date.now() + c.duration * 1000 * 86400,
+          y: c.contract_cost,
+          desc: c.durationAlias,
+        }))
+      ]
+    }, 
+  // {
   //     name: 'Avg daily block rewards<br/>(assume constant price & difficulty)',
   //     type: 'spline',
   //     yAxis: 0,
@@ -148,8 +146,8 @@ const MiningStatsPage: React.SFC = () => {
   //           [Date.now() + 730 * 1000 * 86400, miningPayoff]
   //         ]
   //     ]
-  //   }]
-  // }
+    // }
+  ]}
 
   return (
     <Grid container direction='column' spacing={2}>
@@ -165,7 +163,6 @@ const MiningStatsPage: React.SFC = () => {
         </Grid>
       </Grid>
       <Grid item xs={12}>
-        <img src={process.env.PUBLIC_URL + '/mri-graph.png'} style={{ width: '100%', height: '200px' }} alt='graph' />
         <HighchartsReact
           highcharts={Highcharts}
           options={chartOptions} />
