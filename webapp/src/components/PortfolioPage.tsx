@@ -17,11 +17,13 @@ import {
   CircularProgress,
   ExpansionPanel,
   ExpansionPanelSummary,
-  ExpansionPanelDetails
+  ExpansionPanelDetails,
+  ButtonBase
 } from '@material-ui/core';
-import { ExpandMore, RadioButtonUnchecked } from '@material-ui/icons';
+import { ExpandMore, RadioButtonUnchecked, InfoRounded } from '@material-ui/icons';
 import { useOnboard } from '../contexts/OnboardContext';
-import { useHoneylemon } from '../contexts/HoneylemonContext';
+import { useHoneylemon, OpenOrder } from '../contexts/HoneylemonContext';
+import { usePrevious } from '../helpers/usePrevious';
 
 const useStyles = makeStyles(({ spacing, palette }) => ({
   icon: {
@@ -43,58 +45,45 @@ const useStyles = makeStyles(({ spacing, palette }) => ({
     flexGrow: 0,
     color: palette.secondary.main,
   },
-  sectionHeading: {
+  sectionHeadingText: {
     fontWeight: 'bold',
     color: palette.secondary.main,
   },
   placeholderRow: {
     height: 60,
+  },
+  infoButton: {
+    color: palette.secondary.main,
+  },
+  sectionHeading: {
+    justifyContent: 'space-between',
   }
 }))
 
 const PorfolioPage: React.SFC = () => {
   const { address } = useOnboard();
-  const { honeylemonService, CONTRACT_DURATION, COLLATERAL_TOKEN_DECIMALS } = useHoneylemon();
+  const { honeylemonService, CONTRACT_DURATION, refreshPortfolio, portfolioData } = useHoneylemon();
+
+  const {
+    openOrders,
+    openOrdersMetadata,
+    activePositions,
+    settlementDelayPositions,
+    settledPositionsToWithdraw,
+    settledPositions
+  } = portfolioData;
 
   const [activeTab, setActiveTab] = useState<'active' | 'settled'>('active')
   const [collateralForWithdraw, setCollateralForWithdraw] = useState<Number>(0);
-  const [openOrdersMetadata, setOpenOrdersMetadata] = useState<
-    Array<{
-      orderHash: string,
-      remainingFillableMakerAssetAmount: BigNumber,
-      price: BigNumber
-      //TODO: update to use types once definitions have been added
-    }>>([]);
 
-  const [openOrders, setOpenOrders] = useState<{
-    [orderHash: string]: {
-      makerAddress: string;
-      takerAddress: string;
-      feeRecipientAddress: string;
-      senderAddress: string;
-      makerAssetAmount: BigNumber;
-      takerAssetAmount: BigNumber;
-      makerFee: BigNumber;
-      takerFee: BigNumber;
-      expirationTimeSeconds: BigNumber;
-      salt: BigNumber;
-      makerAssetData: string;
-      takerAssetData: string;
-      makerFeeAssetData: string;
-      takerFeeAssetData: string;
-    }
-  } | undefined>()
-  const [activePositions, setActivePositions] = useState([]);
-  const [settledPositionsToWithdraw, setSettledPositionsToWithdraw] = useState([]);
-  const [settledPositions, setSettledPositions] = useState([]);
-  const [refresh, setRefresh] = useState(true);
-  const [isLoading, setIsLoading] = useState(false);
   const [isWithdrawing, setIsWithdrawing] = useState(false);
+  const [isCancelling, setIsCancelling] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [showOpenOrders, setShowOpenOrders] = useState(false);
   const [showActivePositions, setShowActivePositions] = useState(false);
+  const [showSettlementDelayPositions, setShowSettlementDelayPositions] = useState(false);
   const [showSettledPositionsToWithdraw, setShowSettledPositionsToWithdraw] = useState(false);
   const [showSettledPositions, setShowSettledPositions] = useState(false);
-
 
   const handleSetActiveTab = (event: React.ChangeEvent<{}>, newValue: 'active' | 'settled') => {
     setActiveTab(newValue);
@@ -107,82 +96,32 @@ const PorfolioPage: React.SFC = () => {
       return;
     }
 
-    await honeylemonService.getCancelOrderTx(order)
-      .awaitTransactionSuccessAsync({
-        from: address,
-        gas: 1500000
-      })
-      .then(() => setRefresh(true));
+    try {
+      setIsCancelling(true);
+      await honeylemonService.getCancelOrderTx(order)
+        .awaitTransactionSuccessAsync({
+          from: address,
+          gas: 1500000
+        });
+      refreshPortfolio();
+      setIsCancelling(false)
+    } catch (error) {
+      console.log(error)
+      setIsCancelling(false)
+    }
   }
 
-  const withdrawAvailable = async () => {
+  const withdrawAllAvailable = async () => {
     setIsWithdrawing(true);
     try {
       await honeylemonService.batchRedeem(address);
-      setRefresh(true);
+      refreshPortfolio();
     } catch (error) {
       console.log("Something went wrong during the withdrawl");
       console.log(error);
     }
     setIsWithdrawing(false);
   }
-
-  useEffect(() => {
-    let cancelled = false;
-
-    const getPorfolio = async () => {
-      setIsLoading(true);
-      const openOrdersRes = await honeylemonService.getOpenOrders(address);
-      const positions = await honeylemonService.getPositions(address);
-      if (!cancelled) {
-        setOpenOrdersMetadata(openOrdersRes.records.map((openOrder: any) => openOrder.metaData))
-        !showOpenOrders && setShowOpenOrders(openOrdersRes.records.length > 0);
-        setOpenOrders(Object.fromEntries(
-          openOrdersRes.records.map(((openOrder: any) => [openOrder.metaData.orderHash, openOrder.order]))
-        ));
-
-        const allPositions = positions.longPositions.map((lp: any) => ({
-          ...lp,
-          contractName: lp.contractName + '-long',
-        })).concat(positions.shortPositions.map((sp: any) => ({
-          ...sp,
-          contractName: sp.contractName + '-short',
-        }))).map((p: any) => ({
-          ...p,
-          daysToMaturity: Math.ceil(dayjs(p.contract.expiration * 1000).diff(dayjs(), 'd', true)),
-          pendingReward: Number(p.pendingReward?.shiftedBy(-COLLATERAL_TOKEN_DECIMALS).toString()) || 0,
-          finalReward: Number(p.finalReward?.shiftedBy(-COLLATERAL_TOKEN_DECIMALS).toString()) || 0,
-        }));
-
-        const newActivePositions = allPositions.filter((p: any) => !p?.contract.settlement)
-        setActivePositions(newActivePositions);
-        !showActivePositions && setShowActivePositions(newActivePositions.length > 0)
-
-        const sptw = allPositions.filter((p: any) => p.canRedeem)
-        setSettledPositionsToWithdraw(sptw);
-        !showSettledPositionsToWithdraw && setShowSettledPositionsToWithdraw(sptw.length > 0)
-        setCollateralForWithdraw(sptw.reduce((total: Number, contract: any) => total += contract?.finalReward, 0));
-
-        const finalized = allPositions.filter((p: any) => p.isRedeemed)
-        setSettledPositions(finalized);
-        !showSettledPositions && setShowSettledPositions(finalized.length > 0)
-
-        setRefresh(false);
-        setIsLoading(false)
-      }
-    }
-    getPorfolio()
-    return () => { cancelled = true }
-  }, [address, honeylemonService, refresh, CONTRACT_DURATION, COLLATERAL_TOKEN_DECIMALS])
-
-  useEffect(() => {
-    var poller: NodeJS.Timeout;
-    poller = setInterval(() => setRefresh(true), 5000);
-
-    return () => {
-      clearInterval(poller)
-    }
-  }, [])
 
   const handleToggleOpenOrdersPanel = () => {
     setShowOpenOrders(!showOpenOrders);
@@ -200,7 +139,46 @@ const PorfolioPage: React.SFC = () => {
     setShowSettledPositions(!showSettledPositions);
   }
 
+  const handleToggleSettlementDelayPositionsPanel = () => {
+    setShowSettlementDelayPositions(!showSettlementDelayPositions);
+  }
+
   const classes = useStyles();
+
+  const previousOpenOrdersCount = usePrevious(openOrdersMetadata.length);
+  const previousActivePositionsCount = usePrevious(activePositions.length);
+  const previousSettlementDelayPositionsCount = usePrevious(settlementDelayPositions.length);
+  const previousSettledPositionsToWithdrawCount = usePrevious(settledPositionsToWithdraw.length);
+  const previousSettledPositionsCount = usePrevious(settledPositions.length);
+
+  useEffect(() => {
+    const loadPortfolioData = async () => {
+      setIsLoading(true);
+      await refreshPortfolio();
+      setCollateralForWithdraw(settledPositionsToWithdraw.reduce((total: Number, contract: any) => total += contract?.finalReward, 0));
+      setIsLoading(false);
+    }
+    loadPortfolioData()
+  }, [])
+
+  useEffect(() => {
+    (previousOpenOrdersCount === 0 && openOrdersMetadata.length > 0) && setShowOpenOrders(true);
+    (previousActivePositionsCount === 0 && activePositions.length > 0) && setShowActivePositions(true);
+    (previousSettlementDelayPositionsCount === 0 && settlementDelayPositions.length > 0) && setShowSettlementDelayPositions(true);
+    (previousSettledPositionsToWithdrawCount === 0 && settledPositionsToWithdraw.length > 0) && setShowSettledPositionsToWithdraw(true);
+    (previousSettledPositionsCount === 0 && settledPositions.length > 0) && setShowSettledPositions(true);
+
+    (previousOpenOrdersCount > 0 && openOrdersMetadata.length === 0) && setShowOpenOrders(false);
+    (previousActivePositionsCount > 0 && activePositions.length === 0) && setShowActivePositions(false);
+    (previousSettlementDelayPositionsCount > 0 && settlementDelayPositions.length === 0) && setShowSettlementDelayPositions(false);
+    (previousSettledPositionsToWithdrawCount > 0 && settledPositionsToWithdraw.length === 0) && setShowSettledPositionsToWithdraw(false);
+    (previousSettledPositionsCount > 0 && settledPositions.length === 0) && setShowSettledPositions(false);
+  })
+
+  useEffect(() => {
+    setCollateralForWithdraw(settledPositionsToWithdraw.reduce((total: Number, contract: any) => total += contract?.finalReward, 0));
+  }, [settledPositionsToWithdraw])
+
   return (
     <Grid container>
       <Grid item xs={12}>
@@ -223,10 +201,14 @@ const PorfolioPage: React.SFC = () => {
                 <ExpansionPanelSummary
                   expandIcon={!isLoading ? <ExpandMore /> : <CircularProgress className={classes.loadingSpinner} size={20} />}
                   aria-controls="unfilled-panel-content"
-                  id="unfilled-panel-header">
-                  <Typography variant='h5' className={classes.sectionHeading}>
+                  id="unfilled-panel-header"
+                  classes={{
+                    content: classes.sectionHeading
+                  }}>
+                  <Typography variant='h5' className={classes.sectionHeadingText}>
                     Unfilled Positions
                   </Typography>
+                  <ButtonBase className={classes.infoButton}><InfoRounded /></ButtonBase>
                 </ExpansionPanelSummary>
                 <ExpansionPanelDetails>
                   <Table>
@@ -261,10 +243,14 @@ const PorfolioPage: React.SFC = () => {
                 <ExpansionPanelSummary
                   expandIcon={!isLoading ? <ExpandMore /> : <CircularProgress className={classes.loadingSpinner} size={20} />}
                   aria-controls="active-orders-panel-content"
-                  id="active-orders-panel-header">
-                  <Typography variant='h5' className={classes.sectionHeading}>
+                  id="active-orders-panel-header"
+                  classes={{
+                    content: classes.sectionHeading
+                  }}>
+                  <Typography variant='h5' className={classes.sectionHeadingText}>
                     Positions
                   </Typography>
+                  <ButtonBase className={classes.infoButton}><InfoRounded /></ButtonBase>
                 </ExpansionPanelSummary>
                 <ExpansionPanelDetails>
                   <Table>
@@ -298,12 +284,60 @@ const PorfolioPage: React.SFC = () => {
               </ExpansionPanel>
             </> :
             <>
+              <ExpansionPanel expanded={showSettlementDelayPositions} onClick={handleToggleSettlementDelayPositionsPanel}>
+                <ExpansionPanelSummary
+                  expandIcon={!isLoading ? <ExpandMore /> : <CircularProgress className={classes.loadingSpinner} size={20} />}
+                  aria-controls="settled-orders-withdraw-panel-content"
+                  id="settled-orders-withdraw-panel-header"
+                  classes={{
+                    content: classes.sectionHeading
+                  }}>
+                  <Typography variant='h5' className={classes.sectionHeadingText}>Awaiting Settlement Delay Expiry</Typography>
+                  <ButtonBase className={classes.infoButton}><InfoRounded /></ButtonBase>
+                </ExpansionPanelSummary>
+                <ExpansionPanelDetails>
+                  <Grid container direction='row' spacing={2}>
+                    <Grid item xs={12}>
+                      <Table>
+                        <TableHead>
+                          <TableRow>
+                            <TableCell>Swap</TableCell>
+                            <TableCell align='center'>Position</TableCell>
+                            <TableCell align='right'>BTC</TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {settlementDelayPositions?.map((position: any, i) =>
+                            <TableRow key={i}>
+                              <TableCell>{position.contractName}</TableCell>
+                              <TableCell align='center'>{position.qtyToMint}</TableCell>
+                              <TableCell align='right'>{position.finalReward}</TableCell>
+                            </TableRow>
+                          )}
+                          {!isLoading && settlementDelayPositions.length === 0 &&
+                            <TableRow>
+                              <TableCell colSpan={3} align='center' className={classes.placeholderRow}>
+                                No positions to withdraw
+                              </TableCell>
+                            </TableRow>
+                          }
+                        </TableBody>
+                      </Table>
+                    </Grid>
+                  </Grid>
+                </ExpansionPanelDetails>
+              </ExpansionPanel>
+              <Divider className={classes.sectionDivider} light variant='middle' />
               <ExpansionPanel expanded={showSettledPositionsToWithdraw} onClick={handleToggleSettledPositionsToWithdrawPanel}>
                 <ExpansionPanelSummary
                   expandIcon={!isLoading ? <ExpandMore /> : <CircularProgress className={classes.loadingSpinner} size={20} />}
                   aria-controls="settled-orders-withdraw-panel-content"
-                  id="settled-orders-withdraw-panel-header">
-                  <Typography variant='h5' className={classes.sectionHeading}>Withdraw Pending</Typography>
+                  id="settled-orders-withdraw-panel-header"
+                  classes={{
+                    content: classes.sectionHeading
+                  }}>
+                  <Typography variant='h5' className={classes.sectionHeadingText}>Withdraw Pending</Typography>
+                  <ButtonBase className={classes.infoButton}><InfoRounded /></ButtonBase>
                 </ExpansionPanelSummary>
                 <ExpansionPanelDetails>
                   <Grid container direction='row' spacing={2}>
@@ -335,7 +369,7 @@ const PorfolioPage: React.SFC = () => {
                       </Table>
                     </Grid>
                     <Grid item xs={12}>
-                      <Button fullWidth disabled={collateralForWithdraw === 0} onClick={withdrawAvailable}>
+                      <Button fullWidth disabled={collateralForWithdraw === 0} onClick={withdrawAllAvailable}>
                         {(!isWithdrawing) ?
                           (collateralForWithdraw > 0) ?
                             `WITHDRAW ALL (${collateralForWithdraw.toLocaleString()} BTC)` :
@@ -352,8 +386,12 @@ const PorfolioPage: React.SFC = () => {
                 <ExpansionPanelSummary
                   expandIcon={!isLoading ? <ExpandMore /> : <CircularProgress className={classes.loadingSpinner} size={20} />}
                   aria-controls="settled-orders-panel-content"
-                  id="settled-orders-panel-header">
-                  <Typography variant='h5' className={classes.sectionHeading}>Closed</Typography>
+                  id="settled-orders-panel-header"
+                  classes={{
+                    content: classes.sectionHeading
+                  }}>
+                  <Typography variant='h5' className={classes.sectionHeadingText}>Settled & Withdrawn</Typography>
+                  <ButtonBase className={classes.infoButton}><InfoRounded /></ButtonBase>
                 </ExpansionPanelSummary>
                 <ExpansionPanelDetails>
                   <Table>

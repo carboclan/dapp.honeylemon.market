@@ -6,11 +6,26 @@ import { HoneylemonService } from "honeylemon";
 import { useOnboard } from "./OnboardContext";
 import { ethers } from 'ethers';
 import dayjs from 'dayjs';
+import { BigNumber } from "@0x/utils";
 
 enum TokenType {
   CollateralToken,
   PaymentToken
 }
+
+enum PositionType {
+  Long,
+  Short
+}
+
+//TODO: Extract this from library when TS conversion is done
+const COLLATERAL_TOKEN_DECIMALS = 8;
+const COLLATERAL_TOKEN_NAME = 'imBTC';
+const PAYMENT_TOKEN_DECIMALS = 6;
+const PAYMENT_TOKEN_NAME = 'USDT';
+const CONTRACT_DURATION = 2;
+const CONTRACT_COLLATERAL_RATIO = 1.35;
+
 
 export type HoneylemonContext = {
   honeylemonService: any; //TODO update this when types exist
@@ -32,19 +47,60 @@ export type HoneylemonContext = {
     currentBTCSpotPrice: number,
     btcDifficultyAdjustmentDate: Date,
     miningPayoff: number,
+  },
+  portfolioData: {
+    openOrdersMetadata: Array<OpenOrderMetadata>,
+    openOrders: { [orderHash: string]: OpenOrder } | undefined,
+    activePositions: Array<any>,
+    settlementDelayPositions: Array<any>,
+    settledPositionsToWithdraw: Array<any>,
+    settledPositions: Array<any>,
   }
   deployDSProxyContract(): Promise<void>,
   approveToken(tokenType: TokenType): Promise<void>,
+  refreshPortfolio(): Promise<void>,
 };
 
 export type HoneylemonProviderProps = {
   children: React.ReactNode;
 };
 
+export type OpenOrderMetadata = {
+  orderHash: string,
+  remainingFillableMakerAssetAmount: BigNumber,
+  price: BigNumber
+  //TODO: update to use types once definitions have been added
+}
+
+export type OpenOrder = {
+  makerAddress: string;
+  takerAddress: string;
+  feeRecipientAddress: string;
+  senderAddress: string;
+  makerAssetAmount: BigNumber;
+  takerAssetAmount: BigNumber;
+  makerFee: BigNumber;
+  takerFee: BigNumber;
+  expirationTimeSeconds: BigNumber;
+  salt: BigNumber;
+  makerAssetData: string;
+  takerAssetData: string;
+  makerFeeAssetData: string;
+  takerFeeAssetData: string;
+}
+
+export type ContractDetails = {
+  name: string,
+  duration: number,
+  date: Date,
+  type: PositionType,
+}
+
 const HoneylemonContext = React.createContext<HoneylemonContext | undefined>(undefined);
 
 const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
   const { wallet, network, isReady, address, notify } = useOnboard();
+
   const [honeylemonService, setHoneylemonService] = useState<any | undefined>(undefined);
   const [collateralTokenBalance, setCollateralTokenBalance] = useState<number>(0);
   const [collateralTokenAllowance, setCollateralTokenAllowance] = useState<number>(0);
@@ -56,7 +112,95 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
   const [currentMRI, setCurrentMRI] = useState(0);
   const [currentBTCSpotPrice, setCurrentBTCSpotPrice] = useState(0);
   const [btcDifficultyAdjustmentDate, setBtcDifficultyAdjustmentDate] = useState(new Date());
+  const [openOrdersMetadata, setOpenOrdersMetadata] = useState<Array<OpenOrderMetadata>>([]);
+  const [openOrders, setOpenOrders] = useState<{ [orderHash: string]: OpenOrder } | undefined>()
+  const [activePositions, setActivePositions] = useState([]);
+  const [settlementDelayPositions, setSettlementDelayPositions] = useState([])
+  const [settledPositionsToWithdraw, setSettledPositionsToWithdraw] = useState([]);
+  const [settledPositions, setSettledPositions] = useState([]);
 
+  const deployDSProxyContract = async () => {
+    try {
+      const dsProxyAddress = await honeylemonService.deployDSProxyContract(address);
+      setIsDsProxyDeployed(true);
+      setDsProxyAddress(dsProxyAddress);
+    } catch (error) {
+      console.log('Something went wrong deploying the DS Proxy wallet');
+      console.log(error);
+      // TODO: Display error on modal
+    }
+  }
+
+  const approveToken = async (tokenType: TokenType): Promise<void> => {
+    try {
+      switch (tokenType) {
+        case TokenType.CollateralToken:
+          await honeylemonService.approveCollateralToken(address);
+          const collateral = await honeylemonService.getCollateralTokenAmounts(address);
+          setCollateralTokenAllowance(Number(collateral.allowance.shiftedBy(-8).toString()));
+          setCollateralTokenBalance(Number(collateral.balance.shiftedBy(-8).toString()));
+          break;
+        case TokenType.PaymentToken:
+          await honeylemonService.approvePaymentToken(address);
+          const payment = await honeylemonService.getPaymentTokenAmounts(address);
+          setPaymentTokenAllowance(Number(payment.allowance.shiftedBy(-6).toString()));
+          setPaymentTokenBalance(Number(payment.balance.shiftedBy(-6).toString()));
+          break;
+        default:
+          break;
+      }
+    } catch (error) {
+      console.log('Something went wrong approving the tokens');
+      console.log(error);
+      // TODO: Display error on modal
+    }
+  }
+
+  const parseContractName = (contractName: string): ContractDetails => {
+    return {
+      name: 'contractName',
+      type: PositionType.Long,
+      date: new Date(),
+      duration: 28,
+    }
+  }
+
+  const getPorfolio = async () => {
+    const openOrdersRes = await honeylemonService.getOpenOrders(address);
+    const positions = await honeylemonService.getPositions(address);
+    setOpenOrdersMetadata(openOrdersRes.records.map((openOrder: any) => openOrder.metaData))
+
+    setOpenOrders(Object.fromEntries(
+      openOrdersRes.records.map(((openOrder: any) => [openOrder.metaData.orderHash, openOrder.order]))
+    ));
+
+    const allPositions = positions.longPositions.map((lp: any) => ({
+      ...lp,
+      contractName: lp.contractName + '-long',
+    })).concat(positions.shortPositions.map((sp: any) => ({
+      ...sp,
+      contractName: sp.contractName + '-short',
+    }))).map((p: any) => ({
+      ...p,
+      daysToMaturity: Math.ceil(dayjs(p.contract.expiration * 1000).diff(dayjs(), 'd', true)),
+      pendingReward: Number(p.pendingReward?.shiftedBy(-COLLATERAL_TOKEN_DECIMALS).toString()) || 0,
+      finalReward: Number(p.finalReward?.shiftedBy(-COLLATERAL_TOKEN_DECIMALS).toString()) || 0,
+    }));
+
+    const newActivePositions = allPositions.filter((p: any) => !p?.contract.settlement)
+    setActivePositions(newActivePositions);
+
+    const sdp = allPositions.filter((p: any) => p?.contract.settlement && !p.canRedeem && !p.isRedeemed)
+    setSettlementDelayPositions(sdp);
+    
+    const sptw = allPositions.filter((p: any) => p?.contract.settlement && p.canRedeem && !p.isRedeemed)
+    setSettledPositionsToWithdraw(sptw);
+
+    const finalized = allPositions.filter((p: any) => p?.contract.settlement && p.isRedeemed)
+    setSettledPositions(finalized);
+  }
+
+  // Instantiate honeylemon service and get all initial user data
   useEffect(() => {
     if (isReady && wallet && network && address) {
       const initHoneylemonService = async () => {
@@ -89,7 +233,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
         setPaymentTokenBalance(Number(payment.balance.shiftedBy(-6).toString()));
         const proxyDeployed: boolean = await honeylemonService.addressHasDSProxy(address)
         setIsDsProxyDeployed(proxyDeployed);
-        if (proxyDeployed ) {
+        if (proxyDeployed) {
           const proxyAddress = await honeylemonService.getDSProxyAddress(address);
           setDsProxyAddress(proxyAddress);
         }
@@ -116,7 +260,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
   }, [wallet, network, isReady, address]);
 
 
-  // All polling effects go here
+  // Market Data Poller
   useEffect(() => {
     const getMarketData = async () => {
       try {
@@ -130,9 +274,36 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
       }
     }
 
-    getMarketData();
+    let poller: NodeJS.Timeout;
+
+    poller = setInterval(getMarketData, 10000);
+
+    return () => {
+      clearInterval(poller);
+    }
   }, [])
 
+  // Portfolio Data Poller
+  useEffect(() => {
+    let poller: NodeJS.Timeout;
+
+    const getPortfolioData = async () => {
+      try {
+        await getPorfolio();
+      } catch (error) {
+        console.log('There was an error getting the market data')
+      }
+    }
+
+    if (honeylemonService && address) {
+      poller = setInterval(getPortfolioData, 10000);
+    }
+    return () => {
+      clearInterval(poller);
+    }
+  }, [honeylemonService, address])
+
+  // Difficulty Adjustment Date
   useEffect(() => {
     const getDifficultyAdjustmentDate = async () => {
       try {
@@ -151,6 +322,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
     getDifficultyAdjustmentDate()
   }, [])
 
+  // Transfer & Approval event listeners for Payment & Collateral Tokens 
   useEffect(() => {
     const checkBalancesAndApprovals = async () => {
       const collateral = await honeylemonService.getCollateralTokenAmounts(address);
@@ -202,48 +374,11 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
         // paymentTokenContract.removeAllListeners(transferPaymentTokenTo)  
         collateralTokenContract.removeAllListeners(filterCollateralTokenApproval)
         collateralTokenContract.removeAllListeners(transferCollateralTokenFrom)
-        //   collateralTokenContract.removeAllListeners(transferCollateralTokenTo)
+        // collateralTokenContract.removeAllListeners(transferCollateralTokenTo)
       }
     }
 
   }, [honeylemonService, address])
-
-  const deployDSProxyContract = async () => {
-    try {
-      const dsProxyAddress = await honeylemonService.deployDSProxyContract(address);
-      setIsDsProxyDeployed(true);
-      setDsProxyAddress(dsProxyAddress);
-    } catch (error) {
-      console.log('Something went wrong deploying the DS Proxy wallet');
-      console.log(error);
-      // TODO: Display error on modal
-    }
-  }
-
-  const approveToken = async (tokenType: TokenType): Promise<void> => {
-    try {
-      switch (tokenType) {
-        case TokenType.CollateralToken:
-          await honeylemonService.approveCollateralToken(address);
-          const collateral = await honeylemonService.getCollateralTokenAmounts(address);
-          setCollateralTokenAllowance(Number(collateral.allowance.shiftedBy(-8).toString()));
-          setCollateralTokenBalance(Number(collateral.balance.shiftedBy(-8).toString()));
-          break;
-        case TokenType.PaymentToken:
-          await honeylemonService.approvePaymentToken(address);
-          const payment = await honeylemonService.getPaymentTokenAmounts(address);
-          setPaymentTokenAllowance(Number(payment.allowance.shiftedBy(-6).toString()));
-          setPaymentTokenBalance(Number(payment.balance.shiftedBy(-6).toString()));
-          break;
-        default:
-          break;
-      }
-    } catch (error) {
-      console.log('Something went wrong approving the tokens');
-      console.log(error);
-      // TODO: Display error on modal
-    }
-  }
 
   return (
     <HoneylemonContext.Provider
@@ -251,16 +386,16 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
         honeylemonService,
         collateralTokenBalance,
         collateralTokenAllowance,
-        COLLATERAL_TOKEN_DECIMALS: 8, //TODO: Extract this from library when TS conversion is done
-        COLLATERAL_TOKEN_NAME: 'imBTC',
+        COLLATERAL_TOKEN_DECIMALS,
+        COLLATERAL_TOKEN_NAME,
+        PAYMENT_TOKEN_DECIMALS,
+        PAYMENT_TOKEN_NAME,
+        CONTRACT_DURATION,
+        CONTRACT_COLLATERAL_RATIO,
         paymentTokenAllowance,
         paymentTokenBalance,
-        PAYMENT_TOKEN_DECIMALS: 6, //TODO: Extract this from library when TS conversion is done
-        PAYMENT_TOKEN_NAME: 'USDT',
-        CONTRACT_DURATION: 2, //TODO: Extract this from library when TS conversion is done
         isDsProxyDeployed,
         dsProxyAddress,
-        CONTRACT_COLLATERAL_RATIO: 1.35, //TODO: Extract this from library when TS conversion is done
         marketData: {
           miningContracts,
           currentBTCSpotPrice,
@@ -268,8 +403,17 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
           btcDifficultyAdjustmentDate,
           miningPayoff: 0.0953,
         },
+        portfolioData: {
+          activePositions,
+          openOrders,
+          openOrdersMetadata,
+          settledPositions,
+          settledPositionsToWithdraw,
+          settlementDelayPositions
+        },
         deployDSProxyContract,
         approveToken,
+        refreshPortfolio: getPorfolio
       }}
     >
       {children}

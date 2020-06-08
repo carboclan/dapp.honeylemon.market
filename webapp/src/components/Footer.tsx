@@ -31,7 +31,7 @@ const FooterLink: React.SFC<FooterLinkProps> = ({ url, label, children }) => {
   const classes = useStyles();
 
   return (
-    <Grid item xs={4} direction='column' onClick={() => window.open(url, '_blank')} className={classes.footerLink}>
+    <Grid item xs={4} onClick={() => window.open(url, '_blank')} className={classes.footerLink}>
       {children}
       <Typography>{label}</Typography>
     </Grid>
