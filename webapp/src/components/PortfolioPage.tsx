@@ -95,20 +95,19 @@ const PorfolioPage: React.SFC = () => {
       console.log('This order does not exist.')
       return;
     }
+    setIsCancelling(true);
 
     try {
-      setIsCancelling(true);
       await honeylemonService.getCancelOrderTx(order)
         .awaitTransactionSuccessAsync({
           from: address,
           gas: 1500000
         });
       refreshPortfolio();
-      setIsCancelling(false)
     } catch (error) {
       console.log(error)
-      setIsCancelling(false)
     }
+    setIsCancelling(false)
   }
 
   const withdrawAllAvailable = async () => {
@@ -159,7 +158,7 @@ const PorfolioPage: React.SFC = () => {
       setIsLoading(false);
     }
     loadPortfolioData()
-  }, [])
+  }, [address])
 
   useEffect(() => {
     (previousOpenOrdersCount === 0 && openOrdersMetadata.length > 0) && setShowOpenOrders(true);
@@ -224,7 +223,12 @@ const PorfolioPage: React.SFC = () => {
                         <TableRow key={order.orderHash}>
                           <TableCell>{order?.remainingFillableMakerAssetAmount.toString()}</TableCell>
                           <TableCell align='center'>${order?.price.dividedBy(CONTRACT_DURATION).toFixed(2)}</TableCell>
-                          <TableCell align='right'><Button onClick={() => cancelOpenOrder(order.orderHash)}>Cancel</Button></TableCell>
+                          <TableCell align='right'>
+                            <Button onClick={() => cancelOpenOrder(order.orderHash)} disabled={!isCancelling}>
+                              Cancel&nbsp;
+                              isCancelling && <CircularProgress className={classes.loadingSpinner} size={20} />
+                            </Button>
+                          </TableCell>
                         </TableRow>
                       )}
                       {!isLoading && openOrdersMetadata.length === 0 &&
