@@ -139,8 +139,6 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
         const btcStatsUrl = process.env.REACT_APP_BTC_STATS_URL;
         if (btcStatsUrl) {
           const { currentBlockHeight, avgBlockTime } = await (await fetch(btcStatsUrl)).json()
-          // const currentBlockHeight: number = await (await fetch('https://blockchain.info/q/getblockcount')).json()
-          // const avgBlockTime: number = await (await fetch('https://blockchain.info/q/interval')).json()
           const currentEpochBlocks = currentBlockHeight % 2016;
           const remainingEpochTime = (2016 - currentEpochBlocks) * avgBlockTime;
           const date = dayjs().add(remainingEpochTime, 's');
