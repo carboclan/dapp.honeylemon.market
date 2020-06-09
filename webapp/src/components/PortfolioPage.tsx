@@ -226,7 +226,7 @@ const PorfolioPage: React.SFC = () => {
                           <TableCell align='right'>
                             <Button onClick={() => cancelOpenOrder(order.orderHash)} disabled={!isCancelling}>
                               Cancel&nbsp;
-                              isCancelling && <CircularProgress className={classes.loadingSpinner} size={20} />
+                              {isCancelling && <CircularProgress className={classes.loadingSpinner} size={20} />}
                             </Button>
                           </TableCell>
                         </TableRow>
@@ -321,7 +321,7 @@ const PorfolioPage: React.SFC = () => {
                           {!isLoading && settlementDelayPositions.length === 0 &&
                             <TableRow>
                               <TableCell colSpan={3} align='center' className={classes.placeholderRow}>
-                                No positions to withdraw
+                                No positions awaiting settlement delay expiry
                               </TableCell>
                             </TableRow>
                           }

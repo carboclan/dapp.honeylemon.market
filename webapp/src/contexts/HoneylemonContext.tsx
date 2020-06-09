@@ -157,11 +157,12 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
   }
 
   const parseContractName = (contractName: string): ContractDetails => {
+    const [indexType, collateralInstrument, duration, date, position] = contractName.split('-');
     return {
-      name: 'contractName',
-      type: PositionType.Long,
-      date: new Date(),
-      duration: 28,
+      name: `${indexType}-${collateralInstrument}`,
+      type: (position === 'long') ? PositionType.Long : PositionType.Short,
+      date: new Date(date),
+      duration: Number(duration.slice(0, duration.length - 2))
     }
   }
 
@@ -185,6 +186,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
       daysToMaturity: Math.ceil(dayjs(p.contract.expiration * 1000).diff(dayjs(), 'd', true)),
       pendingReward: Number(p.pendingReward?.shiftedBy(-COLLATERAL_TOKEN_DECIMALS).toString()) || 0,
       finalReward: Number(p.finalReward?.shiftedBy(-COLLATERAL_TOKEN_DECIMALS).toString()) || 0,
+      ...parseContractName(p.contractName),
     }));
 
     const newActivePositions = allPositions.filter((p: any) => !p?.contract.settlement)
