@@ -26,7 +26,7 @@ module.exports = async function(deployer, network, accounts) {
   let marketContractProxy = await deployer.deploy(
     MarketContractProxy,
     marketContractFactoryMPX.address,
-    accounts[0],
+    process.env.HONEYLEMON_ORACLE || accounts[0],
     minterBridge.address,
     collateralToken.address
   );
