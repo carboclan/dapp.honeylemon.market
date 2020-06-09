@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { BigNumber } from '@0x/utils';
-import dayjs from 'dayjs';
 import {
   Typography,
   Grid,
@@ -18,11 +16,13 @@ import {
   ExpansionPanel,
   ExpansionPanelSummary,
   ExpansionPanelDetails,
-  ButtonBase
+  ButtonBase,
+  CircularProgressProps,
+  Box,
 } from '@material-ui/core';
 import { ExpandMore, RadioButtonUnchecked, InfoRounded } from '@material-ui/icons';
 import { useOnboard } from '../contexts/OnboardContext';
-import { useHoneylemon, OpenOrder } from '../contexts/HoneylemonContext';
+import { useHoneylemon } from '../contexts/HoneylemonContext';
 import { usePrevious } from '../helpers/usePrevious';
 
 const useStyles = makeStyles(({ spacing, palette }) => ({
@@ -59,6 +59,33 @@ const useStyles = makeStyles(({ spacing, palette }) => ({
     justifyContent: 'space-between',
   }
 }))
+
+const DaysRemaining = (
+  props: CircularProgressProps & {
+    contractDuration: number,
+    daysRemaining: number
+  }) => {
+  const { contractDuration, daysRemaining, ...cirularProgressProps } = props;
+  return (
+    <Box position="relative" display="inline-flex">
+      <CircularProgress variant="static" {...cirularProgressProps} value={1 - props.daysRemaining / props.contractDuration} />
+      <Box
+        top={0}
+        left={0}
+        bottom={0}
+        right={0}
+        position="absolute"
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+      >
+        <Typography variant="caption" component="div" color="textSecondary">
+          {`${props.daysRemaining}d`}
+        </Typography>
+      </Box>
+    </Box>
+  )
+};
 
 const PorfolioPage: React.SFC = () => {
   const { address } = useOnboard();
@@ -151,28 +178,53 @@ const PorfolioPage: React.SFC = () => {
   const previousSettledPositionsCount = usePrevious(settledPositions.length);
 
   useEffect(() => {
+    let isCancelled = false;
     const loadPortfolioData = async () => {
       setIsLoading(true);
-      await refreshPortfolio();
-      setCollateralForWithdraw(settledPositionsToWithdraw.reduce((total: Number, contract: any) => total += contract?.finalReward, 0));
+      try {
+        await refreshPortfolio();
+        !isCancelled &&
+          setCollateralForWithdraw(settledPositionsToWithdraw.reduce((total: Number, contract: any) => total += contract?.finalReward, 0));
+      } catch (error) {
+
+      }
       setIsLoading(false);
     }
     loadPortfolioData()
-  }, [address])
+    return () => {
+      isCancelled = true;
+    }
+  }, [address, settledPositionsToWithdraw])
 
   useEffect(() => {
-    (previousOpenOrdersCount === 0 && openOrdersMetadata.length > 0) && setShowOpenOrders(true);
-    (previousActivePositionsCount === 0 && activePositions.length > 0) && setShowActivePositions(true);
-    (previousSettlementDelayPositionsCount === 0 && settlementDelayPositions.length > 0) && setShowSettlementDelayPositions(true);
-    (previousSettledPositionsToWithdrawCount === 0 && settledPositionsToWithdraw.length > 0) && setShowSettledPositionsToWithdraw(true);
-    (previousSettledPositionsCount === 0 && settledPositions.length > 0) && setShowSettledPositions(true);
+    ((previousOpenOrdersCount === 0 || !previousOpenOrdersCount) && openOrdersMetadata.length > 0)
+      && setShowOpenOrders(true);
+    ((previousActivePositionsCount === 0 || !previousActivePositionsCount) && activePositions.length > 0)
+      && setShowActivePositions(true);
+    ((previousSettlementDelayPositionsCount === 0 || !previousSettlementDelayPositionsCount) && settlementDelayPositions.length > 0)
+      && setShowSettlementDelayPositions(true);
+    ((previousSettledPositionsToWithdrawCount === 0 || !previousSettledPositionsToWithdrawCount) && settledPositionsToWithdraw.length > 0)
+      && setShowSettledPositionsToWithdraw(true);
+    ((previousSettledPositionsCount === 0 || !previousSettledPositionsCount) && settledPositions.length > 0)
+      && setShowSettledPositions(true);
 
     (previousOpenOrdersCount > 0 && openOrdersMetadata.length === 0) && setShowOpenOrders(false);
     (previousActivePositionsCount > 0 && activePositions.length === 0) && setShowActivePositions(false);
     (previousSettlementDelayPositionsCount > 0 && settlementDelayPositions.length === 0) && setShowSettlementDelayPositions(false);
     (previousSettledPositionsToWithdrawCount > 0 && settledPositionsToWithdraw.length === 0) && setShowSettledPositionsToWithdraw(false);
     (previousSettledPositionsCount > 0 && settledPositions.length === 0) && setShowSettledPositions(false);
-  })
+  }, [
+    previousOpenOrdersCount,
+    openOrdersMetadata,
+    previousActivePositionsCount,
+    activePositions,
+    previousSettlementDelayPositionsCount,
+    settlementDelayPositions,
+    previousSettledPositionsToWithdrawCount,
+    settledPositionsToWithdraw,
+    previousSettledPositionsCount,
+    settledPositions
+  ])
 
   useEffect(() => {
     setCollateralForWithdraw(settledPositionsToWithdraw.reduce((total: Number, contract: any) => total += contract?.finalReward, 0));
@@ -260,7 +312,8 @@ const PorfolioPage: React.SFC = () => {
                   <Table>
                     <TableHead>
                       <TableRow>
-                        <TableCell>Swap</TableCell>
+                        <TableCell>Contract</TableCell>
+                        <TableCell align='center'>Position</TableCell>
                         <TableCell align='center'>Quantity</TableCell>
                         <TableCell align='center'>Days</TableCell>
                         <TableCell align='right'>BTC</TableCell>
@@ -269,9 +322,12 @@ const PorfolioPage: React.SFC = () => {
                     <TableBody>
                       {activePositions && activePositions?.map((position: any, i) =>
                         <TableRow key={i}>
-                          <TableCell>{position.contractName}</TableCell>
+                          <TableCell>{position.instrumentName}</TableCell>
+                          <TableCell align='center'>{position.type}</TableCell>
                           <TableCell align='center'>{position.qtyToMint}</TableCell>
-                          <TableCell align='center'>{position.daysToMaturity}</TableCell>
+                          <TableCell align='center'>
+                            <DaysRemaining contractDuration={position.duration} daysRemaining={position.daysToMaturity} />
+                          </TableCell>
                           <TableCell align='right'>{position.pendingReward}</TableCell>
                         </TableRow>
                       )}
@@ -305,7 +361,7 @@ const PorfolioPage: React.SFC = () => {
                       <Table>
                         <TableHead>
                           <TableRow>
-                            <TableCell>Swap</TableCell>
+                            <TableCell>Contract</TableCell>
                             <TableCell align='center'>Position</TableCell>
                             <TableCell align='right'>BTC</TableCell>
                           </TableRow>
@@ -349,7 +405,7 @@ const PorfolioPage: React.SFC = () => {
                       <Table>
                         <TableHead>
                           <TableRow>
-                            <TableCell>Swap</TableCell>
+                            <TableCell>Contract</TableCell>
                             <TableCell align='center'>Position</TableCell>
                             <TableCell align='right'>BTC</TableCell>
                           </TableRow>
@@ -401,7 +457,7 @@ const PorfolioPage: React.SFC = () => {
                   <Table>
                     <TableHead>
                       <TableRow>
-                        <TableCell>Swap</TableCell>
+                        <TableCell>Contract</TableCell>
                         <TableCell align='center'>Position</TableCell>
                         <TableCell align='right'>BTC</TableCell>
                       </TableRow>

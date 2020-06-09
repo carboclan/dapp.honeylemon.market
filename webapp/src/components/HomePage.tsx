@@ -86,7 +86,7 @@ const HomePage: React.SFC = () => {
           </Typography>
         </Link>
       </Grid>
-      <Grid item container direction='row' className={classes.countdownSection} spacing={2} justify='space-between' alignItems='stretch'>
+      <Grid item container direction='row' className={classes.countdownSection} spacing={2} justify='center' alignItems='stretch'>
         <Grid item xs={12}>
           <Typography style={{ fontWeight: 'bold' }}>Next Difficulty Adjustment</Typography>
         </Grid>
@@ -122,10 +122,10 @@ const HomePage: React.SFC = () => {
           <Typography style={{ fontWeight: 'bold' }}>Estimate: {dayjs(btcDifficultyAdjustmentDate).format('MMM DD, YYYY HH:mm:ss')}</Typography>
         </Grid>
       </Grid>
-      {!isReady ?
-        <Grid item xs={12} className={classes.connectSpacer}>
-          <ConnectWalletButton />
-        </Grid> :
+      <Grid item xs={12} className={classes.connectSpacer}>
+        <ConnectWalletButton />
+      </Grid>
+      {isReady &&
         <>
           <Typography variant='h5' style={{ fontWeight: 'bold' }}>I am a BTC Miner</Typography>
           <Typography color='secondary' style={{ fontWeight: 'bold' }}>Hedge risk & get cash up front</Typography>

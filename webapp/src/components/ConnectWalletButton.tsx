@@ -22,7 +22,7 @@ const useStyles = makeStyles(({ palette, spacing }) => ({
 }))
 
 const ConnectWalletButton: React.SFC = () => {
-  const { wallet, onboard, checkIsReady } = useOnboard();
+  const { wallet, onboard, checkIsReady, isReady } = useOnboard();
   const [isConnecting, setIsConnecting] = useState(false);
   const classes = useStyles();
 
@@ -38,16 +38,20 @@ const ConnectWalletButton: React.SFC = () => {
     setIsConnecting(false);
   }
 
-  return (
-    <Button
-      onClick={() => { handleSelectWalletAndConnect() }}
-      className={classes.button}
-      fullWidth
-      disabled={!onboard || isConnecting}>
-      Connect wallet &nbsp;
-      {isConnecting && <CircularProgress className={classes.loadingSpinner} size={20} />}
-    </Button>
-  )
+  if (!isReady) {
+    return (
+      <Button
+        onClick={() => { handleSelectWalletAndConnect() }}
+        className={classes.button}
+        fullWidth
+        disabled={!onboard || isConnecting}>
+        Connect wallet &nbsp;
+        {isConnecting && <CircularProgress className={classes.loadingSpinner} size={20} />}
+      </Button>
+    )
+  } else {
+    return null;
+  }
 }
 
 export default ConnectWalletButton;

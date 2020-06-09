@@ -14,8 +14,8 @@ enum TokenType {
 }
 
 enum PositionType {
-  Long,
-  Short
+  Long = 'Long',
+  Short = 'Short'
 }
 
 //TODO: Extract this from library when TS conversion is done
@@ -90,7 +90,7 @@ export type OpenOrder = {
 }
 
 export type ContractDetails = {
-  name: string,
+  instrumentName: string,
   duration: number,
   date: Date,
   type: PositionType,
@@ -118,6 +118,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
   const [settlementDelayPositions, setSettlementDelayPositions] = useState([])
   const [settledPositionsToWithdraw, setSettledPositionsToWithdraw] = useState([]);
   const [settledPositions, setSettledPositions] = useState([]);
+  const [isPortfolioRefreshing, setIsPortfolioRefreshing] = useState(false);
 
   const deployDSProxyContract = async () => {
     try {
@@ -159,7 +160,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
   const parseContractName = (contractName: string): ContractDetails => {
     const [indexType, collateralInstrument, duration, date, position] = contractName.split('-');
     return {
-      name: `${indexType}-${collateralInstrument}`,
+      instrumentName: `${indexType}-${collateralInstrument}`,
       type: (position === 'long') ? PositionType.Long : PositionType.Short,
       date: new Date(date),
       duration: Number(duration.slice(0, duration.length - 2))
@@ -167,6 +168,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
   }
 
   const getPorfolio = async () => {
+    setIsPortfolioRefreshing(true);
     const openOrdersRes = await honeylemonService.getOpenOrders(address);
     const positions = await honeylemonService.getPositions(address);
     setOpenOrdersMetadata(openOrdersRes.records.map((openOrder: any) => openOrder.metaData))
@@ -200,6 +202,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
 
     const finalized = allPositions.filter((p: any) => p?.contract.settlement && p.isRedeemed)
     setSettledPositions(finalized);
+    setIsPortfolioRefreshing(false);
   }
 
   // Instantiate honeylemon service and get all initial user data
@@ -291,14 +294,15 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
 
     const getPortfolioData = async () => {
       try {
-        await getPorfolio();
+        !isPortfolioRefreshing && await getPorfolio();
       } catch (error) {
         console.log('There was an error getting the market data')
       }
     }
 
     if (honeylemonService && address) {
-      poller = setInterval(getPortfolioData, 10000);
+      getPortfolioData();
+      poller = setInterval(getPortfolioData, 15000);
     }
     return () => {
       clearInterval(poller);
