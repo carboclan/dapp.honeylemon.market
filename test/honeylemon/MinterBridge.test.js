@@ -15,7 +15,18 @@ const ADDRESS_ZERO = '0x0000000000000000000000000000000000000000';
 
 contract(
   'MinterBridge',
-  ([owner, makerAddress, takerAddress, , , , , _0xBridgeProxy, factoryOwner, random]) => {
+  ([
+    owner,
+    makerAddress,
+    takerAddress,
+    ,
+    ,
+    ,
+    ,
+    _0xBridgeProxy,
+    honeyMultisig,
+    random
+  ]) => {
     let minterBridge, marketContractProxy, collateralToken, sToken, lToken;
 
     before(async () => {
@@ -54,7 +65,7 @@ contract(
       });
 
       it('set 0x Bridge Proxy', async () => {
-        await minterBridge.set0xBridgeProxy(_0xBridgeProxy, { from: owner });
+        await minterBridge.set0xBridgeProxy(_0xBridgeProxy, { from: honeyMultisig });
         assert.equal(
           await minterBridge.ERC20_BRIDGE_PROXY_ADDRESS(),
           _0xBridgeProxy,
@@ -116,7 +127,9 @@ contract(
 
       it('should revert when market contract proxy address is zero', async () => {
         // set market proxy address to address zero
-        await minterBridge.setMarketContractProxyAddress(ADDRESS_ZERO);
+        await minterBridge.setMarketContractProxyAddress(ADDRESS_ZERO, {
+          from: honeyMultisig
+        });
 
         await expectRevert(
           minterBridge.bridgeTransferFrom(
@@ -133,7 +146,9 @@ contract(
 
       it('call bridgeTransferFrom', async () => {
         // reset market proxy address to address zero
-        await minterBridge.setMarketContractProxyAddress(marketContractProxy.address);
+        await minterBridge.setMarketContractProxyAddress(marketContractProxy.address, {
+          from: honeyMultisig
+        });
 
         // call minter bridge
         await minterBridge.bridgeTransferFrom(
