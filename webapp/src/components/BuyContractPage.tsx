@@ -88,6 +88,7 @@ const BuyContractPage: React.SFC = () => {
     paymentTokenBalance,
     CONTRACT_COLLATERAL_RATIO,
     COLLATERAL_TOKEN_DECIMALS,
+    marketData,
     deployDSProxyContract,
     approveToken,
   } = useHoneylemon()
@@ -277,6 +278,9 @@ const BuyContractPage: React.SFC = () => {
     activeStep === 2 && handleBuyOffer();
   }
 
+  const {currentBTCSpotPrice} = marketData
+  const discountOnSpotPrice = (!isLiquid) ? 0 : (((expectedBTCAccrual / orderValue) - currentBTCSpotPrice)/currentBTCSpotPrice) - 1
+  console.log(discountOnSpotPrice * 100);
   return (
     <>
       <Grid container alignItems='stretch' justify='center' spacing={2}>

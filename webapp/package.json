@@ -5,6 +5,7 @@
   "dependencies": {
     "@0x/utils": "5.4.1",
     "@babel/runtime": "^7.10.2",
+    "@carboclan/mri": "git+https://github.com/carboclan/mri.git",
     "@material-ui/core": "4.9.12",
     "@material-ui/icons": "4.9.1",
     "@truffle/contract": "4.2.3",

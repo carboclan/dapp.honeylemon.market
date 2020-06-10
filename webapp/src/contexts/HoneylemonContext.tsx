@@ -6,7 +6,10 @@ import { HoneylemonService } from "honeylemon";
 import { useOnboard } from "./OnboardContext";
 import { ethers } from 'ethers';
 import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
 import { BigNumber } from "@0x/utils";
+import { getBtcMri } from '@carboclan/mri';
+dayjs.extend(utc);
 
 enum TokenType {
   CollateralToken,
@@ -95,7 +98,7 @@ export type ContractDetails = {
   startDate: Date,
   expirationDate: Date,
   settlementDate: Date,
-  type: PositionType,  
+  type: PositionType,
 }
 
 const HoneylemonContext = React.createContext<HoneylemonContext | undefined>(undefined);
@@ -145,18 +148,17 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
           await honeylemonService.approveCollateralToken(address);
           var collateral;
           do {
-            await sleep(5000);
+            await sleep(2000);
             collateral = await honeylemonService.getCollateralTokenAmounts(address);
           } while (Number(collateral.allowance.shiftedBy(-8).toString()) === 0);
           setCollateralTokenAllowance(Number(collateral.allowance.shiftedBy(-COLLATERAL_TOKEN_DECIMALS).toString()));
           setCollateralTokenBalance(Number(collateral.balance.shiftedBy(-COLLATERAL_TOKEN_DECIMALS).toString()));
           break;
         case TokenType.PaymentToken:
-          debugger;
           await honeylemonService.approvePaymentToken(address);
           var payment;
           do {
-            await sleep(5000);
+            await sleep(2000);
             payment = await honeylemonService.getPaymentTokenAmounts(address);
           } while (Number(payment.allowance.shiftedBy(-8).toString()) === 0);
           setCollateralTokenAllowance(Number(payment.allowance.shiftedBy(-PAYMENT_TOKEN_DECIMALS).toString()));
@@ -214,7 +216,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
 
     const sdp = allPositions.filter((p: any) => p?.contract.settlement && !p.canRedeem && !p.isRedeemed)
     setSettlementDelayPositions(sdp);
-    
+
     const sptw = allPositions.filter((p: any) => p?.contract.settlement && p.canRedeem && !p.isRedeemed)
     setSettledPositionsToWithdraw(sptw);
 
@@ -289,11 +291,22 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
       try {
         const marketDataApiUrl = process.env.REACT_APP_MARKET_DATA_API_URL;
         if (marketDataApiUrl) {
-          const { contracts } = await (await fetch(marketDataApiUrl)).json();
+          const { contracts } = await (await fetch(`${marketDataApiUrl}/blockchain/agg?coin=BTC`)).json();
+          const { data } = await (await fetch(`${marketDataApiUrl}/coinmarketcap/v1/cryptocurrency/quotes/latest?symbol=BTC`)).json();
           setMiningContracts(contracts);
+          setCurrentBTCSpotPrice(data?.BTC?.quote?.USD);
         }
       } catch (error) {
         console.log('There was an error getting the market data')
+      }
+      try {
+        const btcComData = await (
+          await fetch(`https://chain.api.btc.com/v3/block/date/${dayjs().utc().format('YYYYMMDD')}`)
+        ).json();
+        const mri = await getBtcMri();
+        //setCurrentMRI(mri);
+      } catch (error) {
+        console.log('There was an error getting the MRI data')
       }
     }
 
