@@ -273,44 +273,6 @@ export class MarketContractProxy extends ethereum.SmartContract {
     return ethereum.CallResult.fromValue(value[0].toAddress());
   }
 
-  ORACLE_URL(): string {
-    let result = super.call("ORACLE_URL", "ORACLE_URL():(string)", []);
-
-    return result[0].toString();
-  }
-
-  try_ORACLE_URL(): ethereum.CallResult<string> {
-    let result = super.tryCall("ORACLE_URL", "ORACLE_URL():(string)", []);
-    if (result.reverted) {
-      return new ethereum.CallResult();
-    }
-    let value = result.value;
-    return ethereum.CallResult.fromValue(value[0].toString());
-  }
-
-  ORACLE_STATISTIC(): string {
-    let result = super.call(
-      "ORACLE_STATISTIC",
-      "ORACLE_STATISTIC():(string)",
-      []
-    );
-
-    return result[0].toString();
-  }
-
-  try_ORACLE_STATISTIC(): ethereum.CallResult<string> {
-    let result = super.tryCall(
-      "ORACLE_STATISTIC",
-      "ORACLE_STATISTIC():(string)",
-      []
-    );
-    if (result.reverted) {
-      return new ethereum.CallResult();
-    }
-    let value = result.value;
-    return ethereum.CallResult.fromValue(value[0].toString());
-  }
-
   marketContracts(param0: BigInt): Address {
     let result = super.call(
       "marketContracts",
@@ -794,6 +756,29 @@ export class MarketContractProxy extends ethereum.SmartContract {
     return ethereum.CallResult.fromValue(value[0].toAddress());
   }
 
+  isDailyContractDeployed(): boolean {
+    let result = super.call(
+      "isDailyContractDeployed",
+      "isDailyContractDeployed():(bool)",
+      []
+    );
+
+    return result[0].toBoolean();
+  }
+
+  try_isDailyContractDeployed(): ethereum.CallResult<boolean> {
+    let result = super.tryCall(
+      "isDailyContractDeployed",
+      "isDailyContractDeployed():(bool)",
+      []
+    );
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toBoolean());
+  }
+
   createDSProxyWallet(): Address {
     let result = super.call(
       "createDSProxyWallet",
@@ -976,36 +961,6 @@ export class SetMinterBridgeAddressCall__Outputs {
   }
 }
 
-export class SetMarketContractSpecsCall extends ethereum.Call {
-  get inputs(): SetMarketContractSpecsCall__Inputs {
-    return new SetMarketContractSpecsCall__Inputs(this);
-  }
-
-  get outputs(): SetMarketContractSpecsCall__Outputs {
-    return new SetMarketContractSpecsCall__Outputs(this);
-  }
-}
-
-export class SetMarketContractSpecsCall__Inputs {
-  _call: SetMarketContractSpecsCall;
-
-  constructor(call: SetMarketContractSpecsCall) {
-    this._call = call;
-  }
-
-  get _params(): Array<BigInt> {
-    return this._call.inputValues[0].value.toBigIntArray();
-  }
-}
-
-export class SetMarketContractSpecsCall__Outputs {
-  _call: SetMarketContractSpecsCall;
-
-  constructor(call: SetMarketContractSpecsCall) {
-    this._call = call;
-  }
-}
-
 export class CreateDSProxyWalletCall extends ethereum.Call {
   get inputs(): CreateDSProxyWalletCall__Inputs {
     return new CreateDSProxyWalletCall__Inputs(this);
@@ -1057,16 +1012,8 @@ export class BatchRedeemCall__Inputs {
     return this._call.inputValues[0].value.toAddressArray();
   }
 
-  get marketAddresses(): Array<Address> {
-    return this._call.inputValues[1].value.toAddressArray();
-  }
-
   get tokensToRedeem(): Array<BigInt> {
-    return this._call.inputValues[2].value.toBigIntArray();
-  }
-
-  get traderLong(): Array<boolean> {
-    return this._call.inputValues[3].value.toBooleanArray();
+    return this._call.inputValues[1].value.toBigIntArray();
   }
 }
 
