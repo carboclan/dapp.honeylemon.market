@@ -98,7 +98,7 @@ contract(
       _currentMri = new BigNumber(pc.getMRIDataForDay(0)).multipliedBy(
         new BigNumber(1e8)
       );
-      _expiration = Math.round(new Date().getTime() / 1000) + 3600 * 24 * 28;
+      _expiration = (await marketContractProxy.getTime()).toNumber() + 3600 * 24 * 28;
     });
 
     describe('Check deployment config', () => {
@@ -402,6 +402,36 @@ contract(
           'Market collateral pool balance mismatch'
         );
       });
+      it("should revert minting positions tokens if no daily contract is deployed", async () => {
+        // Fund the 0x Bridge to enable another contract creation
+        await imbtc.transfer(_0xBridgeProxy, neededCollateral.toString());
+
+        assert.equal(
+          await marketContractProxy.isDailyContractDeployed(),
+          true,
+          "market contract proxy did not correctly report daily contract deployed"
+          );
+          // Increase time to one day after the contract deployment. This should revert
+          // mintPositionTokens as there is no fresh contract deployed in the last 24 hours
+          await time.increaseTo(
+            (await marketContractProxy.getTime()).toNumber() + 60 * 60 * 24 + 1
+            );
+
+        assert.equal(
+          await marketContractProxy.isDailyContractDeployed(),
+          false,
+          "market contract proxy did not correctly report daily contract deployed"
+        );
+
+        await expectRevert.unspecified(
+          marketContractProxy.mintPositionTokens(
+            amount.toString(),
+            takerAddress,
+            makerAddress,
+            { from: _0xBridgeProxy }
+          )
+        );
+      });
     });
 
     describe('Contract settlement', () => {
@@ -420,7 +450,7 @@ contract(
           let _mri = new BigNumber(pc.getMRIDataForDay(i + 1)).multipliedBy(
             new BigNumber(1e8)
           );
-          let _expiration = Math.round(new Date().getTime() / 1000) + 3600 * 24 * 28;
+          let _expiration = (await marketContractProxy.getTime()).toNumber() + 3600 * 24 * 28;
 
           marketContractProxy.dailySettlement(
             _mri,
@@ -481,7 +511,7 @@ contract(
           let _mri = new BigNumber(pc.getMRIDataForDay(29)).multipliedBy(
             new BigNumber(1e8)
           );
-          let _expiration = Math.round(new Date().getTime() / 1000) + 3600 * 24 * 28;
+          let _expiration = (await marketContractProxy.getTime()).toNumber() + 3600 * 24 * 28;
 
           marketContractProxy.dailySettlement(
             _loopbackMri,
@@ -630,7 +660,7 @@ contract(
           let _mri = new BigNumber(pc.getMRIDataForDay(31)).multipliedBy(
             new BigNumber(1e8)
           );
-          let _expiration = Math.round(new Date().getTime() / 1000) + 3600 * 24 * 28;
+          let _expiration = (await marketContractProxy.getTime()).toNumber() + 3600 * 24 * 28;
 
           marketContractProxy.dailySettlement(
             _loopbackMri,
@@ -684,7 +714,7 @@ contract(
           let _mri = new BigNumber(pc.getMRIDataForDay(30)).multipliedBy(
             new BigNumber(1e8)
           );
-          let _expiration = Math.round(new Date().getTime() / 1000) + 3600 * 24 * 28;
+          let _expiration = (await marketContractProxy.getTime()).toNumber() + 3600 * 24 * 28;
           marketContractProxy.dailySettlement(
             _mri,
             _mri,
@@ -891,7 +921,7 @@ contract(
           let _mri = new BigNumber(pc.getMRIDataForDay(i + 1)).multipliedBy(
             new BigNumber(1e8)
           );
-          let _expiration = Math.round(new Date().getTime() / 1000) + 3600 * 24 * 35;
+          let _expiration = (await marketContractProxy.getTime()).toNumber() + 3600 * 24 * 35;
           marketContractProxy.dailySettlement(
             _loopbackMri,
             _mri,

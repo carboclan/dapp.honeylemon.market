@@ -141,10 +141,18 @@ contract MarketContractProxy is ReentrancyGuard, Ownable {
     }
 
     /**
-     * @notice mofidier to check that the caller is minter bridge address
+     * @notice modifier to check that the caller is minter bridge address
      */
     modifier onlyMinterBridge() {
         require(msg.sender == MINTER_BRIDGE_ADDRESS, 'Only Minter Bridge');
+        _;
+    }
+
+    /**
+     * @notice modifier to check that a fresh daily contract has been deployed
+     */
+    modifier onlyIfFreshDailyContract() {
+        require(isDailyContractDeployed(), "No contract has been deployed yet today");
         _;
     }
 
@@ -347,7 +355,6 @@ contract MarketContractProxy is ReentrancyGuard, Ownable {
         return dailySpecs;
     }
 
-    // If the user has a DSProxy wallet, return that address. Else, return their wallet address
     /**
      * @notice get user address
      * @dev get user own address or DSProxy address if user have one
@@ -355,10 +362,23 @@ contract MarketContractProxy is ReentrancyGuard, Ownable {
      * @return address
      */
     function getUserAddressOrDSProxy(address inputAddress) public view returns (address) {
+    // If the user has a DSProxy wallet, return that address. Else, return their wallet address
         return
             addressToDSProxy[inputAddress] == address(0)
                 ? inputAddress
                 : addressToDSProxy[inputAddress];
+    }
+
+    /**
+     * @notice checks if a new contract has been deployed in the last 24 hours
+     * @dev this prevents position tokens from being minted if the Honeylemon oracle has not deployed
+     * a new contract in the last 24 hours to prevent a trader from getting a stale price.
+     * @return bool true if there is a fresh contract, false if there is not a fresh contract
+     */
+    function isDailyContractDeployed() public view returns (bool) {
+        uint settlementTimestamp = MarketContractMPX(getLatestMarketContract()).EXPIRATION();
+        uint oneDayFromLatestDeployment = settlementTimestamp - CONTRACT_DURATION + 60 * 60 * 24;
+        return getTime() < oneDayFromLatestDeployment;
     }
 
     ///////////////////////////
@@ -510,7 +530,7 @@ contract MarketContractProxy is ReentrancyGuard, Ownable {
         uint qtyToMint,
         address longTokenRecipient,
         address shortTokenRecipient
-    ) public onlyMinterBridge nonReentrant {
+    ) public onlyMinterBridge onlyIfFreshDailyContract nonReentrant {
         uint collateralNeeded = calculateRequiredCollateral(qtyToMint);
 
         // Create instance of the latest market contract for today
