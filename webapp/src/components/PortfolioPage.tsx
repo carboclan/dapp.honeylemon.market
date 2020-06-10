@@ -24,6 +24,7 @@ import { ExpandMore, RadioButtonUnchecked, InfoRounded } from '@material-ui/icon
 import { useOnboard } from '../contexts/OnboardContext';
 import { useHoneylemon } from '../contexts/HoneylemonContext';
 import { usePrevious } from '../helpers/usePrevious';
+import dayjs from 'dayjs';
 
 const useStyles = makeStyles(({ spacing, palette }) => ({
   icon: {
@@ -60,15 +61,16 @@ const useStyles = makeStyles(({ spacing, palette }) => ({
   }
 }))
 
-const DaysRemaining = (
+const TimeRemaining = (
   props: CircularProgressProps & {
-    contractDuration: number,
-    daysRemaining: number
+    totalDuration: number,
+    remainingDuration: number,
+    unitLabel: 'd' | 'h'
   }) => {
-  const { contractDuration, daysRemaining, ...cirularProgressProps } = props;
+  const { totalDuration, remainingDuration, unitLabel, ...cirularProgressProps } = props;
   return (
     <Box position="relative" display="inline-flex">
-      <CircularProgress variant="static" {...cirularProgressProps} value={1 - props.daysRemaining / props.contractDuration} />
+      <CircularProgress variant="static" {...cirularProgressProps} value={1 - props.remainingDuration / props.totalDuration} />
       <Box
         top={0}
         left={0}
@@ -80,7 +82,7 @@ const DaysRemaining = (
         justifyContent="center"
       >
         <Typography variant="caption" component="div" color="textSecondary">
-          {`${props.daysRemaining}d`}
+          {`${props.remainingDuration}${unitLabel}`}
         </Typography>
       </Box>
     </Box>
@@ -273,7 +275,7 @@ const PorfolioPage: React.SFC = () => {
                     <TableBody>
                       {openOrdersMetadata && openOrdersMetadata?.map(order =>
                         <TableRow key={order.orderHash}>
-                          <TableCell>{order?.remainingFillableMakerAssetAmount.toString()}</TableCell>
+                          <TableCell>{order?.remainingFillableMakerAssetAmount.toLocaleString()}</TableCell>
                           <TableCell align='center'>${order?.price.dividedBy(CONTRACT_DURATION).toFixed(2)}</TableCell>
                           <TableCell align='right'>
                             <Button onClick={() => cancelOpenOrder(order.orderHash)} disabled={!isCancelling}>
@@ -324,16 +326,16 @@ const PorfolioPage: React.SFC = () => {
                         <TableRow key={i}>
                           <TableCell>{position.instrumentName}</TableCell>
                           <TableCell align='center'>{position.type}</TableCell>
-                          <TableCell align='center'>{position.qtyToMint}</TableCell>
+                          <TableCell align='center'>{position.qtyToMint.toLocaleString()}</TableCell>
                           <TableCell align='center'>
-                            <DaysRemaining contractDuration={position.duration} daysRemaining={position.daysToMaturity} />
+                            <TimeRemaining totalDuration={position.duration} remainingDuration={position.daysToMaturity} unitLabel='d' />
                           </TableCell>
                           <TableCell align='right'>{position.pendingReward}</TableCell>
                         </TableRow>
                       )}
                       {!isLoading && activePositions.length === 0 &&
                         <TableRow>
-                          <TableCell colSpan={4} align='center' className={classes.placeholderRow}>
+                          <TableCell colSpan={5} align='center' className={classes.placeholderRow}>
                             No active positions
                           </TableCell>
                         </TableRow>
@@ -363,20 +365,29 @@ const PorfolioPage: React.SFC = () => {
                           <TableRow>
                             <TableCell>Contract</TableCell>
                             <TableCell align='center'>Position</TableCell>
+                            <TableCell align='center'>Quantity</TableCell>
+                            <TableCell align='center'>Days</TableCell>
                             <TableCell align='right'>BTC</TableCell>
                           </TableRow>
                         </TableHead>
                         <TableBody>
                           {settlementDelayPositions?.map((position: any, i) =>
                             <TableRow key={i}>
-                              <TableCell>{position.contractName}</TableCell>
-                              <TableCell align='center'>{position.qtyToMint}</TableCell>
+                              <TableCell>{position.instrumentName}</TableCell>
+                              <TableCell align='center'>{position.type}</TableCell>
+                              <TableCell align='center'>{position.qtyToMint.toLocaleString()}</TableCell>
+                              <TableCell>
+                                <TimeRemaining
+                                  totalDuration={24}
+                                  remainingDuration={Math.ceil(dayjs(position.settlementDate).diff(dayjs(), 'h', true))}
+                                  unitLabel='h' />
+                              </TableCell>
                               <TableCell align='right'>{position.finalReward}</TableCell>
                             </TableRow>
                           )}
                           {!isLoading && settlementDelayPositions.length === 0 &&
                             <TableRow>
-                              <TableCell colSpan={3} align='center' className={classes.placeholderRow}>
+                              <TableCell colSpan={5} align='center' className={classes.placeholderRow}>
                                 No positions awaiting settlement delay expiry
                               </TableCell>
                             </TableRow>
@@ -405,16 +416,20 @@ const PorfolioPage: React.SFC = () => {
                       <Table>
                         <TableHead>
                           <TableRow>
-                            <TableCell>Contract</TableCell>
-                            <TableCell align='center'>Position</TableCell>
-                            <TableCell align='right'>BTC</TableCell>
+                            <TableRow>
+                              <TableCell>Contract</TableCell>
+                              <TableCell align='center'>Position</TableCell>
+                              <TableCell align='center'>Quantity</TableCell>
+                              <TableCell align='right'>BTC</TableCell>
+                            </TableRow>
                           </TableRow>
                         </TableHead>
                         <TableBody>
                           {settledPositionsToWithdraw?.map((position: any, i) =>
                             <TableRow key={i}>
-                              <TableCell>{position.contractName}</TableCell>
-                              <TableCell align='center'>{position.qtyToMint}</TableCell>
+                              <TableCell>{position.instrumentName}</TableCell>
+                              <TableCell align='center'>{position.type}</TableCell>
+                              <TableCell align='center'>{position.qtyToMint.toLocaleString()}</TableCell>
                               <TableCell align='right'>{position.finalReward}</TableCell>
                             </TableRow>
                           )}
@@ -459,14 +474,16 @@ const PorfolioPage: React.SFC = () => {
                       <TableRow>
                         <TableCell>Contract</TableCell>
                         <TableCell align='center'>Position</TableCell>
+                        <TableCell align='center'>Quantity</TableCell>
                         <TableCell align='right'>BTC</TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
                       {settledPositions.map((position: any, i) =>
                         <TableRow key={i}>
-                          <TableCell>{position.contractName}</TableCell>
-                          <TableCell align='center'>{position.qtyToMint}</TableCell>
+                          <TableCell>{position.instrumentName}</TableCell>
+                          <TableCell align='center'>{position.type}</TableCell>
+                          <TableCell align='center'>{position.qtyToMint.toLocaleString()}</TableCell>
                           <TableCell align='right'>{position.finalReward}</TableCell>
                         </TableRow>
                       )}
@@ -486,7 +503,7 @@ const PorfolioPage: React.SFC = () => {
           }
         </div>
       </Grid>
-    </Grid>
+    </Grid >
   )
 }
 

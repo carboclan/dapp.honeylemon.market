@@ -92,8 +92,10 @@ export type OpenOrder = {
 export type ContractDetails = {
   instrumentName: string,
   duration: number,
-  date: Date,
-  type: PositionType,
+  startDate: Date,
+  expirationDate: Date,
+  settlementDate: Date,
+  type: PositionType,  
 }
 
 const HoneylemonContext = React.createContext<HoneylemonContext | undefined>(undefined);
@@ -132,20 +134,33 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
     }
   }
 
+  function sleep(ms: number) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
   const approveToken = async (tokenType: TokenType): Promise<void> => {
     try {
       switch (tokenType) {
         case TokenType.CollateralToken:
           await honeylemonService.approveCollateralToken(address);
-          const collateral = await honeylemonService.getCollateralTokenAmounts(address);
-          setCollateralTokenAllowance(Number(collateral.allowance.shiftedBy(-8).toString()));
-          setCollateralTokenBalance(Number(collateral.balance.shiftedBy(-8).toString()));
+          var collateral;
+          do {
+            await sleep(5000);
+            collateral = await honeylemonService.getCollateralTokenAmounts(address);
+          } while (Number(collateral.allowance.shiftedBy(-8).toString()) === 0);
+          setCollateralTokenAllowance(Number(collateral.allowance.shiftedBy(-COLLATERAL_TOKEN_DECIMALS).toString()));
+          setCollateralTokenBalance(Number(collateral.balance.shiftedBy(-COLLATERAL_TOKEN_DECIMALS).toString()));
           break;
         case TokenType.PaymentToken:
+          debugger;
           await honeylemonService.approvePaymentToken(address);
-          const payment = await honeylemonService.getPaymentTokenAmounts(address);
-          setPaymentTokenAllowance(Number(payment.allowance.shiftedBy(-6).toString()));
-          setPaymentTokenBalance(Number(payment.balance.shiftedBy(-6).toString()));
+          var payment;
+          do {
+            await sleep(5000);
+            payment = await honeylemonService.getPaymentTokenAmounts(address);
+          } while (Number(payment.allowance.shiftedBy(-8).toString()) === 0);
+          setCollateralTokenAllowance(Number(payment.allowance.shiftedBy(-PAYMENT_TOKEN_DECIMALS).toString()));
+          setCollateralTokenBalance(Number(payment.balance.shiftedBy(-PAYMENT_TOKEN_DECIMALS).toString()));
           break;
         default:
           break;
@@ -158,12 +173,15 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
   }
 
   const parseContractName = (contractName: string): ContractDetails => {
-    const [indexType, collateralInstrument, duration, date, position] = contractName.split('-');
+    const [indexType, collateralInstrument, durationString, startDate, position] = contractName.split('-');
+    const duration = Number(durationString.slice(0, durationString.length - 2));
     return {
       instrumentName: `${indexType}-${collateralInstrument}`,
       type: (position === 'long') ? PositionType.Long : PositionType.Short,
-      date: new Date(date),
-      duration: Number(duration.slice(0, duration.length - 2))
+      startDate: new Date(startDate), //This will always be UTC 00:00 the date the contract was concluded 
+      expirationDate: dayjs(startDate).add(duration, 'd').toDate(),
+      settlementDate: dayjs(startDate).add(duration + 1, 'd').toDate(),
+      duration,
     }
   }
 

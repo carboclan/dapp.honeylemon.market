@@ -178,7 +178,7 @@ const BuyContractPage: React.SFC = () => {
 
   const handleApprovePaymentToken = async () => {
     setTxActive(true);
-    await approveToken(TokenType.CollateralToken)
+    await approveToken(TokenType.PaymentToken)
     setTxActive(false);
   }
 
