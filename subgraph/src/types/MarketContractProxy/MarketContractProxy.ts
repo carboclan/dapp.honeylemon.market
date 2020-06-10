@@ -756,6 +756,29 @@ export class MarketContractProxy extends ethereum.SmartContract {
     return ethereum.CallResult.fromValue(value[0].toAddress());
   }
 
+  isDailyContractDeployed(): boolean {
+    let result = super.call(
+      "isDailyContractDeployed",
+      "isDailyContractDeployed():(bool)",
+      []
+    );
+
+    return result[0].toBoolean();
+  }
+
+  try_isDailyContractDeployed(): ethereum.CallResult<boolean> {
+    let result = super.tryCall(
+      "isDailyContractDeployed",
+      "isDailyContractDeployed():(bool)",
+      []
+    );
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toBoolean());
+  }
+
   createDSProxyWallet(): Address {
     let result = super.call(
       "createDSProxyWallet",

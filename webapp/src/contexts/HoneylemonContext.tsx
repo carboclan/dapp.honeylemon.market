@@ -207,7 +207,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
         paymentTokenAllowance,
         paymentTokenBalance,
         PAYMENT_TOKEN_DECIMALS: 6, //TODO: Extract this from library when TS conversion is done
-        CONTRACT_DURATION: 28, //TODO: Extract this from library when TS conversion is done
+        CONTRACT_DURATION: 2, // Set 2 for Kovan
         isDsProxyDeployed,
         CONTRACT_COLLATERAL_RATIO: 1.25, //TODO: Extract this from library when TS conversion is done
         marketData: {
