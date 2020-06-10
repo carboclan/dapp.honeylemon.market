@@ -173,7 +173,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
 
       paymentTokenContract.on(filterPaymentTokenApproval, () => checkBalancesAndApprovals())
       paymentTokenContract.on(transferPaymentTokenFrom, () => checkBalancesAndApprovals())
-      // paymentTokenContract.on(transferPaymentTokenTo, () => checkBalancesAndApprovals())        
+      // paymentTokenContract.on(transferPaymentTokenTo, () => checkBalancesAndApprovals())
 
       const collateralTokenContractAddress = honeylemonService.collateralTokenAddress;
       const collateralTokenContract = new ethers.Contract(collateralTokenContractAddress, erc20Abi, provider);
@@ -188,7 +188,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
       return () => {
         paymentTokenContract.removeAllListeners(filterPaymentTokenApproval)
         paymentTokenContract.removeAllListeners(transferPaymentTokenFrom)
-        // paymentTokenContract.removeAllListeners(transferPaymentTokenTo)  
+        // paymentTokenContract.removeAllListeners(transferPaymentTokenTo)
         collateralTokenContract.removeAllListeners(filterCollateralTokenApproval)
         collateralTokenContract.removeAllListeners(transferCollateralTokenFrom)
         //   collateralTokenContract.removeAllListeners(transferCollateralTokenTo)
@@ -209,7 +209,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
         PAYMENT_TOKEN_DECIMALS: 6, //TODO: Extract this from library when TS conversion is done
         CONTRACT_DURATION: 28, //TODO: Extract this from library when TS conversion is done
         isDsProxyDeployed,
-        CONTRACT_COLLATERAL_RATIO: 1.35, //TODO: Extract this from library when TS conversion is done
+        CONTRACT_COLLATERAL_RATIO: 1.25, //TODO: Extract this from library when TS conversion is done
         marketData: {
           miningContracts,
           currentBTCSpotPrice,
