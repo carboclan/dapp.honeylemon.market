@@ -416,12 +416,10 @@ const PorfolioPage: React.SFC = () => {
                       <Table>
                         <TableHead>
                           <TableRow>
-                            <TableRow>
-                              <TableCell>Contract</TableCell>
-                              <TableCell align='center'>Position</TableCell>
-                              <TableCell align='center'>Quantity</TableCell>
-                              <TableCell align='right'>BTC</TableCell>
-                            </TableRow>
+                            <TableCell>Contract</TableCell>
+                            <TableCell align='center'>Position</TableCell>
+                            <TableCell align='center'>Quantity</TableCell>
+                            <TableCell align='right'>BTC</TableCell>
                           </TableRow>
                         </TableHead>
                         <TableBody>
