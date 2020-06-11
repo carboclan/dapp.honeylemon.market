@@ -78,13 +78,18 @@ const OfferContractPage: React.SFC = () => {
     CONTRACT_DURATION,
     isDsProxyDeployed,
     PAYMENT_TOKEN_NAME,
+    marketData,
+    PAYMENT_TOKEN_DECIMALS,
     deployDSProxyContract,
     approveToken,
   } = useHoneylemon();
   const { address = '0x' } = useOnboard();
   const classes = useStyles();
 
-  const [hashPrice, setHashPrice] = useState(0);
+  const [hashPrice, setHashPrice] = useState(
+    Number(
+      (marketData.currentMRI * marketData.currentBTCSpotPrice)
+      .toLocaleString(undefined, {maximumFractionDigits: PAYMENT_TOKEN_DECIMALS})));
   const [hashAmount, setHashAmount] = useState(0);
   const [totalContractPrice, setTotalContractPrice] = useState(0);
   const [collateralAmount, setCollateralAmount] = useState(0);
@@ -113,14 +118,6 @@ const OfferContractPage: React.SFC = () => {
   useEffect(() => {
     setTotalContractPrice(hashPrice * hashAmount * CONTRACT_DURATION)
   }, [hashPrice, hashAmount, CONTRACT_DURATION])
-
-  useEffect(() => {
-    const getCurrentHashPrice = async () => {
-      const result = await honeylemonService.getQuoteForSize(new BigNumber(1))
-      setHashPrice(Number(result?.price?.dividedBy(CONTRACT_DURATION).toString()) || 0);
-    }
-    getCurrentHashPrice();
-  }, [CONTRACT_DURATION, honeylemonService])
 
   const tokenApprovalGranted = collateralTokenAllowance > collateralAmount;
   const sufficientCollateral = collateralTokenBalance >= collateralAmount;

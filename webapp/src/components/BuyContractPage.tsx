@@ -72,6 +72,12 @@ const useStyles = makeStyles(({ spacing, palette }) => ({
   actionsContainer: {
     marginBottom: spacing(2),
   },
+  premium: {
+    color: palette.error.main,
+  },
+  discount: {
+    color: palette.success.main,
+  }
 }))
 
 enum BuyType { 'budget', 'quantity' };
@@ -109,6 +115,7 @@ const BuyContractPage: React.SFC = () => {
   const [showContractSpecificationModal, setShowContractSpecificationModal] = useState(false);
   const [showMRIInformationModal, setShowMRIInformationModal] = useState(false);
   const [expectedBTCAccrual, setExpectedBTCAccrual] = useState(0);
+  const [discountOnSpotPrice, setDiscountOnSpotPrice] = useState(0);
 
   const handleChangeBuyType = (event: React.ChangeEvent<{}>, newValue: BuyType) => {
     setBuyType(newValue);
@@ -131,13 +138,24 @@ const BuyContractPage: React.SFC = () => {
     try {
       const result = await honeylemonService.getQuoteForSize(new BigNumber(newValue))
       const newIsLiquid = !!(Number(result?.remainingMakerFillAmount?.toString() || -1) === 0)
+      const newOrderValue = Number(result?.totalTakerFillAmount?.shiftedBy(-PAYMENT_TOKEN_DECIMALS).toString()) || 0;
+      const newExpectedAccrual = Number(new BigNumber(
+        await honeylemonService.calculateRequiredCollateral(new BigNumber(newValue))
+      ).shiftedBy(-COLLATERAL_TOKEN_DECIMALS)
+        .dividedBy(CONTRACT_COLLATERAL_RATIO).toString());
+
+      const { currentBTCSpotPrice } = marketData;
+      const discountValue = (!isLiquid) ?
+        0 :
+        ((currentBTCSpotPrice - (newOrderValue / newExpectedAccrual)) / currentBTCSpotPrice) * 100
+
       setIsLiquid(newIsLiquid);
       setHashPrice(Number(result?.price?.dividedBy(CONTRACT_DURATION).toString()) || 0);
-      setOrderValue(Number(result?.totalTakerFillAmount?.shiftedBy(-PAYMENT_TOKEN_DECIMALS).toString()) || 0);
+      setOrderValue(newOrderValue);
       setResultOrders(result?.resultOrders || undefined);
       setTakerFillAmounts(result?.takerAssetFillAmounts || undefined);
-      const collateraRequired = new BigNumber(await honeylemonService.calculateRequiredCollateral(newValue)).shiftedBy(-COLLATERAL_TOKEN_DECIMALS)
-      setExpectedBTCAccrual(Number(collateraRequired.dividedBy(CONTRACT_COLLATERAL_RATIO).toString()));
+      setExpectedBTCAccrual(newExpectedAccrual);
+      !isNaN(discountValue) && setDiscountOnSpotPrice(discountValue);
     } catch (error) {
       console.log('Error getting the current liquidity')
       console.log(error);
@@ -146,24 +164,34 @@ const BuyContractPage: React.SFC = () => {
   }
 
   const validateOrderValue = async (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const newValueString = e.target.value;
-    if (!newValueString) {
+    const newBudgetString = e.target.value;
+    if (!newBudgetString) {
       setOrderValue(0);
       return;
     }
-    const newValue = parseFloat(newValueString);
-    !isNaN(newValue) && setBudget(newValue)
+    const newBudgetValue = parseFloat(newBudgetString);
+    !isNaN(newBudgetValue) && setBudget(newBudgetValue)
     try {
-      const result = await honeylemonService.getQuoteForBudget(newValue);
+      const result = await honeylemonService.getQuoteForBudget(newBudgetValue);
       const newIsLiquid = !!(Number(result?.remainingTakerFillAmount?.toString() || -1) === 0)
+      const newOrderValue = Number(result?.totalTakerFillAmount?.shiftedBy(-PAYMENT_TOKEN_DECIMALS).toString()) || 0;
+      // This is used in calc of expected accrual
+      const collateralRequiredForPosition = await honeylemonService.calculateRequiredCollateral(new BigNumber(result.totalMakerFillAmount))
+      const newExpectedAccrual = Number(new BigNumber(collateralRequiredForPosition).shiftedBy(-COLLATERAL_TOKEN_DECIMALS)
+        .dividedBy(CONTRACT_COLLATERAL_RATIO).toString());
+      const { currentBTCSpotPrice } = marketData;
+      const discountValue = (!isLiquid) ?
+        0 :
+        ((currentBTCSpotPrice - (newOrderValue / newExpectedAccrual)) / currentBTCSpotPrice) * 100
+
       setIsLiquid(newIsLiquid);
       setHashPrice(Number(result?.price?.dividedBy(CONTRACT_DURATION).toString()) || 0);
       setOrderQuantity(Number(result?.totalMakerFillAmount?.toString()) || 0);
-      setResultOrders(result.resultOrders || undefined);
-      setTakerFillAmounts(result.takerAssetFillAmounts || undefined);
-      setOrderValue(Number(result?.totalTakerFillAmount?.shiftedBy(-PAYMENT_TOKEN_DECIMALS).toString()) || 0);
-      const collateraRequired = new BigNumber(await honeylemonService.calculateRequiredCollateral(result?.totalMakerFillAmount.toString())).shiftedBy(-COLLATERAL_TOKEN_DECIMALS)
-      setExpectedBTCAccrual(Number(collateraRequired.dividedBy(CONTRACT_COLLATERAL_RATIO).toString()));
+      setOrderValue(newOrderValue);
+      setResultOrders(result?.resultOrders || undefined);
+      setTakerFillAmounts(result?.takerAssetFillAmounts || undefined);
+      setExpectedBTCAccrual(newExpectedAccrual);
+      !isNaN(discountValue) && setDiscountOnSpotPrice(discountValue);
     } catch (error) {
       console.log('Error getting the current liquidity')
       console.log(error);
@@ -278,9 +306,6 @@ const BuyContractPage: React.SFC = () => {
     activeStep === 2 && handleBuyOffer();
   }
 
-  const {currentBTCSpotPrice} = marketData
-  const discountOnSpotPrice = (!isLiquid) ? 0 : (((expectedBTCAccrual / orderValue) - currentBTCSpotPrice)/currentBTCSpotPrice) - 1
-  console.log(discountOnSpotPrice * 100);
   return (
     <>
       <Grid container alignItems='stretch' justify='center' spacing={2}>
@@ -308,7 +333,7 @@ const BuyContractPage: React.SFC = () => {
               inputProps={{
                 className: classes.inputBase,
                 min: 0,
-                step: 0.000001
+                step: 1
               }}
               startAdornment={<InputAdornment position="start">$</InputAdornment>}
               onChange={validateOrderValue}
@@ -391,10 +416,12 @@ const BuyContractPage: React.SFC = () => {
                 <TableBody>
                   <TableRow>
                     <TableCell className={classes.orderSummaryEstimate}>
-                      Discount vs Spot BTC Price *
+                      Discount on Spot BTC Price *
                     </TableCell>
-                    <TableCell align='right' className={classes.orderSummaryEstimate}>
-                      1.5%
+                    <TableCell align='right' className={clsx(classes.orderSummaryEstimate,
+                      { [classes.premium]: discountOnSpotPrice < 0 },
+                      { [classes.discount]: discountOnSpotPrice > 0 })}>
+                      {discountOnSpotPrice.toLocaleString(undefined, { minimumFractionDigits: 5, maximumFractionDigits: 8 })}%
                     </TableCell>
                   </TableRow>
                   <TableRow>
@@ -402,7 +429,7 @@ const BuyContractPage: React.SFC = () => {
                       Expected Accrual *
                     </TableCell>
                     <TableCell align='right' className={classes.orderSummaryEstimate}>
-                      {`BTC ${(expectedBTCAccrual).toLocaleString()}`}
+                      {`${(expectedBTCAccrual).toLocaleString(undefined, { minimumFractionDigits: 5, maximumFractionDigits: 8 })} imBTC`}
                     </TableCell>
                   </TableRow>
                   <TableRow>
