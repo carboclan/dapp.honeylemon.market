@@ -8,7 +8,8 @@ import { ethers } from 'ethers';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import { BigNumber } from "@0x/utils";
-import { getBtcMri } from '@carboclan/mri';
+const { getBtcData } = require('@carboclan/mri');
+
 dayjs.extend(utc);
 
 enum TokenType {
@@ -116,6 +117,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
   const [miningContracts, setMiningContracts] = useState<Array<any>>([]);
   const [currentMRI, setCurrentMRI] = useState(0);
   const [currentBTCSpotPrice, setCurrentBTCSpotPrice] = useState(0);
+  const [currentBtcDifficulty, setCurrentBtcDifficulty] = useState(0);
   const [btcDifficultyAdjustmentDate, setBtcDifficultyAdjustmentDate] = useState(new Date());
   const [openOrdersMetadata, setOpenOrdersMetadata] = useState<Array<OpenOrderMetadata>>([]);
   const [openOrders, setOpenOrders] = useState<{ [orderHash: string]: OpenOrder } | undefined>()
@@ -293,20 +295,14 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
         if (marketDataApiUrl) {
           const { contracts } = await (await fetch(`${marketDataApiUrl}/blockchain/agg?coin=BTC`)).json();
           const { data } = await (await fetch(`${marketDataApiUrl}/coinmarketcap/v1/cryptocurrency/quotes/latest?symbol=BTC`)).json();
+          const { mri, difficulty } = await getBtcData(dayjs().utc().format('YYYYMMDD'), 1, false);
           setMiningContracts(contracts);
-          setCurrentBTCSpotPrice(data?.BTC?.quote?.USD);
+          setCurrentBTCSpotPrice(data?.BTC?.quote?.USD?.price);
+          setCurrentMRI(mri);
+          setCurrentBtcDifficulty(difficulty);
         }
       } catch (error) {
         console.log('There was an error getting the market data')
-      }
-      try {
-        const btcComData = await (
-          await fetch(`https://chain.api.btc.com/v3/block/date/${dayjs().utc().format('YYYYMMDD')}`)
-        ).json();
-        const mri = await getBtcMri();
-        //setCurrentMRI(mri);
-      } catch (error) {
-        console.log('There was an error getting the MRI data')
       }
     }
 
