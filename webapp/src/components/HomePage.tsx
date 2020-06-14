@@ -8,7 +8,7 @@ import duration from 'dayjs/plugin/duration';
 import { useOnboard } from '../contexts/OnboardContext';
 import { useHoneylemon } from '../contexts/HoneylemonContext';
 import ConnectWalletButton from './ConnectWalletButton';
-import MRIInformationModal from './MRIInformationModal';
+import MRIDisplay from './MRIDisplay';
 
 dayjs.extend(duration);
 
@@ -59,7 +59,6 @@ const HomePage: React.SFC = () => {
     minutes: '00',
     seconds: '00',
   })
-  const [showMRIInformationModal, setShowMRIInformationModal] = useState(false);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -79,23 +78,12 @@ const HomePage: React.SFC = () => {
   const classes = useStyles();
 
   return (
-    <>
       <Grid container direction='column' spacing={2}>
         <Grid item>
           <Typography color="secondary" variant='h5' align='center'>Sweet Deals In Crypto Mining</Typography>
         </Grid>
         <Grid item>
-          <Paper className={classes.mriInfo}>
-            <Link 
-              variant='body1' 
-              href='#' underline='always' 
-              onClick={() => setShowMRIInformationModal(true)}>
-                Bitcoin Mining Revenue Index (MRI)
-                <OpenInNew fontSize='small'/>
-            </Link>
-            <Typography align='center' color='secondary'>{`BTC ${currentMRI.toLocaleString(undefined, { maximumFractionDigits: 8 })}/TH/Day`}</Typography>
-            <Typography align='center' color='secondary'>{`~ $ ${(currentMRI * currentBTCSpotPrice).toLocaleString(undefined, { maximumFractionDigits: 6 })}/TH/Day`}</Typography>
-          </Paper>
+          <MRIDisplay />
         </Grid>
         <Grid item>
           <Link component={RouterLink} to='/stats' underline='always'>
@@ -103,7 +91,7 @@ const HomePage: React.SFC = () => {
               <span role="img" aria-label="fire">🔥</span>
               Mining Market Live Stats
               <span role="img" aria-label="fire">🔥</span>
-              <OpenInNew fontSize="small"/>
+              <OpenInNew fontSize="small" />
             </Typography>
           </Link>
         </Grid>
@@ -148,18 +136,16 @@ const HomePage: React.SFC = () => {
         </Grid>
         {isReady &&
           <>
-            <Typography variant='h5' style={{ fontWeight: 'bold' }}>I am a BTC Miner</Typography>
-            <Typography color='secondary' style={{ fontWeight: 'bold' }}>Hedge risk & get cash up front</Typography>
-            <Button onClick={() => forwardTo('/offer')} className={classes.button}>OFFER CONTRACTS</Button>
-            <Divider className={classes.divider} />
-            <Typography variant='h5' style={{ fontWeight: 'bold' }}>I am a BTC Hodler</Typography>
-            <Typography color='secondary' style={{ fontWeight: 'bold' }} gutterBottom>Pay cash & earn mining rewards</Typography>
+            <Typography variant='h5' style={{ fontWeight: 'bold' }}>I am a BTC investor.</Typography>
+            <Typography color='secondary' style={{ fontWeight: 'bold' }} gutterBottom>Pay Cash & Earn Mining Revenue in BTC</Typography>
             <Button onClick={() => forwardTo('/buy')} className={classes.button}>BUY CONTRACTS</Button>
+            <Divider className={classes.divider} />
+            <Typography variant='h5' style={{ fontWeight: 'bold' }}>I am a BTC Miner.</Typography>
+            <Typography color='secondary' style={{ fontWeight: 'bold' }}>Hedge Mining Risk & Get Cash Upfront</Typography>
+            <Button onClick={() => forwardTo('/offer')} className={classes.button}>OFFER CONTRACTS</Button>
           </>
         }
       </Grid>
-      <MRIInformationModal open={showMRIInformationModal} onClose={() => setShowMRIInformationModal(false)} />
-    </>
   )
 }
 

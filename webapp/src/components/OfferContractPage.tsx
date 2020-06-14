@@ -31,6 +31,7 @@ import { useOnboard } from '../contexts/OnboardContext';
 import { forwardTo } from '../helpers/history';
 import ContractSpecificationModal from './ContractSpecificationModal';
 import MRIInformationModal from './MRIInformationModal';
+import MRIDisplay from './MRIDisplay';
 
 const useStyles = makeStyles(({ spacing, palette }) => ({
   rightAlign: {
@@ -209,7 +210,10 @@ const OfferContractPage: React.SFC = () => {
     <>
       <Grid container alignItems='flex-start' justify='flex-start' spacing={2} className={classes.offerForm}>
         <Grid item xs={12}>
-          <Typography style={{ fontWeight: 'bold' }}>Offer a {CONTRACT_DURATION} day Mining Revenue Contract</Typography>
+          <MRIDisplay />
+        </Grid>
+        <Grid item xs={12}>
+          <Typography style={{ fontWeight: 'bold' }} color='secondary'>Offer a {CONTRACT_DURATION} day Mining Revenue Contract</Typography>
         </Grid>
         <Grid item xs={6}><Typography style={{ fontWeight: 'bold' }}>Price:</Typography></Grid>
         <Grid item xs={4}>
