@@ -137,8 +137,8 @@ const MiningStatsPage: React.SFC = () => {
       },
       dashStyle: 'Dash',
       data: [
-        [Date.now(), marketData.miningPayoff],
-        [Date.now() + 730 * 1000 * 86400, marketData.miningPayoff]
+        [Date.now(), marketData.currentMRI * marketData.currentBTCSpotPrice],
+        [Date.now() + 730 * 1000 * 86400, marketData.currentMRI * marketData.currentBTCSpotPrice]
       ]
     }
   ]}

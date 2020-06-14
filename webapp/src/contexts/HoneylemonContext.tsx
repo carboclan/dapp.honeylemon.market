@@ -50,7 +50,6 @@ export type HoneylemonContext = {
     currentMRI: number,
     currentBTCSpotPrice: number,
     btcDifficultyAdjustmentDate: Date,
-    miningPayoff: number,
   },
   portfolioData: {
     openOrdersMetadata: Array<OpenOrderMetadata>,
@@ -434,7 +433,6 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
           currentBTCSpotPrice,
           currentMRI,
           btcDifficultyAdjustmentDate,
-          miningPayoff: 0.0953,
         },
         portfolioData: {
           activePositions,
@@ -447,8 +445,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
         deployDSProxyContract,
         approveToken,
         refreshPortfolio: getPorfolio
-      }}
-    >
+      }}>
       {children}
     </HoneylemonContext.Provider>
   );
