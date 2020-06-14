@@ -35,6 +35,7 @@ import { forwardTo } from '../helpers/history';
 import ContractSpecificationModal from './ContractSpecificationModal'
 import MRIInformationModal from './MRIInformationModal'
 import dayjs from 'dayjs';
+import MRIDisplay from './MRIDisplay';
 
 
 const useStyles = makeStyles(({ spacing, palette }) => ({
@@ -62,7 +63,7 @@ const useStyles = makeStyles(({ spacing, palette }) => ({
     color: palette.secondary.main,
   },
   orderSummaryBlur: {
-    filter: 'blur(2px)',
+    filter: 'blur(3px)',
   },
   button: {
     marginTop: spacing(1),
@@ -113,7 +114,6 @@ const BuyContractPage: React.SFC = () => {
   const [showBuyModal, setShowBuyModal] = useState(false);
   const [txActive, setTxActive] = useState(false);
   const [showContractSpecificationModal, setShowContractSpecificationModal] = useState(false);
-  const [showMRIInformationModal, setShowMRIInformationModal] = useState(false);
   const [expectedBTCAccrual, setExpectedBTCAccrual] = useState(0);
   const [discountOnSpotPrice, setDiscountOnSpotPrice] = useState(0);
 
@@ -175,7 +175,6 @@ const BuyContractPage: React.SFC = () => {
       const result = await honeylemonService.getQuoteForBudget(newBudgetValue);
       const newIsLiquid = !!(Number(result?.remainingTakerFillAmount?.toString() || -1) === 0)
       const newOrderValue = Number(result?.totalTakerFillAmount?.shiftedBy(-PAYMENT_TOKEN_DECIMALS).toString()) || 0;
-      // This is used in calc of expected accrual
       const collateralRequiredForPosition = await honeylemonService.calculateRequiredCollateral(new BigNumber(result.totalMakerFillAmount))
       const newExpectedAccrual = Number(new BigNumber(collateralRequiredForPosition).shiftedBy(-COLLATERAL_TOKEN_DECIMALS)
         .dividedBy(CONTRACT_COLLATERAL_RATIO).toString());
@@ -308,9 +307,12 @@ const BuyContractPage: React.SFC = () => {
 
   return (
     <>
-      <Grid container alignItems='stretch' justify='center' spacing={2}>
+      <Grid container alignItems='center' justify='flex-start' spacing={2}>
         <Grid item xs={12}>
-          <Typography style={{ fontWeight: 'bold' }}>Buy a {CONTRACT_DURATION}-Day Bitcoin Mining Revenue Contract</Typography>
+          <MRIDisplay />
+        </Grid>
+        <Grid item xs={12}>
+          <Typography style={{ fontWeight: 'bold' }}>Buy a {CONTRACT_DURATION}-Day Mining Revenue Contract</Typography>
         </Grid>
         <Grid item xs={12}>
           <Tabs
@@ -465,7 +467,7 @@ const BuyContractPage: React.SFC = () => {
           <Typography>
             You will pay <strong>$ {orderValue.toLocaleString()}</strong> to buy <strong>{orderQuantity}Th</strong> of hashrate
             for <strong>{CONTRACT_DURATION} days</strong> for <strong>${hashPrice.toLocaleString()}/Th/day</strong>. You will
-            receive the average value of the <Link href="#" underline='always' onClick={() => setShowMRIInformationModal(true)}>Mining Revenue Index</Link>&nbsp;
+            receive the average value of the <Link href="#" underline='always'>Mining Revenue Index</Link>&nbsp;
             over <strong>{CONTRACT_DURATION} days</strong> representing <strong>{orderQuantity} Th</strong> of mining power per
             day per contract.
           </Typography>
@@ -505,7 +507,6 @@ const BuyContractPage: React.SFC = () => {
         </DialogContent>
       </Dialog>
       <ContractSpecificationModal open={showContractSpecificationModal} onClose={() => setShowContractSpecificationModal(false)} />
-      <MRIInformationModal open={showMRIInformationModal} onClose={() => setShowMRIInformationModal(false)} />
     </>
   )
 }

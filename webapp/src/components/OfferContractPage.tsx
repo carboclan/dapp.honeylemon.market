@@ -97,7 +97,6 @@ const OfferContractPage: React.SFC = () => {
   const [showOfferModal, setShowOfferModal] = useState(false);
   const [txActive, setTxActive] = useState(false);
   const [showContractSpecificationModal, setShowContractSpecificationModal] = useState(false);
-  const [showMRIInformationModal, setShowMRIInformationModal] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -208,7 +207,7 @@ const OfferContractPage: React.SFC = () => {
 
   return (
     <>
-      <Grid container alignItems='flex-start' justify='flex-start' spacing={2} className={classes.offerForm}>
+      <Grid container alignItems='center' justify='flex-start' spacing={2} className={classes.offerForm}>
         <Grid item xs={12}>
           <MRIDisplay />
         </Grid>
@@ -223,7 +222,7 @@ const OfferContractPage: React.SFC = () => {
             inputProps={{
               className: classes.inputBase,
               min: 0,
-              step: 0.0001
+              step: 0.000001
             }}
             startAdornment={<InputAdornment position="start">$</InputAdornment>}
             onChange={e => {
@@ -333,10 +332,10 @@ const OfferContractPage: React.SFC = () => {
             The contract will start when your order is filled and you will receive payment in ${PAYMENT_TOKEN_NAME}&nbsp;
             upfront. At the end of <strong>{CONTRACT_DURATION} days</strong>, your counterparty will
             receive the network average BTC block reward & transaction fees per TH based on the average
-            value of the <Link href='#' underline='always' onClick={() => setShowMRIInformationModal(true)}>
-            Bitcoin Mining Revenue Index (MRI)</Link> over the next <strong>{CONTRACT_DURATION} days</strong> up to a max 
-            win capped by your collateral. The payoff will be directly deducted from your collateral then, and you 
-            can withdraw the remainder of your collateral post settlement.
+            value of the <Link href='#' underline='always'> Bitcoin Mining Revenue Index (MRI)</Link> over 
+            the next <strong>{CONTRACT_DURATION} days</strong> up to a max  win capped by your collateral. 
+            The payoff will be directly deducted from your collateral then, and you can withdraw the remainder 
+            of your collateral post settlement.
           </Typography>
         </Grid>
         <Grid item xs={12}>
@@ -378,7 +377,6 @@ const OfferContractPage: React.SFC = () => {
         </DialogContent>
       </Dialog>
       <ContractSpecificationModal open={showContractSpecificationModal} onClose={() => setShowContractSpecificationModal(false)} />
-      <MRIInformationModal open={showMRIInformationModal} onClose={() => setShowMRIInformationModal(false)} />
     </>
   )
 }
