@@ -384,7 +384,7 @@ const BuyContractPage: React.SFC = () => {
                     <TableCell>
                       Unit Price <br />
                       Quantity
-                  </TableCell>
+                    </TableCell>
                     <TableCell align='right'>
                       $ {hashPrice.toFixed(PAYMENT_TOKEN_DECIMALS)} /TH/day <br />
                       {`${orderQuantity.toLocaleString()} TH`}

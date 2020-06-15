@@ -22,7 +22,9 @@ import {
   Stepper,
   Step,
   StepLabel,
-  StepContent
+  StepContent,
+  IconButton,
+  Collapse
 } from '@material-ui/core';
 import clsx from 'clsx';
 import { BigNumber } from '@0x/utils';
@@ -30,10 +32,10 @@ import { useHoneylemon, TokenType } from '../contexts/HoneylemonContext';
 import { useOnboard } from '../contexts/OnboardContext';
 import { forwardTo } from '../helpers/history';
 import ContractSpecificationModal from './ContractSpecificationModal';
-import MRIInformationModal from './MRIInformationModal';
 import MRIDisplay from './MRIDisplay';
+import { OpenInNew, ExpandMore } from '@material-ui/icons';
 
-const useStyles = makeStyles(({ spacing, palette }) => ({
+const useStyles = makeStyles(({ spacing, palette, transitions }) => ({
   rightAlign: {
     textAlign: 'end',
   },
@@ -68,6 +70,19 @@ const useStyles = makeStyles(({ spacing, palette }) => ({
   actionsContainer: {
     marginBottom: spacing(2),
   },
+  expand: {
+    transform: 'rotate(0deg)',
+    marginLeft: 'auto',
+    transition: transitions.create('transform', {
+      duration: transitions.duration.shortest,
+    }),
+  },
+  expandOpen: {
+    transform: 'rotate(180deg)',
+  },
+  offerDetails: {
+    width: '100%'
+  }
 }))
 
 const OfferContractPage: React.SFC = () => {
@@ -90,13 +105,15 @@ const OfferContractPage: React.SFC = () => {
   const [hashPrice, setHashPrice] = useState(
     Number(
       (marketData.currentMRI * marketData.currentBTCSpotPrice)
-      .toLocaleString(undefined, {maximumFractionDigits: PAYMENT_TOKEN_DECIMALS})));
+        .toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })));
   const [hashAmount, setHashAmount] = useState(0);
   const [totalContractPrice, setTotalContractPrice] = useState(0);
   const [collateralAmount, setCollateralAmount] = useState(0);
   const [showOfferModal, setShowOfferModal] = useState(false);
   const [txActive, setTxActive] = useState(false);
   const [showContractSpecificationModal, setShowContractSpecificationModal] = useState(false);
+  const [showOfferDetails, setShowOfferDetails] = useState(false);
+
 
   useEffect(() => {
     let cancelled = false;
@@ -205,6 +222,10 @@ const OfferContractPage: React.SFC = () => {
     activeStep === 2 && handleCreateOffer();
   }
 
+  const handleOfferDetailsClick = () => {
+    setShowOfferDetails(!showOfferDetails);
+  };
+
   return (
     <>
       <Grid container alignItems='center' justify='flex-start' spacing={2} className={classes.offerForm}>
@@ -212,7 +233,7 @@ const OfferContractPage: React.SFC = () => {
           <MRIDisplay />
         </Grid>
         <Grid item xs={12}>
-          <Typography style={{ fontWeight: 'bold' }} color='secondary'>Offer a {CONTRACT_DURATION} day Mining Revenue Contract</Typography>
+          <Typography style={{ fontWeight: 'bold' }} color='secondary'>Offer a {CONTRACT_DURATION}-day Mining Revenue Contract</Typography>
         </Grid>
         <Grid item xs={6}><Typography style={{ fontWeight: 'bold' }}>Price:</Typography></Grid>
         <Grid item xs={4}>
@@ -243,7 +264,7 @@ const OfferContractPage: React.SFC = () => {
             disabled={showOfferModal} />
         </Grid>
         <Grid item xs={2} className={classes.rightAlign}>
-          <Typography style={{ fontWeight: 'bold' }} color='secondary'>Th/day</Typography>
+          <Typography style={{ fontWeight: 'bold' }} color='secondary'>/Th/day</Typography>
         </Grid>
         <Grid item xs={6}><Typography style={{ fontWeight: 'bold' }}>Quantity</Typography></Grid>
         <Grid item xs={4}>
@@ -274,33 +295,107 @@ const OfferContractPage: React.SFC = () => {
         <Grid item xs={2} className={classes.rightAlign}>
           <Typography style={{ fontWeight: 'bold' }} color='secondary'>Th</Typography>
         </Grid>
-        <Grid item xs={12} container >
+        <Grid item xs={12}>
+          <Link href='#' underline='always'>View Order Book <OpenInNew fontSize='small' /></Link>
+        </Grid>
+        <Grid item xs={12} container>
           <Paper className={clsx(classes.offerSummary, {
             [classes.offerSummaryBlur]: !sufficientCollateral,
           })}>
-            <Typography align='center'><strong>Offer Summary</strong></Typography>
+            <Grid item container xs={12}>
+              <Grid item xs={6}>
+                <Typography align='left'><strong>Offer Summary</strong></Typography>
+              </Grid>
+              <Grid item xs={6} style={{ textAlign: 'right' }}>
+                <Typography variant='caption'>
+                  <Link href='#' underline='always' onClick={() => setShowContractSpecificationModal(true)}>
+                    Contract Specification <OpenInNew fontSize='small' />
+                  </Link>
+                </Typography>
+              </Grid>
+            </Grid>
             <Table size='small'>
               <TableBody>
                 <TableRow>
-                  <TableCell>Contract Total</TableCell>
-                  <TableCell align='right'>{`$ ${totalContractPrice.toLocaleString()} ${PAYMENT_TOKEN_NAME}`}</TableCell>
+                  <TableCell>
+                    Limit Price <br />
+                    Offer Quantity <br />
+                    Contract Duration <br />
+                  </TableCell>
+                  <TableCell align='right'>
+                    {PAYMENT_TOKEN_NAME} {hashPrice.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}/Th/Day <br />
+                    {hashAmount} TH <br />
+                    {CONTRACT_DURATION} Days
+                  </TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell>Collateral Required</TableCell>
-                  <TableCell align='right'>{`${collateralAmount.toLocaleString()} ${COLLATERAL_TOKEN_NAME}`}</TableCell>
+                  <TableCell>
+                    Contract Total <br />
+                    Collateral Required
+                  </TableCell>
+                  <TableCell align='right'>
+                    {`${totalContractPrice.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })} ${PAYMENT_TOKEN_NAME}`} <br />
+                    {`${collateralAmount.toLocaleString(undefined, { maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS })} ${COLLATERAL_TOKEN_NAME}`}
+                  </TableCell>
                 </TableRow>
-                <TableRow>
-                  <TableCell>Duration</TableCell>
-                  <TableCell align='right'>{CONTRACT_DURATION} days</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell>Price</TableCell>
-                  <TableCell align='right'>$ {hashPrice.toLocaleString()} /TH/day</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell>Quantity</TableCell>
-                  <TableCell align='right'>{hashAmount.toLocaleString()} TH</TableCell>
-                </TableRow>
+                {!showOfferDetails ?
+                  <TableRow>
+                    <TableCell colSpan={2} align='center' onClick={handleOfferDetailsClick}>
+                      Expand Details
+                      <IconButton
+                        className={classes.expand}
+                        aria-label="show more">
+                        <ExpandMore />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow> :
+                  <>
+                    <TableRow>
+                      <TableCell>
+                        Offer Valid Till <br />
+                      Start <br />
+                      Expiration <br />
+                      Settlement <br />
+                      </TableCell>
+                      <TableCell align='right'>
+                        TBC <br />
+                        Order-fill Date UTC 00:01 <br />
+                        {`${CONTRACT_DURATION} Days After Start`} <br />
+                        24 Hours After Expiration <br />
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell colSpan={2}>
+                        * Your limit order may be partially filled. <br />
+                        * Your order will be subject to additional Ethereum network transaction fee,
+                        and 0x Protocol fee, both denominated in ETH. Honeylemon does not charge&nbsp;
+                        <Link href='#' underline='always'>fees.<OpenInNew fontSize='small' /></Link>
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell colSpan={2}>
+                        WHAT DOES IT MEAN? <br />
+                        You are offering <strong>{hashAmount} TH</strong> of {CONTRACT_DURATION}-Day
+                        Mining Revenue Contract at <strong>{PAYMENT_TOKEN_NAME} {hashPrice.toLocaleString(undefined, {maximumFractionDigits: PAYMENT_TOKEN_DECIMALS})}&nbsp;
+                        /TH/Day</strong>. You will need to <strong>approve {collateralAmount.toLocaleString(undefined, {maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS})}</strong>&nbsp;
+                        {COLLATERAL_TOKEN_NAME} in your wallet as collateral to list your offer. As soon as your order is filled, your approved collateral will be automatically deposited, 
+                        you will receive payment in <strong>{PAYMENT_TOKEN_NAME}</strong> immediately and the contract will start.<br />
+                        At the end of {CONTRACT_DURATION} days your counterparty will receive the network average BTC block reward & transaction
+                        fees per TH based on the average value of the <Link href='#' underline='always'>Bitcoin Mining Revenue Index (MRI) <OpenInNew fontSize='small'/></Link>&nbsp;
+                        over {CONTRACT_DURATION} days up to a <strong>max win capped by your collateral</strong>.<br />
+                        The payoff will be directly deducted from your collateral, and you can withdraw the remainder of your collateral after settlement.
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell colSpan={2} align='center' onClick={handleOfferDetailsClick}>
+                        Collapse Details
+                      <IconButton className={clsx(classes.expand, classes.expandOpen)}>
+                          <ExpandMore />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  </>
+                }
               </TableBody>
             </Table>
           </Paper>
@@ -320,28 +415,9 @@ const OfferContractPage: React.SFC = () => {
             fullWidth
             onClick={handleStartOffer}
             disabled={hashAmount === 0 || !sufficientCollateral || showOfferModal}>
-            CREATE OFFER &nbsp;
+            OFFER LIMIT ORDER &nbsp;
               {showOfferModal && <CircularProgress className={classes.loadingSpinner} size={20} />}
           </Button>
-        </Grid>
-        <Grid item xs={12}>
-          <Typography>
-            You are offering a <strong>{hashAmount.toLocaleString()}TH contract</strong> at&nbsp;
-            <strong>{PAYMENT_TOKEN_NAME} {hashPrice.toLocaleString()}/Th/day</strong>. You will need to
-            post <strong>{collateralAmount.toLocaleString()} {COLLATERAL_TOKEN_NAME}</strong> as collateral.
-            The contract will start when your order is filled and you will receive payment in ${PAYMENT_TOKEN_NAME}&nbsp;
-            upfront. At the end of <strong>{CONTRACT_DURATION} days</strong>, your counterparty will
-            receive the network average BTC block reward & transaction fees per TH based on the average
-            value of the <Link href='#' underline='always'> Bitcoin Mining Revenue Index (MRI)</Link> over 
-            the next <strong>{CONTRACT_DURATION} days</strong> up to a max  win capped by your collateral. 
-            The payoff will be directly deducted from your collateral then, and you can withdraw the remainder 
-            of your collateral post settlement.
-          </Typography>
-        </Grid>
-        <Grid item xs={12}>
-          <Typography align='center'>
-            See <Link href='#' underline='always' onClick={() => setShowContractSpecificationModal(true)}>full contract specification here.</Link>
-          </Typography>
         </Grid>
       </Grid>
       <Dialog open={showOfferModal} onClose={handleCloseOfferDialog} aria-labelledby="form-dialog-title">
