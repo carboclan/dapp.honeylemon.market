@@ -89,6 +89,7 @@ const OfferContractPage: React.SFC = () => {
   const { honeylemonService,
     COLLATERAL_TOKEN_DECIMALS,
     COLLATERAL_TOKEN_NAME,
+    CONTRACT_COLLATERAL_RATIO,
     collateralTokenAllowance,
     collateralTokenBalance,
     CONTRACT_DURATION,
@@ -331,11 +332,13 @@ const OfferContractPage: React.SFC = () => {
                 <TableRow>
                   <TableCell>
                     Contract Total <br />
-                    Collateral Required
+                    Collateral Required <br />
+                    <br />
                   </TableCell>
                   <TableCell align='right'>
                     {`${totalContractPrice.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })} ${PAYMENT_TOKEN_NAME}`} <br />
-                    {`${collateralAmount.toLocaleString(undefined, { maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS })} ${COLLATERAL_TOKEN_NAME}`}
+                    {`${collateralAmount.toLocaleString(undefined, { maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS })} ${COLLATERAL_TOKEN_NAME}`} <br />
+                    {`(${CONTRACT_COLLATERAL_RATIO * 100} % MRI)`}
                   </TableCell>
                 </TableRow>
                 {!showOfferDetails ?
@@ -374,7 +377,7 @@ const OfferContractPage: React.SFC = () => {
                     </TableRow>
                     <TableRow>
                       <TableCell colSpan={2}>
-                        WHAT DOES IT MEAN? <br />
+                        <Typography variant='subtitle1'>WHAT DOES IT MEAN?</Typography> <br />
                         You are offering <strong>{hashAmount} TH</strong> of {CONTRACT_DURATION}-Day
                         Mining Revenue Contract at <strong>{PAYMENT_TOKEN_NAME} {hashPrice.toLocaleString(undefined, {maximumFractionDigits: PAYMENT_TOKEN_DECIMALS})}&nbsp;
                         /TH/Day</strong>. You will need to <strong>approve {collateralAmount.toLocaleString(undefined, {maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS})}</strong>&nbsp;

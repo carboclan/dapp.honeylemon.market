@@ -278,7 +278,7 @@ const PorfolioPage: React.SFC = () => {
                           <TableCell>{order?.remainingFillableMakerAssetAmount.toLocaleString()}</TableCell>
                           <TableCell align='center'>${order?.price.dividedBy(CONTRACT_DURATION).toFixed(2)}</TableCell>
                           <TableCell align='right'>
-                            <Button onClick={() => cancelOpenOrder(order.orderHash)} disabled={!isCancelling}>
+                            <Button onClick={() => cancelOpenOrder(order.orderHash)} disabled={isCancelling}>
                               Cancel&nbsp;
                               {isCancelling && <CircularProgress className={classes.loadingSpinner} size={20} />}
                             </Button>
