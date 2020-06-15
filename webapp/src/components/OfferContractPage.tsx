@@ -86,7 +86,8 @@ const useStyles = makeStyles(({ spacing, palette, transitions }) => ({
 }))
 
 const OfferContractPage: React.SFC = () => {
-  const { honeylemonService,
+  const { 
+    honeylemonService,
     COLLATERAL_TOKEN_DECIMALS,
     COLLATERAL_TOKEN_NAME,
     CONTRACT_COLLATERAL_RATIO,
