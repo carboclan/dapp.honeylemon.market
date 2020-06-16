@@ -181,9 +181,9 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
     return {
       instrumentName: `${indexType}-${collateralInstrument}`,
       type: (position === 'long') ? PositionType.Long : PositionType.Short,
-      startDate: new Date(startDate), //This will always be UTC 00:00 the date the contract was concluded 
-      expirationDate: dayjs(startDate).add(duration, 'd').toDate(),
-      settlementDate: dayjs(startDate).add(duration + 1, 'd').toDate(),
+      startDate: dayjs(startDate).utc().startOf('day').toDate(), //This will always be UTC 00:00 the date the contract was concluded 
+      expirationDate: dayjs(startDate).utc().startOf('day').add(duration, 'd').toDate(),
+      settlementDate: dayjs(startDate).utc().startOf('day').add(duration + 1, 'd').toDate(),
       duration,
     }
   }
@@ -191,13 +191,12 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
   const getPorfolio = async () => {
     setIsPortfolioRefreshing(true);
     const openOrdersRes = await honeylemonService.getOpenOrders(address);
-    const positions = await honeylemonService.getPositions(address);
     setOpenOrdersMetadata(openOrdersRes.records.map((openOrder: any) => openOrder.metaData))
-
     setOpenOrders(Object.fromEntries(
       openOrdersRes.records.map(((openOrder: any) => [openOrder.metaData.orderHash, openOrder.order]))
     ));
 
+    const positions = await honeylemonService.getPositions(address);
     const allPositions = positions.longPositions.map((lp: any) => ({
       ...lp,
       contractName: lp.contractName + '-long',

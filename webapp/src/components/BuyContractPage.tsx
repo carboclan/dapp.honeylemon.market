@@ -25,6 +25,7 @@ import {
   Step,
   StepLabel,
   StepContent,
+  IconButton,
 } from '@material-ui/core';
 import { BigNumber } from '@0x/utils';
 import clsx from 'clsx';
@@ -33,12 +34,12 @@ import { useHoneylemon, TokenType } from '../contexts/HoneylemonContext';
 import { useOnboard } from '../contexts/OnboardContext';
 import { forwardTo } from '../helpers/history';
 import ContractSpecificationModal from './ContractSpecificationModal'
-import MRIInformationModal from './MRIInformationModal'
 import dayjs from 'dayjs';
 import MRIDisplay from './MRIDisplay';
+import { OpenInNew, ExpandMore } from '@material-ui/icons';
+import { Link as RouterLink } from 'react-router-dom';
 
-
-const useStyles = makeStyles(({ spacing, palette }) => ({
+const useStyles = makeStyles(({ spacing, palette, transitions }) => ({
   rightAlign: {
     textAlign: 'end',
   },
@@ -78,7 +79,17 @@ const useStyles = makeStyles(({ spacing, palette }) => ({
   },
   discount: {
     color: palette.success.main,
-  }
+  },
+  expand: {
+    transform: 'rotate(0deg)',
+    marginLeft: 'auto',
+    transition: transitions.create('transform', {
+      duration: transitions.duration.shortest,
+    }),
+  },
+  expandOpen: {
+    transform: 'rotate(180deg)',
+  },
 }))
 
 enum BuyType { 'budget', 'quantity' };
@@ -95,6 +106,7 @@ const BuyContractPage: React.SFC = () => {
     paymentTokenBalance,
     CONTRACT_COLLATERAL_RATIO,
     COLLATERAL_TOKEN_DECIMALS,
+    COLLATERAL_TOKEN_NAME,
     marketData,
     deployDSProxyContract,
     approveToken,
@@ -116,6 +128,7 @@ const BuyContractPage: React.SFC = () => {
   const [showContractSpecificationModal, setShowContractSpecificationModal] = useState(false);
   const [expectedBTCAccrual, setExpectedBTCAccrual] = useState(0);
   const [discountOnSpotPrice, setDiscountOnSpotPrice] = useState(0);
+  const [showOrderDetails, setShowOrderDetails] = useState(false);
 
   const handleChangeBuyType = (event: React.ChangeEvent<{}>, newValue: BuyType) => {
     setBuyType(newValue);
@@ -305,6 +318,10 @@ const BuyContractPage: React.SFC = () => {
     activeStep === 2 && handleBuyOffer();
   }
 
+  const handleOrderDetailsClick = () => {
+    setShowOrderDetails(!showOrderDetails);
+  };
+
   return (
     <>
       <Grid container alignItems='center' justify='flex-start' spacing={2}>
@@ -312,7 +329,7 @@ const BuyContractPage: React.SFC = () => {
           <MRIDisplay />
         </Grid>
         <Grid item xs={12}>
-          <Typography style={{ fontWeight: 'bold' }}>Buy a {CONTRACT_DURATION}-Day Mining Revenue Contract</Typography>
+          <Typography style={{ fontWeight: 'bold' }}>Buy {CONTRACT_DURATION}-Day Mining Revenue Contract</Typography>
         </Grid>
         <Grid item xs={12}>
           <Tabs
@@ -369,76 +386,139 @@ const BuyContractPage: React.SFC = () => {
               disabled={showBuyModal} />
           </Grid>
           <Grid item xs={3} className={classes.rightAlign}>
-            <Typography style={{ fontWeight: 'bold' }} color='secondary'>TH/{CONTRACT_DURATION} Days</Typography>
+            <Typography style={{ fontWeight: 'bold' }} color='secondary'>TH for {CONTRACT_DURATION} Days</Typography>
           </Grid>
         </TabPanel>
+        <Grid item xs={12} style={{ paddingLeft: 0, paddingRight: 0 }}>
+          <Paper className={clsx(classes.orderSummary, {
+            [classes.orderSummaryBlur]: !isValid,
+          })}>
+            <Table size='small'>
+              <TableBody>
+                <TableRow>
+                  <TableCell className={classes.orderSummaryEstimate}>
+                    Discount vs. Buy BTC *
+                    </TableCell>
+                  <TableCell align='right' className={clsx(classes.orderSummaryEstimate,
+                    { [classes.premium]: discountOnSpotPrice < 0 },
+                    { [classes.discount]: discountOnSpotPrice > 0 })}>
+                    {discountOnSpotPrice.toLocaleString(undefined, { minimumFractionDigits: 5, maximumFractionDigits: 8 })}%
+                    </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className={classes.orderSummaryEstimate}>
+                    Estimated Revenue *
+                    </TableCell>
+                  <TableCell align='right' className={classes.orderSummaryEstimate}>
+                    {`${(expectedBTCAccrual).toLocaleString(undefined, { minimumFractionDigits: 5, maximumFractionDigits: 8 })} imBTC`}
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell colSpan={2}>
+                    * Assuming constant price and difficulty
+                    </TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </Paper>
+        </Grid>
         <Grid item xs={12} container spacing={1}>
           <Grid item xs={12} style={{ paddingLeft: 0, paddingRight: 0 }}>
             <Paper className={clsx(classes.orderSummary, {
               [classes.orderSummaryBlur]: !isValid,
             })}>
-              <Typography align='center'><strong>Order Summary</strong></Typography>
+              <Grid item container xs={12}>
+                <Grid item xs={6}>
+                  <Typography align='left'><strong>Price Quote</strong></Typography>
+                </Grid>
+                <Grid item xs={6} style={{ textAlign: 'right' }}>
+                  <Typography variant='caption'>
+                    <Link href='#' underline='always' onClick={() => setShowContractSpecificationModal(true)}>
+                      Contract Specification <OpenInNew fontSize='small' />
+                    </Link>
+                  </Typography>
+                </Grid>
+              </Grid>
               <Table size='small'>
                 <TableBody>
                   <TableRow>
                     <TableCell>
-                      Unit Price <br />
-                      Quantity
+                      Price <br />
+                      Quantity <br />
+                      Contract Duration
                     </TableCell>
                     <TableCell align='right'>
-                      $ {hashPrice.toFixed(PAYMENT_TOKEN_DECIMALS)} /TH/day <br />
-                      {`${orderQuantity.toLocaleString()} TH`}
+                      {PAYMENT_TOKEN_NAME} {hashPrice.toFixed(PAYMENT_TOKEN_DECIMALS)} /TH/Day<br />
+                      {`${orderQuantity.toLocaleString()}`} TH<br />
+                      {`${CONTRACT_DURATION}`} Days
                     </TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell>Total</TableCell>
-                    <TableCell align='right'>{`$ ${orderValue.toLocaleString()}`}</TableCell>
+                    <TableCell>Contract Total</TableCell>
+                    <TableCell align='right'>{`${PAYMENT_TOKEN_NAME} ${orderValue.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}`}</TableCell>
                   </TableRow>
-                  <TableRow>
-                    <TableCell>
-                      Start <br />
-                    Expiration<br />
-                    Settlement
-                  </TableCell>
-                    <TableCell align='right'>
-                      {dayjs().format('YYYY/MM/DD')} <br />
-                      {dayjs().add(CONTRACT_DURATION, 'd').format('YYYY/MM/DD')} <br />
-                      {dayjs().add(CONTRACT_DURATION + 1, 'd').format('YYYY/MM/DD')}
-                    </TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
-            </Paper>
-          </Grid>
-          <Grid item xs={12} style={{ paddingLeft: 0, paddingRight: 0 }}>
-            <Paper className={clsx(classes.orderSummary, {
-              [classes.orderSummaryBlur]: !isValid,
-            })}>
-              <Table size='small'>
-                <TableBody>
-                  <TableRow>
-                    <TableCell className={classes.orderSummaryEstimate}>
-                      Discount on Spot BTC Price *
-                    </TableCell>
-                    <TableCell align='right' className={clsx(classes.orderSummaryEstimate,
-                      { [classes.premium]: discountOnSpotPrice < 0 },
-                      { [classes.discount]: discountOnSpotPrice > 0 })}>
-                      {discountOnSpotPrice.toLocaleString(undefined, { minimumFractionDigits: 5, maximumFractionDigits: 8 })}%
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className={classes.orderSummaryEstimate}>
-                      Expected Accrual *
-                    </TableCell>
-                    <TableCell align='right' className={classes.orderSummaryEstimate}>
-                      {`${(expectedBTCAccrual).toLocaleString(undefined, { minimumFractionDigits: 5, maximumFractionDigits: 8 })} imBTC`}
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell colSpan={2}>
-                      * Assuming constant price and difficulty
-                    </TableCell>
-                  </TableRow>
+                  {!showOrderDetails ?
+                    <TableRow>
+                      <TableCell colSpan={2} align='center' onClick={handleOrderDetailsClick} style={{ cursor: 'pointer' }}>
+                        Expand Details
+                      <IconButton
+                          className={classes.expand}
+                          aria-label="show more">
+                          <ExpandMore />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow> :
+                    <>
+                      <TableRow>
+                        <TableCell>
+                          Start <br />
+                          Expiration<br />
+                          Settlement
+                        </TableCell>
+                        <TableCell align='right'>
+                          {dayjs().utc().startOf('day').add(1, 'minute').format('YYYY/MM/DD HH:mm')} UTC<br />
+                          {dayjs().utc().startOf('day').add(1, 'minute').add(CONTRACT_DURATION, 'd').format('YYYY/MM/DD HH:mm')} UTC<br />
+                          {dayjs().utc().startOf('day').add(1, 'minute').add(CONTRACT_DURATION + 1, 'd').format('YYYY/MM/DD HH:mm')} UTC
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell colSpan={2}>
+                          * Fillable orders in orderbook and minimum order increment of 1 TH may result in discrepancy between your budget and price quote. <br />
+                          * Your order will be subject to additional Ethereum network transaction fee,
+                            and 0x Protocol fee, both denominated in ETH. Honeylemon does not charge&nbsp;
+                          <Link component={RouterLink} to="/stats" underline='always' >fees.<OpenInNew fontSize='small' /></Link>
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell colSpan={2}>
+                          <Typography variant='subtitle1'>WHAT DOES IT MEAN?</Typography> <br />
+                          <Typography variant='body2'>
+                            You will pay <strong>${PAYMENT_TOKEN_NAME} ${orderValue.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}</strong> to
+                            buy <strong>{`${orderQuantity.toLocaleString()}`} TH</strong> of {CONTRACT_DURATION}-Day Mining Revenue Contracts at&nbsp;
+                            <strong>{PAYMENT_TOKEN_NAME} {hashPrice.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}/TH/Day</strong>.
+                          </Typography>
+                          <Typography variant='body2'>
+                            You will receive the network average BTC block reward & transaction fees per TH based on the average value of
+                            the <Link href='#' underline='always'>Bitcoin Mining Revenue Index (MRI) <OpenInNew fontSize='small' /></Link>&nbsp;
+                            over {CONTRACT_DURATION} days starting today.
+                          </Typography>
+                          <Typography variant='body2'>
+                            You may check your PNL from your Portfolio once order is placed. You can withdraw your mining revenue
+                            denominated in {COLLATERAL_TOKEN_NAME} after {dayjs().utc().startOf('day').add(1, 'minute')
+                            .add(CONTRACT_DURATION + 1, 'd').format('YYYY/MM/DD HH:mm')} UTC.
+                          </Typography>
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell colSpan={2} align='center' onClick={handleOrderDetailsClick} style={{ cursor: 'pointer' }}>
+                          Collapse Details
+                          <IconButton className={clsx(classes.expand, classes.expandOpen)}>
+                            <ExpandMore />
+                          </IconButton>
+                        </TableCell>
+                      </TableRow>
+                    </>
+                  }
                 </TableBody>
               </Table>
             </Paper>
@@ -463,16 +543,6 @@ const BuyContractPage: React.SFC = () => {
               {showBuyModal && <CircularProgress className={classes.loadingSpinner} size={20} />}
           </Button>
         </Grid>
-        <Grid item xs={12}>
-          <Typography>
-            You will pay <strong>$ {orderValue.toLocaleString()}</strong> to buy <strong>{orderQuantity}Th</strong> of hashrate
-            for <strong>{CONTRACT_DURATION} days</strong> for <strong>${hashPrice.toLocaleString()}/Th/day</strong>. You will
-            receive the average value of the <Link href="#" underline='always'>Mining Revenue Index</Link>&nbsp;
-            over <strong>{CONTRACT_DURATION} days</strong> representing <strong>{orderQuantity} Th</strong> of mining power per
-            day per contract.
-          </Typography>
-        </Grid>
-        <Grid item><Typography>See <Link href='#' underline='always' onClick={() => setShowContractSpecificationModal(true)}>full contract specification here.</Link></Typography></Grid>
       </Grid>
       <Dialog open={showBuyModal} onClose={handleCloseBuyDialog} aria-labelledby="form-dialog-title">
         <DialogTitle id="form-dialog-title">Buy Offer</DialogTitle>

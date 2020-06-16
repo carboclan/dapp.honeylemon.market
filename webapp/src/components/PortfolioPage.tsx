@@ -70,7 +70,7 @@ const TimeRemaining = (
   const { totalDuration, remainingDuration, unitLabel, ...cirularProgressProps } = props;
   return (
     <Box position="relative" display="inline-flex">
-      <CircularProgress variant="static" {...cirularProgressProps} value={1 - props.remainingDuration / props.totalDuration} />
+      <CircularProgress variant="static" {...cirularProgressProps} value={(1 - remainingDuration / totalDuration) * 100} color='secondary'/>
       <Box
         top={0}
         left={0}
@@ -82,7 +82,7 @@ const TimeRemaining = (
         justifyContent="center"
       >
         <Typography variant="caption" component="div" color="textSecondary">
-          {`${props.remainingDuration}${unitLabel}`}
+          {`${remainingDuration}${unitLabel}`}
         </Typography>
       </Box>
     </Box>
@@ -366,7 +366,7 @@ const PorfolioPage: React.SFC = () => {
                             <TableCell>Contract</TableCell>
                             <TableCell align='center'>Position</TableCell>
                             <TableCell align='center'>Quantity</TableCell>
-                            <TableCell align='center'>Days</TableCell>
+                            <TableCell align='center'>Hours</TableCell>
                             <TableCell align='right'>BTC</TableCell>
                           </TableRow>
                         </TableHead>

@@ -34,6 +34,7 @@ import { forwardTo } from '../helpers/history';
 import ContractSpecificationModal from './ContractSpecificationModal';
 import MRIDisplay from './MRIDisplay';
 import { OpenInNew, ExpandMore } from '@material-ui/icons';
+import { Link as RouterLink } from 'react-router-dom';
 
 const useStyles = makeStyles(({ spacing, palette, transitions }) => ({
   rightAlign: {
@@ -42,9 +43,6 @@ const useStyles = makeStyles(({ spacing, palette, transitions }) => ({
   inputBase: {
     textAlign: 'end',
     padding: spacing(1)
-  },
-  offerForm: {
-    marginTop: 0,
   },
   offerSummary: {
     padding: spacing(2),
@@ -80,13 +78,10 @@ const useStyles = makeStyles(({ spacing, palette, transitions }) => ({
   expandOpen: {
     transform: 'rotate(180deg)',
   },
-  offerDetails: {
-    width: '100%'
-  }
 }))
 
 const OfferContractPage: React.SFC = () => {
-  const { 
+  const {
     honeylemonService,
     COLLATERAL_TOKEN_DECIMALS,
     COLLATERAL_TOKEN_NAME,
@@ -230,12 +225,15 @@ const OfferContractPage: React.SFC = () => {
 
   return (
     <>
-      <Grid container alignItems='center' justify='flex-start' spacing={2} className={classes.offerForm}>
+      <Grid container alignItems='center' justify='flex-start' spacing={2}>
         <Grid item xs={12}>
           <MRIDisplay />
         </Grid>
-        <Grid item xs={12}>
+        <Grid item xs={8}>
           <Typography style={{ fontWeight: 'bold' }} color='secondary'>Offer a {CONTRACT_DURATION}-day Mining Revenue Contract</Typography>
+        </Grid>
+        <Grid item xs={4} style={{ textAlign: 'end' }}>
+          <Link href='#' underline='always'>Order Book <OpenInNew fontSize='small' /></Link>
         </Grid>
         <Grid item xs={6}><Typography style={{ fontWeight: 'bold' }}>Price:</Typography></Grid>
         <Grid item xs={4}>
@@ -297,9 +295,6 @@ const OfferContractPage: React.SFC = () => {
         <Grid item xs={2} className={classes.rightAlign}>
           <Typography style={{ fontWeight: 'bold' }} color='secondary'>Th</Typography>
         </Grid>
-        <Grid item xs={12}>
-          <Link href='#' underline='always'>View Order Book <OpenInNew fontSize='small' /></Link>
-        </Grid>
         <Grid item xs={12} container>
           <Paper className={clsx(classes.offerSummary, {
             [classes.offerSummaryBlur]: !sufficientCollateral,
@@ -344,7 +339,7 @@ const OfferContractPage: React.SFC = () => {
                 </TableRow>
                 {!showOfferDetails ?
                   <TableRow>
-                    <TableCell colSpan={2} align='center' onClick={handleOfferDetailsClick}>
+                    <TableCell colSpan={2} align='center' onClick={handleOfferDetailsClick} style={{ cursor: 'pointer' }}>
                       Expand Details
                       <IconButton
                         className={classes.expand}
@@ -356,13 +351,11 @@ const OfferContractPage: React.SFC = () => {
                   <>
                     <TableRow>
                       <TableCell>
-                        Offer Valid Till <br />
-                      Start <br />
-                      Expiration <br />
-                      Settlement <br />
+                        Start <br />
+                        Expiration <br />
+                        Settlement <br />
                       </TableCell>
                       <TableCell align='right'>
-                        TBC <br />
                         Order-fill Date UTC 00:01 <br />
                         {`${CONTRACT_DURATION} Days After Start`} <br />
                         24 Hours After Expiration <br />
@@ -371,29 +364,38 @@ const OfferContractPage: React.SFC = () => {
                     <TableRow>
                       <TableCell colSpan={2}>
                         * Your limit order may be partially filled. <br />
+                        * Any unfilled portion of your limit order can be cancelled in your portfolio. <br />
                         * Your order will be subject to additional Ethereum network transaction fee,
                         and 0x Protocol fee, both denominated in ETH. Honeylemon does not charge&nbsp;
-                        <Link href='#' underline='always'>fees.<OpenInNew fontSize='small' /></Link>
+                        <Link component={RouterLink} to="/stats" underline='always' >fees.<OpenInNew fontSize='small' /></Link>
                       </TableCell>
                     </TableRow>
                     <TableRow>
                       <TableCell colSpan={2}>
                         <Typography variant='subtitle1'>WHAT DOES IT MEAN?</Typography> <br />
-                        You are offering <strong>{hashAmount} TH</strong> of {CONTRACT_DURATION}-Day
-                        Mining Revenue Contract at <strong>{PAYMENT_TOKEN_NAME} {hashPrice.toLocaleString(undefined, {maximumFractionDigits: PAYMENT_TOKEN_DECIMALS})}&nbsp;
-                        /TH/Day</strong>. You will need to <strong>approve {collateralAmount.toLocaleString(undefined, {maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS})}</strong>&nbsp;
-                        {COLLATERAL_TOKEN_NAME} in your wallet as collateral to list your offer. As soon as your order is filled, your approved collateral will be automatically deposited, 
-                        you will receive payment in <strong>{PAYMENT_TOKEN_NAME}</strong> immediately and the contract will start.<br />
-                        At the end of {CONTRACT_DURATION} days your counterparty will receive the network average BTC block reward & transaction
-                        fees per TH based on the average value of the <Link href='#' underline='always'>Bitcoin Mining Revenue Index (MRI) <OpenInNew fontSize='small'/></Link>&nbsp;
-                        over {CONTRACT_DURATION} days up to a <strong>max win capped by your collateral</strong>.<br />
-                        The payoff will be directly deducted from your collateral, and you can withdraw the remainder of your collateral after settlement.
+                        <Typography variant='body2'>
+                          You are offering <strong>{hashAmount} TH</strong> of {CONTRACT_DURATION}-Day Mining Revenue Contract at&nbsp;
+                          <strong>{PAYMENT_TOKEN_NAME} {hashPrice.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}/TH/Day</strong>.
+                        </Typography>
+                        <Typography variant='body2'>
+                          You will need to <strong>approve {collateralAmount.toLocaleString(undefined, { maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS })}</strong>&nbsp;
+                          {COLLATERAL_TOKEN_NAME} in your wallet as collateral to list your offer. As soon as your order is filled, your approved collateral will be automatically deposited,
+                          you will receive payment in <strong>{PAYMENT_TOKEN_NAME}</strong> immediately and the contract will start.
+                        </Typography>
+                        <Typography variant='body2'>
+                          At the end of {CONTRACT_DURATION} days your counterparty will receive the network average BTC block reward & transaction
+                          fees per TH based on the average value of the <Link href='#' underline='always'>Bitcoin Mining Revenue
+                          Index (MRI) <OpenInNew fontSize='small' /></Link> over {CONTRACT_DURATION} days up to a <strong>max win capped by your collateral</strong>.
+                        </Typography>
+                        <Typography variant='body2'>
+                          The payoff will be directly deducted from your collateral, and you can withdraw the remainder of your collateral after settlement.
+                        </Typography>
                       </TableCell>
                     </TableRow>
                     <TableRow>
-                      <TableCell colSpan={2} align='center' onClick={handleOfferDetailsClick}>
+                      <TableCell colSpan={2} align='center' onClick={handleOfferDetailsClick} style={{ cursor: 'pointer' }}>
                         Collapse Details
-                      <IconButton className={clsx(classes.expand, classes.expandOpen)}>
+                        <IconButton className={clsx(classes.expand, classes.expandOpen)}>
                           <ExpandMore />
                         </IconButton>
                       </TableCell>
