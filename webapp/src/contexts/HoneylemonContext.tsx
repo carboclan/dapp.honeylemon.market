@@ -51,6 +51,7 @@ export type HoneylemonContext = {
     currentMRI: number,
     currentBTCSpotPrice: number,
     btcDifficultyAdjustmentDate: Date,
+    currentBtcDifficulty: number,
   },
   portfolioData: {
     openOrdersMetadata: Array<OpenOrderMetadata>,
@@ -309,7 +310,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
     }
 
     let poller: NodeJS.Timeout;
-
+    getMarketData();
     poller = setInterval(getMarketData, 10000);
 
     return () => {
@@ -437,6 +438,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
           currentBTCSpotPrice,
           currentMRI,
           btcDifficultyAdjustmentDate,
+          currentBtcDifficulty,
         },
         portfolioData: {
           activePositions,

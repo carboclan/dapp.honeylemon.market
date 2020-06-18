@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link, Button, Typography, makeStyles, Grid, Divider, Paper } from '@material-ui/core';
+import { Link, Button, Typography, makeStyles, Grid, Divider } from '@material-ui/core';
 import { Link as RouterLink } from 'react-router-dom';
 import { OpenInNew } from '@material-ui/icons';
 import { forwardTo } from '../helpers/history';
@@ -52,7 +52,7 @@ const useStyles = makeStyles(({ palette, spacing }) => ({
 
 const HomePage: React.SFC = () => {
   const { isReady } = useOnboard();
-  const { marketData: { btcDifficultyAdjustmentDate, currentBTCSpotPrice, currentMRI } } = useHoneylemon();
+  const { marketData: { btcDifficultyAdjustmentDate } } = useHoneylemon();
   const [adjustmentInterval, setAdjustmentInterval] = useState({
     days: '00',
     hours: '00',
