@@ -125,7 +125,7 @@ const OfferContractPage: React.SFC = () => {
         console.log(error);
       }
     };
-    getCollateralForContract();
+    hashAmount && getCollateralForContract();
     return () => { cancelled = true }
   }, [hashAmount, honeylemonService, COLLATERAL_TOKEN_DECIMALS]);
 
