@@ -2,7 +2,7 @@ import * as React from "react";
 import Web3 from 'web3'
 import { useState, useEffect } from "react";
 import { MetamaskSubprovider, Web3JsProvider } from '@0x/subproviders';
-import { HoneylemonService } from "honeylemon";
+import { HoneylemonService, OrderbookService } from "honeylemon";
 import { useOnboard } from "./OnboardContext";
 import { ethers } from 'ethers';
 import dayjs from 'dayjs';
@@ -31,39 +31,47 @@ const CONTRACT_DURATION = 2;
 const CONTRACT_COLLATERAL_RATIO = 1.35;
 
 
+type OrderSummary = {
+  price: number,
+  quantity: number,
+};
+
 export type HoneylemonContext = {
   honeylemonService: any; //TODO update this when types exist
-  collateralTokenBalance: number,
-  collateralTokenAllowance: number,
-  COLLATERAL_TOKEN_DECIMALS: number,
-  COLLATERAL_TOKEN_NAME: string,
-  paymentTokenBalance: number,
-  paymentTokenAllowance: number,
-  PAYMENT_TOKEN_DECIMALS: number,
-  PAYMENT_TOKEN_NAME: string,
-  CONTRACT_DURATION: number,
-  isDsProxyDeployed: boolean,
-  dsProxyAddress: string,
-  CONTRACT_COLLATERAL_RATIO: number,
-  isDailyContractDeployed: boolean,
+  orderbookService: any;
+  collateralTokenBalance: number;
+  collateralTokenAllowance: number;
+  COLLATERAL_TOKEN_DECIMALS: number;
+  COLLATERAL_TOKEN_NAME: string;
+  paymentTokenBalance: number;
+  paymentTokenAllowance: number;
+  PAYMENT_TOKEN_DECIMALS: number;
+  PAYMENT_TOKEN_NAME: string;
+  CONTRACT_DURATION: number;
+  isDsProxyDeployed: boolean;
+  dsProxyAddress: string;
+  CONTRACT_COLLATERAL_RATIO: number;
+  isDailyContractDeployed: boolean;
   marketData: {
-    miningContracts: Array<any>,
-    currentMRI: number,
-    currentBTCSpotPrice: number,
-    btcDifficultyAdjustmentDate: Date,
-    currentBtcDifficulty: number,
-  },
-  portfolioData: {
-    openOrdersMetadata: Array<OpenOrderMetadata>,
-    openOrders: { [orderHash: string]: OpenOrder } | undefined,
-    activePositions: Array<any>,
-    settlementDelayPositions: Array<any>,
-    settledPositionsToWithdraw: Array<any>,
-    settledPositions: Array<any>,
+    miningContracts: Array<any>;
+    currentMRI: number;
+    currentBTCSpotPrice: number;
+    btcDifficultyAdjustmentDate: Date;
+    currentBtcDifficulty: number;
   }
-  deployDSProxyContract(): Promise<void>,
-  approveToken(tokenType: TokenType): Promise<void>,
-  refreshPortfolio(): Promise<void>,
+  portfolioData: {
+    openOrdersMetadata: Array<OpenOrderMetadata>;
+    openOrders: { [orderHash: string]: OpenOrder } | undefined;
+    activePositions: Array<any>;
+    settlementDelayPositions: Array<any>;
+    settledPositionsToWithdraw: Array<any>;
+    settledPositions: Array<any>;
+  }
+  orderbook: Array<OrderSummary>;
+  btcStats: any,
+  deployDSProxyContract(): Promise<void>;
+  approveToken(tokenType: TokenType): Promise<void>;
+  refreshPortfolio(): Promise<void>;
 };
 
 export type HoneylemonProviderProps = {
@@ -109,6 +117,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
   const { wallet, network, isReady, address, notify } = useOnboard();
 
   const [honeylemonService, setHoneylemonService] = useState<any | undefined>(undefined);
+  const [orderbookService, setOrderbookService] = useState<any | undefined>(undefined);
   const [collateralTokenBalance, setCollateralTokenBalance] = useState<number>(0);
   const [collateralTokenAllowance, setCollateralTokenAllowance] = useState<number>(0);
   const [paymentTokenBalance, setPaymentTokenBalance] = useState<number>(0);
@@ -120,6 +129,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
   const [currentBTCSpotPrice, setCurrentBTCSpotPrice] = useState(0);
   const [currentBtcDifficulty, setCurrentBtcDifficulty] = useState(0);
   const [btcDifficultyAdjustmentDate, setBtcDifficultyAdjustmentDate] = useState(new Date());
+  const [btcStats, setBtcStats] = useState<any>(undefined);
   const [openOrdersMetadata, setOpenOrdersMetadata] = useState<Array<OpenOrderMetadata>>([]);
   const [openOrders, setOpenOrders] = useState<{ [orderHash: string]: OpenOrder } | undefined>()
   const [activePositions, setActivePositions] = useState([]);
@@ -128,6 +138,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
   const [settledPositions, setSettledPositions] = useState([]);
   const [isPortfolioRefreshing, setIsPortfolioRefreshing] = useState(false);
   const [isDailyContractDeployed, setIsDailyContractDeployed] = useState(false);
+  const [orderbook, setOrderbook] = useState([]);
 
   const deployDSProxyContract = async () => {
     try {
@@ -289,6 +300,47 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
     }
   }, [wallet, network, isReady, address]);
 
+  // Instantiate Orderbook service
+  useEffect(() => {
+    const initOrderbookService = async () => {
+      const orderbookServiceInstance = new OrderbookService(
+        process.env.REACT_APP_SRA_URL,
+        process.env.REACT_APP_MINTER_BRIDGE_ADDRESS,
+        process.env.REACT_APP_MARKET_CONTRACT_PROXY_ADDRESS,
+        process.env.REACT_APP_PAYMENT_TOKEN_ADDRESS,
+      );
+      setOrderbookService(orderbookServiceInstance);
+    }
+    initOrderbookService();
+  }, []);
+
+  // Order book poller
+  useEffect(() => {
+    const getOrderbookData = async () => {
+      if (orderbookService) {
+        try {
+          const orderbookResponse = await orderbookService.getOrderbook();
+          const book = orderbookResponse.asks.records.map((order: any) => ({
+            price: Number(new BigNumber(order.metaData.price).dividedBy(CONTRACT_DURATION).toString()),
+            quantity: Number(new BigNumber(order.order.makerAssetAmount).toString())
+          }));
+          setOrderbook(book)
+        } catch (error) {
+          console.log('There was an error getting the orderbook.')
+          console.log(error);
+        }
+      }
+    }
+
+    let poller: NodeJS.Timeout;
+    getOrderbookData();
+    poller = setInterval(getOrderbookData, 10000);
+
+    return () => {
+      clearInterval(poller);
+    }
+  }, [orderbookService])
+
 
   // Market Data Poller
   useEffect(() => {
@@ -298,11 +350,13 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
         if (marketDataApiUrl) {
           const { contracts } = await (await fetch(`${marketDataApiUrl}/blockchain/agg?coin=BTC`)).json();
           const { data } = await (await fetch(`${marketDataApiUrl}/coinmarketcap/v1/cryptocurrency/quotes/latest?symbol=BTC`)).json();
+          const stats = await (await fetch(`${marketDataApiUrl}/blockchain/stats`)).json();
           const { mri, difficulty } = await getBtcData(dayjs().utc().format('YYYYMMDD'), 1, false);
           setMiningContracts(contracts);
           setCurrentBTCSpotPrice(data?.BTC?.quote?.USD?.price);
           setCurrentMRI(mri);
           setCurrentBtcDifficulty(difficulty);
+          setBtcStats(stats);
         }
       } catch (error) {
         console.log('There was an error getting the market data')
@@ -420,6 +474,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
     <HoneylemonContext.Provider
       value={{
         honeylemonService,
+        orderbookService,
         collateralTokenBalance,
         collateralTokenAllowance,
         COLLATERAL_TOKEN_DECIMALS,
@@ -448,6 +503,8 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
           settledPositionsToWithdraw,
           settlementDelayPositions
         },
+        orderbook,
+        btcStats,
         deployDSProxyContract,
         approveToken,
         refreshPortfolio: getPorfolio

@@ -24,7 +24,6 @@ import {
   StepLabel,
   StepContent,
   IconButton,
-  Collapse
 } from '@material-ui/core';
 import clsx from 'clsx';
 import { BigNumber } from '@0x/utils';
@@ -32,6 +31,7 @@ import { useHoneylemon, TokenType } from '../contexts/HoneylemonContext';
 import { useOnboard } from '../contexts/OnboardContext';
 import { forwardTo } from '../helpers/history';
 import ContractSpecificationModal from './ContractSpecificationModal';
+import OrderbookModal from './OrderbookModal';
 import MRIDisplay from './MRIDisplay';
 import { OpenInNew, ExpandMore } from '@material-ui/icons';
 import { Link as RouterLink } from 'react-router-dom';
@@ -110,7 +110,7 @@ const OfferContractPage: React.SFC = () => {
   const [txActive, setTxActive] = useState(false);
   const [showContractSpecificationModal, setShowContractSpecificationModal] = useState(false);
   const [showOfferDetails, setShowOfferDetails] = useState(false);
-
+  const [showOrderbook, setShowOrderbook] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -236,7 +236,8 @@ const OfferContractPage: React.SFC = () => {
           <Typography style={{ fontWeight: 'bold' }} color='secondary'>Offer a {CONTRACT_DURATION}-day Mining Revenue Contract</Typography>
         </Grid>
         <Grid item xs={4} style={{ textAlign: 'end' }}>
-          <Link href='#' underline='always'>Order Book <OpenInNew fontSize='small' /></Link>
+          <IconButton onClick={() => setShowOrderbook(true)}><OpenInNew fontSize='small' /></IconButton>
+          <Link href='#' underline='always'>Order Book </Link>
         </Grid>
         <Grid item xs={6}><Typography style={{ fontWeight: 'bold' }}>Price:</Typography></Grid>
         <Grid item xs={4}>
@@ -464,6 +465,7 @@ const OfferContractPage: React.SFC = () => {
         </DialogContent>
       </Dialog>
       <ContractSpecificationModal open={showContractSpecificationModal} onClose={() => setShowContractSpecificationModal(false)} />
+      <OrderbookModal open={showOrderbook} onClose={() => setShowOrderbook(false)} />
     </>
   )
 }
