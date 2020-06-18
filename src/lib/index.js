@@ -1,5 +1,6 @@
 import {
   HoneylemonService,
+  OrderbookService,
   COLLATERAL_TOKEN_DECIMALS,
   PAYMENT_TOKEN_DECIMALS,
   POSITIONS_QUERY,
@@ -9,6 +10,7 @@ import {
 
 export {
   HoneylemonService,
+  OrderbookService,
   COLLATERAL_TOKEN_DECIMALS,
   PAYMENT_TOKEN_DECIMALS,
   POSITIONS_QUERY,

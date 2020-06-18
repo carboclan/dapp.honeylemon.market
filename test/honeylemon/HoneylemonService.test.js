@@ -167,7 +167,7 @@ const stubOrders = async () => {
       remainingFillableTakerAssetAmount: o.takerAssetAmount
     }
   }));
-  sinon.stub(honeylemonService.apiClient, 'getOrderbookAsync').returns({
+  sinon.stub(honeylemonService.orderbookService.apiClient, 'getOrderbookAsync').returns({
     bids: {
       total: 0,
       page: 1,
@@ -181,7 +181,7 @@ const stubOrders = async () => {
       records
     }
   });
-  sinon.stub(honeylemonService.apiClient, 'getOrdersAsync').returns({
+  sinon.stub(honeylemonService.orderbookService.apiClient, 'getOrdersAsync').returns({
     total: 3,
     page: 1,
     perPage: 20,
