@@ -287,12 +287,12 @@ const BuyContractPage: React.SFC = () => {
 
   const activeStep = getActiveStep()
 
-  const steps = ['Deploy Wallet', `Approve ${PAYMENT_TOKEN_NAME}`, 'Buy Contracts'];
+  const steps = ['Deploy Honeylemon Wallet', `Approve ${PAYMENT_TOKEN_NAME}`, 'Buy Contracts'];
 
   const getStepContent = (step: number) => {
     switch (step) {
       case 0:
-        return `Deploy a wallet contract. This is a once-off operation`;
+        return `Deploy a honeylemon wallet. This is a once-off operation. The honeylemon wallet will reduce the transaction fees in future.`;
       case 1:
         return `Approve ${PAYMENT_TOKEN_NAME}. This is a once-off operation`;
       case 2:

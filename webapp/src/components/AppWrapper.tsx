@@ -177,6 +177,32 @@ function AppWrapper(props: { children: ReactNode }) {
         </div>
         <Divider />
         <List>
+          <ListItem button onClick={() => handleNavigate('/portfolio')}>
+            <ListItemIcon><AccountBalance /></ListItemIcon>
+            <ListItemText primary="Portfolio" />
+          </ListItem>
+          <ListItem button onClick={() => handleNavigate('/offer')}>
+            <ListItemIcon><Assessment /></ListItemIcon>
+            <ListItemText primary="Offer Contract" />
+          </ListItem>
+          <ListItem button onClick={() => handleNavigate('/buy')}>
+            <ListItemIcon><MonetizationOn /></ListItemIcon>
+            <ListItemText primary="Buy Contract" />
+          </ListItem>
+          <ListItem button onClick={() => handleNavigate('/stats')}>
+            <ListItemIcon><Whatshot /></ListItemIcon>
+            <ListItemText primary="Live Market Stats" />
+          </ListItem>
+        </List>
+        <Divider />
+        <List>
+          <ListItem button onClick={handleLogout}>
+            <ListItemIcon><ExitToApp /></ListItemIcon>
+            <ListItemText primary="Log out" />
+          </ListItem>
+        </List>
+        <Divider />
+        <List>
           <ListItem>
             <ListItemIcon>
               <Avatar>
@@ -205,7 +231,7 @@ function AppWrapper(props: { children: ReactNode }) {
                   align: 'right',
                   noWrap: true
                 }}
-                secondary='Proxy Wallet Address'
+                secondary='Honeylemon Wallet Address'
                 secondaryTypographyProps={{
                   align: 'right'
                 }}>
@@ -220,7 +246,7 @@ function AppWrapper(props: { children: ReactNode }) {
                   align: 'right',
                   noWrap: true
                 }}>
-                No DS Proxy deployed yet
+                No Honeylemon wallet deployed yet
               </ListItemText>
             </ListItem>
           }
@@ -263,32 +289,6 @@ function AppWrapper(props: { children: ReactNode }) {
               secondaryTypographyProps={{
                 align: 'right'
               }} />
-          </ListItem>
-        </List>
-        <Divider />
-        <List>
-          <ListItem button onClick={() => handleNavigate('/portfolio')}>
-            <ListItemIcon><AccountBalance /></ListItemIcon>
-            <ListItemText primary="Portfolio" />
-          </ListItem>
-          <ListItem button onClick={() => handleNavigate('/offer')}>
-            <ListItemIcon><Assessment /></ListItemIcon>
-            <ListItemText primary="Offer Contract" />
-          </ListItem>
-          <ListItem button onClick={() => handleNavigate('/buy')}>
-            <ListItemIcon><MonetizationOn /></ListItemIcon>
-            <ListItemText primary="Buy Contract" />
-          </ListItem>
-          <ListItem button onClick={() => handleNavigate('/stats')}>
-            <ListItemIcon><Whatshot /></ListItemIcon>
-            <ListItemText primary="Live Market Stats" />
-          </ListItem>
-        </List>
-        <Divider />
-        <List>
-          <ListItem button onClick={handleLogout}>
-            <ListItemIcon><ExitToApp /></ListItemIcon>
-            <ListItemText primary="Log out" />
           </ListItem>
         </List>
       </Drawer>
