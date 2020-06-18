@@ -27,7 +27,6 @@ const MiningStatsPage: React.SFC = () => {
   const classes = useStyles();
   const {
     marketData: { currentMRI, currentBTCSpotPrice, btcDifficultyAdjustmentDate, miningContracts, currentBtcDifficulty },
-    COLLATERAL_TOKEN_DECIMALS,
     PAYMENT_TOKEN_DECIMALS,
     orderbook,
     btcStats,
@@ -177,7 +176,7 @@ const MiningStatsPage: React.SFC = () => {
               <TableRow>
                 <TableCell>Difficulty (Last Adj Δ%)</TableCell>
                 <TableCell align='right'>{btcStats?.difficulty?.current.toLocaleString(undefined, { maximumFractionDigits: 0 })}</TableCell>
-                <TableCell align='right'>({((btcStats?.difficulty?.current - btcStats?.difficulty?.last) / btcStats?.difficulty?.last).toLocaleString(undefined, { maximumFractionDigits: 4 })}%)</TableCell>
+                <TableCell align='right'>({(((btcStats?.difficulty?.current - btcStats?.difficulty?.last) / btcStats?.difficulty?.last) * 100).toLocaleString(undefined, { maximumFractionDigits: 4 })}%)</TableCell>
               </TableRow>
               <TableRow>
                 <TableCell>24h Network Hashrate</TableCell>

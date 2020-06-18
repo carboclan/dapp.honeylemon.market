@@ -236,8 +236,7 @@ const OfferContractPage: React.SFC = () => {
           <Typography style={{ fontWeight: 'bold' }} color='secondary'>Offer a {CONTRACT_DURATION}-day Mining Revenue Contract</Typography>
         </Grid>
         <Grid item xs={4} style={{ textAlign: 'end' }}>
-          <IconButton onClick={() => setShowOrderbook(true)}><OpenInNew fontSize='small' /></IconButton>
-          <Link href='#' underline='always'>Order Book </Link>
+          <Link href='#' underline='always' onClick={() => setShowOrderbook(true)}>Order Book <OpenInNew fontSize='small' /></Link>
         </Grid>
         <Grid item xs={6}><Typography style={{ fontWeight: 'bold' }}>Price:</Typography></Grid>
         <Grid item xs={4}>
