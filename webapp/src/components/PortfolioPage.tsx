@@ -328,7 +328,7 @@ const PorfolioPage: React.SFC = () => {
                           <TableCell align='center'>{position.type}</TableCell>
                           <TableCell align='center'>{position.qtyToMint.toLocaleString()}</TableCell>
                           <TableCell align='center'>
-                            <TimeRemaining totalDuration={position.duration} remainingDuration={position.daysToMaturity} unitLabel='d' />
+                            <TimeRemaining totalDuration={CONTRACT_DURATION} remainingDuration={position.daysToMaturity} unitLabel='d' />
                           </TableCell>
                           <TableCell align='right'>{position.pendingReward}</TableCell>
                         </TableRow>

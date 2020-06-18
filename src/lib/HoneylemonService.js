@@ -632,8 +632,12 @@ class HoneylemonService {
     return contracts;
   }
 
-  async redeemContract(someContractIdentifier, address) {
-    // TODO
+  async isDailyContractDeployed() {
+    const isContractDeployed = await this.marketContractProxy.methods
+    .isDailyContractDeployed()
+    .call();
+
+  return isContractDeployed;
   }
 }
 

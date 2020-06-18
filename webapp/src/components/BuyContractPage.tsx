@@ -108,6 +108,7 @@ const BuyContractPage: React.SFC = () => {
     COLLATERAL_TOKEN_DECIMALS,
     COLLATERAL_TOKEN_NAME,
     marketData,
+    isDailyContractDeployed,
     deployDSProxyContract,
     approveToken,
   } = useHoneylemon()
@@ -268,10 +269,11 @@ const BuyContractPage: React.SFC = () => {
   if (orderValue) {
     sufficientPaymentTokens = paymentTokenBalance >= orderValue;
     tokenApprovalGranted = paymentTokenAllowance >= orderValue;
-    isValid = isLiquid && sufficientPaymentTokens;
+    isValid = isDailyContractDeployed && isLiquid && sufficientPaymentTokens;
   }
   const errors = [];
 
+  !isDailyContractDeployed && errors.push("New contracts are not available right now");
   !sufficientPaymentTokens && errors.push(`You do not have enough ${PAYMENT_TOKEN_NAME} to proceed`);
   !isLiquid && errors.push("There are not enough contracts available right now");
 

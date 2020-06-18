@@ -45,6 +45,7 @@ export type HoneylemonContext = {
   isDsProxyDeployed: boolean,
   dsProxyAddress: string,
   CONTRACT_COLLATERAL_RATIO: number,
+  isDailyContractDeployed: boolean,
   marketData: {
     miningContracts: Array<any>,
     currentMRI: number,
@@ -125,6 +126,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
   const [settledPositionsToWithdraw, setSettledPositionsToWithdraw] = useState([]);
   const [settledPositions, setSettledPositions] = useState([]);
   const [isPortfolioRefreshing, setIsPortfolioRefreshing] = useState(false);
+  const [isDailyContractDeployed, setIsDailyContractDeployed] = useState(false);
 
   const deployDSProxyContract = async () => {
     try {
@@ -262,6 +264,8 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
           const proxyAddress = await honeylemonService.getDSProxyAddress(address);
           setDsProxyAddress(proxyAddress);
         }
+        const isContractDeployed = await honeylemonService.isDailyContractDeployed();
+        setIsDailyContractDeployed(isContractDeployed);
         if (address && notify) {
           const { emitter } = notify.account(address);
           emitter.on('all', tx => ({
@@ -427,6 +431,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
         paymentTokenBalance,
         isDsProxyDeployed,
         dsProxyAddress,
+        isDailyContractDeployed,
         marketData: {
           miningContracts,
           currentBTCSpotPrice,
