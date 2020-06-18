@@ -38,6 +38,7 @@ import dayjs from 'dayjs';
 import MRIDisplay from './MRIDisplay';
 import { OpenInNew, ExpandMore } from '@material-ui/icons';
 import { Link as RouterLink } from 'react-router-dom';
+import MRIInformationModal from './MRIInformationModal';
 
 const useStyles = makeStyles(({ spacing, palette, transitions }) => ({
   rightAlign: {
@@ -130,6 +131,7 @@ const BuyContractPage: React.SFC = () => {
   const [expectedBTCAccrual, setExpectedBTCAccrual] = useState(0);
   const [discountOnSpotPrice, setDiscountOnSpotPrice] = useState(0);
   const [showOrderDetails, setShowOrderDetails] = useState(false);
+  const [showMRIInformationModal, setShowMRIInformationModal] = useState(false);
 
   const handleChangeBuyType = (event: React.ChangeEvent<{}>, newValue: BuyType) => {
     setBuyType(newValue);
@@ -407,12 +409,12 @@ const BuyContractPage: React.SFC = () => {
                 <TableRow>
                   <TableCell className={classes.orderSummaryEstimate}>
                     Discount vs. Buy BTC *
-                    </TableCell>
+                  </TableCell>
                   <TableCell align='right' className={clsx(classes.orderSummaryEstimate,
                     { [classes.premium]: discountOnSpotPrice < 0 },
                     { [classes.discount]: discountOnSpotPrice > 0 })}>
                     {discountOnSpotPrice.toLocaleString(undefined, { minimumFractionDigits: 5, maximumFractionDigits: 8 })}%
-                    </TableCell>
+                  </TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className={classes.orderSummaryEstimate}>
@@ -508,8 +510,8 @@ const BuyContractPage: React.SFC = () => {
                           </Typography>
                           <Typography variant='body2'>
                             You will receive the network average BTC block reward & transaction fees per TH based on the average value of
-                            the <Link href='#' underline='always'>Bitcoin Mining Revenue Index (MRI) <OpenInNew fontSize='small' /></Link>&nbsp;
-                            over {CONTRACT_DURATION} days starting today.
+                            the <Link href='#' underline='always' onClick={() => setShowMRIInformationModal(true)}>Bitcoin Mining Revenue 
+                            Index (MRI) <OpenInNew fontSize='small' /></Link> over {CONTRACT_DURATION} days starting today.
                           </Typography>
                           <Typography variant='body2'>
                             You may check your PNL from your Portfolio once order is placed. You can withdraw your mining revenue

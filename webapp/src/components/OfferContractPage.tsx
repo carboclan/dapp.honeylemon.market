@@ -35,6 +35,7 @@ import OrderbookModal from './OrderbookModal';
 import MRIDisplay from './MRIDisplay';
 import { OpenInNew, ExpandMore } from '@material-ui/icons';
 import { Link as RouterLink } from 'react-router-dom';
+import MRIInformationModal from './MRIInformationModal';
 
 const useStyles = makeStyles(({ spacing, palette, transitions }) => ({
   rightAlign: {
@@ -111,6 +112,7 @@ const OfferContractPage: React.SFC = () => {
   const [showContractSpecificationModal, setShowContractSpecificationModal] = useState(false);
   const [showOfferDetails, setShowOfferDetails] = useState(false);
   const [showOrderbook, setShowOrderbook] = useState(false);
+  const [showMRIInformationModal, setShowMRIInformationModal] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -389,7 +391,7 @@ const OfferContractPage: React.SFC = () => {
                         </Typography>
                         <Typography variant='body2'>
                           At the end of {CONTRACT_DURATION} days your counterparty will receive the network average BTC block reward & transaction
-                          fees per TH based on the average value of the <Link href='#' underline='always'>Bitcoin Mining Revenue
+                          fees per TH based on the average value of the <Link href='#' underline='always' onClick={() => setShowMRIInformationModal(true)}>Bitcoin Mining Revenue
                           Index (MRI) <OpenInNew fontSize='small' /></Link> over {CONTRACT_DURATION} days up to a <strong>max win capped by your collateral</strong>.
                         </Typography>
                         <Typography variant='body2'>
@@ -465,6 +467,7 @@ const OfferContractPage: React.SFC = () => {
       </Dialog>
       <ContractSpecificationModal open={showContractSpecificationModal} onClose={() => setShowContractSpecificationModal(false)} />
       <OrderbookModal open={showOrderbook} onClose={() => setShowOrderbook(false)} />
+      <MRIInformationModal open={showMRIInformationModal} onClose={() => setShowMRIInformationModal(false)} />
     </>
   )
 }
