@@ -113,8 +113,8 @@ const BuyContractPage: React.SFC = () => {
   } = useHoneylemon()
   const classes = useStyles();
 
-  const [budget, setBudget] = useState(0);
-  const [orderValue, setOrderValue] = useState(0);
+  const [budget, setBudget] = useState<number | undefined>(undefined);
+  const [orderValue, setOrderValue] = useState<number | undefined>(undefined);
 
   const [hashPrice, setHashPrice] = useState(0);
   const [orderQuantity, setOrderQuantity] = useState(0);
@@ -261,10 +261,15 @@ const BuyContractPage: React.SFC = () => {
     setTxActive(false);
   }
 
-  const sufficientPaymentTokens = paymentTokenBalance >= orderValue;
-  const tokenApprovalGranted = paymentTokenAllowance >= orderValue;
-  const isValid = isLiquid && sufficientPaymentTokens;
+  let sufficientPaymentTokens = true
+  let tokenApprovalGranted = true
+  let isValid = true
 
+  if (orderValue) {
+    sufficientPaymentTokens = paymentTokenBalance >= orderValue;
+    tokenApprovalGranted = paymentTokenAllowance >= orderValue;
+    isValid = isLiquid && sufficientPaymentTokens;
+  }
   const errors = [];
 
   !sufficientPaymentTokens && errors.push(`You do not have enough ${PAYMENT_TOKEN_NAME} to proceed`);
@@ -354,9 +359,10 @@ const BuyContractPage: React.SFC = () => {
                 min: 0,
                 step: 1
               }}
+              placeholder='0'
               startAdornment={<InputAdornment position="start">$</InputAdornment>}
               onChange={validateOrderValue}
-              value={budget}
+              value={budget || ''}
               type='number'
               onBlur={e => {
                 e.target.value = e.target.value.replace(/^(-)?0+(0\.|\d)/, '$1$2')
@@ -377,8 +383,9 @@ const BuyContractPage: React.SFC = () => {
                 min: 0,
                 step: 1
               }}
+              placeholder='0'
               onChange={validateOrderQuantity}
-              value={orderQuantity}
+              value={orderQuantity || ''}
               type='number'
               onBlur={e => {
                 e.target.value = e.target.value.replace(/^(-)?0+(0\.|\d)/, '$1$2')
@@ -455,7 +462,7 @@ const BuyContractPage: React.SFC = () => {
                   </TableRow>
                   <TableRow>
                     <TableCell>Contract Total</TableCell>
-                    <TableCell align='right'>{`${PAYMENT_TOKEN_NAME} ${orderValue.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}`}</TableCell>
+                    <TableCell align='right'>{`${PAYMENT_TOKEN_NAME} ${(orderValue || 0).toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}`}</TableCell>
                   </TableRow>
                   {!showOrderDetails ?
                     <TableRow>
@@ -493,7 +500,7 @@ const BuyContractPage: React.SFC = () => {
                         <TableCell colSpan={2}>
                           <Typography variant='subtitle1'>WHAT DOES IT MEAN?</Typography> <br />
                           <Typography variant='body2'>
-                            You will pay <strong>${PAYMENT_TOKEN_NAME} ${orderValue.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}</strong> to
+                            You will pay <strong>${PAYMENT_TOKEN_NAME} ${(orderValue || 0).toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}</strong> to
                             buy <strong>{`${orderQuantity.toLocaleString()}`} TH</strong> of {CONTRACT_DURATION}-Day Mining Revenue Contracts at&nbsp;
                             <strong>{PAYMENT_TOKEN_NAME} {hashPrice.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}/TH/Day</strong>.
                           </Typography>
@@ -505,7 +512,7 @@ const BuyContractPage: React.SFC = () => {
                           <Typography variant='body2'>
                             You may check your PNL from your Portfolio once order is placed. You can withdraw your mining revenue
                             denominated in {COLLATERAL_TOKEN_NAME} after {dayjs().utc().startOf('day').add(1, 'minute')
-                            .add(CONTRACT_DURATION + 1, 'd').format('YYYY/MM/DD HH:mm')} UTC.
+                              .add(CONTRACT_DURATION + 1, 'd').format('YYYY/MM/DD HH:mm')} UTC.
                           </Typography>
                         </TableCell>
                       </TableRow>

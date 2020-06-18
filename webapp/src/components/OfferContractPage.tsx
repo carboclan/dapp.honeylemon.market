@@ -103,7 +103,7 @@ const OfferContractPage: React.SFC = () => {
     Number(
       (marketData.currentMRI * marketData.currentBTCSpotPrice)
         .toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })));
-  const [hashAmount, setHashAmount] = useState(0);
+  const [hashAmount, setHashAmount] = useState<number | undefined>(undefined);
   const [totalContractPrice, setTotalContractPrice] = useState(0);
   const [collateralAmount, setCollateralAmount] = useState(0);
   const [showOfferModal, setShowOfferModal] = useState(false);
@@ -130,7 +130,8 @@ const OfferContractPage: React.SFC = () => {
   }, [hashAmount, honeylemonService, COLLATERAL_TOKEN_DECIMALS]);
 
   useEffect(() => {
-    setTotalContractPrice(hashPrice * hashAmount * CONTRACT_DURATION)
+    hashAmount &&
+      setTotalContractPrice(hashPrice * hashAmount * CONTRACT_DURATION)
   }, [hashPrice, hashAmount, CONTRACT_DURATION])
 
   const tokenApprovalGranted = collateralTokenAllowance > collateralAmount;
@@ -157,16 +158,18 @@ const OfferContractPage: React.SFC = () => {
 
   const handleCreateOffer = async () => {
     setTxActive(true);
-    try {
-      const order = honeylemonService.createOrder(address, new BigNumber(hashAmount), new BigNumber(CONTRACT_DURATION).multipliedBy(hashPrice));
-      const signedOrder = await honeylemonService.signOrder(order);
-      await honeylemonService.submitOrder(signedOrder);
-      setShowOfferModal(false)
-      forwardTo('/portfolio')
-    } catch (error) {
-      console.log('Something went wrong creating the offer');
-      console.log(error);
-      // TODO: Display error on modal
+    if (hashAmount) {
+      try {
+        const order = honeylemonService.createOrder(address, new BigNumber(hashAmount), new BigNumber(CONTRACT_DURATION).multipliedBy(hashPrice));
+        const signedOrder = await honeylemonService.signOrder(order);
+        await honeylemonService.submitOrder(signedOrder);
+        setShowOfferModal(false)
+        forwardTo('/portfolio')
+      } catch (error) {
+        console.log('Something went wrong creating the offer');
+        console.log(error);
+        // TODO: Display error on modal
+      }
     }
     setTxActive(false);
   }
@@ -245,6 +248,7 @@ const OfferContractPage: React.SFC = () => {
               min: 0,
               step: 0.000001
             }}
+            placeholder='0'
             startAdornment={<InputAdornment position="start">$</InputAdornment>}
             onChange={e => {
               const newValueString = e.target.value;
@@ -256,7 +260,7 @@ const OfferContractPage: React.SFC = () => {
               const newValue = parseFloat(newValueString);
               !isNaN(newValue) && setHashPrice(newValue);
             }}
-            value={hashPrice}
+            value={hashPrice || ''}
             type='number'
             onBlur={e => {
               e.target.value = e.target.value.replace(/^(-)?0+(0\.|\d)/, '$1$2')
@@ -276,6 +280,7 @@ const OfferContractPage: React.SFC = () => {
               min: 0,
               step: 1
             }}
+            placeholder='0'
             onChange={e => {
               const newValueString = e.target.value;
               if (!newValueString) {
@@ -285,7 +290,7 @@ const OfferContractPage: React.SFC = () => {
               const newValue = parseInt(newValueString);
               !isNaN(newValue) && setHashAmount(newValue);
             }}
-            value={hashAmount}
+            value={hashAmount || ''}
             type='number'
             onBlur={e => {
               e.target.value = e.target.value.replace(/^(-)?0+(0\.|\d)/, '$1$2')
