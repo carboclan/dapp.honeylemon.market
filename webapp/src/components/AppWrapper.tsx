@@ -177,21 +177,21 @@ function AppWrapper(props: { children: ReactNode }) {
         </div>
         <Divider />
         <List>
-          <ListItem button onClick={() => handleNavigate('/portfolio')}>
-            <ListItemIcon><AccountBalance /></ListItemIcon>
-            <ListItemText primary="Portfolio" />
-          </ListItem>
-          <ListItem button onClick={() => handleNavigate('/offer')}>
-            <ListItemIcon><Assessment /></ListItemIcon>
-            <ListItemText primary="Offer Contract" />
+          <ListItem button onClick={() => handleNavigate('/stats')}>
+            <ListItemIcon><Whatshot /></ListItemIcon>
+            <ListItemText primary="Live Market Stats" />
           </ListItem>
           <ListItem button onClick={() => handleNavigate('/buy')}>
             <ListItemIcon><MonetizationOn /></ListItemIcon>
             <ListItemText primary="Buy Contract" />
           </ListItem>
-          <ListItem button onClick={() => handleNavigate('/stats')}>
-            <ListItemIcon><Whatshot /></ListItemIcon>
-            <ListItemText primary="Live Market Stats" />
+          <ListItem button onClick={() => handleNavigate('/offer')}>
+            <ListItemIcon><Assessment /></ListItemIcon>
+            <ListItemText primary="Offer Contract" />
+          </ListItem>
+          <ListItem button onClick={() => handleNavigate('/portfolio')}>
+            <ListItemIcon><AccountBalance /></ListItemIcon>
+            <ListItemText primary="Portfolio" />
           </ListItem>
         </List>
         <Divider />
@@ -231,7 +231,7 @@ function AppWrapper(props: { children: ReactNode }) {
                   align: 'right',
                   noWrap: true
                 }}
-                secondary='Honeylemon Wallet Address'
+                secondary='Honeylemon Vault'
                 secondaryTypographyProps={{
                   align: 'right'
                 }}>
@@ -246,7 +246,7 @@ function AppWrapper(props: { children: ReactNode }) {
                   align: 'right',
                   noWrap: true
                 }}>
-                No Honeylemon wallet deployed yet
+                No honeylemon vault deployed
               </ListItemText>
             </ListItem>
           }

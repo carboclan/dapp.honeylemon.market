@@ -287,12 +287,12 @@ const BuyContractPage: React.SFC = () => {
 
   const activeStep = getActiveStep()
 
-  const steps = ['Deploy Honeylemon Wallet', `Approve ${PAYMENT_TOKEN_NAME}`, 'Buy Contracts'];
+  const steps = ['Deploy honeylemon vault', `Approve ${PAYMENT_TOKEN_NAME}`, 'Buy Contracts'];
 
   const getStepContent = (step: number) => {
     switch (step) {
       case 0:
-        return `Deploy a honeylemon wallet. This is a once-off operation. The honeylemon wallet will reduce the transaction fees in future.`;
+        return `Deploy a honeylemon vault. This is a once-off operation. The honeylemon vault will reduce the transaction fees in future.`;
       case 1:
         return `Approve ${PAYMENT_TOKEN_NAME}. This is a once-off operation`;
       case 2:
@@ -400,7 +400,7 @@ const BuyContractPage: React.SFC = () => {
             <Typography style={{ fontWeight: 'bold' }} color='secondary'>TH for {CONTRACT_DURATION} Days</Typography>
           </Grid>
         </TabPanel>
-        <Grid item xs={12} style={{ paddingLeft: 0, paddingRight: 0 }}>
+        <Grid item xs={12}>
           <Paper className={clsx(classes.orderSummary, {
             [classes.orderSummaryBlur]: !isValid,
           })}>
@@ -433,7 +433,7 @@ const BuyContractPage: React.SFC = () => {
             </Table>
           </Paper>
         </Grid>
-        <Grid item xs={12} container spacing={1}>
+        <Grid item xs={12} container>
           <Grid item xs={12} style={{ paddingLeft: 0, paddingRight: 0 }}>
             <Paper className={clsx(classes.orderSummary, {
               [classes.orderSummaryBlur]: !isValid,

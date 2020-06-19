@@ -184,12 +184,12 @@ const OfferContractPage: React.SFC = () => {
 
   const activeStep = getActiveStep();
 
-  const steps = ['Deploy honeylemon wallet', `Approve ${COLLATERAL_TOKEN_NAME}`, 'Offer Contracts'];
+  const steps = ['Deploy honeylemon vault', `Approve ${COLLATERAL_TOKEN_NAME}`, 'Offer Contracts'];
 
   const getStepContent = (step: number) => {
     switch (step) {
       case 0:
-        return `Deploy a honeylemon wallet. This is a once-off operation. The honeylemon wallet will reduce the transaction fees in future.`;
+        return `Deploy a honeylemon vault. This is a once-off operation. The honeylemon vault will reduce the transaction fees in future.`;
       case 1:
         return `Approve ${COLLATERAL_TOKEN_NAME}. This is a once-off operation`;
       case 2:

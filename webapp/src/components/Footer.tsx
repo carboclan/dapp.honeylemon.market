@@ -4,7 +4,6 @@ import { GitHub, Telegram, School } from '@material-ui/icons';
 
 const useStyles = makeStyles(({ palette, spacing }) => ({
   footer: {
-    position: 'fixed',
     top: (props: any) => `calc(100vh - ${props.heightOfFooter})`,
     bottom: 0,
     left: 0,
