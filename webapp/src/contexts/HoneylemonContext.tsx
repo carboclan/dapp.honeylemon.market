@@ -440,31 +440,28 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
       const paymentTokenContractAddress = honeylemonService.paymentTokenAddress;
       const paymentTokenContract = new ethers.Contract(paymentTokenContractAddress, erc20Abi, provider);
       const filterPaymentTokenApproval = paymentTokenContract.filters.Approval(address);
-      const transferPaymentTokenFrom = paymentTokenContract.filters.Transfer(address);
-      // TODO Figure out why this is not working
-      // const transferPaymentTokenTo = paymentTokenContract.filters.Transfer(null, address);
-
+      const transferPaymentTokenFrom = paymentTokenContract.filters.Transfer(address, null, null);
+      const transferPaymentTokenTo = paymentTokenContract.filters.Transfer(null, address, null);
       paymentTokenContract.on(filterPaymentTokenApproval, () => checkBalancesAndApprovals())
       paymentTokenContract.on(transferPaymentTokenFrom, () => checkBalancesAndApprovals())
-      // paymentTokenContract.on(transferPaymentTokenTo, () => checkBalancesAndApprovals())
+      paymentTokenContract.on(transferPaymentTokenTo, () => checkBalancesAndApprovals())
 
       const collateralTokenContractAddress = honeylemonService.collateralTokenAddress;
       const collateralTokenContract = new ethers.Contract(collateralTokenContractAddress, erc20Abi, provider);
       const filterCollateralTokenApproval = collateralTokenContract.filters.Approval(address);
       const transferCollateralTokenFrom = collateralTokenContract.filters.Transfer(address);
-      // TODO Figure out why this is not working
-      // const transferCollateralTokenTo = collateralTokenContract.filters.Transfer(null, address, null);
+      const transferCollateralTokenTo = collateralTokenContract.filters.Transfer(null, address, null);
 
       collateralTokenContract.on(filterCollateralTokenApproval, () => checkBalancesAndApprovals())
       collateralTokenContract.on(transferCollateralTokenFrom, () => checkBalancesAndApprovals())
-      // collateralTokenContract.on(transferCollateralTokenTo, () => checkBalancesAndApprovals())
+      collateralTokenContract.on(transferCollateralTokenTo, () => checkBalancesAndApprovals())
       return () => {
         paymentTokenContract.removeAllListeners(filterPaymentTokenApproval)
         paymentTokenContract.removeAllListeners(transferPaymentTokenFrom)
-        // paymentTokenContract.removeAllListeners(transferPaymentTokenTo)
+        paymentTokenContract.removeAllListeners(transferPaymentTokenTo)
         collateralTokenContract.removeAllListeners(filterCollateralTokenApproval)
         collateralTokenContract.removeAllListeners(transferCollateralTokenFrom)
-        // collateralTokenContract.removeAllListeners(transferCollateralTokenTo)
+        collateralTokenContract.removeAllListeners(transferCollateralTokenTo)
       }
     }
 
