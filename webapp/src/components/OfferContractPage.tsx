@@ -391,8 +391,8 @@ const OfferContractPage: React.SFC = () => {
                         <Typography variant='body2'>
                           You need to have at least {collateralAmount.toLocaleString(undefined, { maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS })} {PAYMENT_TOKEN_NAME} in
                           your wallet balance now, and approve Honeylemon smart contract to access your {PAYMENT_TOKEN_NAME} in your wallet as collateral to list your offer.
-                          You may cancel your offer from your Portfolio anytime prior to it being filled. As soon as your order is filled, your approved collateral will be automatically deposited,
-                          you will receive payment in <strong>{PAYMENT_TOKEN_NAME}</strong> immediately and the contract will start.
+                          You may cancel your offer from your Portfolio anytime prior to it being filled. As soon as your order is filled, your approved collateral will be 
+                          automatically deposited, you will receive payment in <strong>{PAYMENT_TOKEN_NAME}</strong> immediately and the contract will start.
                         </Typography>
                         <Typography variant='body2'>
                           At the end of {CONTRACT_DURATION} days your counterparty will receive the network average BTC block reward & transaction

@@ -431,7 +431,7 @@ const BuyContractPage: React.SFC = () => {
                       Contract Duration
                     </TableCell>
                     <TableCell align='right'>
-                      {PAYMENT_TOKEN_NAME} {hashPrice.toFixed(PAYMENT_TOKEN_DECIMALS)} /TH/Day<br />
+                      {PAYMENT_TOKEN_NAME} {hashPrice.toLocaleString(undefined, {maximumFractionDigits: PAYMENT_TOKEN_DECIMALS})} /TH/Day<br />
                       {`${orderQuantity.toLocaleString()}`} TH<br />
                       {`${CONTRACT_DURATION}`} Days
                     </TableCell>
@@ -442,7 +442,7 @@ const BuyContractPage: React.SFC = () => {
                   </TableRow>
                   <TableRow>
                     <TableCell>Revenue Cap</TableCell>
-                    <TableCell align='right'>{`${((expectedBTCAccrual || 0) * CONTRACT_COLLATERAL_RATIO).toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}`}</TableCell>
+                    <TableCell align='right'>{`${((expectedBTCAccrual || 0) * CONTRACT_COLLATERAL_RATIO).toLocaleString(undefined, { maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS })} ${COLLATERAL_TOKEN_NAME}`}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell className={classes.orderSummaryEstimate}>
@@ -508,13 +508,13 @@ const BuyContractPage: React.SFC = () => {
                             <strong>{PAYMENT_TOKEN_NAME} {hashPrice.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}/TH/Day</strong>.
                           </Typography>
                           <Typography variant='body2'>
-                            At settlment, you will receive mining revenue (in imBTC) over # days, which is the network average BTC block 
-                            reward & transaction fees (MRI) per TH over contract duration, up to a max reveue of&nbsp;
-                            {`${((expectedBTCAccrual || 0) * CONTRACT_COLLATERAL_RATIO)} ${COLLATERAL_TOKEN_NAME}`}.
+                            At settlment, you will receive mining revenue (in {COLLATERAL_TOKEN_NAME}) over {CONTRACT_DURATION} days, which 
+                            is the network average BTC block reward & transaction fees (MRI) per TH over contract duration, up to a max 
+                            revenue of {`${((expectedBTCAccrual || 0) * CONTRACT_COLLATERAL_RATIO)} ${COLLATERAL_TOKEN_NAME}`}.
                             You can withdraw your mining revenue (in {COLLATERAL_TOKEN_NAME}) after settlement.
                           </Typography>
                           <Typography variant='body2'>
-                          You will receive the network average BTC block reward & transaction fees per TH based on the average value of
+                            You will receive the network average BTC block reward & transaction fees per TH based on the average value of
                             the <Link href='#' underline='always' onClick={() => setShowMRIInformationModal(true)}>Bitcoin Mining Revenue 
                             Index (MRI) <OpenInNew fontSize='small' /></Link> over {CONTRACT_DURATION} days starting today.
                           </Typography>
