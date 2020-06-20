@@ -270,7 +270,7 @@ const OfferContractPage: React.SFC = () => {
             disabled={showOfferModal} />
         </Grid>
         <Grid item xs={2} className={classes.rightAlign}>
-          <Typography style={{ fontWeight: 'bold' }} color='secondary'>/Th/day</Typography>
+          <Typography style={{ fontWeight: 'bold' }} color='secondary'>/TH/Day</Typography>
         </Grid>
         <Grid item xs={6}><Typography style={{ fontWeight: 'bold' }}>Quantity</Typography></Grid>
         <Grid item xs={4}>
@@ -369,7 +369,7 @@ const OfferContractPage: React.SFC = () => {
                       </TableCell>
                     </TableRow>
                     <TableRow>
-                      <TableCell colSpan={2}>
+                      <TableCell colSpan={2} style={{ color: '#a9a9a9' }}>
                         * Your limit order may be partially filled. <br />
                         * Any unfilled portion of your limit order can be cancelled in your portfolio. <br />
                         * Your order will be subject to additional Ethereum network transaction fee,
@@ -378,7 +378,7 @@ const OfferContractPage: React.SFC = () => {
                       </TableCell>
                     </TableRow>
                     <TableRow>
-                      <TableCell colSpan={2}>
+                      <TableCell colSpan={2} style={{ color: '#a9a9a9' }}>
                         <Typography variant='subtitle1'>WHAT DOES IT MEAN?</Typography> <br />
                         <Typography variant='body2'>
                           You are offering <strong>{hashAmount} TH</strong> of {CONTRACT_DURATION}-Day Mining Revenue Contract at&nbsp;
@@ -392,7 +392,7 @@ const OfferContractPage: React.SFC = () => {
                         <Typography variant='body2'>
                           At the end of {CONTRACT_DURATION} days your counterparty will receive the network average BTC block reward & transaction
                           fees per TH based on the average value of the <Link href='#' underline='always' onClick={() => setShowMRIInformationModal(true)}>Bitcoin Mining Revenue
-                          Index (MRI) <OpenInNew fontSize='small' /></Link> over {CONTRACT_DURATION} days up to a <strong>max win capped by your collateral</strong>.
+                          Index (MRI) <OpenInNew fontSize='small' /></Link> over {CONTRACT_DURATION} days up to a <strong>max capped by your collateral</strong>.
                         </Typography>
                         <Typography variant='body2'>
                           The payoff will be directly deducted from your collateral, and you can withdraw the remainder of your collateral after settlement.

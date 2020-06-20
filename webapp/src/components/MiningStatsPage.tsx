@@ -31,6 +31,10 @@ const MiningStatsPage: React.SFC = () => {
     btcStats,
   } = useHoneylemon();
 
+  const contractDurations = [90, 180, 360];
+
+  const bestHoneylemonPrice = (orderbook.length > 0) ? orderbook[0].price : currentMRI * currentBTCSpotPrice;
+
   const chartOptions: Highcharts.Options | undefined =
     miningContracts && {
       title: {
@@ -127,6 +131,7 @@ const MiningStatsPage: React.SFC = () => {
         },
         data: [
           ...miningContracts
+            .concat({duration: 28, contract_cost: bestHoneylemonPrice, durationAlias: 'honeylemon'})
             .sort((c1, c2) => c1.duration < c2.duration ? -1 : 1)
             .filter(c => c.duration <= 730).map(c => ({
               x: Date.now() + c.duration * 1000 * 86400,
@@ -153,10 +158,6 @@ const MiningStatsPage: React.SFC = () => {
       }
       ]
     }
-
-  const contractDurations = [90, 180, 360];
-
-  const bestHoneylemonPrice = (orderbook.length > 0) ? orderbook[0].price : currentMRI * currentBTCSpotPrice;
 
   return (
     <Grid container direction='column' spacing={2}>
@@ -247,9 +248,10 @@ const MiningStatsPage: React.SFC = () => {
                 <HoneyLemonLogo className={classes.winner} />
               </TableCell>
             </TableRow>
-            {miningContracts.filter(mc => mc.duration > 0 && contractDurations.includes(mc.duration)).map(mc => (
+            {miningContracts.filter(mc => mc.duration > 0 && contractDurations.includes(mc.duration))
+              .sort((a, b) => (a.duration < b.duration) ? -1:1).map(mc => (
               <TableRow key={mc.durationAlias}>
-                <TableCell>{mc.durationAlias}</TableCell>
+                <TableCell>{mc.durationAlias} Cloud Mining</TableCell>
                 <TableCell>$ {(miningContracts.filter(c => c.duration === mc.duration)[0]?.contract_cost)?.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}</TableCell>
                 <TableCell style={{ width: 50 }} align="right">
                   <Link href={`https://honeylemon.market/#/products?coin=BTC&duration=${mc.duration}`} target="_blank" rel="noopener"><OpenInNew /></Link>

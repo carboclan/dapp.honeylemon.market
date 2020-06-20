@@ -2,7 +2,7 @@ import React, { ReactNode, useRef } from 'react';
 import clsx from 'clsx';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
 import { Drawer, AppBar, Toolbar, Divider, IconButton, Typography, ListItem, ListItemIcon, ListItemText, List, Avatar, Link } from '@material-ui/core';
-import { Menu, ChevronLeft, ChevronRight, AccountBalance, Assessment, MonetizationOn, Whatshot, ExitToApp } from '@material-ui/icons';
+import { Menu, ChevronLeft, ChevronRight, AccountBalance, Assessment, MonetizationOn, Whatshot, ExitToApp, Home } from '@material-ui/icons';
 import Blockies from 'react-blockies';
 
 import { forwardTo } from '../helpers/history';
@@ -13,6 +13,7 @@ import Footer from './Footer';
 import { useOnClickOutside } from '../helpers/useOnClickOutside';
 import { networkName } from '../helpers/ethereumNetworkUtils';
 import { displayAddress } from '../helpers/displayAddress';
+import { useLocation } from 'react-router-dom';
 
 const drawerWidth = 300;
 const footerHeight = 150;
@@ -86,6 +87,7 @@ const useStyles = makeStyles(({ transitions, palette, mixins, spacing }) => ({
 function AppWrapper(props: { children: ReactNode }) {
   const classes = useStyles();
   const theme = useTheme();
+  const location = useLocation();
   const [open, setOpen] = React.useState(false);
   const { isReady, address, network, resetOnboard } = useOnboard();
   const { isDsProxyDeployed, dsProxyAddress, deployDSProxyContract, approveToken } = useHoneylemon();
@@ -144,8 +146,8 @@ function AppWrapper(props: { children: ReactNode }) {
             edge="end"
             onClick={handleDrawerOpen}
             className={clsx(classes.hamburger,
-              { [classes.hide]: open })}
-            disabled={!isReady} >
+              { [classes.hide]: open },
+              { [classes.hide]: !isReady })} >
             <Menu fontSize='large' />
           </IconButton>
         </Toolbar>
@@ -177,28 +179,25 @@ function AppWrapper(props: { children: ReactNode }) {
         </div>
         <Divider />
         <List>
-          <ListItem button onClick={() => handleNavigate('/stats')}>
+          <ListItem button onClick={() => handleNavigate('/')} selected={location.pathname === '/'}>
+            <ListItemIcon><Home /></ListItemIcon>
+            <ListItemText primary="Home" />
+          </ListItem>
+          <ListItem button onClick={() => handleNavigate('/stats')} selected={location.pathname === '/stats'}>
             <ListItemIcon><Whatshot /></ListItemIcon>
             <ListItemText primary="Live Market Stats" />
           </ListItem>
-          <ListItem button onClick={() => handleNavigate('/buy')}>
+          <ListItem button onClick={() => handleNavigate('/buy')} selected={location.pathname === '/buy'}>
             <ListItemIcon><MonetizationOn /></ListItemIcon>
             <ListItemText primary="Buy Contract" />
           </ListItem>
-          <ListItem button onClick={() => handleNavigate('/offer')}>
+          <ListItem button onClick={() => handleNavigate('/offer')} selected={location.pathname === '/offer'}>
             <ListItemIcon><Assessment /></ListItemIcon>
             <ListItemText primary="Offer Contract" />
           </ListItem>
-          <ListItem button onClick={() => handleNavigate('/portfolio')}>
+          <ListItem button onClick={() => handleNavigate('/portfolio')} selected={location.pathname === '/portfolio'}>
             <ListItemIcon><AccountBalance /></ListItemIcon>
             <ListItemText primary="Portfolio" />
-          </ListItem>
-        </List>
-        <Divider />
-        <List>
-          <ListItem button onClick={handleLogout}>
-            <ListItemIcon><ExitToApp /></ListItemIcon>
-            <ListItemText primary="Log out" />
           </ListItem>
         </List>
         <Divider />
@@ -290,6 +289,13 @@ function AppWrapper(props: { children: ReactNode }) {
                 align: 'right'
               }} />
           </ListItem>
+          <Divider />
+          <List>
+            <ListItem button onClick={handleLogout}>
+              <ListItemIcon><ExitToApp /></ListItemIcon>
+              <ListItemText primary="Disconnect Wallet" />
+            </ListItem>
+          </List>
         </List>
       </Drawer>
     </div>
