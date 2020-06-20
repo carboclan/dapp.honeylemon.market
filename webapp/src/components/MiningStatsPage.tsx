@@ -263,7 +263,7 @@ const MiningStatsPage: React.SFC = () => {
             {miningContracts.filter(mc => mc.duration > 0 && contractDurations.includes(mc.duration))
               .sort((a, b) => (a.duration < b.duration) ? -1 : 1).map(mc => (
                 <TableRow key={mc.durationAlias}>
-                  <TableCell>{mc.durationAlias} Cloud Mining</TableCell>
+                  <TableCell>{mc.durationAlias} cloud mining</TableCell>
                   <TableCell>$ {(miningContracts.filter(c => c.duration === mc.duration)[0]?.contract_cost)?.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}</TableCell>
                   <TableCell style={{ width: 50 }} align="right">
                     <Link href={`https://honeylemon.market/#/products?coin=BTC&duration=${mc.duration}`} target="_blank" rel="noopener"><OpenInNew /></Link>

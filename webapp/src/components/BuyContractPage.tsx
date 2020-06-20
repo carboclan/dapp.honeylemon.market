@@ -39,6 +39,7 @@ import MRIDisplay from './MRIDisplay';
 import { OpenInNew, ExpandMore } from '@material-ui/icons';
 import { Link as RouterLink } from 'react-router-dom';
 import MRIInformationModal from './MRIInformationModal';
+import OrderbookModal from './OrderbookModal';
 
 const useStyles = makeStyles(({ spacing, palette, transitions }) => ({
   rightAlign: {
@@ -132,6 +133,7 @@ const BuyContractPage: React.SFC = () => {
   const [discountOnSpotPrice, setDiscountOnSpotPrice] = useState(0);
   const [showOrderDetails, setShowOrderDetails] = useState(false);
   const [showMRIInformationModal, setShowMRIInformationModal] = useState(false);
+  const [showOrderbook, setShowOrderbook] = useState(false);
 
   const handleChangeBuyType = (event: React.ChangeEvent<{}>, newValue: BuyType) => {
     setBuyType(newValue);
@@ -337,8 +339,11 @@ const BuyContractPage: React.SFC = () => {
         <Grid item xs={12}>
           <MRIDisplay />
         </Grid>
-        <Grid item xs={12}>
+        <Grid item xs={8}>
           <Typography style={{ fontWeight: 'bold' }}>Buy {CONTRACT_DURATION}-Day Mining Revenue Contract</Typography>
+        </Grid>
+        <Grid item xs={4} style={{ textAlign: 'end' }}>
+          <Link href='#' underline='always' onClick={() => setShowOrderbook(true)}>Order Book <OpenInNew fontSize='small' /></Link>
         </Grid>
         <Grid item xs={12}>
           <Tabs
@@ -400,39 +405,6 @@ const BuyContractPage: React.SFC = () => {
             <Typography style={{ fontWeight: 'bold' }} color='secondary'>TH for {CONTRACT_DURATION} Days</Typography>
           </Grid>
         </TabPanel>
-        <Grid item xs={12}>
-          <Paper className={clsx(classes.orderSummary, {
-            [classes.orderSummaryBlur]: !isValid,
-          })}>
-            <Table size='small'>
-              <TableBody>
-                <TableRow>
-                  <TableCell className={classes.orderSummaryEstimate}>
-                    Discount vs. Buy BTC *
-                  </TableCell>
-                  <TableCell align='right' className={clsx(classes.orderSummaryEstimate,
-                    { [classes.premium]: discountOnSpotPrice < 0 },
-                    { [classes.discount]: discountOnSpotPrice > 0 })}>
-                    {discountOnSpotPrice.toLocaleString(undefined, { minimumFractionDigits: 5, maximumFractionDigits: 8 })}%
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className={classes.orderSummaryEstimate}>
-                    Estimated Revenue *
-                    </TableCell>
-                  <TableCell align='right' className={classes.orderSummaryEstimate}>
-                    {`${(expectedBTCAccrual).toLocaleString(undefined, { minimumFractionDigits: 5, maximumFractionDigits: 8 })} imBTC`}
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell colSpan={2}>
-                    * Assuming constant price and difficulty
-                    </TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-          </Paper>
-        </Grid>
         <Grid item xs={12} container>
           <Grid item xs={12} style={{ paddingLeft: 0, paddingRight: 0 }}>
             <Paper className={clsx(classes.orderSummary, {
@@ -467,6 +439,33 @@ const BuyContractPage: React.SFC = () => {
                   <TableRow>
                     <TableCell>Contract Total</TableCell>
                     <TableCell align='right'>{`${PAYMENT_TOKEN_NAME} ${(orderValue || 0).toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}`}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>Revenue Cap</TableCell>
+                    <TableCell align='right'>{`${((expectedBTCAccrual || 0) * CONTRACT_COLLATERAL_RATIO).toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}`}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className={classes.orderSummaryEstimate}>
+                      Discount vs. Buy BTC *
+                  </TableCell>
+                    <TableCell align='right' className={clsx(classes.orderSummaryEstimate,
+                      { [classes.premium]: discountOnSpotPrice < 0 },
+                      { [classes.discount]: discountOnSpotPrice > 0 })}>
+                      {discountOnSpotPrice.toLocaleString(undefined, { minimumFractionDigits: 5, maximumFractionDigits: 8 })}%
+                  </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className={classes.orderSummaryEstimate}>
+                      Estimated Revenue *
+                    </TableCell>
+                    <TableCell align='right' className={classes.orderSummaryEstimate}>
+                      {`${(expectedBTCAccrual).toLocaleString(undefined, { minimumFractionDigits: 5, maximumFractionDigits: 8 })} imBTC`}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell colSpan={2}>
+                      * Assuming constant price and difficulty
+                    </TableCell>
                   </TableRow>
                   {!showOrderDetails ?
                     <TableRow>
@@ -509,7 +508,13 @@ const BuyContractPage: React.SFC = () => {
                             <strong>{PAYMENT_TOKEN_NAME} {hashPrice.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}/TH/Day</strong>.
                           </Typography>
                           <Typography variant='body2'>
-                            You will receive the network average BTC block reward & transaction fees per TH based on the average value of
+                            At settlment, you will receive mining revenue (in imBTC) over # days, which is the network average BTC block 
+                            reward & transaction fees (MRI) per TH over contract duration, up to a max reveue of&nbsp;
+                            {`${((expectedBTCAccrual || 0) * CONTRACT_COLLATERAL_RATIO)} ${COLLATERAL_TOKEN_NAME}`}.
+                            You can withdraw your mining revenue (in {COLLATERAL_TOKEN_NAME}) after settlement.
+                          </Typography>
+                          <Typography variant='body2'>
+                          You will receive the network average BTC block reward & transaction fees per TH based on the average value of
                             the <Link href='#' underline='always' onClick={() => setShowMRIInformationModal(true)}>Bitcoin Mining Revenue 
                             Index (MRI) <OpenInNew fontSize='small' /></Link> over {CONTRACT_DURATION} days starting today.
                           </Typography>
@@ -588,6 +593,8 @@ const BuyContractPage: React.SFC = () => {
         </DialogContent>
       </Dialog>
       <ContractSpecificationModal open={showContractSpecificationModal} onClose={() => setShowContractSpecificationModal(false)} />
+      <MRIInformationModal open={showMRIInformationModal} onClose={() => setShowMRIInformationModal(false)} />
+      <OrderbookModal open={showOrderbook} onClose={() => setShowOrderbook(false)} />
     </>
   )
 }

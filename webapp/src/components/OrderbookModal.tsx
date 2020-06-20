@@ -1,5 +1,5 @@
 import React from 'react';
-import { makeStyles, Dialog, DialogTitle, DialogContent, TableRow, TableHead, Table, TableCell, TableBody } from '@material-ui/core';
+import { makeStyles, Dialog, DialogTitle, DialogContent, TableRow, TableHead, Table, TableCell, TableBody, Typography } from '@material-ui/core';
 import { useHoneylemon } from '../contexts/HoneylemonContext';
 
 const useStyles = makeStyles(({ palette }) => ({
@@ -16,20 +16,26 @@ const OrderbookModal: React.SFC<OrderbookModalProps> = ({ open, onClose }: Order
   const { orderbook, PAYMENT_TOKEN_DECIMALS } = useHoneylemon();
   return (
     <Dialog open={open} onClose={onClose} aria-labelledby="dialog-title" maxWidth='sm' fullWidth>
-      <DialogTitle id="dialog-title">Order Book</DialogTitle>
+      <DialogTitle id="dialog-title">Order Book (Offers Only)</DialogTitle>
       <DialogContent>
+        <Typography>
+          Miners can make offers and cancel before the listed offer is filled.<br/>
+          Buyers are not able to bid, buy orders will be filled by best available offers.
+        </Typography>
         <Table>
           <TableHead>
             <TableRow>
               <TableCell>Price ($/TH/Day)</TableCell>
-              <TableCell>Quantity (TH)</TableCell>
+              <TableCell align='center'>Contract Duration (Days)</TableCell>
+              <TableCell align='right'>Quantity (TH)</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {orderbook.map((order, i) =>
               <TableRow key={i}>
                 <TableCell>$ {order.price.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}</TableCell>
-                <TableCell>{order.quantity} TH</TableCell>
+                <TableCell align='center'>28</TableCell>
+                <TableCell align='right'>{order.quantity} TH</TableCell>
               </TableRow>
             )}
           </TableBody>

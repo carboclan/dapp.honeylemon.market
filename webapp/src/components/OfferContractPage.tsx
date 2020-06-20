@@ -184,14 +184,14 @@ const OfferContractPage: React.SFC = () => {
 
   const activeStep = getActiveStep();
 
-  const steps = ['Deploy honeylemon vault', `Approve ${COLLATERAL_TOKEN_NAME}`, 'Offer Contracts'];
+  const steps = ['Deploy honeylemon vault', `Approve ${COLLATERAL_TOKEN_NAME} collateral`, 'Offer Contract'];
 
   const getStepContent = (step: number) => {
     switch (step) {
       case 0:
-        return `Deploy a honeylemon vault. This is a once-off operation. The honeylemon vault will reduce the transaction fees in future.`;
+        return `Deploy a honeylemon vault. The honeylemon vault will reduce the transaction fees paid when redeeming in future. This step is optional. This is a once-off operation.`;
       case 1:
-        return `Approve ${COLLATERAL_TOKEN_NAME}. This is a once-off operation`;
+        return `Approve Honeylemon smart contract access to your wallet’s ${COLLATERAL_TOKEN_NAME} allowance. Your ${COLLATERAL_TOKEN_NAME} collateral will be auto-deposited into smart contract based on the MRI value at the time of your order being filled.`;
       case 2:
         return `Finalize Offer`;
     }
@@ -335,7 +335,7 @@ const OfferContractPage: React.SFC = () => {
                 <TableRow>
                   <TableCell>
                     Contract Total <br />
-                    Collateral Required <br />
+                    Estimated Collateral<br />
                     <br />
                   </TableCell>
                   <TableCell align='right'>
@@ -370,6 +370,10 @@ const OfferContractPage: React.SFC = () => {
                     </TableRow>
                     <TableRow>
                       <TableCell colSpan={2} style={{ color: '#a9a9a9' }}>
+                        * Estimated collateral is calcuated based on current MRI value; actual collateral 
+                          deposited will be based on the actual MRI value at at the time your order being filled. <br />
+                        * When your offer is taken, if you do not have sufficient imBTC in wallet as collateral, 
+                          your offer size will be scaled down and filled based on what your actual imBTC balance would allow. <br />
                         * Your limit order may be partially filled. <br />
                         * Any unfilled portion of your limit order can be cancelled in your portfolio. <br />
                         * Your order will be subject to additional Ethereum network transaction fee,
@@ -385,8 +389,9 @@ const OfferContractPage: React.SFC = () => {
                           <strong>{PAYMENT_TOKEN_NAME} {hashPrice.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}/TH/Day</strong>.
                         </Typography>
                         <Typography variant='body2'>
-                          You will need to <strong>approve {collateralAmount.toLocaleString(undefined, { maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS })}</strong>&nbsp;
-                          {COLLATERAL_TOKEN_NAME} in your wallet as collateral to list your offer. As soon as your order is filled, your approved collateral will be automatically deposited,
+                          You need to have at least {collateralAmount.toLocaleString(undefined, { maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS })} {PAYMENT_TOKEN_NAME} in
+                          your wallet balance now, and approve Honeylemon smart contract to access your {PAYMENT_TOKEN_NAME} in your wallet as collateral to list your offer.
+                          You may cancel your offer from your Portfolio anytime prior to it being filled. As soon as your order is filled, your approved collateral will be automatically deposited,
                           you will receive payment in <strong>{PAYMENT_TOKEN_NAME}</strong> immediately and the contract will start.
                         </Typography>
                         <Typography variant='body2'>
