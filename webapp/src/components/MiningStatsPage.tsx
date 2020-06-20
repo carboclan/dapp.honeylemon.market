@@ -8,6 +8,7 @@ import { useHoneylemon } from '../contexts/HoneylemonContext';
 import dayjs from 'dayjs';
 import MRIDisplay from './MRIDisplay';
 import { OpenInNew } from '@material-ui/icons';
+import clsx from 'clsx';
 
 SL(Highcharts);
 
@@ -19,7 +20,13 @@ const useStyles = makeStyles(({ palette }) => ({
   winner: {
     width: 20,
     height: 20,
-  }
+  },
+  decrease: {
+    color: palette.error.main,
+  },
+  increase: {
+    color: palette.success.main,
+  },
 }))
 
 const MiningStatsPage: React.SFC = () => {
@@ -44,22 +51,18 @@ const MiningStatsPage: React.SFC = () => {
           color: 'white'
         }
       },
-
       credits: {
         enabled: true,
         href: 'https://honeylemon.market/',
         text: 'honeylemon.market'
       },
-
       chart: {
         backgroundColor: '#000',
         style: {
           fontFamily: '"Roboto", Helvetica, Arial, sans-serif'
         }
       },
-
       colors: ['#cece4b'],
-
       yAxis: [{
         title: {
           text: `Best Price ($/TH/Day)`,
@@ -72,7 +75,6 @@ const MiningStatsPage: React.SFC = () => {
         minorGridLineWidth: 0,
         min: 0,
       }],
-
       xAxis: {
         type: 'datetime',
         title: {
@@ -91,11 +93,9 @@ const MiningStatsPage: React.SFC = () => {
         tickWidth: 0,
         endOnTick: false
       },
-
       legend: {
         enabled: false
       },
-
       plotOptions: {
         spline: {
           states: {
@@ -131,7 +131,7 @@ const MiningStatsPage: React.SFC = () => {
         },
         data: [
           ...miningContracts
-            .concat({duration: 28, contract_cost: bestHoneylemonPrice, durationAlias: 'honeylemon'})
+            .concat({ duration: 28, contract_cost: bestHoneylemonPrice, durationAlias: 'honeylemon' })
             .sort((c1, c2) => c1.duration < c2.duration ? -1 : 1)
             .filter(c => c.duration <= 730).map(c => ({
               x: Date.now() + c.duration * 1000 * 86400,
@@ -159,6 +159,7 @@ const MiningStatsPage: React.SFC = () => {
       ]
     }
 
+  const difficultyChange = ((btcStats?.difficulty?.current - btcStats?.difficulty?.last) / btcStats?.difficulty?.last) * 100;
   return (
     <Grid container direction='column' spacing={2}>
       <Grid item xs={12}>
@@ -170,33 +171,44 @@ const MiningStatsPage: React.SFC = () => {
             <TableBody>
               <TableRow>
                 <TableCell>BTC Price (24h Δ%) </TableCell>
-                <TableCell align='right'>$ {currentBTCSpotPrice.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}</TableCell>
-                <TableCell align='right'>({btcStats?.quote?.percentChange24h}%)</TableCell>
+                <TableCell align='right'>
+                  <Typography>$ {btcStats?.quote.price.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}</Typography>
+                  <Typography className={clsx(
+                    { [classes.decrease]: btcStats?.quote?.percentChange24h < 0 },
+                    { [classes.increase]: btcStats?.quote?.percentChange24h > 0 })}>({btcStats?.quote?.percentChange24h}%)
+                  </Typography>
+                </TableCell>
               </TableRow>
               <TableRow>
                 <TableCell>Difficulty (Last Adj Δ%)</TableCell>
-                <TableCell align='right'>{btcStats?.difficulty?.current.toLocaleString(undefined, { maximumFractionDigits: 0 })}</TableCell>
-                <TableCell align='right'>({(((btcStats?.difficulty?.current - btcStats?.difficulty?.last) / btcStats?.difficulty?.last) * 100).toLocaleString(undefined, { maximumFractionDigits: 4 })}%)</TableCell>
+                <TableCell align='right'>
+                  <Typography>{btcStats?.difficulty?.current.toLocaleString(undefined, { maximumFractionDigits: 0 })}</Typography>
+                  <Typography className={clsx(
+                    { [classes.decrease]: difficultyChange < 0 },
+                    { [classes.increase]: difficultyChange > 0 })}>
+                    ({difficultyChange.toLocaleString(undefined, { maximumFractionDigits: 4 })}%)
+                  </Typography>
+                </TableCell>
               </TableRow>
               <TableRow>
                 <TableCell>24h Network Hashrate</TableCell>
-                <TableCell align='right' colSpan={2}>{(btcStats?.hashrate24h / 10 ** 9).toLocaleString(undefined, { maximumFractionDigits: 0 })} TH</TableCell>
+                <TableCell align='right'>{(btcStats?.hashrate24h / 10 ** 9).toLocaleString(undefined, { maximumFractionDigits: 0 })} TH</TableCell>
               </TableRow>
               <TableRow>
                 <TableCell>24h Total Mining Revenue</TableCell>
-                <TableCell align='right' colSpan={2}>$ {btcStats?.reward24h?.total.toLocaleString(undefined, { maximumFractionDigits: 2 })}</TableCell>
+                <TableCell align='right'>$ {btcStats?.reward24h?.total.toLocaleString(undefined, { maximumFractionDigits: 2 })}</TableCell>
               </TableRow>
               <TableRow>
                 <TableCell>% Block Rewards</TableCell>
-                <TableCell align='right' colSpan={2}>{(btcStats?.reward24h?.block / btcStats?.reward24h?.total * 100).toLocaleString(undefined, { maximumSignificantDigits: 2 })} %</TableCell>
+                <TableCell align='right'>{(btcStats?.reward24h?.block / btcStats?.reward24h?.total * 100).toLocaleString(undefined, { maximumSignificantDigits: 2 })} %</TableCell>
               </TableRow>
               <TableRow>
                 <TableCell>% Transaction Fee</TableCell>
-                <TableCell align='right' colSpan={2}>{(btcStats?.reward24h?.fees / btcStats?.reward24h?.total * 100).toLocaleString(undefined, { maximumSignificantDigits: 2 })} %</TableCell>
+                <TableCell align='right'>{(btcStats?.reward24h?.fees / btcStats?.reward24h?.total * 100).toLocaleString(undefined, { maximumSignificantDigits: 2 })} %</TableCell>
               </TableRow>
               <TableRow>
                 <TableCell>Next Difficulty Adjustment Date</TableCell>
-                <TableCell colSpan={2} align='right'>{dayjs(btcDifficultyAdjustmentDate).format('MMM DD, YYYY HH:mm:ss')} UTC</TableCell>
+                <TableCell align='right'>{dayjs(btcDifficultyAdjustmentDate).format('MMM DD, YYYY HH:mm:ss')} UTC</TableCell>
               </TableRow>
             </TableBody>
           </Table>
@@ -249,15 +261,15 @@ const MiningStatsPage: React.SFC = () => {
               </TableCell>
             </TableRow>
             {miningContracts.filter(mc => mc.duration > 0 && contractDurations.includes(mc.duration))
-              .sort((a, b) => (a.duration < b.duration) ? -1:1).map(mc => (
-              <TableRow key={mc.durationAlias}>
-                <TableCell>{mc.durationAlias} Cloud Mining</TableCell>
-                <TableCell>$ {(miningContracts.filter(c => c.duration === mc.duration)[0]?.contract_cost)?.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}</TableCell>
-                <TableCell style={{ width: 50 }} align="right">
-                  <Link href={`https://honeylemon.market/#/products?coin=BTC&duration=${mc.duration}`} target="_blank" rel="noopener"><OpenInNew /></Link>
-                </TableCell>
-              </TableRow>
-            ))}
+              .sort((a, b) => (a.duration < b.duration) ? -1 : 1).map(mc => (
+                <TableRow key={mc.durationAlias}>
+                  <TableCell>{mc.durationAlias} Cloud Mining</TableCell>
+                  <TableCell>$ {(miningContracts.filter(c => c.duration === mc.duration)[0]?.contract_cost)?.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}</TableCell>
+                  <TableCell style={{ width: 50 }} align="right">
+                    <Link href={`https://honeylemon.market/#/products?coin=BTC&duration=${mc.duration}`} target="_blank" rel="noopener"><OpenInNew /></Link>
+                  </TableCell>
+                </TableRow>
+              ))}
           </TableBody>
         </Table>
       </Grid>
