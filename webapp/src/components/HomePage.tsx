@@ -16,8 +16,9 @@ const useStyles = makeStyles(({ palette, spacing }) => ({
   button: {
     backgroundColor: palette.secondary.main,
     color: palette.common.black,
-    paddingTop: spacing(2),
-    paddingBottom: spacing(2),
+    paddingTop: spacing(1),
+    paddingBottom: spacing(1),
+    fontSize: 20,
   },
   divider: {
     margin: spacing(2),
@@ -48,6 +49,13 @@ const useStyles = makeStyles(({ palette, spacing }) => ({
   mriInfo: {
     textAlign: 'center',
   },
+  liveStatsButton: {
+    borderColor: palette.secondary.main,
+    borderWidth: 2,
+    borderStyle: 'solid',
+    color: palette.secondary.main,
+    backgroundColor: '#303030',
+  }
 }))
 
 const HomePage: React.SFC = () => {
@@ -85,15 +93,14 @@ const HomePage: React.SFC = () => {
         <Grid item>
           <MRIDisplay />
         </Grid>
-        <Grid item>
-          <Link component={RouterLink} to='/stats' underline='always'>
-            <Typography align='center' style={{ fontWeight: 'bold' }} gutterBottom>
+        <Grid item xs={12} style={{textAlign: 'center'}}>
+          <Button onClick={() => forwardTo('/stats')} className={classes.liveStatsButton}>
+            <Typography align='center' style={{ fontWeight: 'bold' }}>
               <span role="img" aria-label="fire">🔥</span>
               Mining Market Live Stats
               <span role="img" aria-label="fire">🔥</span>
-              <OpenInNew fontSize="small" />
             </Typography>
-          </Link>
+          </Button>
         </Grid>
         <Grid item container direction='row' className={classes.countdownSection} spacing={2} justify='center' alignItems='stretch'>
           <Grid item xs={12}>

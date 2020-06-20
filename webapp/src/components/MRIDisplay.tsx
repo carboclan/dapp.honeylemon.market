@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Link, Typography, makeStyles, Paper } from '@material-ui/core';
-import { OpenInNew } from '@material-ui/icons';
+import { Help } from '@material-ui/icons';
 import { useHoneylemon } from '../contexts/HoneylemonContext';
 import MRIInformationModal from './MRIInformationModal';
 
-const useStyles = makeStyles(({ palette, spacing }) => ({
+const useStyles = makeStyles(({ spacing }) => ({
   mriInfo: {
     textAlign: 'center',
     padding: spacing(2),
@@ -28,7 +28,7 @@ const MRIDisplay: React.SFC = () => {
           href='#' underline='always'
           onClick={() => setShowMRIInformationModal(true)}>
           Bitcoin Mining Revenue Index (MRI)
-          <OpenInNew fontSize='small' />
+          <Help fontSize='small' />
         </Link>
         {currentMRI > 0 ?
           <>
