@@ -191,11 +191,11 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
 
   const parseContractName = (contractName: string): ContractDetails => {
     const [indexType, collateralInstrument, durationString, startDate, position] = contractName.split('-');
-    const duration = Number(durationString.slice(0, durationString.length - 2));
+    const duration = Number(durationString.replace('D', ''));
     return {
       instrumentName: `${indexType}-${collateralInstrument}`,
       type: (position === 'long') ? PositionType.Long : PositionType.Short,
-      startDate: dayjs(startDate).utc().startOf('day').toDate(), //This will always be UTC 00:00 the date the contract was concluded 
+      startDate: dayjs(startDate).utc().startOf('day').toDate(), //This will always be UTC 00:00 the date the contract was concluded
       expirationDate: dayjs(startDate).utc().startOf('day').add(duration, 'd').toDate(),
       settlementDate: dayjs(startDate).utc().startOf('day').add(duration + 1, 'd').toDate(),
       duration,
@@ -412,7 +412,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
     getDifficultyAdjustmentDate()
   }, [])
 
-  // Transfer & Approval event listeners for Payment & Collateral Tokens 
+  // Transfer & Approval event listeners for Payment & Collateral Tokens
   useEffect(() => {
     const checkBalancesAndApprovals = async () => {
       const collateral = await honeylemonService.getCollateralTokenAmounts(address);
