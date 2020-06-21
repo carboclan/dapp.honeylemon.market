@@ -2,6 +2,7 @@
   "name": "@honeylemon/monorepo",
   "version": "3.0.0",
   "description": "Decentralized Synthetic cloud mining contracts built on Ethereum",
+  "private": true,
   "dependencies": {
 
   },

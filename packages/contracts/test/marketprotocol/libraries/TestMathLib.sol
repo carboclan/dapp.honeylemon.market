@@ -17,7 +17,7 @@
 pragma solidity 0.5.2;
 
 import 'truffle/Assert.sol';
-import '../../../contracts/libraries/MathLib.sol';
+import '../../../src/libraries/MathLib.sol';
 
 
 /// @title TestMathLib tests for all of our math functions
