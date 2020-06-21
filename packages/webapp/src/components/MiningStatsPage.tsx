@@ -230,7 +230,7 @@ const MiningStatsPage: React.SFC = () => {
           <TableBody>
             <TableRow>
               <TableCell>
-                <strong>Spot Contract Price</strong>
+                <strong>Spot Market</strong>
               </TableCell>
               <TableCell style={{ width: 50 }}>
                 <strong>($/TH/Day)</strong>
@@ -246,7 +246,7 @@ const MiningStatsPage: React.SFC = () => {
             </TableRow>
             <TableRow>
               <TableCell>
-                <strong>Forward Contract Price</strong>
+                <strong>Forward Market</strong>
               </TableCell>
               <TableCell style={{ width: 50 }}>
                 <strong>($/TH/Day)</strong>
@@ -263,7 +263,7 @@ const MiningStatsPage: React.SFC = () => {
             {miningContracts.filter(mc => mc.duration > 0 && contractDurations.includes(mc.duration))
               .sort((a, b) => (a.duration < b.duration) ? -1 : 1).map(mc => (
                 <TableRow key={mc.durationAlias}>
-                  <TableCell>{mc.durationAlias} cloud mining</TableCell>
+                  <TableCell>{mc.durationAlias} Cloud Mining</TableCell>
                   <TableCell>$ {(miningContracts.filter(c => c.duration === mc.duration)[0]?.contract_cost)?.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}</TableCell>
                   <TableCell style={{ width: 50 }} align="right">
                     <Link href={`https://honeylemon.market/#/products?coin=BTC&duration=${mc.duration}`} target="_blank" rel="noopener"><OpenInNew /></Link>

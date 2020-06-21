@@ -21,16 +21,16 @@ const OrderbookModal: React.SFC<OrderbookModalProps> = ({ open, onClose }: Order
           <TableHead>
             <TableRow>
               <TableCell>Price ($/TH/Day)</TableCell>
-              <TableCell align='center'>Contract Duration (Days)</TableCell>
+              <TableCell align='center'>Duration (Days)</TableCell>
               <TableCell align='right'>Quantity (TH)</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {orderbook.map((order, i) =>
               <TableRow key={i}>
-                <TableCell>$ {order.price.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}</TableCell>
+                <TableCell>{order.price.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}</TableCell>
                 <TableCell align='center'>28</TableCell>
-                <TableCell align='right'>{order.quantity} TH</TableCell>
+                <TableCell align='right'>{order.quantity}</TableCell>
               </TableRow>
             )}
           </TableBody>

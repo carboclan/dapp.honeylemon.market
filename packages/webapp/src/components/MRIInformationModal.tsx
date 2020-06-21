@@ -18,7 +18,7 @@ const MRIInformationModal: React.SFC<MRIInformationModalProps> = ({ open, onClos
 
   return (
     <Dialog open={open} onClose={onClose} aria-labelledby="dialog-title" maxWidth='sm' fullWidth>
-      <DialogTitle id="dialog-title">BTC Mining Revenue Index</DialogTitle>
+      <DialogTitle id="dialog-title">BTC Mining Revenue Index Specification</DialogTitle>
       <DialogContent>
         <Typography variant='subtitle1'>Meaning</Typography>
         <Typography variant='caption'>
