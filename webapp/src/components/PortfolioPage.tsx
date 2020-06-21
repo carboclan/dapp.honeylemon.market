@@ -116,7 +116,8 @@ const PorfolioPage: React.SFC = () => {
   } = portfolioData;
 
   const [activeTab, setActiveTab] = useState<'active' | 'expired'>('active')
-  const [collateralForWithdraw, setCollateralForWithdraw] = useState<Number>(0);
+  const [longCollateralForWithdraw, setLongCollateralForWithdraw] = useState<number>(0);
+  const [shortCollateralForWithdraw, setShortCollateralForWithdraw] = useState<number>(0);
 
   const [isWithdrawing, setIsWithdrawing] = useState(false);
   const [isCancelling, setIsCancelling] = useState(false);
@@ -237,10 +238,9 @@ const PorfolioPage: React.SFC = () => {
       setIsLoading(true);
       try {
         await refreshPortfolio();
-        // !isCancelled &&
-        //   setCollateralForWithdraw(settledPositionsToWithdraw.reduce((total: Number, contract: any) => total += contract?.finalReward, 0));
       } catch (error) {
-
+        console.log('There was an error getting the portfolio data');
+        console.log(error);
       }
       setIsLoading(false);
     }
@@ -281,10 +281,15 @@ const PorfolioPage: React.SFC = () => {
   ])
 
   useEffect(() => {
-    const collateralAvailableToWithdraw = expiredLongPositions.concat(expiredShortPositions)
+    const longCollateralAvailableToWithdraw = expiredLongPositions
       .filter(p => p.status === PositionStatus.withdrawalPending)
       .reduce((total: Number, position: any) => total += position?.finalReward, 0)
-    setCollateralForWithdraw(collateralAvailableToWithdraw);
+    setLongCollateralForWithdraw(longCollateralAvailableToWithdraw);
+
+    const shortCollateralAvailableToWithdraw = expiredShortPositions
+      .filter(p => p.status === PositionStatus.withdrawalPending)
+      .reduce((total: Number, position: any) => total += position?.finalReward, 0);
+    setShortCollateralForWithdraw(shortCollateralAvailableToWithdraw);
   }, [expiredLongPositions, expiredShortPositions])
 
   return (
@@ -465,11 +470,23 @@ const PorfolioPage: React.SFC = () => {
                   </ExpansionPanelSummary>
                   <ExpansionPanelDetails>
                     <Grid container>
+                      <Table>
+                        <TableBody>
+                          <TableRow>
+                            <TableCell>Long Positions (Remaining Collateral)</TableCell>
+                            <TableCell align='right'>{longCollateralForWithdraw.toLocaleString(undefined, {maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS})} {COLLATERAL_TOKEN_NAME}</TableCell>
+                          </TableRow>
+                          <TableRow>
+                            <TableCell>Short Positions (Earnings)</TableCell>
+                            <TableCell align='right'>{shortCollateralForWithdraw.toLocaleString(undefined, {maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS})} {COLLATERAL_TOKEN_NAME}</TableCell>
+                          </TableRow>
+                        </TableBody>
+                      </Table>
                       <Grid item xs={12} style={{ paddingTop: 8 }}>
-                        <Button fullWidth disabled={collateralForWithdraw === 0} onClick={withdrawAllAvailable}>
+                        <Button fullWidth disabled={(longCollateralForWithdraw + shortCollateralForWithdraw) === 0} onClick={withdrawAllAvailable}>
                           {(!isWithdrawing) ?
-                            (collateralForWithdraw > 0) ?
-                              `WITHDRAW ALL (${collateralForWithdraw.toLocaleString()} ${COLLATERAL_TOKEN_NAME})` :
+                            ((longCollateralForWithdraw + shortCollateralForWithdraw) > 0) ?
+                              `WITHDRAW ALL (${(longCollateralForWithdraw + shortCollateralForWithdraw).toLocaleString()} ${COLLATERAL_TOKEN_NAME})` :
                               <>WITHDRAW ALL <RadioButtonUnchecked className={classes.icon} /></> :
                             <>WITHDRAW ALL <CircularProgress className={classes.loadingSpinner} size={20} /></>
                           }
@@ -488,7 +505,7 @@ const PorfolioPage: React.SFC = () => {
                     IconButtonProps={{ onClick: handleToggleExpiredLongPositionsPanel }}>
                     <Typography variant='h5' className={classes.sectionHeadingText}>
                       Long Positions (Filled Buy Order)
-                  </Typography>
+                    </Typography>
                     <ButtonBase className={classes.infoButton}><InfoRounded /></ButtonBase>
                   </ExpansionPanelSummary>
                   <ExpansionPanelDetails>
