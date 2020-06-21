@@ -14,6 +14,7 @@ const TabPanel = ({ children, value, index, ...other }: TabPanelProps) => (
         {...other}
         style={{
             display: 'flex',
+            alignItems: 'center',
             padding: (value !== index) ? '0px' : '8px',
         }}
     >

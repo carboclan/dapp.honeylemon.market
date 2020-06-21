@@ -47,7 +47,7 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
       try {
         const montserrat = new FontFaceObserver('Montserrat')
         await montserrat.load(undefined);
-        
+
         const onboard = Onboard({
           dappId: onboardProps.dappId,
           networkId: onboardProps.networkId,
@@ -56,14 +56,15 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
             wallets: [
               { walletName: 'metamask', preferred: true },
               {
+                walletName: 'imToken',
+                rpcUrl: 'https://eth-testnet.tokenlon.im', //TODO update this for mainnet mainnet-eth.token.im
+                preferred: true,
+              },
+              { walletName: "coinbase", preferred: true },
+              {
                 walletName: "portis",
                 apiKey: process.env.REACT_APP_PORTIS_API_KEY,
               },
-              {
-                walletName: 'imToken',
-                rpcUrl: 'https://eth-testnet.tokenlon.im', //TODO update this for mainnet mainnet-eth.token.im
-              },
-              { walletName: "coinbase", preferred: true },
               { walletName: "dapper" },
               {
                 walletName: "walletConnect",
@@ -75,6 +76,10 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
               { walletName: "torus" },
               { walletName: "status" },
               { walletName: "unilogin" },
+              {
+                walletName: 'ledger',
+                rpcUrl: infuraRpc
+              },
             ]
           },
           walletCheck: [

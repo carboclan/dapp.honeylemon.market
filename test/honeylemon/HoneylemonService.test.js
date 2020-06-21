@@ -167,7 +167,7 @@ const stubOrders = async () => {
       remainingFillableTakerAssetAmount: o.takerAssetAmount
     }
   }));
-  sinon.stub(honeylemonService.apiClient, 'getOrderbookAsync').returns({
+  sinon.stub(honeylemonService.orderbookService.apiClient, 'getOrderbookAsync').returns({
     bids: {
       total: 0,
       page: 1,
@@ -181,7 +181,7 @@ const stubOrders = async () => {
       records
     }
   });
-  sinon.stub(honeylemonService.apiClient, 'getOrdersAsync').returns({
+  sinon.stub(honeylemonService.orderbookService.apiClient, 'getOrdersAsync').returns({
     total: 3,
     page: 1,
     perPage: 20,
@@ -389,6 +389,7 @@ contract('HoneylemonService', () => {
 
     expect(txHash).to.not.be.null;
   });
+
   it('Calculate required Collateral', async () => {
     const amount = new BigNumber(1000);
     // Expected collateral requirement is defined by the CFD cap price (found by the currentMRI),
@@ -397,7 +398,7 @@ contract('HoneylemonService', () => {
     const expectedCollateralRequirement = amount
       .multipliedBy(currentMRIScaled)
       .multipliedBy(CONTRACT_DURATION)
-      .multipliedBy(1.35);
+      .multipliedBy(1.25);
 
     const actualCollateralRequirement = await honeylemonService.calculateRequiredCollateral(
       amount.toString()
@@ -419,7 +420,7 @@ contract('HoneylemonService', () => {
 
   it('Retrieve open positions', async () => {
     // reset state in case it is polluted
-    await resetState();
+    // await resetState();
 
     try {
       const fillSize = new BigNumber(1);
@@ -449,8 +450,11 @@ contract('HoneylemonService', () => {
       );
       await fill0xOrderForAddresses(5, takerAddress, makerAddress);
 
+      // Increase time by 1 day to simulate settlement
+      await time.increase(24 * 60 * 60 + 1);
+
       // Wait for subgraph to index the events
-      await delay(3000);
+      await delay(5000);
 
       // Get contracts object from HoneyLemonService
       const { longPositions, shortPositions } = await honeylemonService.getPositions(
@@ -470,17 +474,17 @@ contract('HoneylemonService', () => {
 
       // Expired contract
       expect(longPositions[0].finalReward).to.eql(new BigNumber(307944));
-      expect(shortPositions2[0].finalReward).to.eql(new BigNumber(107778));
+      expect(shortPositions2[0].finalReward).to.eql(new BigNumber(76986));
 
       // Active contract
       expect(longPositions[1].pendingReward).to.eql(new BigNumber(7332));
-      expect(shortPositions2[1].pendingReward).to.eql(new BigNumber(269816));
+      expect(shortPositions2[1].pendingReward).to.eql(new BigNumber(249288));
       expect(longPositions[1].finalReward).to.eql(new BigNumber(0));
       expect(shortPositions2[1].finalReward).to.eql(new BigNumber(0));
 
       // New contract
       expect(longPositions[2].pendingReward).to.eql(new BigNumber(0));
-      expect(shortPositions2[2].pendingReward).to.eql(new BigNumber(346435));
+      expect(shortPositions2[2].pendingReward).to.eql(new BigNumber(320775));
       expect(longPositions[2].finalReward).to.eql(new BigNumber(0));
       expect(shortPositions2[2].finalReward).to.eql(new BigNumber(0));
 

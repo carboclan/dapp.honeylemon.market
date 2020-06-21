@@ -6,8 +6,9 @@ const useStyles = makeStyles(({ palette, spacing }) => ({
   button: {
     backgroundColor: palette.secondary.main,
     color: palette.common.black,
-    paddingTop: spacing(2),
-    paddingBottom: spacing(2),
+    paddingTop: spacing(1),
+    paddingBottom: spacing(1),
+    fontSize: 20,
   },
   connectSpacer: {
     paddingTop: `${spacing(8)}px !important`,
@@ -22,7 +23,7 @@ const useStyles = makeStyles(({ palette, spacing }) => ({
 }))
 
 const ConnectWalletButton: React.SFC = () => {
-  const { wallet, onboard, isReady, checkIsReady } = useOnboard();
+  const { wallet, onboard, checkIsReady, isReady } = useOnboard();
   const [isConnecting, setIsConnecting] = useState(false);
   const classes = useStyles();
 
@@ -38,16 +39,20 @@ const ConnectWalletButton: React.SFC = () => {
     setIsConnecting(false);
   }
 
-  return (
-    <Button
-      onClick={() => { handleSelectWalletAndConnect() }}
-      className={classes.button}
-      fullWidth
-      disabled={!onboard || isConnecting}>
-      Connect wallet &nbsp;
-      {isConnecting && <CircularProgress className={classes.loadingSpinner} size={20} />}
-    </Button>
-  )
+  if (!isReady) {
+    return (
+      <Button
+        onClick={() => { handleSelectWalletAndConnect() }}
+        className={classes.button}
+        fullWidth
+        disabled={!onboard || isConnecting}>
+        Connect wallet &nbsp;
+        {isConnecting && <CircularProgress className={classes.loadingSpinner} size={20} />}
+      </Button>
+    )
+  } else {
+    return null;
+  }
 }
 
 export default ConnectWalletButton;

@@ -25,20 +25,23 @@ import {
   Step,
   StepLabel,
   StepContent,
+  IconButton,
 } from '@material-ui/core';
 import { BigNumber } from '@0x/utils';
-import { Link as RouterLink } from 'react-router-dom';
 import clsx from 'clsx';
 import { TabPanel } from './TabPanel';
-import { useHoneylemon } from '../contexts/HoneylemonContext';
+import { useHoneylemon, TokenType } from '../contexts/HoneylemonContext';
 import { useOnboard } from '../contexts/OnboardContext';
 import { forwardTo } from '../helpers/history';
 import ContractSpecificationModal from './ContractSpecificationModal'
-import MRIInformationModal from './MRIInformationModal'
 import dayjs from 'dayjs';
+import MRIDisplay from './MRIDisplay';
+import { OpenInNew, ExpandMore } from '@material-ui/icons';
+import { Link as RouterLink } from 'react-router-dom';
+import MRIInformationModal from './MRIInformationModal';
+import OrderbookModal from './OrderbookModal';
 
-
-const useStyles = makeStyles(({ spacing, palette }) => ({
+const useStyles = makeStyles(({ spacing, palette, transitions }) => ({
   rightAlign: {
     textAlign: 'end',
   },
@@ -63,7 +66,7 @@ const useStyles = makeStyles(({ spacing, palette }) => ({
     color: palette.secondary.main,
   },
   orderSummaryBlur: {
-    filter: 'blur(2px)',
+    filter: 'blur(3px)',
   },
   button: {
     marginTop: spacing(1),
@@ -72,6 +75,22 @@ const useStyles = makeStyles(({ spacing, palette }) => ({
   },
   actionsContainer: {
     marginBottom: spacing(2),
+  },
+  premium: {
+    color: palette.error.main,
+  },
+  discount: {
+    color: palette.success.main,
+  },
+  expand: {
+    transform: 'rotate(0deg)',
+    marginLeft: 'auto',
+    transition: transitions.create('transform', {
+      duration: transitions.duration.shortest,
+    }),
+  },
+  expandOpen: {
+    transform: 'rotate(180deg)',
   },
 }))
 
@@ -82,17 +101,23 @@ const BuyContractPage: React.SFC = () => {
   const {
     honeylemonService,
     PAYMENT_TOKEN_DECIMALS,
+    PAYMENT_TOKEN_NAME,
     paymentTokenAllowance,
     CONTRACT_DURATION,
     isDsProxyDeployed,
     paymentTokenBalance,
     CONTRACT_COLLATERAL_RATIO,
-    COLLATERAL_TOKEN_DECIMALS
+    COLLATERAL_TOKEN_DECIMALS,
+    COLLATERAL_TOKEN_NAME,
+    marketData,
+    isDailyContractDeployed,
+    deployDSProxyContract,
+    approveToken,
   } = useHoneylemon()
   const classes = useStyles();
 
-  const [budget, setBudget] = useState(0);
-  const [orderValue, setOrderValue] = useState(0);
+  const [budget, setBudget] = useState<number | undefined>(undefined);
+  const [orderValue, setOrderValue] = useState<number | undefined>(undefined);
 
   const [hashPrice, setHashPrice] = useState(0);
   const [orderQuantity, setOrderQuantity] = useState(0);
@@ -102,10 +127,13 @@ const BuyContractPage: React.SFC = () => {
   const [takerAssetFillAmounts, setTakerFillAmounts] = useState([]);
   const [buyType, setBuyType] = useState<BuyType>(BuyType.budget);
   const [showBuyModal, setShowBuyModal] = useState(false);
-  const [isTxActive, setTxActive] = useState(false);
+  const [txActive, setTxActive] = useState(false);
   const [showContractSpecificationModal, setShowContractSpecificationModal] = useState(false);
-  const [showMRIInformationModal, setShowMRIInformationModal] = useState(false);
   const [expectedBTCAccrual, setExpectedBTCAccrual] = useState(0);
+  const [discountOnSpotPrice, setDiscountOnSpotPrice] = useState(0);
+  const [showOrderDetails, setShowOrderDetails] = useState(false);
+  const [showMRIInformationModal, setShowMRIInformationModal] = useState(false);
+  const [showOrderbook, setShowOrderbook] = useState(false);
 
   const handleChangeBuyType = (event: React.ChangeEvent<{}>, newValue: BuyType) => {
     setBuyType(newValue);
@@ -128,13 +156,24 @@ const BuyContractPage: React.SFC = () => {
     try {
       const result = await honeylemonService.getQuoteForSize(new BigNumber(newValue))
       const newIsLiquid = !!(Number(result?.remainingMakerFillAmount?.toString() || -1) === 0)
+      const newOrderValue = Number(result?.totalTakerFillAmount?.shiftedBy(-PAYMENT_TOKEN_DECIMALS).toString()) || 0;
+      const newExpectedAccrual = Number(new BigNumber(
+        await honeylemonService.calculateRequiredCollateral(new BigNumber(newValue))
+      ).shiftedBy(-COLLATERAL_TOKEN_DECIMALS)
+        .dividedBy(CONTRACT_COLLATERAL_RATIO).toString());
+
+      const { currentBTCSpotPrice } = marketData;
+      const discountValue = (!isLiquid) ?
+        0 :
+        ((currentBTCSpotPrice - (newOrderValue / newExpectedAccrual)) / currentBTCSpotPrice) * 100
+
       setIsLiquid(newIsLiquid);
       setHashPrice(Number(result?.price?.dividedBy(CONTRACT_DURATION).toString()) || 0);
-      setOrderValue(Number(result?.totalTakerFillAmount?.shiftedBy(-PAYMENT_TOKEN_DECIMALS).toString()) || 0);
+      setOrderValue(newOrderValue);
       setResultOrders(result?.resultOrders || undefined);
       setTakerFillAmounts(result?.takerAssetFillAmounts || undefined);
-      const collateraRequired = new BigNumber(await honeylemonService.calculateRequiredCollateral(newValue)).shiftedBy(-COLLATERAL_TOKEN_DECIMALS)
-      setExpectedBTCAccrual(Number(collateraRequired.dividedBy(CONTRACT_COLLATERAL_RATIO).toString()));
+      setExpectedBTCAccrual(newExpectedAccrual);
+      !isNaN(discountValue) && setDiscountOnSpotPrice(discountValue);
     } catch (error) {
       console.log('Error getting the current liquidity')
       console.log(error);
@@ -143,24 +182,33 @@ const BuyContractPage: React.SFC = () => {
   }
 
   const validateOrderValue = async (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const newValueString = e.target.value;
-    if (!newValueString) {
+    const newBudgetString = e.target.value;
+    if (!newBudgetString) {
       setOrderValue(0);
       return;
     }
-    const newValue = parseFloat(newValueString);
-    !isNaN(newValue) && setBudget(newValue)
+    const newBudgetValue = parseFloat(newBudgetString);
+    !isNaN(newBudgetValue) && setBudget(newBudgetValue)
     try {
-      const result = await honeylemonService.getQuoteForBudget(newValue);
+      const result = await honeylemonService.getQuoteForBudget(newBudgetValue);
       const newIsLiquid = !!(Number(result?.remainingTakerFillAmount?.toString() || -1) === 0)
+      const newOrderValue = Number(result?.totalTakerFillAmount?.shiftedBy(-PAYMENT_TOKEN_DECIMALS).toString()) || 0;
+      const collateralRequiredForPosition = await honeylemonService.calculateRequiredCollateral(new BigNumber(result.totalMakerFillAmount))
+      const newExpectedAccrual = Number(new BigNumber(collateralRequiredForPosition).shiftedBy(-COLLATERAL_TOKEN_DECIMALS)
+        .dividedBy(CONTRACT_COLLATERAL_RATIO).toString());
+      const { currentBTCSpotPrice } = marketData;
+      const discountValue = (!isLiquid) ?
+        0 :
+        ((currentBTCSpotPrice - (newOrderValue / newExpectedAccrual)) / currentBTCSpotPrice) * 100
+
       setIsLiquid(newIsLiquid);
       setHashPrice(Number(result?.price?.dividedBy(CONTRACT_DURATION).toString()) || 0);
       setOrderQuantity(Number(result?.totalMakerFillAmount?.toString()) || 0);
-      setResultOrders(result.resultOrders || undefined);
-      setTakerFillAmounts(result.takerAssetFillAmounts || undefined);
-      setOrderValue(Number(result?.totalTakerFillAmount?.shiftedBy(-PAYMENT_TOKEN_DECIMALS).toString()) || 0);
-      const collateraRequired = new BigNumber(await honeylemonService.calculateRequiredCollateral(result?.totalMakerFillAmount.toString())).shiftedBy(-COLLATERAL_TOKEN_DECIMALS)
-      setExpectedBTCAccrual(Number(collateraRequired.dividedBy(CONTRACT_COLLATERAL_RATIO).toString()));
+      setOrderValue(newOrderValue);
+      setResultOrders(result?.resultOrders || undefined);
+      setTakerFillAmounts(result?.takerAssetFillAmounts || undefined);
+      setExpectedBTCAccrual(newExpectedAccrual);
+      !isNaN(discountValue) && setDiscountOnSpotPrice(discountValue);
     } catch (error) {
       console.log('Error getting the current liquidity')
       console.log(error);
@@ -170,25 +218,13 @@ const BuyContractPage: React.SFC = () => {
 
   const handleDeployDSProxy = async () => {
     setTxActive(true);
-    try {
-      await honeylemonService.deployDSProxyContract(address);
-    } catch (error) {
-      console.log('Something went wrong deploying the DS Proxy wallet');
-      console.log(error);
-      // TODO: Display error on modal
-    }
+    await deployDSProxyContract();
     setTxActive(false);
   }
 
   const handleApprovePaymentToken = async () => {
     setTxActive(true);
-    try {
-      await honeylemonService.approvePaymentToken(address);
-    } catch (error) {
-      console.log('Something went wrong approving the tokens');
-      console.log(error);
-      // TODO: Display error on modal
-    }
+    await approveToken(TokenType.PaymentToken)
     setTxActive(false);
   }
 
@@ -230,13 +266,19 @@ const BuyContractPage: React.SFC = () => {
     setTxActive(false);
   }
 
-  const sufficientPaymentTokens = paymentTokenBalance >= orderValue;
-  const tokenApprovalGranted = paymentTokenAllowance >= orderValue;
-  const isValid = isLiquid && sufficientPaymentTokens;
+  let sufficientPaymentTokens = true
+  let tokenApprovalGranted = true
+  let isValid = true
 
+  if (orderValue) {
+    sufficientPaymentTokens = paymentTokenBalance >= orderValue;
+    tokenApprovalGranted = paymentTokenAllowance >= orderValue;
+    isValid = isDailyContractDeployed && isLiquid && sufficientPaymentTokens;
+  }
   const errors = [];
 
-  !sufficientPaymentTokens && errors.push("You do not have enough USDT to proceed");
+  !isDailyContractDeployed && errors.push("New contracts are not available right now");
+  !sufficientPaymentTokens && errors.push(`You do not have enough ${PAYMENT_TOKEN_NAME} to proceed`);
   !isLiquid && errors.push("There are not enough contracts available right now");
 
   const getActiveStep = () => {
@@ -247,14 +289,14 @@ const BuyContractPage: React.SFC = () => {
 
   const activeStep = getActiveStep()
 
-  const steps = ['Deploy Wallet', 'Approve USDT', 'Buy Contracts'];
+  const steps = ['Deploy honeylemon vault', `Approve ${PAYMENT_TOKEN_NAME}`, 'Buy Contracts'];
 
   const getStepContent = (step: number) => {
     switch (step) {
       case 0:
-        return `Deploy a wallet contract. This is a once-off operation`;
+        return `Deploy a honeylemon vault. This is a once-off operation. The honeylemon vault will reduce the transaction fees in future.`;
       case 1:
-        return 'Approve USDT. This is a once-off operation';
+        return `Approve ${PAYMENT_TOKEN_NAME}. This is a once-off operation`;
       case 2:
         return `Finalize Purchase`;
     }
@@ -287,11 +329,21 @@ const BuyContractPage: React.SFC = () => {
     activeStep === 2 && handleBuyOffer();
   }
 
+  const handleOrderDetailsClick = () => {
+    setShowOrderDetails(!showOrderDetails);
+  };
+
   return (
     <>
-      <Grid container alignItems='stretch' justify='center' spacing={2}>
+      <Grid container alignItems='center' justify='flex-start' spacing={2}>
         <Grid item xs={12}>
-          <Typography style={{ fontWeight: 'bold' }}>Buy a {CONTRACT_DURATION}-Day Bitcoin Mining Revenue Contract</Typography>
+          <MRIDisplay />
+        </Grid>
+        <Grid item xs={8}>
+          <Typography style={{ fontWeight: 'bold' }}>Buy {CONTRACT_DURATION}-Day Mining Revenue Contract</Typography>
+        </Grid>
+        <Grid item xs={4} style={{ textAlign: 'end' }}>
+          <Link href='#' underline='always' onClick={() => setShowOrderbook(true)}>Order Book <OpenInNew fontSize='small' /></Link>
         </Grid>
         <Grid item xs={12}>
           <Tabs
@@ -314,11 +366,12 @@ const BuyContractPage: React.SFC = () => {
               inputProps={{
                 className: classes.inputBase,
                 min: 0,
-                step: 0.000001
+                step: 1
               }}
+              placeholder='0'
               startAdornment={<InputAdornment position="start">$</InputAdornment>}
               onChange={validateOrderValue}
-              value={budget}
+              value={budget || ''}
               type='number'
               onBlur={e => {
                 e.target.value = e.target.value.replace(/^(-)?0+(0\.|\d)/, '$1$2')
@@ -326,7 +379,7 @@ const BuyContractPage: React.SFC = () => {
               disabled={showBuyModal} />
           </Grid>
           <Grid item xs={3} className={classes.rightAlign}>
-            <Typography style={{ fontWeight: 'bold' }} color='secondary'>USDT</Typography>
+            <Typography style={{ fontWeight: 'bold' }} color='secondary'>{PAYMENT_TOKEN_NAME}</Typography>
           </Grid>
         </TabPanel>
         <TabPanel value={buyType} index={2}>
@@ -339,8 +392,9 @@ const BuyContractPage: React.SFC = () => {
                 min: 0,
                 step: 1
               }}
+              placeholder='0'
               onChange={validateOrderQuantity}
-              value={orderQuantity}
+              value={orderQuantity || ''}
               type='number'
               onBlur={e => {
                 e.target.value = e.target.value.replace(/^(-)?0+(0\.|\d)/, '$1$2')
@@ -348,67 +402,64 @@ const BuyContractPage: React.SFC = () => {
               disabled={showBuyModal} />
           </Grid>
           <Grid item xs={3} className={classes.rightAlign}>
-            <Typography style={{ fontWeight: 'bold' }} color='secondary'>TH/28 Days</Typography>
+            <Typography style={{ fontWeight: 'bold' }} color='secondary'>TH for {CONTRACT_DURATION} Days</Typography>
           </Grid>
         </TabPanel>
-        <Grid item xs={12} container spacing={1}>
+        <Grid item xs={12} container>
           <Grid item xs={12} style={{ paddingLeft: 0, paddingRight: 0 }}>
             <Paper className={clsx(classes.orderSummary, {
               [classes.orderSummaryBlur]: !isValid,
             })}>
-              <Typography align='center'><strong>Order Summary</strong></Typography>
+              <Grid item container xs={12}>
+                <Grid item xs={6}>
+                  <Typography align='left'><strong>Price Quote</strong></Typography>
+                </Grid>
+                <Grid item xs={6} style={{ textAlign: 'right' }}>
+                  <Typography variant='caption'>
+                    <Link href='#' underline='always' onClick={() => setShowContractSpecificationModal(true)}>
+                      Contract Specification <OpenInNew fontSize='small' />
+                    </Link>
+                  </Typography>
+                </Grid>
+              </Grid>
               <Table size='small'>
                 <TableBody>
                   <TableRow>
                     <TableCell>
-                      Unit Price <br />
-                    Quantity
-                  </TableCell>
+                      Price <br />
+                      Quantity <br />
+                      Contract Duration
+                    </TableCell>
                     <TableCell align='right'>
-                      $ {hashPrice.toFixed(PAYMENT_TOKEN_DECIMALS)} /TH/day <br />
-                      {`${orderQuantity.toLocaleString()} TH`}
+                      {PAYMENT_TOKEN_NAME} {hashPrice.toLocaleString(undefined, {maximumFractionDigits: PAYMENT_TOKEN_DECIMALS})} /TH/Day<br />
+                      {`${orderQuantity.toLocaleString()}`} TH<br />
+                      {`${CONTRACT_DURATION}`} Days
                     </TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell>Total</TableCell>
-                    <TableCell align='right'>{`$ ${orderValue.toLocaleString()}`}</TableCell>
+                    <TableCell>Contract Total</TableCell>
+                    <TableCell align='right'>{`${PAYMENT_TOKEN_NAME} ${(orderValue || 0).toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}`}</TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell>
-                      Start <br />
-                    Expiration<br />
-                    Settlement
-                  </TableCell>
-                    <TableCell align='right'>
-                      {dayjs().format('YYYY/MM/DD')} <br />
-                      {dayjs().add(CONTRACT_DURATION, 'd').format('YYYY/MM/DD')} <br />
-                      {dayjs().add(CONTRACT_DURATION + 1, 'd').format('YYYY/MM/DD')}
-                    </TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
-            </Paper>
-          </Grid>
-          <Grid item xs={12} style={{ paddingLeft: 0, paddingRight: 0 }}>
-            <Paper className={clsx(classes.orderSummary, {
-              [classes.orderSummaryBlur]: !isValid,
-            })}>
-              <Table size='small'>
-                <TableBody>
-                  <TableRow>
-                    <TableCell className={classes.orderSummaryEstimate}>
-                      Discount vs Spot BTC Price *
-                    </TableCell>
-                    <TableCell align='right' className={classes.orderSummaryEstimate}>
-                      1.5%
-                    </TableCell>
+                    <TableCell>Revenue Cap</TableCell>
+                    <TableCell align='right'>{`${((expectedBTCAccrual || 0) * CONTRACT_COLLATERAL_RATIO).toLocaleString(undefined, { maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS })} ${COLLATERAL_TOKEN_NAME}`}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell className={classes.orderSummaryEstimate}>
-                      Expected Accrual *
+                      Discount vs. Buy BTC *
+                  </TableCell>
+                    <TableCell align='right' className={clsx(classes.orderSummaryEstimate,
+                      { [classes.premium]: discountOnSpotPrice < 0 },
+                      { [classes.discount]: discountOnSpotPrice > 0 })}>
+                      {discountOnSpotPrice.toLocaleString(undefined, { minimumFractionDigits: 5, maximumFractionDigits: 8 })}%
+                  </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className={classes.orderSummaryEstimate}>
+                      Estimated Revenue *
                     </TableCell>
                     <TableCell align='right' className={classes.orderSummaryEstimate}>
-                      {`BTC ${(expectedBTCAccrual).toLocaleString()}`}
+                      {`${(expectedBTCAccrual).toLocaleString(undefined, { minimumFractionDigits: 5, maximumFractionDigits: 8 })} imBTC`}
                     </TableCell>
                   </TableRow>
                   <TableRow>
@@ -416,6 +467,74 @@ const BuyContractPage: React.SFC = () => {
                       * Assuming constant price and difficulty
                     </TableCell>
                   </TableRow>
+                  {!showOrderDetails ?
+                    <TableRow>
+                      <TableCell colSpan={2} align='center' onClick={handleOrderDetailsClick} style={{ cursor: 'pointer' }}>
+                        Expand Details
+                      <IconButton
+                          className={classes.expand}
+                          aria-label="show more">
+                          <ExpandMore />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow> :
+                    <>
+                      <TableRow>
+                        <TableCell>
+                          Start <br />
+                          Expiration<br />
+                          Settlement
+                        </TableCell>
+                        <TableCell align='right'>
+                          {dayjs().utc().startOf('day').add(1, 'minute').format('YYYY/MM/DD HH:mm')} UTC<br />
+                          {dayjs().utc().startOf('day').add(1, 'minute').add(CONTRACT_DURATION, 'd').format('YYYY/MM/DD HH:mm')} UTC<br />
+                          {dayjs().utc().startOf('day').add(1, 'minute').add(CONTRACT_DURATION + 1, 'd').format('YYYY/MM/DD HH:mm')} UTC
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell colSpan={2}>
+                          * Fillable orders in orderbook and minimum order increment of 1 TH may result in discrepancy between your budget and price quote. <br />
+                          * Your order will be subject to additional Ethereum network transaction fee,
+                            and 0x Protocol fee, both denominated in ETH. Honeylemon does not charge&nbsp;
+                          <Link component={RouterLink} to="/stats" underline='always' >fees.<OpenInNew fontSize='small' /></Link>
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell colSpan={2}>
+                          <Typography variant='subtitle1'>WHAT DOES IT MEAN?</Typography> <br />
+                          <Typography variant='body2'>
+                            You will pay <strong>${PAYMENT_TOKEN_NAME} ${(orderValue || 0).toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}</strong> to
+                            buy <strong>{`${orderQuantity.toLocaleString()}`} TH</strong> of {CONTRACT_DURATION}-Day Mining Revenue Contracts at&nbsp;
+                            <strong>{PAYMENT_TOKEN_NAME} {hashPrice.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}/TH/Day</strong>.
+                          </Typography>
+                          <Typography variant='body2'>
+                            At settlment, you will receive mining revenue (in {COLLATERAL_TOKEN_NAME}) over {CONTRACT_DURATION} days, which 
+                            is the network average BTC block reward & transaction fees (MRI) per TH over contract duration, up to a max 
+                            revenue of {`${((expectedBTCAccrual || 0) * CONTRACT_COLLATERAL_RATIO)} ${COLLATERAL_TOKEN_NAME}`}.
+                            You can withdraw your mining revenue (in {COLLATERAL_TOKEN_NAME}) after settlement.
+                          </Typography>
+                          <Typography variant='body2'>
+                            You will receive the network average BTC block reward & transaction fees per TH based on the average value of
+                            the <Link href='#' underline='always' onClick={() => setShowMRIInformationModal(true)}>Bitcoin Mining Revenue 
+                            Index (MRI) <OpenInNew fontSize='small' /></Link> over {CONTRACT_DURATION} days starting today.
+                          </Typography>
+                          <Typography variant='body2'>
+                            You may check your PNL from your Portfolio once order is placed. You can withdraw your mining revenue
+                            denominated in {COLLATERAL_TOKEN_NAME} after {dayjs().utc().startOf('day').add(1, 'minute')
+                              .add(CONTRACT_DURATION + 1, 'd').format('YYYY/MM/DD HH:mm')} UTC.
+                          </Typography>
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell colSpan={2} align='center' onClick={handleOrderDetailsClick} style={{ cursor: 'pointer' }}>
+                          Collapse Details
+                          <IconButton className={clsx(classes.expand, classes.expandOpen)}>
+                            <ExpandMore />
+                          </IconButton>
+                        </TableCell>
+                      </TableRow>
+                    </>
+                  }
                 </TableBody>
               </Table>
             </Paper>
@@ -440,16 +559,6 @@ const BuyContractPage: React.SFC = () => {
               {showBuyModal && <CircularProgress className={classes.loadingSpinner} size={20} />}
           </Button>
         </Grid>
-        <Grid item xs={12}>
-          <Typography>
-            You will pay <strong>$ {orderValue.toLocaleString()}</strong> to buy <strong>{orderQuantity}Th</strong> of hashrate
-            for <strong>{CONTRACT_DURATION} days</strong> for <strong>${hashPrice.toLocaleString()}/Th/day</strong>. You will
-            receive the average value of the <Link href="#" underline='always' onClick={() => setShowMRIInformationModal(true)}>Mining Revenue Index</Link>&nbsp;
-            over <strong>{CONTRACT_DURATION} days</strong> representing <strong>{orderQuantity} Th</strong> of mining power per
-            day per contract.
-          </Typography>
-        </Grid>
-        <Grid item><Typography>See <Link href='#' underline='always' onClick={() => setShowContractSpecificationModal(true)}>full contract specification here.</Link></Typography></Grid>
       </Grid>
       <Dialog open={showBuyModal} onClose={handleCloseBuyDialog} aria-labelledby="form-dialog-title">
         <DialogTitle id="form-dialog-title">Buy Offer</DialogTitle>
@@ -464,7 +573,7 @@ const BuyContractPage: React.SFC = () => {
                     <Button
                       onClick={handleCloseBuyDialog}
                       className={classes.button}
-                      disabled={isTxActive}>
+                      disabled={txActive}>
                       Cancel
                     </Button>
                     <Button
@@ -472,9 +581,9 @@ const BuyContractPage: React.SFC = () => {
                       color="primary"
                       onClick={() => handleStepperNext(activeStep)}
                       className={classes.button}
-                      disabled={isTxActive}>
+                      disabled={txActive}>
                       {getStepButtonLabel(activeStep)}&nbsp;
-                        {isTxActive && <CircularProgress className={classes.loadingSpinner} size={20} />}
+                        {txActive && <CircularProgress className={classes.loadingSpinner} size={20} />}
                     </Button>
                   </div>
                 </StepContent>
@@ -485,6 +594,7 @@ const BuyContractPage: React.SFC = () => {
       </Dialog>
       <ContractSpecificationModal open={showContractSpecificationModal} onClose={() => setShowContractSpecificationModal(false)} />
       <MRIInformationModal open={showMRIInformationModal} onClose={() => setShowMRIInformationModal(false)} />
+      <OrderbookModal open={showOrderbook} onClose={() => setShowOrderbook(false)} />
     </>
   )
 }
