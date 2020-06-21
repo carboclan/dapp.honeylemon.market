@@ -1,5 +1,5 @@
 {
-  "name": "honeylemon-graph",
+  "name": "@honeylemon/graph",
   "version": "0.1.0",
   "scripts": {
     "create": "graph create carboclan/honeylemon --node https://api.thegraph.com/deploy/",

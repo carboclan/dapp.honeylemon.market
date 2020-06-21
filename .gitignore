@@ -11,6 +11,6 @@ goBindings/
 docker/.volumes/
 build/
 dist/*
-
+.vscode
 # Local Netlify folder
 .netlify
