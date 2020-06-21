@@ -300,7 +300,7 @@ const OfferContractPage: React.SFC = () => {
             disabled={showOfferModal} />
         </Grid>
         <Grid item xs={2} className={classes.rightAlign}>
-          <Typography style={{ fontWeight: 'bold' }} color='secondary'>Th</Typography>
+          <Typography style={{ fontWeight: 'bold' }} color='secondary'>TH</Typography>
         </Grid>
         <Grid item xs={12} container>
           <Paper className={clsx(classes.offerSummary, {
@@ -361,23 +361,25 @@ const OfferContractPage: React.SFC = () => {
                         Start <br />
                         Expiration <br />
                         Settlement <br />
+                        Offer Valid Till
                       </TableCell>
                       <TableCell align='right'>
                         Order-fill Date UTC 00:01 <br />
                         {`${CONTRACT_DURATION} Days After Start`} <br />
                         24 Hours After Expiration <br />
+                        TBC
                       </TableCell>
                     </TableRow>
                     <TableRow>
                       <TableCell colSpan={2} style={{ color: '#a9a9a9' }}>
                         * Estimated collateral is calcuated based on current MRI value; actual collateral 
                           deposited will be based on the actual MRI value at at the time your order being filled. <br />
-                        * When your offer is taken, if you do not have sufficient imBTC in wallet as collateral, 
-                          your offer size will be scaled down and filled based on what your actual imBTC balance would allow. <br />
+                        * If you do not have sufficient {COLLATERAL_TOKEN_NAME} in wallet as collateral when your offer is being taken, 
+                          a portion of the order will still be filled based on your available {COLLATERAL_TOKEN_NAME} balance at the time.<br />
                         * Your limit order may be partially filled. <br />
-                        * Any unfilled portion of your limit order can be cancelled in your portfolio. <br />
+                        * Your offer will be valid for 10 days. Any unfilled portion of your limit order can be cancelled in your portfolio.<br />
                         * Your order will be subject to additional Ethereum network transaction fee,
-                        and 0x Protocol fee, both denominated in ETH. Honeylemon does not charge&nbsp;
+                          and 0x Protocol fee, both denominated in ETH. Honeylemon does not charge&nbsp;
                         <Link component={RouterLink} to="/stats" underline='always' >fees.<OpenInNew fontSize='small' /></Link>
                       </TableCell>
                     </TableRow>
