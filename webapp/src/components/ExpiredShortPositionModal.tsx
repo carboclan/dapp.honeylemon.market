@@ -25,7 +25,7 @@ const ExpiredShortPositionModal: React.SFC<ExpiredShortPositionModalProps> = ({ 
           <TableBody>
             <TableRow>
               <TableCell>Contract</TableCell>
-              <TableCell>{position.instrumentName}</TableCell>
+              <TableCell>{position?.instrumentName}</TableCell>
             </TableRow>
             <TableRow>
               <TableCell>

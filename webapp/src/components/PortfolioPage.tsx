@@ -460,7 +460,7 @@ const PorfolioPage: React.SFC = () => {
                     IconButtonProps={{ onClick: handleTogglePendingWithdrawPanel }}>
                     <Typography variant='h5' className={classes.sectionHeadingText}>
                       Pending Withdrawal
-                  </Typography>
+                    </Typography>
                     <ButtonBase className={classes.infoButton}><InfoRounded /></ButtonBase>
                   </ExpansionPanelSummary>
                   <ExpansionPanelDetails>
@@ -469,7 +469,7 @@ const PorfolioPage: React.SFC = () => {
                         <Button fullWidth disabled={collateralForWithdraw === 0} onClick={withdrawAllAvailable}>
                           {(!isWithdrawing) ?
                             (collateralForWithdraw > 0) ?
-                              `WITHDRAW ALL (${collateralForWithdraw.toLocaleString()} BTC)` :
+                              `WITHDRAW ALL (${collateralForWithdraw.toLocaleString()} ${COLLATERAL_TOKEN_NAME})` :
                               <>WITHDRAW ALL <RadioButtonUnchecked className={classes.icon} /></> :
                             <>WITHDRAW ALL <CircularProgress className={classes.loadingSpinner} size={20} /></>
                           }
@@ -485,7 +485,7 @@ const PorfolioPage: React.SFC = () => {
                     classes={{
                       content: classes.sectionHeading
                     }}
-                    IconButtonProps={{ onClick: handleTogglePendingWithdrawPanel }}>
+                    IconButtonProps={{ onClick: handleToggleExpiredLongPositionsPanel }}>
                     <Typography variant='h5' className={classes.sectionHeadingText}>
                       Long Positions (Filled Buy Order)
                   </Typography>
@@ -543,8 +543,7 @@ const PorfolioPage: React.SFC = () => {
                           <TableCell>Settlement Date</TableCell>
                           <TableCell align='center'>Received </TableCell>
                           <TableCell align='center'>Paid</TableCell>
-                          <TableCell align='center'>Remaining Collateral</TableCell>
-                          <TableCell align='right'>Status</TableCell>
+                          <TableCell align='center'>Status</TableCell>
                           <TableCell></TableCell>
                         </TableRow>
                       </TableHead>
