@@ -19,21 +19,21 @@ You can also find it directly from this repo in the [documentation folder](./doc
 
 The repository is broken up into 4 main packages, managed using yarn workspaces. You can find these in the `packages` directory. These packages are as follows:
 
-#### 1) **contracts**
+#### 1) **`packages/contracts`**
 
 Smart contracts, deployment scripts and integration tests for the Honeylemon protocol. The contract bring together MarketProtcol 0x MinterBridge and custom HoneyLemon contracts to create the protocols financial contracts.
 
-#### 2) **honeylemon.js**
+#### 2) **`packages/honeylemon.js`**
 
 Javascript library used to connect to the Honeylemon protocol. This library is used by the front end to wrap complex interactions like submitting orders or batch token redemption.
 
-#### 3) **subgraph**
+#### 3) **`packages/subgraph`**
 
 The Graph subgraph used to index contract events for front end retrieval. Used directly by `honeylemon.js`.
 
-#### 4) **webapp**
+#### 4) **`packages/webapp`**
 
-React Typescript, dapp front end. Can be found [here](https://app.honeylemon.market).
+React Typescript, dapp front end. Can be found online [here](https://app.honeylemon.market).
 
 ## Setting up the Honeylemon protocol 👩‍💻
 
