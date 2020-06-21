@@ -1,7 +1,7 @@
 # HoneyLemon - Synthetic Bitcoin cloud mining contracts on Ethereum
 
 <p align="center">
-  <img alt="UMA Logo" src="./docs/Logo.png" width="300">
+  <img alt="HoneyLemonLogo Logo" src="./docs/Logo.png" width="300">
 </p>
 
 [![GitHub](https://img.shields.io/github/license/carboclan/dapp.honeylemon.market)](https://github.com/carboclan/dapp.honeylemon.market/blob/master/LICENSE)
