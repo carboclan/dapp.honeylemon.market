@@ -2,9 +2,9 @@
   "name": "@honeylemon/contracts",
   "version": "0.1.0",
   "description": "Solidity Contracts for Honeylemon",
-  "main": "index.js",
+  "main": "lib/src/index.js",
   "scripts": {
-    "build": "truffle compile",
+    "build": "truffle compile && yarn tsc -b",
     "test": "truffle test",
     "lint": "prettier-eslint --write \"$(pwd)/**/*.js\" \"$(pwd)/**/*.sol\" --ignore './node_modules/**'",
     "postinstall": "truffle compile"
@@ -14,9 +14,8 @@
   "dependencies": {
     "@openzeppelin/test-helpers": "^0.5.6",
     "@truffle/hdwallet-provider": "^1.0.35",
-    "pg": "^8.2.1"
-  },
-  "devDependencies": {
+    "pg": "^8.2.1",
+    "typescript": "3.0.1",
     "eslint": "^6.8.0",
     "eslint-cli": "^1.1.1",
     "ganache-time-traveler": "^1.0.14",
@@ -32,6 +31,6 @@
     "web3-core": "^1.2.7",
     "web3-core-helpers": "^1.2.7",
     "web3-core-method": "^1.2.7",
-    "web3-utils": "^1.2.7"
+    "web3-utils": "^1.2.7" 
   }
 }

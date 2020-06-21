@@ -17,8 +17,8 @@
 pragma solidity 0.5.2;
 
 import 'truffle/Assert.sol';
-import '../../../src/marketprotocol/tokens/MarketToken.sol';
-import '../../../src/marketprotocol/tokens/UpgradeableTokenMock.sol';
+import '../../../contracts/marketprotocol/tokens/MarketToken.sol';
+import '../../../contracts/marketprotocol/tokens/UpgradeableTokenMock.sol';
 
 
 /// @title TestUpgradeableToken
