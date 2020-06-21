@@ -25,8 +25,8 @@ const TH_DECIMALS = 0; // TH has 6 decimals
 const PAYMENT_TOKEN_DECIMALS = 6; // USDT has 6 decimals
 const COLLATERAL_TOKEN_DECIMALS = 8; // imBTC has 8 decimals
 const SHIFT_PRICE_BY = TH_DECIMALS - PAYMENT_TOKEN_DECIMALS;
-// const CONTRACT_DURATION = 28; // Days
-const CONTRACT_DURATION = 2; // 2 day for Kovan deployment
+const CONTRACT_DURATION = 28; // Days
+// const CONTRACT_DURATION = 2; // 2 day for Kovan deployment
 
 class HoneylemonService {
   constructor(
