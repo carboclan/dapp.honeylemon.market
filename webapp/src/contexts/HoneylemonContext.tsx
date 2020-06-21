@@ -22,6 +22,13 @@ enum PositionType {
   Short = 'Short'
 }
 
+export enum PositionStatus {
+  active = 'Active',
+  expiredAwaitingSettlement = 'Expired Awaiting Settlement',
+  withdrawalPending = 'Withdrawal Pending',
+  withdrawn = 'Withdrawn'
+}
+
 //TODO: Extract this from library when TS conversion is done
 const COLLATERAL_TOKEN_DECIMALS = 8;
 const COLLATERAL_TOKEN_NAME = 'imBTC';
@@ -62,10 +69,10 @@ export type HoneylemonContext = {
   portfolioData: {
     openOrdersMetadata: Array<OpenOrderMetadata>;
     openOrders: { [orderHash: string]: OpenOrder } | undefined;
-    activePositions: Array<any>;
-    settlementDelayPositions: Array<any>;
-    settledPositionsToWithdraw: Array<any>;
-    settledPositions: Array<any>;
+    activeLongPositions: Array<any>;
+    activeShortPositions: Array<any>;
+    expiredLongPositions: Array<any>;
+    expiredShortPositions: Array<any>;
   }
   orderbook: Array<OrderSummary>;
   btcStats: any,
@@ -132,10 +139,10 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
   const [btcStats, setBtcStats] = useState<any>(undefined);
   const [openOrdersMetadata, setOpenOrdersMetadata] = useState<Array<OpenOrderMetadata>>([]);
   const [openOrders, setOpenOrders] = useState<{ [orderHash: string]: OpenOrder } | undefined>()
-  const [activePositions, setActivePositions] = useState([]);
-  const [settlementDelayPositions, setSettlementDelayPositions] = useState([])
-  const [settledPositionsToWithdraw, setSettledPositionsToWithdraw] = useState([]);
-  const [settledPositions, setSettledPositions] = useState([]);
+  const [activeLongPositions, setActiveLongPositions] = useState([]);
+  const [activeShortPositions, setActiveShortPositions] = useState([]);
+  const [expiredLongPositions, setExpiredLongPositions] = useState([]);
+  const [expiredShortPositions, setExpiredShortPositions] = useState([]);
   const [isPortfolioRefreshing, setIsPortfolioRefreshing] = useState(false);
   const [isDailyContractDeployed, setIsDailyContractDeployed] = useState(false);
   const [orderbook, setOrderbook] = useState([]);
@@ -195,10 +202,20 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
     return {
       instrumentName: `${indexType}-${collateralInstrument}`,
       type: (position === 'long') ? PositionType.Long : PositionType.Short,
-      startDate: dayjs(startDate).utc().startOf('day').toDate(), //This will always be UTC 00:00 the date the contract was concluded
-      expirationDate: dayjs(startDate).utc().startOf('day').add(duration, 'd').toDate(),
-      settlementDate: dayjs(startDate).utc().startOf('day').add(duration + 1, 'd').toDate(),
+      startDate: dayjs(startDate).startOf('day').utc().toDate(), //This will always be UTC 00:00 the date the contract was concluded
+      expirationDate: dayjs(startDate).startOf('day').utc().add(duration, 'd').toDate(),
+      settlementDate: dayjs(startDate).startOf('day').utc().add(duration + 1, 'd').toDate(),
       duration,
+    }
+  }
+
+  const getPositionStatus = (position: any): PositionStatus => {
+    if (!position?.contract.settlement) {
+      return PositionStatus.active;
+    } else {
+      if (!position.isRedeemed && !position.canRedeem ) return PositionStatus.expiredAwaitingSettlement;
+      if (!position.isRedeemed && position.canRedeem) return PositionStatus.withdrawalPending;
+      return PositionStatus.withdrawn; 
     }
   }
 
@@ -217,25 +234,31 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
     })).concat(positions.shortPositions.map((sp: any) => ({
       ...sp,
       contractName: sp.contractName + '-short',
-    }))).map((p: any) => ({
+    }))).map((p: any) => {
+      return {
       ...p,
-      daysToMaturity: Math.ceil(dayjs(p.contract.expiration * 1000).diff(dayjs(), 'd', true)),
+      daysToExpiration: Math.ceil(dayjs(p.contract.expiration * 1000).diff(dayjs(), 'd', true)),
       pendingReward: Number(p.pendingReward?.shiftedBy(-COLLATERAL_TOKEN_DECIMALS).toString()) || 0,
       finalReward: Number(p.finalReward?.shiftedBy(-COLLATERAL_TOKEN_DECIMALS).toString()) || 0,
+      totalCost: Number(new BigNumber(p.price).multipliedBy(p.qtyToMint).toString()),
+      totalCollateralLocked: Number(new BigNumber(p.contract.collateralPerUnit).multipliedBy(p.qtyToMint).shiftedBy(-COLLATERAL_TOKEN_DECIMALS).toString()),
       ...parseContractName(p.contractName),
-    }));
+      status: getPositionStatus(p),
+    }});
 
-    const newActivePositions = allPositions.filter((p: any) => !p?.contract.settlement)
-    setActivePositions(newActivePositions);
+    console.log(allPositions);
+    const newActiveLongPositions = allPositions.filter((p: any) => p.status === PositionStatus.active && p.type === PositionType.Long)
+    setActiveLongPositions(newActiveLongPositions);
 
-    const sdp = allPositions.filter((p: any) => p?.contract.settlement && !p.canRedeem && !p.isRedeemed)
-    setSettlementDelayPositions(sdp);
+    const newActiveShortPositions = allPositions.filter((p: any) => p.status === PositionStatus.active && p.type === PositionType.Short)
+    setActiveShortPositions(newActiveShortPositions);
 
-    const sptw = allPositions.filter((p: any) => p?.contract.settlement && p.canRedeem && !p.isRedeemed)
-    setSettledPositionsToWithdraw(sptw);
+    const newExpiredLongPositions = allPositions.filter((p: any) => p.status !== PositionStatus.active && p.type === PositionType.Long)
+    setExpiredLongPositions(newExpiredLongPositions);
 
-    const finalized = allPositions.filter((p: any) => p?.contract.settlement && p.isRedeemed)
-    setSettledPositions(finalized);
+    const newExpiredShortPositions = allPositions.filter((p: any) => p.status !== PositionStatus.active && p.type === PositionType.Short)
+    setExpiredShortPositions(newExpiredShortPositions);
+
     setIsPortfolioRefreshing(false);
   }
 
@@ -493,12 +516,12 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
           currentBtcDifficulty,
         },
         portfolioData: {
-          activePositions,
+          activeLongPositions,
+          activeShortPositions,
           openOrders,
           openOrdersMetadata,
-          settledPositions,
-          settledPositionsToWithdraw,
-          settlementDelayPositions
+          expiredLongPositions,
+          expiredShortPositions,
         },
         orderbook,
         btcStats,
