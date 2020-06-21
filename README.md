@@ -35,7 +35,7 @@ The Graph subgraph used to index contract events for front end retrieval. Used d
 
 React Typescript, dapp front end. Can be found [here](https://app.honeylemon.market).
 
-## Setting up the Honeylemon protocol
+## Setting up the Honeylemon protocol 👩‍💻
 
 ### Development Environment 👷‍♂️
 
@@ -65,7 +65,7 @@ yarn run honeylemon-service-tests
 yarn run integration tests
 ```
 
-### React Front End 👨‍💻
+### React Front End 🖥
 
 Running the front end can be done by executing:
 
