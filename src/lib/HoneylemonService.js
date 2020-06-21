@@ -22,10 +22,11 @@ const web3 = new Web3(null); // This is just for encoding, etc.
 const NULL_ADDRESS = '0x0000000000000000000000000000000000000000';
 const ORDER_FILL_GAS = 150000;
 const TH_DECIMALS = 0; // TH has 6 decimals
-const PAYMENT_TOKEN_DECIMALS = 6; // USDC has 6 decimals
+const PAYMENT_TOKEN_DECIMALS = 6; // USDT has 6 decimals
 const COLLATERAL_TOKEN_DECIMALS = 8; // imBTC has 8 decimals
 const SHIFT_PRICE_BY = TH_DECIMALS - PAYMENT_TOKEN_DECIMALS;
-const CONTRACT_DURATION = 28; // Days
+// const CONTRACT_DURATION = 28; // Days
+const CONTRACT_DURATION = 2; // 2 day for Kovan deployment
 
 class HoneylemonService {
   constructor(
@@ -38,7 +39,6 @@ class HoneylemonService {
     collateralTokenAddress,
     paymentTokenAddress
   ) {
-    this.apiClient = new HttpClient(apiUrl);
     this.subgraphClient = new GraphQLClient(subgraphUrl);
     this.minterBridgeAddress =
       minterBridgeAddress || MinterBridgeArtefacts.networks[chainId].address;
@@ -61,6 +61,14 @@ class HoneylemonService {
       '0x0000'
     );
     this.takerAssetData = assetDataUtils.encodeERC20AssetData(this.paymentTokenAddress);
+
+    // Instantiate OrderbookService
+    this.orderbookService = new OrderbookService(
+      apiUrl,
+      minterBridgeAddress,
+      marketContractProxyAddress,
+      paymentTokenAddress
+    );
 
     // Instantiate tokens
     this.collateralToken = new ERC20TokenContract(
@@ -275,7 +283,7 @@ class HoneylemonService {
   }
 
   async submitOrder(signedOrder) {
-    return this.apiClient.submitOrderAsync(signedOrder);
+    return this.orderbookService.submitOrder(signedOrder);
   }
 
   async checkCollateralTokenApproval(ownerAddress, amount) {
@@ -339,29 +347,11 @@ class HoneylemonService {
   }
 
   async getOrderbook() {
-    const orderbookRequest = {
-      baseAssetData: this.makerAssetData,
-      quoteAssetData: this.takerAssetData
-    };
-    return this.apiClient.getOrderbookAsync(orderbookRequest);
+    return this.orderbookService.getOrderbook();
   }
 
   async getOpenOrders(makerAddress) {
-    const ordersResponse = await this.apiClient.getOrdersAsync({
-      makerAddress: makerAddress.toLowerCase()
-    });
-    ordersResponse.records.map(({ order, metaData }) => {
-      metaData.price = order.takerAssetAmount
-        .dividedBy(order.makerAssetAmount)
-        .shiftedBy(SHIFT_PRICE_BY);
-
-      metaData.remainingFillableMakerAssetAmount = orderCalculationUtils.getMakerFillAmount(
-        order,
-        new BigNumber(metaData.remainingFillableTakerAssetAmount)
-      );
-    });
-
-    return ordersResponse;
+    return this.orderbookService.getOpenOrders(makerAddress);
   }
 
   async calculateRequiredCollateral(amount) {
@@ -378,6 +368,14 @@ class HoneylemonService {
       from: deployer,
       gas: 9000000
     });
+    return address;
+  }
+
+  async getDSProxyAddress(ownerAddress) {
+    const address = await this.marketContractProxy.methods
+      .getUserAddressOrDSProxy(ownerAddress)
+      .call({ from: ownerAddress });
+
     return address;
   }
 
@@ -623,8 +621,70 @@ class HoneylemonService {
     return contracts;
   }
 
-  async redeemContract(someContractIdentifier, address) {
-    // TODO
+  async isDailyContractDeployed() {
+    const isContractDeployed = await this.marketContractProxy.methods
+    .isDailyContractDeployed()
+    .call();
+
+  return isContractDeployed;
+  }
+}
+
+class OrderbookService {
+  constructor(
+    apiUrl,
+    minterBridgeAddress,
+    marketContractProxyAddress,
+    paymentTokenAddress
+  ) {
+    this.apiClient = new HttpClient(apiUrl);
+    // Calculate asset data
+    this.makerAssetData = assetDataUtils.encodeERC20BridgeAssetData(
+      marketContractProxyAddress,
+      minterBridgeAddress,
+      '0x0000'
+    );
+    this.takerAssetData = assetDataUtils.encodeERC20AssetData(paymentTokenAddress);
+  }
+
+  async getOrderbook() {
+    const orderbookRequest = {
+      baseAssetData: this.makerAssetData,
+      quoteAssetData: this.takerAssetData
+    };
+    const orderbookResponse = await this.apiClient.getOrderbookAsync(orderbookRequest);
+
+    this._processOrders(orderbookResponse.asks);
+
+    return orderbookResponse;
+  }
+
+  async getOpenOrders(makerAddress) {
+    const ordersResponse = await this.apiClient.getOrdersAsync({
+      makerAddress: makerAddress.toLowerCase()
+    });
+
+    this._processOrders(ordersResponse);
+
+    return ordersResponse;
+  }
+
+  // Calculate price and remainingFillableMakerAssetAmount
+  _processOrders(ordersResponse) {
+    ordersResponse.records.map(({ order, metaData }) => {
+      metaData.price = order.takerAssetAmount
+        .dividedBy(order.makerAssetAmount)
+        .shiftedBy(SHIFT_PRICE_BY);
+
+      metaData.remainingFillableMakerAssetAmount = orderCalculationUtils.getMakerFillAmount(
+        order,
+        new BigNumber(metaData.remainingFillableTakerAssetAmount)
+      );
+    });
+  }
+
+  async submitOrder(signedOrder) {
+    return this.apiClient.submitOrderAsync(signedOrder);
   }
 }
 
@@ -693,6 +753,7 @@ const CONTRACTS_QUERY = /* GraphQL */ `
 
 module.exports = {
   HoneylemonService,
+  OrderbookService,
   PAYMENT_TOKEN_DECIMALS,
   COLLATERAL_TOKEN_DECIMALS,
   POSITIONS_QUERY,

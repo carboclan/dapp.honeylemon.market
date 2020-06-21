@@ -29,8 +29,15 @@ const theme = (createMuiTheme)({
     },
     MuiAppBar: {
       root: {
-        minHeight: '60px'
-      }
+        minHeight: '64px'
+      },
+    },
+    MuiToolbar: {
+      regular: {
+        minHeight: '64px',
+        paddingLeft: '24px',
+        paddingRight: '24px',
+      },
     }
   }
 });

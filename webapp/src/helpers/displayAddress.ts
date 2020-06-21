@@ -5,5 +5,5 @@ export const displayAddress = (address: string, maxLength: number = 13) => {
     return address
   }
   const charsToKeep = Math.floor((maxLength - 5)/2)
-  return address.substring(0, charsToKeep + 2) + "..." + address.substring(address.length - 1 - charsToKeep, address.length - 1);
+  return address.substring(0, charsToKeep + 2) + "..." + address.substring(address.length - charsToKeep, address.length);
 }
