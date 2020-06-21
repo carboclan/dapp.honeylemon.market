@@ -30,13 +30,12 @@ export enum PositionStatus {
 }
 
 //TODO: Extract this from library when TS conversion is done
-const COLLATERAL_TOKEN_DECIMALS = 8;
-const COLLATERAL_TOKEN_NAME = 'imBTC';
-const PAYMENT_TOKEN_DECIMALS = 6;
-const PAYMENT_TOKEN_NAME = 'USDT';
-const CONTRACT_DURATION = 2;
-const CONTRACT_COLLATERAL_RATIO = 1.25;
-
+const COLLATERAL_TOKEN_DECIMALS = Number(process.env.REACT_APP_COLLATERAL_TOKEN_DECIMALS) || 8;
+const COLLATERAL_TOKEN_NAME = process.env.REACT_APP_COLLATERAL_TOKEN_NAME || 'imBTC';
+const PAYMENT_TOKEN_DECIMALS = Number(process.env.REACT_APP_PAYMENT_TOKEN_DECIMALS) || 6;
+const PAYMENT_TOKEN_NAME = process.env.REACT_APP_PAYMENT_TOKEN_NAME || 'USDT';
+const CONTRACT_DURATION = Number(process.env.REACT_APP_CONTRACT_DURATION) || 28;
+const CONTRACT_COLLATERAL_RATIO = Number(process.env.REACT_APP_CONTRACT_COLLATERAL_RATIO) || 1.25;
 
 type OrderSummary = {
   price: number,
@@ -357,7 +356,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
 
     let poller: NodeJS.Timeout;
     getOrderbookData();
-    poller = setInterval(getOrderbookData, 10000);
+    poller = setInterval(getOrderbookData, 30000);
 
     return () => {
       clearInterval(poller);
@@ -388,7 +387,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
 
     let poller: NodeJS.Timeout;
     getMarketData();
-    poller = setInterval(getMarketData, 10000);
+    poller = setInterval(getMarketData, 30000);
 
     return () => {
       clearInterval(poller);
@@ -409,7 +408,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
 
     if (honeylemonService && address) {
       getPortfolioData();
-      poller = setInterval(getPortfolioData, 15000);
+      poller = setInterval(getPortfolioData, 30000);
     }
     return () => {
       clearInterval(poller);
