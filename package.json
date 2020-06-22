@@ -20,9 +20,7 @@
     "build:honeylemonjs": "yarn wsrun -p @honeylemon/honeylemonjs -c build",
     "build:subgraph": "yarn wsrun -p @honeylemon/graph -c build",
     "build:webapp": "yarn wsrun -p @honeylemon/graph -c build",
-    "start:dev": "yarn wsrun start:dev --parallel --exclude-missing",
-    "clean": "rm -rf ./node_modules && rm -rf ./*/node_modules",
-    "test:webapp": "yarn wsrun -p molecule-alpha-webapp -c test:watch"
+    "clean": "rm -rf ./node_modules && rm -rf ./*/node_modules"
   },
   "workspaces": {
     "packages": ["packages/*"],
