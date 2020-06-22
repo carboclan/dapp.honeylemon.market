@@ -1,4 +1,4 @@
-# Initial page
+# HoneyLemon - Synthetic Cloud Mining
 
 ![HoneyLemonLogo Logo](.gitbook/assets/Logo.png)
 
