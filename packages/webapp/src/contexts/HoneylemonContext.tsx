@@ -2,7 +2,7 @@ import * as React from "react";
 import Web3 from 'web3'
 import { useState, useEffect } from "react";
 import { MetamaskSubprovider, Web3JsProvider } from '@0x/subproviders';
-import { HoneylemonService, OrderbookService } from "honeylemon";
+import { HoneylemonService, OrderbookService, COLLATERAL_TOKEN_DECIMALS, PAYMENT_TOKEN_DECIMALS, CONTRACT_DURATION } from "@honeylemon/honeylemonjs";
 import { useOnboard } from "./OnboardContext";
 import { ethers } from 'ethers';
 import dayjs from 'dayjs';
@@ -30,11 +30,8 @@ export enum PositionStatus {
 }
 
 //TODO: Extract this from library when TS conversion is done
-const COLLATERAL_TOKEN_DECIMALS = Number(process.env.REACT_APP_COLLATERAL_TOKEN_DECIMALS) || 8;
 const COLLATERAL_TOKEN_NAME = process.env.REACT_APP_COLLATERAL_TOKEN_NAME || 'imBTC';
-const PAYMENT_TOKEN_DECIMALS = Number(process.env.REACT_APP_PAYMENT_TOKEN_DECIMALS) || 6;
 const PAYMENT_TOKEN_NAME = process.env.REACT_APP_PAYMENT_TOKEN_NAME || 'USDT';
-const CONTRACT_DURATION = Number(process.env.REACT_APP_CONTRACT_DURATION) || 28;
 const CONTRACT_COLLATERAL_RATIO = Number(process.env.REACT_APP_CONTRACT_COLLATERAL_RATIO) || 1.25;
 
 type OrderSummary = {
@@ -43,8 +40,8 @@ type OrderSummary = {
 };
 
 export type HoneylemonContext = {
-  honeylemonService: any; //TODO update this when types exist
-  orderbookService: any;
+  honeylemonService: HoneylemonService;
+  orderbookService: OrderbookService;
   collateralTokenBalance: number;
   collateralTokenAllowance: number;
   COLLATERAL_TOKEN_DECIMALS: number;

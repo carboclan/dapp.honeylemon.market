@@ -6,8 +6,23 @@
   "dependencies": {
   },
   "devDependencies": {
+    "chalk": "^2.0.1",
+    "jest": "^24.5.0",
+    "jest-haste-map": "^24.5.0",
+    "jest-resolve": "^24.5.0",
+    "precommit": "^1.2.2",
+    "wsrun": "^3.6.5",
+    "typescript": "3.9.5"
   },
   "scripts": {
+    "build": "yarn wsrun --stages -c build",
+    "build:contracts": "yarn wsrun -p @honeylemon/contracts -c build",
+    "build:honeylemonjs": "yarn wsrun -p @honeylemon/honeylemonjs -c build",
+    "build:subgraph": "yarn wsrun -p @honeylemon/graph -c build",
+    "build:webapp": "yarn wsrun -p @honeylemon/graph -c build",
+    "start:dev": "yarn wsrun start:dev --parallel --exclude-missing",
+    "clean": "rm -rf ./node_modules && rm -rf ./*/node_modules",
+    "test:webapp": "yarn wsrun -p molecule-alpha-webapp -c test:watch"
   },
   "workspaces": {
     "packages": ["packages/*"],

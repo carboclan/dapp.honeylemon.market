@@ -629,10 +629,10 @@ class HoneylemonService {
 
   async isDailyContractDeployed() {
     const isContractDeployed = await this.marketContractProxy.methods
-    .isDailyContractDeployed()
-    .call();
+      .isDailyContractDeployed()
+      .call();
 
-  return isContractDeployed;
+    return isContractDeployed;
   }
 }
 
