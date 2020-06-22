@@ -4,7 +4,7 @@ const infuraApikey = '9542ce9f96be4ae08225dcde36ff1638';
 let mnemonic = ''; //require('./mnemonic');
 
 module.exports = {
-  contracts_directory: "./src",
+  contracts_directory: "./contracts",
   networks: {
     development: {
       host: process.env.TRUFFLE_DEVELOP_HOST || 'localhost',

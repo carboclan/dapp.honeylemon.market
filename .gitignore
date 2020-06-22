@@ -12,5 +12,6 @@ docker/.volumes/
 build/
 dist/*
 .vscode
+lib/
 # Local Netlify folder
 .netlify

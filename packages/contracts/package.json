@@ -4,22 +4,23 @@
   "description": "Solidity Contracts for Honeylemon",
   "main": "lib/src/index.js",
   "scripts": {
-    "build": "truffle compile && yarn tsc -b",
+    "build": "truffle compile && tsc -b",
     "test": "truffle test",
     "lint": "prettier-eslint --write \"$(pwd)/**/*.js\" \"$(pwd)/**/*.sol\" --ignore './node_modules/**'",
-    "postinstall": "truffle compile"
+    "postinstall": "yarn build"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "@carboclan",
+  "license": "Apache-2.0",
   "dependencies": {
     "@openzeppelin/test-helpers": "^0.5.6",
     "@truffle/hdwallet-provider": "^1.0.35",
-    "pg": "^8.2.1",
-    "typescript": "3.0.1",
+    "bn.js": "^4.11.0",
+    "dotenv": "^8.2.0",
     "eslint": "^6.8.0",
     "eslint-cli": "^1.1.1",
     "ganache-time-traveler": "^1.0.14",
     "openzeppelin-solidity": "2.2.0",
+    "pg": "^8.2.1",
     "prettier-eslint": "^9.0.1",
     "prettier-eslint-cli": "5.0.0",
     "prettier-plugin-solidity": "^1.0.0-alpha.47",
@@ -28,9 +29,10 @@
     "solium": "^1.0.5",
     "truffle": "5.1.18",
     "truffle-assertions": "0.9.0",
+    "typescript": "3.9.5",
     "web3-core": "^1.2.7",
     "web3-core-helpers": "^1.2.7",
     "web3-core-method": "^1.2.7",
-    "web3-utils": "^1.2.7" 
+    "web3-utils": "^1.2.7"
   }
 }
