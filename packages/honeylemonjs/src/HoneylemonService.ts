@@ -245,7 +245,7 @@ class HoneylemonService {
     return this.contractWrappers.exchange.cancelOrder(order);
   }
 
-  createOrder(makerAddress, sizeTh, pricePerTh, expirationTime) {
+  createOrder(makerAddress, sizeTh, pricePerTh, expirationTime?) {
     sizeTh = new BigNumber(sizeTh);
     pricePerTh = new BigNumber(pricePerTh);
     if (!expirationTime) {

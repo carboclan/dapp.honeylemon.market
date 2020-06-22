@@ -124,7 +124,7 @@ const BuyContractPage: React.SFC = () => {
   const [isLiquid, setIsLiquid] = useState(true);
 
   const [resultOrders, setResultOrders] = useState([]);
-  const [takerAssetFillAmounts, setTakerFillAmounts] = useState([]);
+  const [takerAssetFillAmounts, setTakerFillAmounts] = useState<Array<any>>([]);
   const [buyType, setBuyType] = useState<BuyType>(BuyType.budget);
   const [showBuyModal, setShowBuyModal] = useState(false);
   const [txActive, setTxActive] = useState(false);

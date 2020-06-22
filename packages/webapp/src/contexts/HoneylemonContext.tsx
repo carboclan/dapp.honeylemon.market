@@ -2,7 +2,7 @@ import * as React from "react";
 import Web3 from 'web3'
 import { useState, useEffect } from "react";
 import { MetamaskSubprovider, Web3JsProvider } from '@0x/subproviders';
-import { HoneylemonService, OrderbookService, COLLATERAL_TOKEN_DECIMALS, PAYMENT_TOKEN_DECIMALS, CONTRACT_DURATION } from "@honeylemon/honeylemonjs";
+import { HoneylemonService, OrderbookService, COLLATERAL_TOKEN_DECIMALS, PAYMENT_TOKEN_DECIMALS, CONTRACT_DURATION } from "@honeylemon/honeylemonjs/lib/src";
 import { useOnboard } from "./OnboardContext";
 import { ethers } from 'ethers';
 import dayjs from 'dayjs';
