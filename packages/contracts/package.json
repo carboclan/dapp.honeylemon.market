@@ -4,7 +4,7 @@
   "description": "Solidity Contracts for Honeylemon",
   "main": "lib/src/index.js",
   "scripts": {
-    "build": "truffle compile && tsc -b",
+    "build": "truffle compile && tsc -d --declarationDir lib --declarationMap",
     "test": "truffle test",
     "lint": "prettier-eslint --write \"$(pwd)/**/*.js\" \"$(pwd)/**/*.sol\" --ignore './node_modules/**'",
     "postinstall": "yarn build"
