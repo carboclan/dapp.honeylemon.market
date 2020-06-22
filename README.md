@@ -1,4 +1,4 @@
-# Initial page
+# HoneyLemon - Synthetic BTC mining contracts on Ethereum
 
 ![HoneyLemonLogo Logo](.gitbook/assets/Logo.png)
 
