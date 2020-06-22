@@ -2,3 +2,7 @@
 
 * [Initial page](README.md)
 
+## Design
+
+* [Technical Architecture](design/technical-architecture.md)
+
