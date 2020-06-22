@@ -1,4 +1,4 @@
-# HoneyLemon - Synthetic BTC cloud mining contracts
+# HoneyLemon - Synthetic BTC Cloud Mining
 
 ![HoneyLemonLogo Logo](.gitbook/assets/Logo.png)
 
