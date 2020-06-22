@@ -1,4 +1,4 @@
-# HoneyLemon - Synthetic BTC Cloud Mining
+# Initial page
 
 ![HoneyLemonLogo Logo](.gitbook/assets/Logo.png)
 
