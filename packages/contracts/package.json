@@ -4,14 +4,15 @@
   "description": "Solidity Contracts for Honeylemon",
   "main": "lib/src/index.js",
   "scripts": {
-    "build": "npx truffle compile && yarn generate-types && tsc -d --declarationDir lib --declarationMap",
+    "build": "npx truffle compile && yarn generate-types && npx tsc -d --declarationDir lib --declarationMap",
     "generate-types": "yarn generate-types:truffle && yarn generate-types:web3 && yarn generate-types:ethers",
     "generate-types:truffle": "npx typechain \"build/contracts/*.json\" --target=truffle-v5 --outDir lib/types/truffle",
     "generate-types:web3": "npx typechain \"build/contracts/*.json\" --target=web3-v1 --outDir lib/types/web3",
     "generate-types:ethers": "npx typechain \"build/contracts/*.json\" --target=ethers-v4 --outDir lib/types/ethers",
     "migrate": "tsc -p ./tsconfig.migrate.json --outDir ./migrations && truffle migrate",
     "test": "truffle test",
-    "lint": "prettier-eslint --write \"$(pwd)/**/*.js\" \"$(pwd)/**/*.sol\" --ignore './node_modules/**'"
+    "lint": "prettier-eslint --write \"$(pwd)/**/*.js\" \"$(pwd)/**/*.sol\" --ignore './node_modules/**'",
+    "postinstall": "yarn build"
   },
   "author": "@carboclan",
   "license": "Apache-2.0",
