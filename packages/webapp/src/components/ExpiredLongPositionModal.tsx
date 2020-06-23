@@ -1,10 +1,10 @@
 import React from 'react';
-import { makeStyles, Dialog, DialogTitle, DialogContent, TableRow, TableHead, Table, TableCell, TableBody, Typography, Grid } from '@material-ui/core';
+import { makeStyles, Dialog, DialogTitle, DialogContent, TableRow, Table, TableCell, TableBody } from '@material-ui/core';
 import { useHoneylemon, PositionStatus } from '../contexts/HoneylemonContext';
 import { BigNumber } from '@0x/utils';
 import dayjs from 'dayjs';
 
-const useStyles = makeStyles(({ palette }) => ({
+const useStyles = makeStyles(() => ({
 
 }))
 
@@ -15,7 +15,6 @@ interface ExpiredLongPositionModalProps {
 };
 
 const ExpiredLongPositionModal: React.SFC<ExpiredLongPositionModalProps> = ({ open, onClose, position }) => {
-  const classes = useStyles();
   const { PAYMENT_TOKEN_DECIMALS, PAYMENT_TOKEN_NAME, COLLATERAL_TOKEN_NAME, COLLATERAL_TOKEN_DECIMALS } = useHoneylemon();
   return (
     <Dialog open={open} onClose={onClose} aria-labelledby="dialog-title" maxWidth='sm' fullWidth>

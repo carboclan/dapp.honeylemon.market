@@ -32,7 +32,7 @@ const useStyles = makeStyles(({ palette }) => ({
 const MiningStatsPage: React.SFC = () => {
   const classes = useStyles();
   const {
-    marketData: { currentMRI, currentBTCSpotPrice, btcDifficultyAdjustmentDate, miningContracts, currentBtcDifficulty },
+    marketData: { currentMRI, currentBTCSpotPrice, btcDifficultyAdjustmentDate, miningContracts },
     PAYMENT_TOKEN_DECIMALS,
     orderbook,
     btcStats,
