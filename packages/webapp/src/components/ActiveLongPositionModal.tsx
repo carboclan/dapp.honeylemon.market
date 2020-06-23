@@ -1,12 +1,8 @@
 import React from 'react';
-import { makeStyles, Dialog, DialogTitle, DialogContent, TableRow, Table, TableCell, TableBody } from '@material-ui/core';
+import { Dialog, DialogTitle, DialogContent, TableRow, Table, TableCell, TableBody } from '@material-ui/core';
 import { useHoneylemon } from '../contexts/HoneylemonContext';
 import { BigNumber } from '@0x/utils';
 import dayjs from 'dayjs';
-
-const useStyles = makeStyles(() => ({
-
-}))
 
 interface ActiveLongPositionModalProps {
   open: boolean,
