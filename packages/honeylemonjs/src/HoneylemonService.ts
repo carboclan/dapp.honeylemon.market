@@ -1,11 +1,6 @@
 const { GraphQLClient } = require('graphql-request');
 const { HttpClient, OrderbookRequest } = require('@0x/connect');
-const MinterBridgeArtefacts = require('../../build/contracts/MinterBridge.json');
-const MarketContractProxyArtefacts = require('../../build/contracts/MarketContractProxy.json');
-const MarketContractMPX = require('../../build/contracts/MarketContractMPX.json');
-const DSProxyArtefacts = require('../../build/contracts/DSProxy.json');
-const CollateralTokenArtefacts = require('../../build/contracts/CollateralToken.json');
-const PaymentTokenArtefacts = require('../../build/contracts/PaymentToken.json');
+const { MinterBridge, MarketContractProxy, MarketContractMPX, CollateralToken, PaymentToken, DSProxy } = require('@honeylemon/contracts');
 
 const {
   marketUtils,
@@ -29,6 +24,20 @@ const CONTRACT_DURATION = 28; // Days
 // const CONTRACT_DURATION = 2; // 2 day for Kovan deployment
 
 class HoneylemonService {
+  subgraphClient: any;
+  minterBridgeAddress: any;
+  marketContractProxyAddress: any;
+  collateralTokenAddress: any;
+  paymentTokenAddress: any;
+  provider: any;
+  chainId: any;
+  contractWrappers: any;
+  makerAssetData: any;
+  takerAssetData: any;
+  orderbookService: OrderbookService;
+  collateralToken: any;
+  paymentToken: any;
+  marketContractProxy: any;
   constructor(
     apiUrl,
     subgraphUrl,
@@ -41,14 +50,11 @@ class HoneylemonService {
   ) {
     this.subgraphClient = new GraphQLClient(subgraphUrl);
     this.minterBridgeAddress =
-      minterBridgeAddress || MinterBridgeArtefacts.networks[chainId].address;
+      minterBridgeAddress || MinterBridge.networks[chainId].address;
     this.marketContractProxyAddress =
-      marketContractProxyAddress ||
-      MarketContractProxyArtefacts.networks[chainId].address;
-    this.collateralTokenAddress =
-      collateralTokenAddress || CollateralTokenArtefacts.networks[chainId].address;
-    this.paymentTokenAddress =
-      paymentTokenAddress || PaymentTokenArtefacts.networks[chainId].address;
+      marketContractProxyAddress || MarketContractProxy.networks[chainId].address;
+    this.collateralTokenAddress = collateralTokenAddress || CollateralToken.networks[chainId].address;
+    this.paymentTokenAddress = paymentTokenAddress || PaymentToken.networks[chainId].address;
     this.provider = provider;
     this.chainId = chainId;
 
@@ -78,7 +84,7 @@ class HoneylemonService {
     this.paymentToken = new ERC20TokenContract(this.paymentTokenAddress, this.provider);
 
     this.marketContractProxy = new web3.eth.Contract(
-      MarketContractProxyArtefacts.abi,
+      MarketContractProxy.abi,
       this.marketContractProxyAddress
     );
 
@@ -239,7 +245,7 @@ class HoneylemonService {
     return this.contractWrappers.exchange.cancelOrder(order);
   }
 
-  createOrder(makerAddress, sizeTh, pricePerTh, expirationTime) {
+  createOrder(makerAddress, sizeTh, pricePerTh, expirationTime?) {
     sizeTh = new BigNumber(sizeTh);
     pricePerTh = new BigNumber(pricePerTh);
     if (!expirationTime) {
@@ -397,7 +403,7 @@ class HoneylemonService {
       return null;
     }
 
-    let traderDSProxy = new web3.eth.Contract(DSProxyArtefacts.abi, dsProxyAddress);
+    let traderDSProxy = new web3.eth.Contract(DSProxy.abi, dsProxyAddress);
     traderDSProxy.setProvider(this.provider);
 
     // Get position information for the recipient
@@ -623,14 +629,17 @@ class HoneylemonService {
 
   async isDailyContractDeployed() {
     const isContractDeployed = await this.marketContractProxy.methods
-    .isDailyContractDeployed()
-    .call();
+      .isDailyContractDeployed()
+      .call();
 
-  return isContractDeployed;
+    return isContractDeployed;
   }
 }
 
 class OrderbookService {
+  apiClient: any;
+  makerAssetData: any;
+  takerAssetData: any;
   constructor(
     apiUrl,
     minterBridgeAddress,
@@ -751,7 +760,7 @@ const CONTRACTS_QUERY = /* GraphQL */ `
   }
 `;
 
-module.exports = {
+export {
   HoneylemonService,
   OrderbookService,
   PAYMENT_TOKEN_DECIMALS,

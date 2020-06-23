@@ -1,5 +1,5 @@
 {
-  "name": "honeylemon-graph",
+  "name": "@honeylemon/graph",
   "version": "0.1.0",
   "scripts": {
     "create": "graph create carboclan/honeylemon --node https://api.thegraph.com/deploy/",
@@ -12,15 +12,15 @@
     "prepare:local": "mustache config/local.json subgraph.template.yaml > subgraph.yaml"
   },
   "devDependencies": {
-    "@graphprotocol/graph-cli": "^0.18.0",
-    "@graphprotocol/graph-ts": "^0.18.0",
-    "mustache": "^4.0.1"
+    "@graphprotocol/graph-cli": "0.18.0",
+    "@graphprotocol/graph-ts": "0.18.0",
+    "mustache": "4.0.1"
   },
   "dependencies": {
-    "babel-polyfill": "^6.26.0",
-    "babel-register": "^6.26.0",
-    "truffle": "^5.0.4",
-    "truffle-contract": "^4.0.5",
-    "truffle-hdwallet-provider": "^1.0.4"
+    "babel-polyfill": "6.26.0",
+    "babel-register": "6.26.0",
+    "truffle": "5.0.4",
+    "truffle-contract": "4.0.5",
+    "truffle-hdwallet-provider": "1.0.4"
   }
 }
