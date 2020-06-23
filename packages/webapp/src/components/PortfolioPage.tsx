@@ -233,7 +233,6 @@ const PorfolioPage: React.SFC = () => {
   const previousExpiredShortPositionsCount = usePrevious(expiredShortPositions.length);
 
   useEffect(() => {
-    let isCancelled = false;
     const loadPortfolioData = async () => {
       setIsLoading(true);
       try {
@@ -246,7 +245,6 @@ const PorfolioPage: React.SFC = () => {
     }
     loadPortfolioData()
     return () => {
-      isCancelled = true;
     }
   }, [address])
 
@@ -474,11 +472,11 @@ const PorfolioPage: React.SFC = () => {
                         <TableBody>
                           <TableRow>
                             <TableCell>Long Positions (Remaining Collateral)</TableCell>
-                            <TableCell align='right'>{longCollateralForWithdraw.toLocaleString(undefined, {maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS})} {COLLATERAL_TOKEN_NAME}</TableCell>
+                            <TableCell align='right'>{longCollateralForWithdraw.toLocaleString(undefined, { maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS })} {COLLATERAL_TOKEN_NAME}</TableCell>
                           </TableRow>
                           <TableRow>
                             <TableCell>Short Positions (Earnings)</TableCell>
-                            <TableCell align='right'>{shortCollateralForWithdraw.toLocaleString(undefined, {maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS})} {COLLATERAL_TOKEN_NAME}</TableCell>
+                            <TableCell align='right'>{shortCollateralForWithdraw.toLocaleString(undefined, { maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS })} {COLLATERAL_TOKEN_NAME}</TableCell>
                           </TableRow>
                         </TableBody>
                       </Table>

@@ -8,7 +8,6 @@ import { ethers } from 'ethers';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import { BigNumber } from "@0x/utils";
-const { getBtcData } = require('@carboclan/mri');
 
 dayjs.extend(utc);
 
@@ -60,7 +59,6 @@ export type HoneylemonContext = {
     currentMRI: number;
     currentBTCSpotPrice: number;
     btcDifficultyAdjustmentDate: Date;
-    currentBtcDifficulty: number;
   }
   portfolioData: {
     openOrdersMetadata: Array<OpenOrderMetadata>;
@@ -130,7 +128,6 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
   const [miningContracts, setMiningContracts] = useState<Array<any>>([]);
   const [currentMRI, setCurrentMRI] = useState(0);
   const [currentBTCSpotPrice, setCurrentBTCSpotPrice] = useState(0);
-  const [currentBtcDifficulty, setCurrentBtcDifficulty] = useState(0);
   const [btcDifficultyAdjustmentDate, setBtcDifficultyAdjustmentDate] = useState(new Date());
   const [btcStats, setBtcStats] = useState<any>(undefined);
   const [openOrdersMetadata, setOpenOrdersMetadata] = useState<Array<OpenOrderMetadata>>([]);
@@ -368,13 +365,10 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
         const marketDataApiUrl = process.env.REACT_APP_MARKET_DATA_API_URL;
         if (marketDataApiUrl) {
           const { contracts } = await (await fetch(`${marketDataApiUrl}/blockchain/agg?coin=BTC`)).json();
-          const { data } = await (await fetch(`${marketDataApiUrl}/coinmarketcap/v1/cryptocurrency/quotes/latest?symbol=BTC`)).json();
           const stats = await (await fetch(`${marketDataApiUrl}/blockchain/stats`)).json();
-          const { mri, difficulty } = await getBtcData(dayjs().utc().format('YYYYMMDD'), 1, false);
           setMiningContracts(contracts);
-          setCurrentBTCSpotPrice(data?.BTC?.quote?.USD?.price);
-          setCurrentMRI(mri);
-          setCurrentBtcDifficulty(difficulty);
+          setCurrentBTCSpotPrice(stats.quote?.price);
+          setCurrentMRI(Number(new BigNumber(stats.mri).shiftedBy(-COLLATERAL_TOKEN_DECIMALS).toString()));
           setBtcStats(stats);
         }
       } catch (error) {
@@ -509,7 +503,6 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
           currentBTCSpotPrice,
           currentMRI,
           btcDifficultyAdjustmentDate,
-          currentBtcDifficulty,
         },
         portfolioData: {
           activeLongPositions,

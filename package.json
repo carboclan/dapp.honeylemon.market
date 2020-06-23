@@ -16,6 +16,7 @@
     "build:honeylemonjs": "yarn wsrun -p @honeylemon/honeylemonjs -c build",
     "build:subgraph": "yarn wsrun -p @honeylemon/graph -c build",
     "build:webapp": "yarn wsrun -p @honeylemon/webapp -c build",
+    "start:webapp": "yarn wsrun -p @honeylemon/webapp -c start",
     "clean": "rm -rf ./node_modules && rm -rf ./*/node_modules"
   },
   "workspaces": {

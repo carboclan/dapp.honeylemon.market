@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link, Button, Typography, makeStyles, Grid, Divider } from '@material-ui/core';
-import { Link as RouterLink } from 'react-router-dom';
-import { OpenInNew } from '@material-ui/icons';
+import { Button, Typography, makeStyles, Grid, Divider } from '@material-ui/core';
 import { forwardTo } from '../helpers/history';
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
