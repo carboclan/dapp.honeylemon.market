@@ -1,3 +1,0 @@
-[submodule "packages/webapp/node_modules/@carboclan/mri"]
-	path = packages/webapp/node_modules/@carboclan/mri
-	url = https://github.com/carboclan/mri.git

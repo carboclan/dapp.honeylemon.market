@@ -8,7 +8,6 @@ import { ethers } from 'ethers';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import { BigNumber } from "@0x/utils";
-// const { getBtcData } = require('@carboclan/mri');
 
 dayjs.extend(utc);
 
