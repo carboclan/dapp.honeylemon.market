@@ -197,6 +197,14 @@ const MiningStatsPage: React.SFC = () => {
                 </TableCell>
               </TableRow>
               <TableRow>
+                <TableCell><Typography>Next Adj Date</Typography></TableCell>
+                <TableCell align='right'>
+                  <Typography>
+                    {dayjs(btcDifficultyAdjustmentDate).format('MMM DD, YYYY HH:mm')} UTC
+                  </Typography>
+                </TableCell>
+              </TableRow>
+              <TableRow>
                 <TableCell><Typography>24h Hashrate</Typography></TableCell>
                 <TableCell align='right'>
                   <Typography>{(btcStats?.hashrate24h / 10 ** 9).toLocaleString(undefined, { maximumFractionDigits: 0 })} TH </Typography>
@@ -224,28 +232,20 @@ const MiningStatsPage: React.SFC = () => {
                   </Typography>
                 </TableCell>
               </TableRow>
-              <TableRow>
-                <TableCell><Typography>Next Difficulty Adjustment Date</Typography></TableCell>
-                <TableCell align='right'>
-                  <Typography>
-                    {dayjs(btcDifficultyAdjustmentDate).format('MMM DD, YYYY HH:mm')} UTC
-                  </Typography>
-                </TableCell>
-              </TableRow>
             </TableBody>
           </Table>
         </Paper>
       </Grid>
       <Grid item xs={12}>
-        <Typography variant='h6' className={classes.pageHeader}>Mining Revenue Contract Markets</Typography>
+        <Typography variant='h6' className={classes.pageHeader}>Mining Revenue Contracts</Typography>
+      </Grid>
+      <Grid item xs={12}>
+        <MRIDisplay />
       </Grid>
       <Grid item xs={12}>
         <HighchartsReact
           highcharts={Highcharts}
           options={chartOptions} />
-      </Grid>
-      <Grid item xs={12}>
-        <MRIDisplay />
       </Grid>
       <Grid item xs={12}>
         <Table size='small'>

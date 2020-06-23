@@ -342,7 +342,7 @@ const PorfolioPage: React.SFC = () => {
                             <TableCell align='right'>
                               <Button onClick={() => cancelOpenOrder(order.orderHash)} disabled={isCancelling}>
                                 Cancel&nbsp;
-                              {isCancelling && <CircularProgress className={classes.loadingSpinner} size={20} />}
+                                {isCancelling && <CircularProgress className={classes.loadingSpinner} size={20} />}
                               </Button>
                             </TableCell>
                           </TableRow>
@@ -398,7 +398,7 @@ const PorfolioPage: React.SFC = () => {
                           <TableRow>
                             <TableCell colSpan={5} align='center' className={classes.placeholderRow}>
                               No Active Long Positions
-                          </TableCell>
+                            </TableCell>
                           </TableRow>
                         }
                       </TableBody>
