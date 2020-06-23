@@ -93,6 +93,7 @@ const OfferContractPage: React.SFC = () => {
     isDsProxyDeployed,
     PAYMENT_TOKEN_NAME,
     marketData,
+    btcStats,
     PAYMENT_TOKEN_DECIMALS,
     deployDSProxyContract,
     approveToken,
@@ -102,7 +103,7 @@ const OfferContractPage: React.SFC = () => {
 
   const [hashPrice, setHashPrice] = useState(
     Number(
-      (marketData.currentMRI * marketData.currentBTCSpotPrice)
+      (btcStats.mri * marketData.currentBTCSpotPrice)
         .toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })));
   const [hashAmount, setHashAmount] = useState<number | undefined>(10000);
   const [totalContractPrice, setTotalContractPrice] = useState(0);
@@ -380,7 +381,7 @@ const OfferContractPage: React.SFC = () => {
                       <TableCell colSpan={2} style={{ color: '#a9a9a9' }}>
                         * Estimated collateral is calcuated based on current MRI value; actual collateral 
                           deposited will be based on the actual MRI value at at the time your order being filled. <br />
-                        * If you do not have sufficient {COLLATERAL_TOKEN_NAME} in wallet as collateral when your offer is being taken, 
+                        * If you do not have sufficient {COLLATERAL_TOKEN_NAME} in your wallet as collateral when your offer is being taken, 
                           a portion of the order will still be filled based on your available {COLLATERAL_TOKEN_NAME} balance at the time.<br />
                         * Your limit order may be partially filled. <br />
                         * Your offer will be valid for 10 days. Any unfilled portion of your limit order can be cancelled in your portfolio.<br />
