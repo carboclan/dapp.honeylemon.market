@@ -365,11 +365,9 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
         const marketDataApiUrl = process.env.REACT_APP_MARKET_DATA_API_URL;
         if (marketDataApiUrl) {
           const { contracts } = await (await fetch(`${marketDataApiUrl}/blockchain/agg?coin=BTC`)).json();
-          const { data } = await (await fetch(`${marketDataApiUrl}/coinmarketcap/v1/cryptocurrency/quotes/latest?symbol=BTC`)).json();
           const stats = await (await fetch(`${marketDataApiUrl}/blockchain/stats`)).json();
-          // const { mri, difficulty } = await getBtcData(dayjs().utc().format('YYYYMMDD'), 1, false);
           setMiningContracts(contracts);
-          data && setCurrentBTCSpotPrice(data.BTC?.quote?.USD?.price);
+          setCurrentBTCSpotPrice(stats.quote?.price);
           setCurrentMRI(0.00000829); //TODO get this from the API
           setBtcStats(stats);
         }
