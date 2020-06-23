@@ -86,19 +86,7 @@ const HomePage: React.SFC = () => {
   return (
       <Grid container direction='column' spacing={2}>
         <Grid item>
-          <Typography color="secondary" variant='h5' align='center'>Sweet Deals In Crypto Mining</Typography>
-        </Grid>
-        <Grid item>
           <MRIDisplay />
-        </Grid>
-        <Grid item xs={12} style={{textAlign: 'center'}}>
-          <Button onClick={() => forwardTo('/stats')} className={classes.liveStatsButton}>
-            <Typography align='center' style={{ fontWeight: 'bold' }}>
-              <span role="img" aria-label="fire">🔥</span>
-              Mining Market Live Stats
-              <span role="img" aria-label="fire">🔥</span>
-            </Typography>
-          </Button>
         </Grid>
         <Grid item container direction='row' className={classes.countdownSection} spacing={2} justify='center' alignItems='stretch'>
           <Grid item xs={12}>
@@ -133,8 +121,17 @@ const HomePage: React.SFC = () => {
             <span>Secs</span>
           </Grid>
           <Grid item xs={12}>
-            <Typography style={{ fontWeight: 'bold' }}>Estimate: {dayjs(btcDifficultyAdjustmentDate).format('MMM DD, YYYY HH:mm:ss')}</Typography>
+            <Typography style={{ fontWeight: 'bold' }}>Estimate: {dayjs(btcDifficultyAdjustmentDate).format('MMM DD, YYYY HH:mm')} GMT</Typography>
           </Grid>
+        </Grid>
+        <Grid item xs={12} style={{textAlign: 'center'}}>
+          <Button onClick={() => forwardTo('/stats')} className={classes.liveStatsButton} fullWidth>
+            <Typography align='center' style={{ fontWeight: 'bold' }}>
+              <span role="img" aria-label="fire">🔥</span>
+              Mining Market Live Stats
+              <span role="img" aria-label="fire">🔥</span>
+            </Typography>
+          </Button>
         </Grid>
         <Grid item xs={12} className={classes.connectSpacer}>
           <ConnectWalletButton />
@@ -145,7 +142,7 @@ const HomePage: React.SFC = () => {
             <Typography color='secondary' style={{ fontWeight: 'bold' }} gutterBottom>Pay Cash & Earn Mining Revenue in BTC</Typography>
             <Button onClick={() => forwardTo('/buy')} className={classes.button}>BUY CONTRACTS</Button>
             <Divider className={classes.divider} />
-            <Typography variant='h5' style={{ fontWeight: 'bold' }}>I am a BTC Miner.</Typography>
+            <Typography variant='h5' style={{ fontWeight: 'bold' }}>I am a BTC miner.</Typography>
             <Typography color='secondary' style={{ fontWeight: 'bold' }}>Hedge Mining Risk & Get Cash Upfront</Typography>
             <Button onClick={() => forwardTo('/offer')} className={classes.button}>OFFER CONTRACTS</Button>
           </>

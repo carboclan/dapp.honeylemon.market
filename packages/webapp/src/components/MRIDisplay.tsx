@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, Typography, makeStyles, Paper } from '@material-ui/core';
-import { Help } from '@material-ui/icons';
+import { Info } from '@material-ui/icons';
 import { useHoneylemon } from '../contexts/HoneylemonContext';
 import MRIInformationModal from './MRIInformationModal';
 
@@ -27,8 +27,8 @@ const MRIDisplay: React.SFC = () => {
           variant='body1'
           href='#' underline='always'
           onClick={() => setShowMRIInformationModal(true)}>
-          Bitcoin Mining Revenue Index (MRI)
-          <Help fontSize='small' />
+          BTC Mining Revenue Index (MRI_BTC)
+          <Info fontSize='small' />
         </Link>
         {currentMRI > 0 ?
           <>
