@@ -233,7 +233,6 @@ const PorfolioPage: React.SFC = () => {
   const previousExpiredShortPositionsCount = usePrevious(expiredShortPositions.length);
 
   useEffect(() => {
-    let isCancelled = false;
     const loadPortfolioData = async () => {
       setIsLoading(true);
       try {
@@ -246,7 +245,6 @@ const PorfolioPage: React.SFC = () => {
     }
     loadPortfolioData()
     return () => {
-      isCancelled = true;
     }
   }, [address])
 
