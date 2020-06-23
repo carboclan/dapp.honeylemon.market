@@ -104,7 +104,7 @@ const OfferContractPage: React.SFC = () => {
     Number(
       (marketData.currentMRI * marketData.currentBTCSpotPrice)
         .toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })));
-  const [hashAmount, setHashAmount] = useState<number | undefined>(undefined);
+  const [hashAmount, setHashAmount] = useState<number | undefined>(10000);
   const [totalContractPrice, setTotalContractPrice] = useState(0);
   const [collateralAmount, setCollateralAmount] = useState(0);
   const [showOfferModal, setShowOfferModal] = useState(false);
@@ -246,7 +246,7 @@ const OfferContractPage: React.SFC = () => {
         <Grid item xs={4} style={{ textAlign: 'end' }}>
           <Link href='#' underline='always' onClick={() => setShowOrderbook(true)}>Order Book <OpenInNew fontSize='small' /></Link>
         </Grid>
-        <Grid item xs={6}><Typography style={{ fontWeight: 'bold' }}>Price:</Typography></Grid>
+        <Grid item xs={4}><Typography style={{ fontWeight: 'bold' }}>Price:</Typography></Grid>
         <Grid item xs={4}>
           <FilledInput
             fullWidth
@@ -275,10 +275,10 @@ const OfferContractPage: React.SFC = () => {
             }}
             disabled={showOfferModal} />
         </Grid>
-        <Grid item xs={2} className={classes.rightAlign}>
+        <Grid item xs={4} className={classes.rightAlign}>
           <Typography style={{ fontWeight: 'bold' }} color='secondary'>/TH/Day</Typography>
         </Grid>
-        <Grid item xs={6}><Typography style={{ fontWeight: 'bold' }}>Quantity</Typography></Grid>
+        <Grid item xs={4}><Typography style={{ fontWeight: 'bold' }}>Quantity</Typography></Grid>
         <Grid item xs={4}>
           <FilledInput
             fullWidth
@@ -305,7 +305,7 @@ const OfferContractPage: React.SFC = () => {
             }}
             disabled={showOfferModal} />
         </Grid>
-        <Grid item xs={2} className={classes.rightAlign}>
+        <Grid item xs={4} className={classes.rightAlign}>
           <Typography style={{ fontWeight: 'bold' }} color='secondary'>TH</Typography>
         </Grid>
         <Grid item xs={12} container>
@@ -328,9 +328,9 @@ const OfferContractPage: React.SFC = () => {
               <TableBody>
                 <TableRow>
                   <TableCell>
-                    Limit Price <br />
-                    Offer Quantity <br />
-                    Contract Duration <br />
+                    Price <br />
+                    Quantity <br />
+                    Duration <br />
                   </TableCell>
                   <TableCell align='right'>
                     {PAYMENT_TOKEN_NAME} {hashPrice.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}/Th/Day <br />
