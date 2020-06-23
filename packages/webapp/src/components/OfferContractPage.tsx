@@ -162,7 +162,13 @@ const OfferContractPage: React.SFC = () => {
     setTxActive(true);
     if (hashAmount) {
       try {
-        const order = honeylemonService.createOrder(address, new BigNumber(hashAmount), new BigNumber(CONTRACT_DURATION).multipliedBy(hashPrice));
+        const order = honeylemonService.createOrder(
+          address, 
+          new BigNumber(hashAmount), 
+          new BigNumber(CONTRACT_DURATION).multipliedBy(hashPrice), 
+          new BigNumber(Math.round(Date.now() / 1000) + 10 * 24 * 60 * 60)
+        );
+        
         const signedOrder = await honeylemonService.signOrder(order);
         await honeylemonService.submitOrder(signedOrder);
         setShowOfferModal(false)
