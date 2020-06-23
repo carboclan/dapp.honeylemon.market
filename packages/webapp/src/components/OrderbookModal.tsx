@@ -1,10 +1,6 @@
 import React from 'react';
-import { makeStyles, Dialog, DialogTitle, DialogContent, TableRow, TableHead, Table, TableCell, TableBody, Typography } from '@material-ui/core';
+import { Dialog, DialogTitle, DialogContent, TableRow, TableHead, Table, TableCell, TableBody, Typography } from '@material-ui/core';
 import { useHoneylemon } from '../contexts/HoneylemonContext';
-
-const useStyles = makeStyles(({ palette }) => ({
-
-}))
 
 interface OrderbookModalProps {
   open: boolean,
@@ -12,7 +8,6 @@ interface OrderbookModalProps {
 };
 
 const OrderbookModal: React.SFC<OrderbookModalProps> = ({ open, onClose }: OrderbookModalProps) => {
-  const classes = useStyles();
   const { orderbook, PAYMENT_TOKEN_DECIMALS } = useHoneylemon();
   return (
     <Dialog open={open} onClose={onClose} aria-labelledby="dialog-title" maxWidth='sm' fullWidth>

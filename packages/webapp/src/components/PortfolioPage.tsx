@@ -472,11 +472,11 @@ const PorfolioPage: React.SFC = () => {
                         <TableBody>
                           <TableRow>
                             <TableCell>Long Positions (Remaining Collateral)</TableCell>
-                            <TableCell align='right'>{longCollateralForWithdraw.toLocaleString(undefined, {maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS})} {COLLATERAL_TOKEN_NAME}</TableCell>
+                            <TableCell align='right'>{longCollateralForWithdraw.toLocaleString(undefined, { maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS })} {COLLATERAL_TOKEN_NAME}</TableCell>
                           </TableRow>
                           <TableRow>
                             <TableCell>Short Positions (Earnings)</TableCell>
-                            <TableCell align='right'>{shortCollateralForWithdraw.toLocaleString(undefined, {maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS})} {COLLATERAL_TOKEN_NAME}</TableCell>
+                            <TableCell align='right'>{shortCollateralForWithdraw.toLocaleString(undefined, { maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS })} {COLLATERAL_TOKEN_NAME}</TableCell>
                           </TableRow>
                         </TableBody>
                       </Table>
