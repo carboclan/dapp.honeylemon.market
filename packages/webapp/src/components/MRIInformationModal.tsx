@@ -44,30 +44,30 @@ const MRIInformationModal: React.SFC<MRIInformationModalProps> = ({ open, onClos
           where
         </Typography>
         <Typography variant='caption' paragraph>
-          ◦ MRI_BTC_d represents the "d-day BTC Mining Revenue Index". For example, MRI_BTC_28
+        • <strong>MRI_BTC_d</strong> represents the "d-day BTC Mining Revenue Index". For example, MRI_BTC_28
           represents 28-day BTC Mining Revenue Index. We will publish the 1-day Mining Revenue
           Index MRI_BTC_1 at UTC 00:01 each day, and abbreviate it as MRI_BTC.
         </Typography>
         <Typography variant='caption' paragraph>
-          ◦ avgHashrate_d is the average hashrate starting from block height i over d days
+        • <strong>avgHashrate_d</strong> is the average hashrate starting from block height i over d days
         </Typography>
         <Typography variant='caption' paragraph>
-          ◦ i represents the block height
+        • <strong>i</strong> represents the block height
         </Typography>
         <Typography variant='caption' paragraph>
-          ◦ d represents the number of days corresponding to Bitcoin Mining Revenue Index (MRI)
+        • <strong>d</strong> represents the number of days corresponding to Bitcoin Mining Revenue Index (MRI)
         </Typography>
         <Typography variant='caption' paragraph>
-          ◦ N_d represents the number of blocks produced within d day(s)
+        • <strong>N_d</strong> represents the number of blocks produced within d day(s)
         </Typography>
         <Typography variant='caption' paragraph>
-          ◦ Difficulty_i represents the value of network difficulty at block height i
+        • <strong>Difficulty_i</strong> represents the value of network difficulty at block height i
         </Typography>
         <Typography variant='caption' paragraph>
-          ◦ Coinbase_i represents the amount of block rewards at block height i
+        • <strong>Coinbase_i</strong> represents the amount of block rewards at block height i
         </Typography>
         <Typography variant='caption' paragraph>
-          ◦ Fee_i represents the amount of fees at block height i
+        • <strong>Fee_i</strong> represents the amount of fees at block height i
         </Typography>
       </DialogContent>
     </Dialog>
