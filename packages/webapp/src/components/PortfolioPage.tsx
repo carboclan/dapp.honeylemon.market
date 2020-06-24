@@ -303,7 +303,7 @@ const PorfolioPage: React.SFC = () => {
                     }}
                     IconButtonProps={{ onClick: handleToggleOpenOrdersPanel }}>
                     <Typography variant='h6' className={classes.sectionHeadingText}>
-                      Unfilled Positions (Open Orders)
+                      Unfilled Positions (Open Offers)
                     </Typography>
                   </ExpansionPanelSummary>
                   <ExpansionPanelDetails>
