@@ -3,6 +3,7 @@ import { Dialog, DialogTitle, DialogContent, TableRow, Table, TableCell, TableBo
 import { useHoneylemon } from '../contexts/HoneylemonContext';
 import dayjs from 'dayjs';
 import { useOnboard } from '../contexts/OnboardContext';
+import { COLLATERAL_TOKEN_DECIMALS } from '@honeylemon/honeylemonjs/lib/src';
 
 const useStyles = makeStyles(({ spacing, palette }) => ({
   loadingSpinner: {
@@ -24,7 +25,19 @@ interface UnfilledOfferModalProps {
 };
 
 const UnfilledOfferModal: React.SFC<UnfilledOfferModalProps> = ({ open, onClose, offer }) => {
-  const { PAYMENT_TOKEN_DECIMALS, honeylemonService, CONTRACT_DURATION, portfolioData: { openOrders }, refreshPortfolio } = useHoneylemon();
+  const {
+    PAYMENT_TOKEN_DECIMALS,
+    honeylemonService,
+    CONTRACT_DURATION,
+    CONTRACT_COLLATERAL_RATIO,
+    portfolioData: {
+      openOrders
+    },
+    refreshPortfolio,
+    marketData: {
+      currentMRI
+    }
+  } = useHoneylemon();
   const { address } = useOnboard();
   const classes = useStyles();
 
@@ -96,7 +109,17 @@ const UnfilledOfferModal: React.SFC<UnfilledOfferModalProps> = ({ open, onClose,
             </TableRow>
             <TableRow>
               <TableCell>Estimated Collateral</TableCell>
-              <TableCell align='right'></TableCell>
+              <TableCell align='right'>
+                {(currentMRI * 
+                  offer.remainingFillableMakerAssetAmount * 
+                  CONTRACT_DURATION * 
+                  CONTRACT_COLLATERAL_RATIO).toLocaleString(
+                    undefined, 
+                    { 
+                      maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS 
+                    })
+                }
+              </TableCell>
             </TableRow>
             <TableRow>
               <TableCell>Offer Valid Till</TableCell>
