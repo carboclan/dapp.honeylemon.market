@@ -462,7 +462,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
       const collateralTokenContractAddress = honeylemonService.collateralTokenAddress;
       const collateralTokenContract = new ethers.Contract(collateralTokenContractAddress, erc20Abi, provider);
       const filterCollateralTokenApproval = collateralTokenContract.filters.Approval(address);
-      const transferCollateralTokenFrom = collateralTokenContract.filters.Transfer(address);
+      const transferCollateralTokenFrom = collateralTokenContract.filters.Transfer(address, null, null);
       const transferCollateralTokenTo = collateralTokenContract.filters.Transfer(null, address, null);
 
       collateralTokenContract.on(filterCollateralTokenApproval, () => checkBalancesAndApprovals())
