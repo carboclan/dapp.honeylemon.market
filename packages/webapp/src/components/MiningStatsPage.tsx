@@ -163,59 +163,84 @@ const MiningStatsPage: React.SFC = () => {
   return (
     <Grid container direction='column' spacing={2}>
       <Grid item xs={12}>
-        <Typography variant='h5' className={classes.pageHeader}>Bitcoin Mining Live Stats</Typography>
+        <Typography variant='h6' className={classes.pageHeader}>Bitcoin Mining Live Stats</Typography>
       </Grid>
       <Grid item xs={12}>
         <Paper>
           <Table size='small' >
             <TableBody>
               <TableRow>
-                <TableCell>BTC Price (24h Δ%) </TableCell>
+                <TableCell>
+                  <Typography>BTC Price</Typography>
+                  <Typography>24h Chg%</Typography>
+                </TableCell>
                 <TableCell align='right'>
-                  <Typography>$ {btcStats?.quote.price.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}</Typography>
+                  <Typography>$ {btcStats?.quote.price.toLocaleString(undefined, { maximumFractionDigits: 2 })}</Typography>
                   <Typography className={clsx(
                     { [classes.decrease]: btcStats?.quote?.percentChange24h < 0 },
-                    { [classes.increase]: btcStats?.quote?.percentChange24h > 0 })}>({btcStats?.quote?.percentChange24h}%)
+                    { [classes.increase]: btcStats?.quote?.percentChange24h > 0 })}>({btcStats?.quote?.percentChange24h.toLocaleString(undefined, { maximumFractionDigits: 1 })}%)
                   </Typography>
                 </TableCell>
               </TableRow>
               <TableRow>
-                <TableCell>Difficulty (Last Adj Δ%)</TableCell>
+                <TableCell>
+                  <Typography>Difficulty</Typography>
+                  <Typography>Last Adj Chg%</Typography>
+                </TableCell>
                 <TableCell align='right'>
                   <Typography>{btcStats?.difficulty?.current.toLocaleString(undefined, { maximumFractionDigits: 0 })}</Typography>
                   <Typography className={clsx(
                     { [classes.decrease]: difficultyChange < 0 },
                     { [classes.increase]: difficultyChange > 0 })}>
-                    ({difficultyChange.toLocaleString(undefined, { maximumFractionDigits: 4 })}%)
+                    ({difficultyChange.toLocaleString(undefined, { maximumFractionDigits: 1 })}%)
                   </Typography>
                 </TableCell>
               </TableRow>
               <TableRow>
-                <TableCell>24h Network Hashrate</TableCell>
-                <TableCell align='right'>{(btcStats?.hashrate24h / 10 ** 9).toLocaleString(undefined, { maximumFractionDigits: 0 })} TH</TableCell>
+                <TableCell><Typography>Next Adj Date</Typography></TableCell>
+                <TableCell align='right'>
+                  <Typography>
+                    {dayjs(btcDifficultyAdjustmentDate).format('MMM DD, YYYY HH:mm')} UTC
+                  </Typography>
+                </TableCell>
               </TableRow>
               <TableRow>
-                <TableCell>24h Total Mining Revenue</TableCell>
-                <TableCell align='right'>$ {btcStats?.reward24h?.total.toLocaleString(undefined, { maximumFractionDigits: 2 })}</TableCell>
+                <TableCell><Typography>24h Hashrate</Typography></TableCell>
+                <TableCell align='right'>
+                  <Typography>{(btcStats?.hashrate24h / 10 ** 9).toLocaleString(undefined, { maximumFractionDigits: 0 })} TH </Typography>
+                </TableCell>
               </TableRow>
               <TableRow>
-                <TableCell>% Block Rewards</TableCell>
-                <TableCell align='right'>{(btcStats?.reward24h?.block / btcStats?.reward24h?.total * 100).toLocaleString(undefined, { maximumSignificantDigits: 2 })} %</TableCell>
+                <TableCell><Typography>24h Mining Revenue</Typography></TableCell>
+                <TableCell align='right'>
+                  <Typography>$ {btcStats?.reward24h?.total.toLocaleString(undefined, { maximumFractionDigits: 2 })}</Typography>
+                </TableCell>
               </TableRow>
               <TableRow>
-                <TableCell>% Transaction Fee</TableCell>
-                <TableCell align='right'>{(btcStats?.reward24h?.fees / btcStats?.reward24h?.total * 100).toLocaleString(undefined, { maximumSignificantDigits: 2 })} %</TableCell>
+                <TableCell><Typography>% Block Rewards</Typography></TableCell>
+                <TableCell align='right'>
+                  <Typography>
+                    {(btcStats?.reward24h?.block / btcStats?.reward24h?.total * 100).toLocaleString(undefined, { maximumSignificantDigits: 2 })} %
+                    </Typography>
+                </TableCell>
               </TableRow>
               <TableRow>
-                <TableCell>Next Difficulty Adjustment Date</TableCell>
-                <TableCell align='right'>{dayjs(btcDifficultyAdjustmentDate).format('MMM DD, YYYY HH:mm:ss')} UTC</TableCell>
+                <TableCell><Typography>% Transaction Fee</Typography></TableCell>
+                <TableCell align='right'>
+                  <Typography>
+                    {(btcStats?.reward24h?.fees / btcStats?.reward24h?.total * 100).toLocaleString(undefined, { maximumSignificantDigits: 2 })} %
+                  </Typography>
+                </TableCell>
               </TableRow>
             </TableBody>
           </Table>
         </Paper>
       </Grid>
       <Grid item xs={12}>
-        <Typography variant='h5' className={classes.pageHeader}>Mining Revenue Contract Markets</Typography>
+        <Typography variant='h6' className={classes.pageHeader}>Mining Revenue Contracts</Typography>
+      </Grid>
+      <Grid item xs={12}>
+        <MRIDisplay />
       </Grid>
       <Grid item xs={12}>
         <HighchartsReact
@@ -223,14 +248,11 @@ const MiningStatsPage: React.SFC = () => {
           options={chartOptions} />
       </Grid>
       <Grid item xs={12}>
-        <MRIDisplay />
-      </Grid>
-      <Grid item xs={12}>
         <Table size='small'>
           <TableBody>
             <TableRow>
               <TableCell>
-                <strong>Spot Contract Price</strong>
+                <strong>Spot Market</strong>
               </TableCell>
               <TableCell style={{ width: 50 }}>
                 <strong>($/TH/Day)</strong>
@@ -246,7 +268,7 @@ const MiningStatsPage: React.SFC = () => {
             </TableRow>
             <TableRow>
               <TableCell>
-                <strong>Forward Contract Price</strong>
+                <strong>Forward Market</strong>
               </TableCell>
               <TableCell style={{ width: 50 }}>
                 <strong>($/TH/Day)</strong>
@@ -263,13 +285,19 @@ const MiningStatsPage: React.SFC = () => {
             {miningContracts.filter(mc => mc.duration > 0 && contractDurations.includes(mc.duration))
               .sort((a, b) => (a.duration < b.duration) ? -1 : 1).map(mc => (
                 <TableRow key={mc.durationAlias}>
-                  <TableCell>{mc.durationAlias} cloud mining</TableCell>
+                  <TableCell>{mc.durationAlias} Cloud Mining</TableCell>
                   <TableCell>$ {(miningContracts.filter(c => c.duration === mc.duration)[0]?.contract_cost)?.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}</TableCell>
                   <TableCell style={{ width: 50 }} align="right">
                     <Link href={`https://honeylemon.market/#/products?coin=BTC&duration=${mc.duration}`} target="_blank" rel="noopener"><OpenInNew /></Link>
                   </TableCell>
                 </TableRow>
               ))}
+            <TableRow >
+              <TableCell colSpan={2} align="center">Visit the Honeylemon Aggregator</TableCell>
+              <TableCell style={{ width: 50 }} align="right">
+                <Link href={`https://honeylemon.market/`} target="_blank" rel="noopener"><OpenInNew /></Link>
+              </TableCell>
+            </TableRow>
           </TableBody>
         </Table>
       </Grid>
