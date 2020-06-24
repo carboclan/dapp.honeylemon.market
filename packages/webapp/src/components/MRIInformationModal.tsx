@@ -1,5 +1,5 @@
 import React from 'react';
-import { makeStyles, Dialog, DialogTitle, DialogContent, Typography } from '@material-ui/core';
+import { makeStyles, Dialog, DialogTitle, DialogContent, Typography, Link } from '@material-ui/core';
 
 const useStyles = makeStyles(({ palette }) => ({
   mriFormula: {
@@ -20,13 +20,15 @@ const MRIInformationModal: React.SFC<MRIInformationModalProps> = ({ open, onClos
     <Dialog open={open} onClose={onClose} aria-labelledby="dialog-title" maxWidth='sm' fullWidth>
       <DialogTitle id="dialog-title">BTC Mining Revenue Index (MRI_BTC_d)</DialogTitle>
       <DialogContent>
-        <Typography variant='subtitle1'>Meaning</Typography>
         <Typography variant='caption'>
-          The d-day BTC Mining Revenue Index (MRI_BTC_d) represents the network daily average block rewards plus
-          fees earned in BTC per 1 terahash (TH) of hash power in the past d days.
+          The d-day BTC Mining Revenue Index (MRI_BTC_d) represents the network daily average block rewards
+          plus fees earned in BTC per 1 terahash (TH) of hash power in the past d days, that is, the total
+          reward over the past d days divided by d.
         </Typography>
         <br />
+        <br />
         <img src="HistoricMRIGraph.jpg" style={{ width: '100%' }} />
+        <br />
         <br />
         <Typography variant='subtitle1'>Design Considerations</Typography>
         <Typography variant='caption'>
@@ -38,37 +40,7 @@ const MRIInformationModal: React.SFC<MRIInformationModalProps> = ({ open, onClos
         </Typography>
         <br />
         <br />
-        <Typography variant='subtitle1'>Formula</Typography>
-        <img src='BMRIFormula.png' alt='BMRI Formula' className={classes.mriFormula} />
-        <Typography variant='caption' paragraph>
-          where
-        </Typography>
-        <Typography variant='caption' paragraph>
-        • <strong>MRI_BTC_d</strong> represents the "d-day BTC Mining Revenue Index". For example, MRI_BTC_28
-          represents 28-day BTC Mining Revenue Index. We will publish the 1-day Mining Revenue
-          Index MRI_BTC_1 at UTC 00:01 each day, and abbreviate it as MRI_BTC.
-        </Typography>
-        <Typography variant='caption' paragraph>
-        • <strong>avgHashrate_d</strong> is the average hashrate starting from block height i over d days
-        </Typography>
-        <Typography variant='caption' paragraph>
-        • <strong>i</strong> represents the block height
-        </Typography>
-        <Typography variant='caption' paragraph>
-        • <strong>d</strong> represents the number of days corresponding to Bitcoin Mining Revenue Index (MRI)
-        </Typography>
-        <Typography variant='caption' paragraph>
-        • <strong>N_d</strong> represents the number of blocks produced within d day(s)
-        </Typography>
-        <Typography variant='caption' paragraph>
-        • <strong>Difficulty_i</strong> represents the value of network difficulty at block height i
-        </Typography>
-        <Typography variant='caption' paragraph>
-        • <strong>Coinbase_i</strong> represents the amount of block rewards at block height i
-        </Typography>
-        <Typography variant='caption' paragraph>
-        • <strong>Fee_i</strong> represents the amount of fees at block height i
-        </Typography>
+        <Link href='#' target="_blank" rel='noopener' underline='always'>For mathematical definition of MRI_BTC see the docs</Link>
       </DialogContent>
     </Dialog>
   )
