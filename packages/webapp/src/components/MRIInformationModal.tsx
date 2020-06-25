@@ -21,9 +21,9 @@ const MRIInformationModal: React.SFC<MRIInformationModalProps> = ({ open, onClos
       <DialogTitle id="dialog-title">BTC Mining Revenue Index (MRI_BTC_d)</DialogTitle>
       <DialogContent>
         <Typography variant='caption'>
-          The d-day BTC Mining Revenue Index (MRI_BTC_d) represents the network daily average block rewards
-          plus fees earned in BTC per 1 terahash (TH) of hash power in the past d days, that is, the total
-          reward over the past d days divided by d.
+        The d-day BTC Mining Revenue Index (MRI_BTC_d) represents the network daily average block rewards plus
+        fees earned in BTC per 1 terahash (TH) of hash power in the past d days, that is, the total reward over 
+        the past d days divided by d.
         </Typography>
         <br />
         <br />
@@ -32,11 +32,12 @@ const MRIInformationModal: React.SFC<MRIInformationModalProps> = ({ open, onClos
         <br />
         <Typography variant='subtitle1'>Design Considerations</Typography>
         <Typography variant='caption'>
-          • The index MUST has a clear physical meaning. <br />
-          • The index SHOULD closely replicate a miner's payoff in reality. <br />
-          • The index SHOULD make the contract easy for miners (hedgers) to trade. Thus, the miner is able to
-            hedge the risk exposure of mining practice of over some certain period of time by entering into a position of such contract.<br />
-          • The index SHOULD be consistent with mining industry conventional practices. MRI follows mining industry convention of Full Pay-Per-Share (FPPS) approach.
+        • The index MUST have a clear physical meaning.<br />
+        • The index SHOULD closely replicate miners’ revenue in reality.<br /> 
+        • The index SHOULD make the contract easy for miners to trade in order to hedge the risk <br /> 
+          exposure of mining practice over some certain period of time.
+        • The index SHOULD be consistent with the mining industry conventional practices. MRI follows 
+          the mining industry convention of Full Pay-Per-Share (FPPS) approach.
         </Typography>
         <br />
         <br />
