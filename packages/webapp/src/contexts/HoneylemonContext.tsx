@@ -81,7 +81,7 @@ export type HoneylemonProviderProps = {
 
 export type OpenOrderMetadata = {
   orderHash: string,
-  remainingFillableMakerAssetAmount: BigNumber,
+  remainingFillableMakerAssetAmount: number,
   price: BigNumber
   //TODO: update to use types once definitions have been added
 }
@@ -96,6 +96,8 @@ export type OpenOrder = {
   makerFee: BigNumber;
   takerFee: BigNumber;
   expirationTimeSeconds: BigNumber;
+  expirationDate: Date,
+  listingDate: Date,
   salt: BigNumber;
   makerAssetData: string;
   takerAssetData: string;
@@ -215,11 +217,15 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
   const getPorfolio = async () => {
     setIsPortfolioRefreshing(true);
     const openOrdersRes = await honeylemonService.getOpenOrders(address);
+    console.log(openOrdersRes);
     setOpenOrdersMetadata(openOrdersRes.records.map((openOrder: any) => openOrder.metaData))
     setOpenOrders(Object.fromEntries(
-      openOrdersRes.records.map(((openOrder: any) => [openOrder.metaData.orderHash, openOrder.order]))
+      openOrdersRes.records.map(((openOrder: any) => [openOrder.metaData.orderHash, {
+        ...openOrder.order,
+        expirationDate: dayjs(openOrder.order.expirationTimeSeconds.toNumber() * 1000).toDate(),
+        listingDate: dayjs(openOrder.order.expirationTimeSeconds.toNumber() * 1000).subtract(10, 'd').toDate()}]))
     ));
-
+    console.log(openOrders);
     const positions = await honeylemonService.getPositions(address);
     const allPositions = positions.longPositions.map((lp: any) => ({
       ...lp,
@@ -239,7 +245,6 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
       status: getPositionStatus(p),
     }});
 
-    console.log(allPositions);
     const newActiveLongPositions = allPositions.filter((p: any) => p.status === PositionStatus.active && p.type === PositionType.Long)
     setActiveLongPositions(newActiveLongPositions);
 
@@ -368,7 +373,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
           const stats = await (await fetch(`${marketDataApiUrl}/blockchain/stats`)).json();
           setMiningContracts(contracts);
           setCurrentBTCSpotPrice(stats.quote?.price);
-          setCurrentMRI(Number(new BigNumber(stats.mri).shiftedBy(-COLLATERAL_TOKEN_DECIMALS).toString()));
+          setCurrentMRI(stats.mri);
           setBtcStats(stats);
         }
       } catch (error) {
@@ -462,7 +467,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
       const collateralTokenContractAddress = honeylemonService.collateralTokenAddress;
       const collateralTokenContract = new ethers.Contract(collateralTokenContractAddress, erc20Abi, provider);
       const filterCollateralTokenApproval = collateralTokenContract.filters.Approval(address);
-      const transferCollateralTokenFrom = collateralTokenContract.filters.Transfer(address);
+      const transferCollateralTokenFrom = collateralTokenContract.filters.Transfer(address, null, null);
       const transferCollateralTokenTo = collateralTokenContract.filters.Transfer(null, address, null);
 
       collateralTokenContract.on(filterCollateralTokenApproval, () => checkBalancesAndApprovals())

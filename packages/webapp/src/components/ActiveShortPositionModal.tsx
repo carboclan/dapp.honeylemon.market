@@ -19,14 +19,14 @@ const ActiveShortPositionModal: React.SFC<ActiveShortPositionModalProps> = ({ op
         <Table>
           <TableBody>
             <TableRow>
-              <TableCell>Contract</TableCell>
-              <TableCell>{position.instrumentName}</TableCell>
+              <TableCell>Contract Position</TableCell>
+              <TableCell>{position.contractName}</TableCell>
             </TableRow>
             <TableRow>
               <TableCell>
-                Start Date <br />
-                Expiration Date <br />
-                Settlement Date <br />
+                Start<br />
+                Expiration<br />
+                Settlement<br />
                 Days till Expiration
               </TableCell>
               <TableCell align='right'>
@@ -38,12 +38,12 @@ const ActiveShortPositionModal: React.SFC<ActiveShortPositionModalProps> = ({ op
             </TableRow>
             <TableRow>
               <TableCell>
-                Price ($/TH) <br />
-                Quantity (TH)
+                Price<br />
+                Quantity
               </TableCell>
               <TableCell align='right'>
-                {new BigNumber(position.price).toPrecision(PAYMENT_TOKEN_DECIMALS)} <br />
-                {position.qtyToMint.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}
+                $ {new BigNumber(position.price).toPrecision(PAYMENT_TOKEN_DECIMALS)} /TH/Day <br />
+                {position.qtyToMint.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })} TH
               </TableCell>
             </TableRow>
             <TableRow>

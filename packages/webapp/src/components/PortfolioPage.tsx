@@ -16,7 +16,6 @@ import {
   ExpansionPanel,
   ExpansionPanelSummary,
   ExpansionPanelDetails,
-  ButtonBase,
   CircularProgressProps,
   Box,
 } from '@material-ui/core';
@@ -29,6 +28,8 @@ import ActiveLongPositionModal from './ActiveLongPositionModal';
 import ActiveShortPositionModal from './ActiveShortPositionModal';
 import ExpiredLongPositionModal from './ExpiredLongPositionModal';
 import ExpiredShortPositionModal from './ExpiredShortPositionModal';
+import UnfilledOfferModal from './UnfilledOfferModal';
+
 
 const useStyles = makeStyles(({ spacing, palette }) => ({
   icon: {
@@ -120,10 +121,11 @@ const PorfolioPage: React.SFC = () => {
   const [shortCollateralForWithdraw, setShortCollateralForWithdraw] = useState<number>(0);
 
   const [isWithdrawing, setIsWithdrawing] = useState(false);
-  const [isCancelling, setIsCancelling] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const [showOpenOrders, setShowOpenOrders] = useState(false);
+  const [unfilledOfferModalIndex, setUnfilledOfferModalIndex] = useState(-1);
+  const [showUnfilledOfferModal, setShowUnfilledOfferModal] = useState(false);
 
   const [showActiveLongPositions, setShowActiveLongPositions] = useState(false);
   const [showActiveLongPositionModal, setShowActiveLongPositionModal] = useState(false);
@@ -146,27 +148,6 @@ const PorfolioPage: React.SFC = () => {
   const handleSetActiveTab = (event: React.ChangeEvent<{}>, newValue: 'active' | 'expired') => {
     setActiveTab(newValue);
   };
-
-  const cancelOpenOrder = async (orderHash: string) => {
-    const order = openOrders?.[orderHash];
-    if (!order) {
-      console.log('This order does not exist.')
-      return;
-    }
-    setIsCancelling(true);
-
-    try {
-      await honeylemonService.getCancelOrderTx(order)
-        .awaitTransactionSuccessAsync({
-          from: address,
-          gas: 1500000
-        });
-      refreshPortfolio();
-    } catch (error) {
-      console.log(error)
-    }
-    setIsCancelling(false)
-  }
 
   const withdrawAllAvailable = async () => {
     setIsWithdrawing(true);
@@ -221,6 +202,11 @@ const PorfolioPage: React.SFC = () => {
   const handleShowExpiredShortPositionDetails = (i: number) => {
     setExpiredShortPositionModalIndex(i);
     setShowExpiredShortPositionModal(true);
+  }
+
+  const handleShowUnfilledOfferDetails = (i: number) => {
+    setUnfilledOfferModalIndex(i);
+    setShowUnfilledOfferModal(true);
   }
 
   const classes = useStyles();
@@ -316,42 +302,34 @@ const PorfolioPage: React.SFC = () => {
                       content: classes.sectionHeading
                     }}
                     IconButtonProps={{ onClick: handleToggleOpenOrdersPanel }}>
-                    <Typography variant='h5' className={classes.sectionHeadingText}>
-                      Unfilled Positions (Open Orders)
-                  </Typography>
-                    <ButtonBase className={classes.infoButton}><InfoRounded /></ButtonBase>
+                    <Typography variant='h6' className={classes.sectionHeadingText}>
+                      Unfilled Positions (Open Offers)
+                    </Typography>
                   </ExpansionPanelSummary>
                   <ExpansionPanelDetails>
                     <Table>
                       <TableHead>
                         <TableRow>
                           <TableCell>Price ($/TH/Day)</TableCell>
-                          <TableCell align='center'>Duration (Days)</TableCell>
                           <TableCell align='center'>Quantity (TH)</TableCell>
-                          <TableCell align='center'>Listing Date</TableCell>
                           <TableCell></TableCell>
                         </TableRow>
                       </TableHead>
                       <TableBody>
-                        {openOrdersMetadata && openOrdersMetadata?.map(order =>
+                        {openOrdersMetadata && openOrdersMetadata?.map((order, i) =>
                           <TableRow key={order.orderHash}>
-                            <TableCell>${order?.price.dividedBy(CONTRACT_DURATION).toFixed(2)}</TableCell>
-                            <TableCell align='center'>{CONTRACT_DURATION} days</TableCell>
-                            <TableCell align='center'>{order?.remainingFillableMakerAssetAmount.toLocaleString()}</TableCell>
-                            <TableCell align='center'>TBC</TableCell>
+                            <TableCell>${Number(order?.price.dividedBy(CONTRACT_DURATION).toString()).toLocaleString(undefined, {maximumFractionDigits: PAYMENT_TOKEN_DECIMALS})}</TableCell>
+                            <TableCell align='center'>{order?.remainingFillableMakerAssetAmount.toLocaleString(undefined, {maximumFractionDigits: 0})}</TableCell>
                             <TableCell align='right'>
-                              <Button onClick={() => cancelOpenOrder(order.orderHash)} disabled={isCancelling}>
-                                Cancel&nbsp;
-                              {isCancelling && <CircularProgress className={classes.loadingSpinner} size={20} />}
-                              </Button>
+                              <Info onClick={() => handleShowUnfilledOfferDetails(i)} />
                             </TableCell>
                           </TableRow>
                         )}
                         {!isLoading && openOrdersMetadata.length === 0 &&
                           <TableRow>
-                            <TableCell colSpan={5} align='center' className={classes.placeholderRow}>
+                            <TableCell colSpan={3} align='center' className={classes.placeholderRow}>
                               No Unfilled Positions (Open Orders)
-                          </TableCell>
+                            </TableCell>
                           </TableRow>
                         }
                       </TableBody>
@@ -366,10 +344,9 @@ const PorfolioPage: React.SFC = () => {
                       content: classes.sectionHeading
                     }}
                     IconButtonProps={{ onClick: handleToggleActiveLongPositionsPanel }}>
-                    <Typography variant='h5' className={classes.sectionHeadingText}>
-                      Long Positions (Filled Buy Order)
-                  </Typography>
-                    <ButtonBase className={classes.infoButton}><InfoRounded /></ButtonBase>
+                    <Typography variant='h6' className={classes.sectionHeadingText}>
+                      Long Positions (Contracts Bought)
+                    </Typography>
                   </ExpansionPanelSummary>
                   <ExpansionPanelDetails>
                     <Table>
@@ -398,7 +375,7 @@ const PorfolioPage: React.SFC = () => {
                           <TableRow>
                             <TableCell colSpan={5} align='center' className={classes.placeholderRow}>
                               No Active Long Positions
-                          </TableCell>
+                            </TableCell>
                           </TableRow>
                         }
                       </TableBody>
@@ -413,10 +390,9 @@ const PorfolioPage: React.SFC = () => {
                       content: classes.sectionHeading
                     }}
                     IconButtonProps={{ onClick: handleToggleActiveShortPositionsPanel }}>
-                    <Typography variant='h5' className={classes.sectionHeadingText}>
-                      Short Positions (Filled Offers)
-                  </Typography>
-                    <ButtonBase className={classes.infoButton}><InfoRounded /></ButtonBase>
+                    <Typography variant='h6' className={classes.sectionHeadingText}>
+                      Short Positions (Contracts Offered)
+                    </Typography>
                   </ExpansionPanelSummary>
                   <ExpansionPanelDetails>
                     <Table>
@@ -461,21 +437,20 @@ const PorfolioPage: React.SFC = () => {
                       content: classes.sectionHeading
                     }}
                     IconButtonProps={{ onClick: handleTogglePendingWithdrawPanel }}>
-                    <Typography variant='h5' className={classes.sectionHeadingText}>
+                    <Typography variant='h6' className={classes.sectionHeadingText}>
                       Pending Withdrawal
                     </Typography>
-                    <ButtonBase className={classes.infoButton}><InfoRounded /></ButtonBase>
                   </ExpansionPanelSummary>
                   <ExpansionPanelDetails>
                     <Grid container>
                       <Table>
                         <TableBody>
                           <TableRow>
-                            <TableCell>Long Positions (Remaining Collateral)</TableCell>
+                            <TableCell>Long Positions (Earnings)</TableCell>
                             <TableCell align='right'>{longCollateralForWithdraw.toLocaleString(undefined, { maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS })} {COLLATERAL_TOKEN_NAME}</TableCell>
                           </TableRow>
                           <TableRow>
-                            <TableCell>Short Positions (Earnings)</TableCell>
+                            <TableCell>Short Positions (Remaining Collateral)</TableCell>
                             <TableCell align='right'>{shortCollateralForWithdraw.toLocaleString(undefined, { maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS })} {COLLATERAL_TOKEN_NAME}</TableCell>
                           </TableRow>
                         </TableBody>
@@ -501,10 +476,9 @@ const PorfolioPage: React.SFC = () => {
                       content: classes.sectionHeading
                     }}
                     IconButtonProps={{ onClick: handleToggleExpiredLongPositionsPanel }}>
-                    <Typography variant='h5' className={classes.sectionHeadingText}>
-                      Long Positions (Filled Buy Order)
+                    <Typography variant='h6' className={classes.sectionHeadingText}>
+                      Long Positions (Contracts Bought)
                     </Typography>
-                    <ButtonBase className={classes.infoButton}><InfoRounded /></ButtonBase>
                   </ExpansionPanelSummary>
                   <ExpansionPanelDetails>
                     <Table>
@@ -546,18 +520,17 @@ const PorfolioPage: React.SFC = () => {
                       content: classes.sectionHeading
                     }}
                     IconButtonProps={{ onClick: handleToggleExpiredShortPositionsPanel }}>
-                    <Typography variant='h5' className={classes.sectionHeadingText}>
-                      Short Positions (Filled Offers)
-                  </Typography>
-                    <ButtonBase className={classes.infoButton}><InfoRounded /></ButtonBase>
+                    <Typography variant='h6' className={classes.sectionHeadingText}>
+                      Short Positions (Contracts Offered)
+                    </Typography>
                   </ExpansionPanelSummary>
                   <ExpansionPanelDetails>
                     <Table>
                       <TableHead>
                         <TableRow>
                           <TableCell>Settlement Date</TableCell>
-                          <TableCell align='center'>Received </TableCell>
-                          <TableCell align='center'>Paid</TableCell>
+                          <TableCell align='center'>Received ({PAYMENT_TOKEN_NAME}</TableCell>
+                          <TableCell align='center'>Paid ({COLLATERAL_TOKEN_NAME})</TableCell>
                           <TableCell align='center'>Status</TableCell>
                           <TableCell></TableCell>
                         </TableRow>
@@ -611,6 +584,12 @@ const PorfolioPage: React.SFC = () => {
           open={showExpiredShortPositionModal}
           onClose={() => setShowExpiredShortPositionModal(false)}
           position={expiredShortPositions[expiredShortPositionModalIndex]} />
+      }
+      {unfilledOfferModalIndex > -1 &&
+        <UnfilledOfferModal
+          open={showUnfilledOfferModal}
+          onClose={() => setShowUnfilledOfferModal(false)}
+          offer={openOrdersMetadata[unfilledOfferModalIndex]} />
       }
     </>
   )

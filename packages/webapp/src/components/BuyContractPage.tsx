@@ -426,12 +426,12 @@ const BuyContractPage: React.SFC = () => {
                 <TableBody>
                   <TableRow>
                     <TableCell>
-                      Price <br />
+                      Price<br />
                       Quantity <br />
-                      Contract Duration
+                      Duration
                     </TableCell>
                     <TableCell align='right'>
-                      {PAYMENT_TOKEN_NAME} {hashPrice.toLocaleString(undefined, {maximumFractionDigits: PAYMENT_TOKEN_DECIMALS})} /TH/Day<br />
+                      ${hashPrice.toLocaleString(undefined, {maximumFractionDigits: PAYMENT_TOKEN_DECIMALS})}/TH/Day<br />
                       {`${orderQuantity.toLocaleString()}`} TH<br />
                       {`${CONTRACT_DURATION}`} Days
                     </TableCell>
@@ -446,20 +446,20 @@ const BuyContractPage: React.SFC = () => {
                   </TableRow>
                   <TableRow>
                     <TableCell className={classes.orderSummaryEstimate}>
-                      Discount vs. Buy BTC *
+                      Buy contract vs. Buy BTC * <br />
+                      Estimated Revenue *
                   </TableCell>
                     <TableCell align='right' className={clsx(classes.orderSummaryEstimate,
                       { [classes.premium]: discountOnSpotPrice < 0 },
                       { [classes.discount]: discountOnSpotPrice > 0 })}>
-                      {discountOnSpotPrice.toLocaleString(undefined, { minimumFractionDigits: 5, maximumFractionDigits: 8 })}%
+                      {discountOnSpotPrice.toLocaleString(undefined, { maximumFractionDigits: 2 })}% <br />
+                      {`${(expectedBTCAccrual).toLocaleString(undefined, { maximumFractionDigits: 8 })} imBTC`}
                   </TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell className={classes.orderSummaryEstimate}>
-                      Estimated Revenue *
                     </TableCell>
                     <TableCell align='right' className={classes.orderSummaryEstimate}>
-                      {`${(expectedBTCAccrual).toLocaleString(undefined, { minimumFractionDigits: 5, maximumFractionDigits: 8 })} imBTC`}
                     </TableCell>
                   </TableRow>
                   <TableRow>
@@ -486,13 +486,13 @@ const BuyContractPage: React.SFC = () => {
                           Settlement
                         </TableCell>
                         <TableCell align='right'>
-                          {dayjs().utc().startOf('day').add(1, 'minute').format('YYYY/MM/DD HH:mm')} UTC<br />
-                          {dayjs().utc().startOf('day').add(1, 'minute').add(CONTRACT_DURATION, 'd').format('YYYY/MM/DD HH:mm')} UTC<br />
-                          {dayjs().utc().startOf('day').add(1, 'minute').add(CONTRACT_DURATION + 1, 'd').format('YYYY/MM/DD HH:mm')} UTC
+                          {dayjs().utc().startOf('day').add(1, 'minute').format('DD-MMM-YY')}<br />
+                          {dayjs().utc().startOf('day').add(1, 'minute').add(CONTRACT_DURATION, 'd').format('DD-MMM-YY')}<br />
+                          {dayjs().utc().startOf('day').add(1, 'minute').add(CONTRACT_DURATION + 1, 'd').format('DD-MMM-YY')}
                         </TableCell>
                       </TableRow>
                       <TableRow>
-                        <TableCell colSpan={2}>
+                        <TableCell colSpan={2} style={{ color: '#a9a9a9' }}>
                           * Fillable orders in orderbook and minimum order increment of 1 TH may result in discrepancy between your budget and price quote. <br />
                           * Your order will be subject to additional Ethereum network transaction fee,
                             and 0x Protocol fee, both denominated in ETH. Honeylemon does not charge&nbsp;
@@ -500,25 +500,25 @@ const BuyContractPage: React.SFC = () => {
                         </TableCell>
                       </TableRow>
                       <TableRow>
-                        <TableCell colSpan={2}>
+                        <TableCell colSpan={2} >
                           <Typography variant='subtitle1'>WHAT DOES IT MEAN?</Typography> <br />
-                          <Typography variant='body2'>
+                          <Typography variant='body2' style={{ color: '#a9a9a9' }}>
                             You will pay <strong>${PAYMENT_TOKEN_NAME} ${(orderValue || 0).toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}</strong> to
                             buy <strong>{`${orderQuantity.toLocaleString()}`} TH</strong> of {CONTRACT_DURATION}-Day Mining Revenue Contracts at&nbsp;
                             <strong>{PAYMENT_TOKEN_NAME} {hashPrice.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}/TH/Day</strong>.
                           </Typography>
-                          <Typography variant='body2'>
+                          <Typography variant='body2' style={{ color: '#a9a9a9' }}>
                             At settlment, you will receive mining revenue (in {COLLATERAL_TOKEN_NAME}) over {CONTRACT_DURATION} days, which 
                             is the network average BTC block reward & transaction fees (MRI) per TH over contract duration, up to a max 
-                            revenue of {`${((expectedBTCAccrual || 0) * CONTRACT_COLLATERAL_RATIO)} ${COLLATERAL_TOKEN_NAME}`}.
+                            revenue of {`${(((expectedBTCAccrual) || 0) * CONTRACT_COLLATERAL_RATIO).toLocaleString(undefined, {maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS})} ${COLLATERAL_TOKEN_NAME}`}.
                             You can withdraw your mining revenue (in {COLLATERAL_TOKEN_NAME}) after settlement.
                           </Typography>
-                          <Typography variant='body2'>
+                          <Typography variant='body2' style={{ color: '#a9a9a9' }}>
                             You will receive the network average BTC block reward & transaction fees per TH based on the average value of
                             the <Link href='#' underline='always' onClick={() => setShowMRIInformationModal(true)}>Bitcoin Mining Revenue 
                             Index (MRI) <OpenInNew fontSize='small' /></Link> over {CONTRACT_DURATION} days starting today.
                           </Typography>
-                          <Typography variant='body2'>
+                          <Typography variant='body2' style={{ color: '#a9a9a9' }}>
                             You may check your PNL from your Portfolio once order is placed. You can withdraw your mining revenue
                             denominated in {COLLATERAL_TOKEN_NAME} after {dayjs().utc().startOf('day').add(1, 'minute')
                               .add(CONTRACT_DURATION + 1, 'd').format('YYYY/MM/DD HH:mm')} UTC.
