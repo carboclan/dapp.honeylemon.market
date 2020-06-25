@@ -217,7 +217,6 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
   const getPorfolio = async () => {
     setIsPortfolioRefreshing(true);
     const openOrdersRes = await honeylemonService.getOpenOrders(address);
-    console.log(openOrdersRes);
     setOpenOrdersMetadata(openOrdersRes.records.map((openOrder: any) => openOrder.metaData))
     setOpenOrders(Object.fromEntries(
       openOrdersRes.records.map(((openOrder: any) => [openOrder.metaData.orderHash, {
@@ -225,7 +224,6 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
         expirationDate: dayjs(openOrder.order.expirationTimeSeconds.toNumber() * 1000).toDate(),
         listingDate: dayjs(openOrder.order.expirationTimeSeconds.toNumber() * 1000).subtract(10, 'd').toDate()}]))
     ));
-    console.log(openOrders);
     const positions = await honeylemonService.getPositions(address);
     const allPositions = positions.longPositions.map((lp: any) => ({
       ...lp,
