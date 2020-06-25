@@ -19,8 +19,8 @@ const ExpiredLongPositionModal: React.SFC<ExpiredLongPositionModalProps> = ({ op
         <Table>
           <TableBody>
             <TableRow>
-              <TableCell>Contract</TableCell>
-              <TableCell align='right'>{position.instrumentName}</TableCell>
+              <TableCell>Contract Position</TableCell>
+              <TableCell align='right'>{position.contractName}</TableCell>
             </TableRow>
             <TableRow>
               <TableCell>
@@ -42,7 +42,7 @@ const ExpiredLongPositionModal: React.SFC<ExpiredLongPositionModalProps> = ({ op
                 Quantity
               </TableCell>
               <TableCell align='right'>
-                $ {new BigNumber(position.price).toPrecision(PAYMENT_TOKEN_DECIMALS)} /TH<br />
+                $ {new BigNumber(position.price).toPrecision(PAYMENT_TOKEN_DECIMALS)} /TH/Day<br />
                 {position.qtyToMint.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })} TH
               </TableCell>
             </TableRow>
