@@ -29,7 +29,7 @@ const OrderbookModal: React.SFC<OrderbookModalProps> = ({ open, onClose }: Order
             {orderbook.map((order, i) =>
               <TableRow key={i}>
                 <TableCell>{order.price.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}</TableCell>
-                <TableCell align='center'>CONTRACT_DURATION</TableCell>
+                <TableCell align='center'>{CONTRACT_DURATION}</TableCell>
                 <TableCell align='right'>{order.quantity.toLocaleString(undefined, { maximumFractionDigits: 0 })}</TableCell>
               </TableRow>
             )}
