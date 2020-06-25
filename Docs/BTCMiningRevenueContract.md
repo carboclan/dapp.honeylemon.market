@@ -4,7 +4,7 @@
 
 The Honeylemon Mining Revenue Contract is the first of a series of Mining Revenue Contracts designed to replicate payoff of existing cloud mining.
 
-The Honeylemon 28-Day Mining Revenue Contract is a forward-like product that settles to the market-wide block reward and fees per Terahash over 28 days as published in the BTC Mining Revenue Index \(BTC\_MRI\), with a 125% max revenue cap for the buyer. The buyer pays a fixed price in stable coin \(USDT\) upfront and later receives the mining output in ERC-20 representation of BTC \(imBTC\) upon contract settlement. Honeylemon contracts are built upon Market Protocol and 0x Protocol v3. 
+The Honeylemon 28-Day BTC Mining Revenue Contract is a forward-like product that settles to the market-wide block reward and fees per Terahash over 28 days as published in the BTC Mining Revenue Index \(BTC\_MRI\), with a 125% max revenue cap for the buyer. The buyer pays a fixed price in stable coin \(USDT\) upfront and later receives the mining output in ERC-20 representation of BTC \(imBTC\) upon contract settlement. Honeylemon contracts are built upon Market Protocol and 0x Protocol v3. 
 
 Honeylemon dApp provides a simple mobile-first trading interface and a one-sided orderbook, allowing miners or traders in general to be short both network difficulty and BTC price. This allows miners to receive cash upfront and hedge mining risks, and gives buyers the opportunity to receive mining payoff without the hassle of mining operations.
 
