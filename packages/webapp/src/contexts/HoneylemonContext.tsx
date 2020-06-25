@@ -81,7 +81,7 @@ export type HoneylemonProviderProps = {
 
 export type OpenOrderMetadata = {
   orderHash: string,
-  remainingFillableMakerAssetAmount: BigNumber,
+  remainingFillableMakerAssetAmount: number,
   price: BigNumber
   //TODO: update to use types once definitions have been added
 }

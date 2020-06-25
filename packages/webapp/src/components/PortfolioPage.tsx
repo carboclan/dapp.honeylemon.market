@@ -319,7 +319,7 @@ const PorfolioPage: React.SFC = () => {
                         {openOrdersMetadata && openOrdersMetadata?.map((order, i) =>
                           <TableRow key={order.orderHash}>
                             <TableCell>${Number(order?.price.dividedBy(CONTRACT_DURATION).toString()).toLocaleString(undefined, {maximumFractionDigits: PAYMENT_TOKEN_DECIMALS})}</TableCell>
-                            <TableCell align='center'>{order?.remainingFillableMakerAssetAmount.toLocaleString()}</TableCell>
+                            <TableCell align='center'>{order?.remainingFillableMakerAssetAmount.toLocaleString(undefined, {maximumFractionDigits: 0})}</TableCell>
                             <TableCell align='right'>
                               <Info onClick={() => handleShowUnfilledOfferDetails(i)} />
                             </TableCell>
@@ -329,7 +329,7 @@ const PorfolioPage: React.SFC = () => {
                           <TableRow>
                             <TableCell colSpan={3} align='center' className={classes.placeholderRow}>
                               No Unfilled Positions (Open Orders)
-                          </TableCell>
+                            </TableCell>
                           </TableRow>
                         }
                       </TableBody>
@@ -529,8 +529,8 @@ const PorfolioPage: React.SFC = () => {
                       <TableHead>
                         <TableRow>
                           <TableCell>Settlement Date</TableCell>
-                          <TableCell align='center'>Received </TableCell>
-                          <TableCell align='center'>Paid</TableCell>
+                          <TableCell align='center'>Received ({PAYMENT_TOKEN_NAME}</TableCell>
+                          <TableCell align='center'>Paid ({COLLATERAL_TOKEN_NAME})</TableCell>
                           <TableCell align='center'>Status</TableCell>
                           <TableCell></TableCell>
                         </TableRow>

@@ -30,6 +30,7 @@ const UnfilledOfferModal: React.SFC<UnfilledOfferModalProps> = ({ open, onClose,
     honeylemonService,
     CONTRACT_DURATION,
     CONTRACT_COLLATERAL_RATIO,
+    COLLATERAL_TOKEN_NAME,
     portfolioData: {
       openOrders
     },
@@ -80,7 +81,7 @@ const UnfilledOfferModal: React.SFC<UnfilledOfferModalProps> = ({ open, onClose,
                 Limit Price
               </TableCell>
               <TableCell align='right'>
-                {Number(offer?.price.dividedBy(CONTRACT_DURATION).toString()).toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}
+                ${Number(offer?.price.dividedBy(CONTRACT_DURATION).toString()).toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}/TH/Day
               </TableCell>
             </TableRow>
             <TableRow>
@@ -88,7 +89,7 @@ const UnfilledOfferModal: React.SFC<UnfilledOfferModalProps> = ({ open, onClose,
                 Duration
               </TableCell>
               <TableCell align='right'>
-                {CONTRACT_DURATION}
+                {CONTRACT_DURATION} Days
               </TableCell>
             </TableRow>
             <TableRow>
@@ -96,7 +97,7 @@ const UnfilledOfferModal: React.SFC<UnfilledOfferModalProps> = ({ open, onClose,
                 Quantity
               </TableCell>
               <TableCell align='right'>
-                {offer.remainingFillableMakerAssetAmount.toLocaleString()}
+                {offer.remainingFillableMakerAssetAmount.toLocaleString()} TH
               </TableCell>
             </TableRow>
             <TableRow>
@@ -104,7 +105,7 @@ const UnfilledOfferModal: React.SFC<UnfilledOfferModalProps> = ({ open, onClose,
                 Contract Total
               </TableCell>
               <TableCell align='right'>
-                {(offer.price * offer.remainingFillableMakerAssetAmount).toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}
+                $ {(offer.price * offer.remainingFillableMakerAssetAmount).toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}
               </TableCell>
             </TableRow>
             <TableRow>
@@ -118,7 +119,7 @@ const UnfilledOfferModal: React.SFC<UnfilledOfferModalProps> = ({ open, onClose,
                     { 
                       maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS 
                     })
-                }
+                } {COLLATERAL_TOKEN_NAME}
               </TableCell>
             </TableRow>
             <TableRow>
@@ -127,9 +128,9 @@ const UnfilledOfferModal: React.SFC<UnfilledOfferModalProps> = ({ open, onClose,
             </TableRow>
           </TableBody>
         </Table>
-        <Grid container alignItems='center' spacing={2}>
+        <Grid container justify='center' spacing={2}>
           <Grid item>
-            <Button onClick={() => cancelOpenOrder(offer.orderHash)} disabled={isCancelling} className={classes.cancelButton}>
+            <Button onClick={() => cancelOpenOrder(offer.orderHash)} disabled={isCancelling} className={classes.cancelButton} fullWidth>
               Cancel Offer &nbsp;
                 {isCancelling && <CircularProgress className={classes.loadingSpinner} size={20} />}
             </Button>
