@@ -43,11 +43,11 @@ $$
 
 ### **Index Oracle**
 
-Honeylemon admin maintains an oracle that posts BTC_MRI on-chain. This data is used by the Market Protocol smart contracts to calculate payoffs at settlement. 
+Honeylemon admin maintains an oracle that posts `BTC_MRI` on-chain. This data is used by the Market Protocol smart contracts to calculate payoffs at settlement. 
 
 Currently the oracle is centralized and operated by Honeylemon admin. The oracle component will be redesigned towards a more trustless approach in the future. The oracle currently provides two indices:
 
-* `MRI_BTC_1` 	 - used once to calculate collateral requirements upon contract creation when an offer is taken. 
+* `MRI_BTC_1`  - used once to calculate collateral requirements upon contract creation when an offer is taken. 
 * `MRI_BTC_28` - used to calculate payoffs at contract settlement.
 
  
