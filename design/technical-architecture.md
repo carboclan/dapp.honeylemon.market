@@ -1,8 +1,7 @@
 ---
 description: >-
-  This document explains the general architecture of Honellemons synthetic
-  Bitcoin mining contracts. For a full economic specification of the contracts
-  see XXX.
+  This document explains the general technical architecture of Honellemon's
+  synthetic Bitcoin mining contracts built on Ethereum.
 ---
 
 # Technical Architecture
