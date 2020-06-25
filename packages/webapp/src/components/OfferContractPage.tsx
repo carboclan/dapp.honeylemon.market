@@ -36,6 +36,7 @@ import MRIDisplay from './MRIDisplay';
 import { OpenInNew, ExpandMore } from '@material-ui/icons';
 import { Link as RouterLink } from 'react-router-dom';
 import MRIInformationModal from './MRIInformationModal';
+import dayjs from 'dayjs';
 
 const useStyles = makeStyles(({ spacing, palette, transitions }) => ({
   rightAlign: {
@@ -374,7 +375,7 @@ const OfferContractPage: React.SFC = () => {
                         Order-fill Date UTC 00:01 <br />
                         {`${CONTRACT_DURATION} Days After Start`} <br />
                         24 Hours After Expiration <br />
-                        TBC
+                        {`${dayjs().add(10,'d').format('DD-MMM-YY')}`}
                       </TableCell>
                     </TableRow>
                     <TableRow>
