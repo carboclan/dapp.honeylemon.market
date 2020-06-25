@@ -1,4 +1,4 @@
-# Financial Documentation
+# 28-Day BTC Mining Revenue Contract
 
 ## **Introduction**
 
