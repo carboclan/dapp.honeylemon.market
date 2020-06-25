@@ -121,7 +121,6 @@ const PorfolioPage: React.SFC = () => {
   const [shortCollateralForWithdraw, setShortCollateralForWithdraw] = useState<number>(0);
 
   const [isWithdrawing, setIsWithdrawing] = useState(false);
-  const [isCancelling, setIsCancelling] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const [showOpenOrders, setShowOpenOrders] = useState(false);
@@ -149,27 +148,6 @@ const PorfolioPage: React.SFC = () => {
   const handleSetActiveTab = (event: React.ChangeEvent<{}>, newValue: 'active' | 'expired') => {
     setActiveTab(newValue);
   };
-
-  const cancelOpenOrder = async (orderHash: string) => {
-    const order = openOrders?.[orderHash];
-    if (!order) {
-      console.log('This order does not exist.')
-      return;
-    }
-    setIsCancelling(true);
-
-    try {
-      await honeylemonService.getCancelOrderTx(order)
-        .awaitTransactionSuccessAsync({
-          from: address,
-          gas: 1500000
-        });
-      refreshPortfolio();
-    } catch (error) {
-      console.log(error)
-    }
-    setIsCancelling(false)
-  }
 
   const withdrawAllAvailable = async () => {
     setIsWithdrawing(true);
@@ -325,7 +303,7 @@ const PorfolioPage: React.SFC = () => {
                     }}
                     IconButtonProps={{ onClick: handleToggleOpenOrdersPanel }}>
                     <Typography variant='h6' className={classes.sectionHeadingText}>
-                      Unfilled Positions (Open Orders)
+                      Unfilled Positions (Open Offers)
                     </Typography>
                   </ExpansionPanelSummary>
                   <ExpansionPanelDetails>
@@ -340,14 +318,10 @@ const PorfolioPage: React.SFC = () => {
                       <TableBody>
                         {openOrdersMetadata && openOrdersMetadata?.map((order, i) =>
                           <TableRow key={order.orderHash}>
-                            <TableCell>${order?.price.dividedBy(CONTRACT_DURATION).toFixed(2)}</TableCell>
-                            <TableCell align='center'>{order?.remainingFillableMakerAssetAmount.toLocaleString()}</TableCell>
+                            <TableCell>${Number(order?.price.dividedBy(CONTRACT_DURATION).toString()).toLocaleString(undefined, {maximumFractionDigits: PAYMENT_TOKEN_DECIMALS})}</TableCell>
+                            <TableCell align='center'>{order?.remainingFillableMakerAssetAmount.toLocaleString(undefined, {maximumFractionDigits: 0})}</TableCell>
                             <TableCell align='right'>
                               <Info onClick={() => handleShowUnfilledOfferDetails(i)} />
-                              <Button onClick={() => cancelOpenOrder(order.orderHash)} disabled={isCancelling}>
-                                Cancel&nbsp;
-                                {isCancelling && <CircularProgress className={classes.loadingSpinner} size={20} />}
-                              </Button>
                             </TableCell>
                           </TableRow>
                         )}
@@ -355,7 +329,7 @@ const PorfolioPage: React.SFC = () => {
                           <TableRow>
                             <TableCell colSpan={3} align='center' className={classes.placeholderRow}>
                               No Unfilled Positions (Open Orders)
-                          </TableCell>
+                            </TableCell>
                           </TableRow>
                         }
                       </TableBody>
@@ -555,8 +529,8 @@ const PorfolioPage: React.SFC = () => {
                       <TableHead>
                         <TableRow>
                           <TableCell>Settlement Date</TableCell>
-                          <TableCell align='center'>Received </TableCell>
-                          <TableCell align='center'>Paid</TableCell>
+                          <TableCell align='center'>Received ({PAYMENT_TOKEN_NAME}</TableCell>
+                          <TableCell align='center'>Paid ({COLLATERAL_TOKEN_NAME})</TableCell>
                           <TableCell align='center'>Status</TableCell>
                           <TableCell></TableCell>
                         </TableRow>
@@ -613,8 +587,8 @@ const PorfolioPage: React.SFC = () => {
       }
       {unfilledOfferModalIndex > -1 &&
         <UnfilledOfferModal
-          open={showExpiredShortPositionModal}
-          onClose={() => setShowExpiredShortPositionModal(false)}
+          open={showUnfilledOfferModal}
+          onClose={() => setShowUnfilledOfferModal(false)}
           offer={openOrdersMetadata[unfilledOfferModalIndex]} />
       }
     </>
