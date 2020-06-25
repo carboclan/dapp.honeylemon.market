@@ -1,5 +1,6 @@
 import React from 'react';
 import { Typography, Dialog, DialogTitle, DialogContent, Link } from '@material-ui/core';
+import { OpenInNew } from '@material-ui/icons';
 
 interface ContractSpecificationModalProps {
   open: boolean,
@@ -105,7 +106,7 @@ const ContractSpecificationModal: React.SFC<ContractSpecificationModalProps> =
           <Typography variant='h6'>Protocols</Typography>
           <Typography variant='body2' paragraph>Market Protocol + 0x Protocol</Typography>
           <br /><br />
-          <Link href='#' target="_blank" rel='noopener' underline='always'>For more details, please refer to Honeylemon Documentation.</Link>
+          <Link href='#' target="_blank" rel='noopener' underline='always'>For more details, please refer to Honeylemon Documentation.<OpenInNew fontSize='small'/></Link>
         </DialogContent>
       </Dialog>
     )

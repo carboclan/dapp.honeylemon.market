@@ -1,5 +1,6 @@
 import React from 'react';
 import { makeStyles, Dialog, DialogTitle, DialogContent, Typography, Link } from '@material-ui/core';
+import { OpenInNew } from '@material-ui/icons';
 
 const useStyles = makeStyles(({ palette }) => ({
   mriFormula: {
@@ -41,7 +42,7 @@ const MRIInformationModal: React.SFC<MRIInformationModalProps> = ({ open, onClos
         </Typography>
         <br />
         <br />
-        <Link href='#' target="_blank" rel='noopener' underline='always'>For mathematical definition of MRI_BTC see the docs</Link>
+        <Link href='#' target="_blank" rel='noopener' underline='always'>For mathematical definition of MRI_BTC see the docs.<OpenInNew fontSize='small'/></Link>
       </DialogContent>
     </Dialog>
   )
