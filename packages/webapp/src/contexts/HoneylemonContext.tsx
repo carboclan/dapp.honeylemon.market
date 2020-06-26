@@ -154,10 +154,6 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
     }
   }
 
-  function sleep(ms: number) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-  }
-
   const approveToken = async (tokenType: TokenType, amount?: number): Promise<void> => {
     debugger;
     try {

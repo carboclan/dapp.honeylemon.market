@@ -90,8 +90,10 @@ function AppWrapper(props: { children: ReactNode }) {
   const location = useLocation();
   const [open, setOpen] = React.useState(false);
   const { isReady, address, network, ethBalance, resetOnboard } = useOnboard();
-  const { isDsProxyDeployed, dsProxyAddress, deployDSProxyContract } = useHoneylemon();
   const {
+    isDsProxyDeployed, 
+    dsProxyAddress, 
+    deployDSProxyContract,
     collateralTokenBalance,
     collateralTokenAllowance,
     COLLATERAL_TOKEN_DECIMALS,
