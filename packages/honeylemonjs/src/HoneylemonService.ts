@@ -20,8 +20,7 @@ const TH_DECIMALS = 0; // TH has 6 decimals
 const PAYMENT_TOKEN_DECIMALS = 6; // USDT has 6 decimals
 const COLLATERAL_TOKEN_DECIMALS = 8; // imBTC has 8 decimals
 const SHIFT_PRICE_BY = TH_DECIMALS - PAYMENT_TOKEN_DECIMALS;
-// const CONTRACT_DURATION = 28; // Days
-const CONTRACT_DURATION = 2; // 2 day for Kovan deployment
+const CONTRACT_DURATION = 28; // Days
 
 class HoneylemonService {
   subgraphClient: any;
@@ -304,8 +303,8 @@ class HoneylemonService {
     return !!allowance.isGreaterThanOrEqualTo(amount);
   }
 
-  async approveCollateralToken(makerAddress, amount) {
-    amount = amount || new BigNumber(2).pow(256).minus(1);
+  async approveCollateralToken(makerAddress, amount: Number) {
+    amount = new BigNumber(amount) || new BigNumber(2).pow(256).minus(1);
     return await this.collateralToken
       .approve(this.minterBridgeAddress, amount)
       .awaitTransactionSuccessAsync({
@@ -326,7 +325,7 @@ class HoneylemonService {
   }
 
   async approvePaymentToken(takerAddress, amount) {
-    amount = amount || new BigNumber(2).pow(256).minus(1);
+    amount = new BigNumber(amount) || new BigNumber(2).pow(256).minus(1);
     return await this.paymentToken
       .approve(this.contractWrappers.contractAddresses.erc20Proxy, amount)
       .awaitTransactionSuccessAsync({

@@ -3,6 +3,7 @@ import { Dialog, DialogTitle, DialogContent, TableRow, Table, TableCell, TableBo
 import { useHoneylemon } from '../contexts/HoneylemonContext';
 import { BigNumber } from '@0x/utils';
 import dayjs from 'dayjs';
+import { CONTRACT_DURATION } from '@honeylemon/honeylemonjs/lib/src';
 
 interface ActiveShortPositionModalProps {
   open: boolean,
@@ -20,7 +21,7 @@ const ActiveShortPositionModal: React.SFC<ActiveShortPositionModalProps> = ({ op
           <TableBody>
             <TableRow>
               <TableCell>Contract Position</TableCell>
-              <TableCell>{position.contractName}</TableCell>
+              <TableCell align='right'>{position.contractName}</TableCell>
             </TableRow>
             <TableRow>
               <TableCell>
@@ -33,7 +34,7 @@ const ActiveShortPositionModal: React.SFC<ActiveShortPositionModalProps> = ({ op
                 {dayjs(position.startDate).format('DD-MMM-YY')} <br />
                 {dayjs(position.expirationDate).format('DD-MMM-YY')} <br />
                 {dayjs(position.settlementDate).format('DD-MMM-YY')} <br />
-                {position.daysToExpiration}
+                {position.daysToExpiration} days
               </TableCell>
             </TableRow>
             <TableRow>
@@ -42,13 +43,13 @@ const ActiveShortPositionModal: React.SFC<ActiveShortPositionModalProps> = ({ op
                 Quantity
               </TableCell>
               <TableCell align='right'>
-                $ {new BigNumber(position.price).toPrecision(PAYMENT_TOKEN_DECIMALS)} /TH/Day <br />
+                $ {new BigNumber(position.price).dividedBy(CONTRACT_DURATION).toPrecision(PAYMENT_TOKEN_DECIMALS)} /TH/Day <br />
                 {position.qtyToMint.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })} TH
               </TableCell>
             </TableRow>
             <TableRow>
-              <TableCell>Received ({PAYMENT_TOKEN_NAME})</TableCell>
-              <TableCell align='right'>$ {position.totalCost.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}</TableCell>
+              <TableCell>Received</TableCell>
+              <TableCell align='right'>{position.totalCost.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })} {PAYMENT_TOKEN_NAME}</TableCell>
             </TableRow>
             <TableRow>
               <TableCell>

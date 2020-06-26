@@ -19,7 +19,7 @@ export type OnboardContext = {
   onboard?: OnboardApi,
   address?: string,
   network?: number,
-  balance?: number,
+  ethBalance?: number,
   wallet?: Wallet,
   notify?: NotifyApi,
   isReady: boolean,
@@ -32,7 +32,7 @@ const OnboardContext = React.createContext<OnboardContext | undefined>(undefined
 function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
   const [address, setAddress] = useState<string | undefined>(undefined)
   const [network, setNetwork] = useState<number | undefined>(undefined)
-  const [balance, setBalance] = useState<number | undefined>(undefined)
+  const [ethBalance, setEthBalance] = useState<number | undefined>(undefined)
   const [wallet, setWallet] = useState<Wallet | undefined>(undefined)
   const [onboard, setOnboard] = useState<OnboardApi | undefined>(undefined)
   const [isReady, setIsReady] = useState<boolean>(false);
@@ -76,6 +76,7 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
               { walletName: "torus" },
               { walletName: "status" },
               { walletName: "unilogin" },
+              { walletName: "authereum"},
               {
                 walletName: 'ledger',
                 rpcUrl: infuraRpc
@@ -93,8 +94,8 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
             network: setNetwork,
             balance: (balance: string) => {
               (balance)
-                ? setBalance(Number(fromWei(balance, 'ether')))
-                : setBalance(0);
+                ? setEthBalance(Number(fromWei(balance, 'ether')))
+                : setEthBalance(0);
             },
             wallet: (wallet: Wallet) => {
               if (wallet.provider) {
@@ -141,7 +142,7 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
     <OnboardContext.Provider value={{
       address: address,
       network: network,
-      balance: balance,
+      ethBalance: ethBalance,
       wallet: wallet,
       onboard: onboard,
       notify: notify,

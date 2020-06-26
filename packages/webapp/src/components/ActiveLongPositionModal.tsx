@@ -11,7 +11,7 @@ interface ActiveLongPositionModalProps {
 };
 
 const ActiveLongPositionModal: React.SFC<ActiveLongPositionModalProps> = ({ open, onClose, position }) => {
-  const { PAYMENT_TOKEN_DECIMALS, PAYMENT_TOKEN_NAME, COLLATERAL_TOKEN_NAME, COLLATERAL_TOKEN_DECIMALS } = useHoneylemon();
+  const { PAYMENT_TOKEN_DECIMALS, PAYMENT_TOKEN_NAME, COLLATERAL_TOKEN_NAME, COLLATERAL_TOKEN_DECIMALS, CONTRACT_DURATION } = useHoneylemon();
   return (
     <Dialog open={open} onClose={onClose} aria-labelledby="dialog-title" maxWidth='sm' fullWidth>
       <DialogTitle id="dialog-title">Active Long Position Details</DialogTitle>
@@ -33,7 +33,7 @@ const ActiveLongPositionModal: React.SFC<ActiveLongPositionModalProps> = ({ open
                 {dayjs(position.startDate).format('DD-MMM-YY')} <br />
                 {dayjs(position.expirationDate).format('DD-MMM-YY')} <br />
                 {dayjs(position.settlementDate).format('DD-MMM-YY')} <br />
-                {position.daysToExpiration}
+                {position.daysToExpiration} days
               </TableCell>
             </TableRow>
             <TableRow>
@@ -42,16 +42,16 @@ const ActiveLongPositionModal: React.SFC<ActiveLongPositionModalProps> = ({ open
                 Quantity
               </TableCell>
               <TableCell align='right'>
-                $ {new BigNumber(position.price).toPrecision(PAYMENT_TOKEN_DECIMALS)} /TH/Day<br />
+                $ {new BigNumber(position.price).dividedBy(CONTRACT_DURATION).toPrecision(PAYMENT_TOKEN_DECIMALS)} /TH/Day<br />
                 {position.qtyToMint.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })} TH
               </TableCell>
             </TableRow>
             <TableRow>
-              <TableCell>Cost ({PAYMENT_TOKEN_NAME})</TableCell>
-              <TableCell align='right'>$ {position.totalCost.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}</TableCell>
+              <TableCell>Cost</TableCell>
+              <TableCell align='right'>{position.totalCost.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })} {PAYMENT_TOKEN_NAME}</TableCell>
             </TableRow>
             <TableRow>
-              <TableCell>Receivable ({COLLATERAL_TOKEN_NAME})</TableCell>
+              <TableCell>Receivable</TableCell>
               <TableCell align='right'>{position.pendingReward.toLocaleString(undefined, { maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS })} {COLLATERAL_TOKEN_NAME}</TableCell>
             </TableRow>
           </TableBody>
