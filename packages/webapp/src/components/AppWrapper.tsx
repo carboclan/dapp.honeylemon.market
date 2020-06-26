@@ -81,6 +81,9 @@ const useStyles = makeStyles(({ transitions, palette, mixins, spacing }) => ({
   },
   contentWrapper: {
     paddingBottom: footerHeight,
+  },
+  approveTokenSwitch: {
+    transform: 'rotate(-90deg)'
   }
 }));
 
@@ -294,7 +297,7 @@ function AppWrapper(props: { children: ReactNode }) {
             <ListItemIcon>
               <img src='imBtc.png' style={{ width: '40px' }} alt='imbtc logo' />
             </ListItemIcon>
-            <Switch checked={(collateralTokenAllowance > 0)} onChange={() => handleToggleTokenApproval(TokenType.CollateralToken)} />
+            <Switch className={classes.approveTokenSwitch} checked={(collateralTokenAllowance > 0)} onChange={() => handleToggleTokenApproval(TokenType.CollateralToken)} />
             <ListItemText
               primary={`${collateralTokenBalance.toLocaleString(undefined, {
                 useGrouping: true,
@@ -313,7 +316,7 @@ function AppWrapper(props: { children: ReactNode }) {
             <ListItemIcon>
               <img src='usdt.png' style={{ width: '40px' }} alt='usdt logo' />
             </ListItemIcon>
-            <Switch checked={(paymentTokenAllowance > 0)} onChange={() => handleToggleTokenApproval(TokenType.PaymentToken)} />
+            <Switch className={classes.approveTokenSwitch} checked={(paymentTokenAllowance > 0)} onChange={() => handleToggleTokenApproval(TokenType.PaymentToken)} />
             <ListItemText
               primary={`${paymentTokenBalance.toLocaleString(undefined, {
                 useGrouping: true,
