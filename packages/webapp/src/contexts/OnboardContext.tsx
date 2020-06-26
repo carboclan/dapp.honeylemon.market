@@ -76,6 +76,7 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
               { walletName: "torus" },
               { walletName: "status" },
               { walletName: "unilogin" },
+              { walletName: "authereum"},
               {
                 walletName: 'ledger',
                 rpcUrl: infuraRpc
