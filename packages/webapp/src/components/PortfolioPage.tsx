@@ -19,7 +19,7 @@ import {
   CircularProgressProps,
   Box,
 } from '@material-ui/core';
-import { ExpandMore, RadioButtonUnchecked, InfoRounded, Info } from '@material-ui/icons';
+import { ExpandMore, RadioButtonUnchecked, Info } from '@material-ui/icons';
 import { useOnboard } from '../contexts/OnboardContext';
 import { useHoneylemon, PositionStatus } from '../contexts/HoneylemonContext';
 import { usePrevious } from '../helpers/usePrevious';
@@ -108,7 +108,6 @@ const PorfolioPage: React.SFC = () => {
   } = useHoneylemon();
 
   const {
-    openOrders,
     openOrdersMetadata,
     activeLongPositions,
     activeShortPositions,

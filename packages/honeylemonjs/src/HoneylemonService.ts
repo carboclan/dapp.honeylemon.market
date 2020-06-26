@@ -303,8 +303,8 @@ class HoneylemonService {
     return !!allowance.isGreaterThanOrEqualTo(amount);
   }
 
-  async approveCollateralToken(makerAddress, amount) {
-    amount = amount || new BigNumber(2).pow(256).minus(1);
+  async approveCollateralToken(makerAddress, amount: Number) {
+    amount = new BigNumber(amount) || new BigNumber(2).pow(256).minus(1);
     return await this.collateralToken
       .approve(this.minterBridgeAddress, amount)
       .awaitTransactionSuccessAsync({
@@ -325,7 +325,7 @@ class HoneylemonService {
   }
 
   async approvePaymentToken(takerAddress, amount) {
-    amount = amount || new BigNumber(2).pow(256).minus(1);
+    amount = new BigNumber(amount) || new BigNumber(2).pow(256).minus(1);
     return await this.paymentToken
       .approve(this.contractWrappers.contractAddresses.erc20Proxy, amount)
       .awaitTransactionSuccessAsync({

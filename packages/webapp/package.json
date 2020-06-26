@@ -13,7 +13,7 @@
     "@truffle/debug-utils": "4.1.1",
     "@types/fontfaceobserver": "0.0.6",
     "bnc-notify": "1.2.1",
-    "bnc-onboard": "1.9.4",
+    "bnc-onboard": "1.10.0",
     "dayjs": "1.8.26",
     "dotenv": "8.2.0",
     "eslint": "6.8.0",

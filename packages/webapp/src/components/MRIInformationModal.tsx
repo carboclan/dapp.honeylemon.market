@@ -1,13 +1,7 @@
 import React from 'react';
-import { makeStyles, Dialog, DialogTitle, DialogContent, Typography, Link } from '@material-ui/core';
+import { Dialog, DialogTitle, DialogContent, Typography, Link } from '@material-ui/core';
 import { OpenInNew } from '@material-ui/icons';
 
-const useStyles = makeStyles(({ palette }) => ({
-  mriFormula: {
-    // filter: 'invert(1)',
-    width: '100%'
-  }
-}))
 
 interface MRIInformationModalProps {
   open: boolean,
@@ -15,8 +9,6 @@ interface MRIInformationModalProps {
 };
 
 const MRIInformationModal: React.SFC<MRIInformationModalProps> = ({ open, onClose }: MRIInformationModalProps) => {
-  const classes = useStyles();
-
   return (
     <Dialog open={open} onClose={onClose} aria-labelledby="dialog-title" maxWidth='sm' fullWidth>
       <DialogTitle id="dialog-title">BTC Mining Revenue Index (MRI_BTC_d)</DialogTitle>
@@ -28,7 +20,7 @@ const MRIInformationModal: React.SFC<MRIInformationModalProps> = ({ open, onClos
         </Typography>
         <br />
         <br />
-        <img src="HistoricMRIGraph.jpg" style={{ width: '100%' }} />
+        <img src="HistoricMRIGraph.jpg" style={{ width: '100%' }} alt='Historic MRI'/>
         <br />
         <br />
         <Typography variant='subtitle1'>Design Considerations</Typography>
