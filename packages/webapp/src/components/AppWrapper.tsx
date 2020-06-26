@@ -1,14 +1,14 @@
 import React, { ReactNode, useRef } from 'react';
 import clsx from 'clsx';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
-import { Drawer, AppBar, Toolbar, Divider, IconButton, Typography, ListItem, ListItemIcon, ListItemText, List, Avatar, Link } from '@material-ui/core';
+import { Drawer, AppBar, Toolbar, Divider, IconButton, Typography, ListItem, ListItemIcon, ListItemText, List, Avatar, Link, Button, Switch } from '@material-ui/core';
 import { Menu, ChevronLeft, ChevronRight, AccountBalance, Assessment, MonetizationOn, Whatshot, ExitToApp, Home } from '@material-ui/icons';
 import Blockies from 'react-blockies';
 
 import { forwardTo } from '../helpers/history';
 import { ReactComponent as HoneyLemonLogo } from '../images/honeylemon-logo.svg';
 import { useOnboard } from '../contexts/OnboardContext';
-import { useHoneylemon } from '../contexts/HoneylemonContext';
+import { useHoneylemon, TokenType } from '../contexts/HoneylemonContext';
 import Footer from './Footer';
 import { useOnClickOutside } from '../helpers/useOnClickOutside';
 import { networkName } from '../helpers/ethereumNetworkUtils';
@@ -90,14 +90,17 @@ function AppWrapper(props: { children: ReactNode }) {
   const location = useLocation();
   const [open, setOpen] = React.useState(false);
   const { isReady, address, network, ethBalance, resetOnboard } = useOnboard();
-  const { isDsProxyDeployed, dsProxyAddress } = useHoneylemon();
+  const { isDsProxyDeployed, dsProxyAddress, deployDSProxyContract } = useHoneylemon();
   const {
     collateralTokenBalance,
+    collateralTokenAllowance,
     COLLATERAL_TOKEN_DECIMALS,
     COLLATERAL_TOKEN_NAME,
     paymentTokenBalance,
+    paymentTokenAllowance,
     PAYMENT_TOKEN_DECIMALS,
     PAYMENT_TOKEN_NAME,
+    approveToken
   } = useHoneylemon();
 
   const handleLogout = () => {
@@ -117,6 +120,23 @@ function AppWrapper(props: { children: ReactNode }) {
   const handleNavigate = (path: string) => {
     forwardTo(path);
     setOpen(false);
+  }
+
+  const handleToggleTokenApproval = (tokenType: TokenType) => {
+    switch (tokenType) {
+      case TokenType.CollateralToken: {
+        (collateralTokenAllowance === 0) ? 
+          approveToken(TokenType.CollateralToken) :
+          approveToken(TokenType.CollateralToken, 0);
+        break;
+      }
+      case TokenType.PaymentToken: {
+        (paymentTokenAllowance === 0) ? 
+          approveToken(TokenType.PaymentToken) :
+          approveToken(TokenType.PaymentToken, 0);
+        break;
+      }
+    }    
   }
 
   const ref = useRef(null);
@@ -244,13 +264,7 @@ function AppWrapper(props: { children: ReactNode }) {
               </ListItemText>
             </ListItem> :
             <ListItem>
-              <ListItemText
-                primaryTypographyProps={{
-                  align: 'right',
-                  noWrap: true
-                }}>
-                No honeylemon vault deployed
-              </ListItemText>
+              <Button onClick={deployDSProxyContract} fullWidth>Deploy honeylemon vault</Button>
             </ListItem>
           }
         </List>
@@ -278,6 +292,7 @@ function AppWrapper(props: { children: ReactNode }) {
             <ListItemIcon>
               <img src='imBtc.png' style={{ width: '40px' }} alt='imbtc logo' />
             </ListItemIcon>
+            <Switch checked={(collateralTokenAllowance > 0)} onChange={() => handleToggleTokenApproval(TokenType.CollateralToken)} />
             <ListItemText
               primary={`${collateralTokenBalance.toLocaleString(undefined, {
                 useGrouping: true,
@@ -296,6 +311,7 @@ function AppWrapper(props: { children: ReactNode }) {
             <ListItemIcon>
               <img src='usdt.png' style={{ width: '40px' }} alt='usdt logo' />
             </ListItemIcon>
+            <Switch checked={(paymentTokenAllowance > 0)} onChange={() => handleToggleTokenApproval(TokenType.PaymentToken)} />
             <ListItemText
               primary={`${paymentTokenBalance.toLocaleString(undefined, {
                 useGrouping: true,
