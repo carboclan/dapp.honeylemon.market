@@ -106,7 +106,7 @@ const ContractSpecificationModal: React.SFC<ContractSpecificationModalProps> =
           <Typography variant='h6'>Protocols</Typography>
           <Typography variant='body2' paragraph>Market Protocol + 0x Protocol</Typography>
           <br /><br />
-          <Link href='#' target="_blank" rel='noopener' underline='always'>For more details, please refer to Honeylemon Documentation.<OpenInNew fontSize='small'/></Link>
+          <Link href='https://docs.honeylemon.market/btc-mining-revenue-contract-1#contract-specifications' target="_blank" rel='noopener' underline='always'>For more details, please refer to Honeylemon Documentation.<OpenInNew fontSize='small'/></Link>
         </DialogContent>
       </Dialog>
     )

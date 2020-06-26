@@ -20,7 +20,6 @@ const TH_DECIMALS = 0; // TH has 6 decimals
 const PAYMENT_TOKEN_DECIMALS = 6; // USDT has 6 decimals
 const COLLATERAL_TOKEN_DECIMALS = 8; // imBTC has 8 decimals
 const SHIFT_PRICE_BY = TH_DECIMALS - PAYMENT_TOKEN_DECIMALS;
-const CONTRACT_DURATION = 28; // Days
 
 class HoneylemonService {
   subgraphClient: any;
@@ -37,6 +36,7 @@ class HoneylemonService {
   collateralToken: any;
   paymentToken: any;
   marketContractProxy: any;
+  contractDuration: number;
   constructor(
     apiUrl,
     subgraphUrl,
@@ -45,7 +45,8 @@ class HoneylemonService {
     minterBridgeAddress,
     marketContractProxyAddress,
     collateralTokenAddress,
-    paymentTokenAddress
+    paymentTokenAddress,
+    contractDuration
   ) {
     this.subgraphClient = new GraphQLClient(subgraphUrl);
     this.minterBridgeAddress =
@@ -56,7 +57,7 @@ class HoneylemonService {
     this.paymentTokenAddress = paymentTokenAddress || PaymentToken.networks[chainId].address;
     this.provider = provider;
     this.chainId = chainId;
-
+    this.contractDuration = contractDuration;
     this.contractWrappers = new ContractWrappers(this.provider, { chainId });
 
     // Calculate asset data
@@ -501,7 +502,7 @@ class HoneylemonService {
         shortPositions: []
       };
 
-    const contracts = await this.getContracts(CONTRACT_DURATION);
+    const contracts = await this.getContracts(this.contractDuration);
 
     // TODO: additional processing, calculate total price by iterating over fills
     const shortPositionsProcessed = await this._processPositionsData(
@@ -621,7 +622,7 @@ class HoneylemonService {
     return positions;
   }
 
-  async getContracts(last = CONTRACT_DURATION) {
+  async getContracts(last = this.contractDuration) {
     const { contracts } = await this.subgraphClient.request(CONTRACTS_QUERY, { last });
     return contracts;
   }
@@ -766,5 +767,4 @@ export {
   COLLATERAL_TOKEN_DECIMALS,
   POSITIONS_QUERY,
   CONTRACTS_QUERY,
-  CONTRACT_DURATION
 };
