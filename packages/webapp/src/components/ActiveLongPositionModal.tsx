@@ -33,7 +33,7 @@ const ActiveLongPositionModal: React.SFC<ActiveLongPositionModalProps> = ({ open
                 {dayjs(position.startDate).format('DD-MMM-YY')} <br />
                 {dayjs(position.expirationDate).format('DD-MMM-YY')} <br />
                 {dayjs(position.settlementDate).format('DD-MMM-YY')} <br />
-                {position.daysToExpiration}
+                {position.daysToExpiration} days
               </TableCell>
             </TableRow>
             <TableRow>

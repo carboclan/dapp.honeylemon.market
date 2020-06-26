@@ -34,7 +34,7 @@ const ActiveShortPositionModal: React.SFC<ActiveShortPositionModalProps> = ({ op
                 {dayjs(position.startDate).format('DD-MMM-YY')} <br />
                 {dayjs(position.expirationDate).format('DD-MMM-YY')} <br />
                 {dayjs(position.settlementDate).format('DD-MMM-YY')} <br />
-                {position.daysToExpiration}
+                {position.daysToExpiration} days
               </TableCell>
             </TableRow>
             <TableRow>
@@ -48,8 +48,8 @@ const ActiveShortPositionModal: React.SFC<ActiveShortPositionModalProps> = ({ op
               </TableCell>
             </TableRow>
             <TableRow>
-              <TableCell>Received ({PAYMENT_TOKEN_NAME})</TableCell>
-              <TableCell align='right'>$ {position.totalCost.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}</TableCell>
+              <TableCell>Received</TableCell>
+              <TableCell align='right'>{position.totalCost.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })} {PAYMENT_TOKEN_NAME}</TableCell>
             </TableRow>
             <TableRow>
               <TableCell>
