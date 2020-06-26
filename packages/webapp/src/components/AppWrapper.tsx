@@ -89,7 +89,7 @@ function AppWrapper(props: { children: ReactNode }) {
   const theme = useTheme();
   const location = useLocation();
   const [open, setOpen] = React.useState(false);
-  const { isReady, address, network, resetOnboard } = useOnboard();
+  const { isReady, address, network, ethBalance, resetOnboard } = useOnboard();
   const { isDsProxyDeployed, dsProxyAddress } = useHoneylemon();
   const {
     collateralTokenBalance,
@@ -212,6 +212,10 @@ function AppWrapper(props: { children: ReactNode }) {
               primaryTypographyProps={{
                 align: 'right',
                 noWrap: true
+              }}
+              secondary='Your Wallet'
+              secondaryTypographyProps={{
+                align: 'right'
               }}>
               <Link href={`https://${networkName(network)}.etherscan.io/address/${address}`} target="_blank" rel='noopener' underline='always' >
                 {displayAddress(address || '0x', 20)}
@@ -252,6 +256,24 @@ function AppWrapper(props: { children: ReactNode }) {
         </List>
         <Divider />
         <List>
+          <ListItem>
+            <ListItemIcon>
+              <img src='eth.png' style={{ width: '40px' }} alt='eth logo' />
+            </ListItemIcon>
+            <ListItemText
+              primary={`${(ethBalance || 0).toLocaleString(undefined, {
+                useGrouping: true,
+                maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS,
+              })}`}
+              secondary='ETH'
+              primaryTypographyProps={{
+                align: 'right',
+                noWrap: true,
+              }}
+              secondaryTypographyProps={{
+                align: 'right'
+              }} />
+          </ListItem>
           <ListItem>
             <ListItemIcon>
               <img src='imBtc.png' style={{ width: '40px' }} alt='imbtc logo' />
