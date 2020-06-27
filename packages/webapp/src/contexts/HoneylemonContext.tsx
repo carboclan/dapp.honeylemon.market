@@ -350,7 +350,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
     return () => {
       clearInterval(poller);
     }
-  }, [orderbookService])
+  }, [orderbookService, contractDuration])
 
 
   // Market Data Poller
