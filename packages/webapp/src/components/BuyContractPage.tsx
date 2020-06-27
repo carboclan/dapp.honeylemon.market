@@ -233,7 +233,6 @@ const BuyContractPage: React.SFC = () => {
     try {
       // TODO: I dont think this should be hardcoded in here
       const gasPrice = 5e9; // 5 GWEI
-
       const tx = await honeylemonService.getFillOrdersTx(
         resultOrders,
         takerAssetFillAmounts
@@ -510,7 +509,7 @@ const BuyContractPage: React.SFC = () => {
                           <Typography variant='body2' style={{ color: '#a9a9a9' }}>
                             At settlment, you will receive mining revenue (in {COLLATERAL_TOKEN_NAME}) over {CONTRACT_DURATION} days, which 
                             is the network average BTC block reward & transaction fees (MRI) per TH over contract duration, up to a max 
-                            revenue of {`${(((expectedBTCAccrual) || 0) * CONTRACT_COLLATERAL_RATIO).toLocaleString(undefined, {maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS})} ${COLLATERAL_TOKEN_NAME}`}.
+                            revenue of <strong>{`${(((expectedBTCAccrual) || 0) * CONTRACT_COLLATERAL_RATIO).toLocaleString(undefined, {maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS})} ${COLLATERAL_TOKEN_NAME}`}.</strong>&nbsp;
                             You can withdraw your mining revenue (in {COLLATERAL_TOKEN_NAME}) after settlement.
                           </Typography>
                           <Typography variant='body2' style={{ color: '#a9a9a9' }}>
