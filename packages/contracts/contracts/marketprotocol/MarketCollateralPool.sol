@@ -26,7 +26,6 @@ import 'openzeppelin-solidity/contracts/token/ERC20/ERC20.sol';
 import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
 import 'openzeppelin-solidity/contracts/utils/ReentrancyGuard.sol';
 
-
 /// @title MarketCollateralPool
 /// @notice This collateral pool houses all of the collateral for all market contracts currently in circulation.
 /// This pool facilitates locking of collateral and minting / redemption of position tokens for that collateral.

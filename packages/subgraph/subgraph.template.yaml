@@ -41,7 +41,7 @@ dataSources:
               - PositionTokensMinted
           abis:
               - name: MarketContractProxy
-                file: ../build/contracts/MarketContractProxy.json
+                file: ../contracts/build/contracts/MarketContractProxy.json
           eventHandlers:
               - event: PositionTokensMinted(uint256,indexed uint256,string,indexed address,address,indexed address,address,address,address,address,uint256)
                 handler: handlePositionTokensMinted

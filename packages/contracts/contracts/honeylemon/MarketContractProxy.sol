@@ -13,7 +13,6 @@ import '../libraries/MathLib.sol';
 
 import './DSProxy.sol';
 
-
 /// @title Market Contract Proxy.
 /// @notice Handles the interconnection of the Market Protocol with 0x to
 /// facilitate issuance of long and short tokens at order execution.
@@ -153,7 +152,7 @@ contract MarketContractProxy is ReentrancyGuard, Ownable {
      * @notice modifier to check that a fresh daily contract has been deployed
      */
     modifier onlyIfFreshDailyContract() {
-        require(isDailyContractDeployed(), "No contract has been deployed yet today");
+        require(isDailyContractDeployed(), 'No contract has been deployed yet today');
         _;
     }
 
@@ -363,7 +362,7 @@ contract MarketContractProxy is ReentrancyGuard, Ownable {
      * @return address
      */
     function getUserAddressOrDSProxy(address inputAddress) public view returns (address) {
-    // If the user has a DSProxy wallet, return that address. Else, return their wallet address
+        // If the user has a DSProxy wallet, return that address. Else, return their wallet address
         return
             addressToDSProxy[inputAddress] == address(0)
                 ? inputAddress
@@ -377,8 +376,13 @@ contract MarketContractProxy is ReentrancyGuard, Ownable {
      * @return bool true if there is a fresh contract, false if there is not a fresh contract
      */
     function isDailyContractDeployed() public view returns (bool) {
-        uint settlementTimestamp = MarketContractMPX(getLatestMarketContract()).EXPIRATION();
-        uint oneDayFromLatestDeployment = settlementTimestamp - CONTRACT_DURATION + 60 * 60 * 24;
+        uint settlementTimestamp = MarketContractMPX(getLatestMarketContract())
+            .EXPIRATION();
+        uint oneDayFromLatestDeployment = settlementTimestamp -
+            CONTRACT_DURATION +
+            60 *
+            60 *
+            24;
         return getTime() < oneDayFromLatestDeployment;
     }
 

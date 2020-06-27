@@ -11,7 +11,6 @@
 
 pragma solidity 0.5.2;
 
-
 contract DSNote {
     event LogNote(
         bytes4 indexed sig,
@@ -36,7 +35,6 @@ contract DSNote {
     }
 }
 
-
 contract DSAuthority {
     function canCall(
         address src,
@@ -45,12 +43,10 @@ contract DSAuthority {
     ) public view returns (bool);
 }
 
-
 contract DSAuthEvents {
     event LogSetAuthority(address indexed authority);
     event LogSetOwner(address indexed owner);
 }
-
 
 contract DSAuth is DSAuthEvents {
     DSAuthority public authority;
@@ -88,7 +84,6 @@ contract DSAuth is DSAuthEvents {
         }
     }
 }
-
 
 // DSProxy
 // Allows code execution using a persistant identity This can be very
@@ -132,7 +127,6 @@ contract DSProxy is DSAuth, DSNote {
         }
     }
 }
-
 
 // DSProxyFactory
 // This factory deploys new proxy instances through build()

@@ -5,6 +5,7 @@
   "private": true,
   "dependencies": {
   },
+  "engines" : { "node" : ">=0.10.3 <0.12" } ,
   "devDependencies": {
     "chalk": "^2.0.1",
     "wsrun": "^3.6.5",
@@ -17,6 +18,7 @@
     "build:subgraph": "yarn wsrun -p @honeylemon/graph -c build",
     "build:webapp": "yarn wsrun -p @honeylemon/webapp -c build",
     "start:webapp": "yarn wsrun -p @honeylemon/webapp -c start",
+    "test:contracts": "yarn wsrun -p @honeylemon/contracts -c test",
     "clean": "rm -rf ./node_modules && rm -rf ./*/node_modules"
   },
   "workspaces": {

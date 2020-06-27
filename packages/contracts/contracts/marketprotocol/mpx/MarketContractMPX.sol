@@ -18,7 +18,6 @@ pragma solidity 0.5.2;
 
 import '../MarketContract.sol';
 
-
 /// @title MarketContractMPX - a MarketContract designed to be used with our internal oracle service
 /// @author Phil Elsasser <phil@marketprotocol.io>
 contract MarketContractMPX is MarketContract {

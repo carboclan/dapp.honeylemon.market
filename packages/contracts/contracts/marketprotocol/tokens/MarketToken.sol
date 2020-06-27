@@ -18,7 +18,6 @@ pragma solidity 0.5.2;
 
 import './UpgradableToken.sol';
 
-
 /// @title Market Token
 /// @notice Our membership token.  Users must lock tokens to enable trading for a given Market Contract
 /// as well as have a minimum balance of tokens to create new Market Contracts.

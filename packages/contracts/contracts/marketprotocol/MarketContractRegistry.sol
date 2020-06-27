@@ -19,7 +19,6 @@ pragma solidity 0.5.2;
 import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
 import './MarketContractRegistryInterface.sol';
 
-
 /// @title MarketContractRegistry
 /// @author Phil Elsasser <phil@marketprotocol.io>
 contract MarketContractRegistry is Ownable, MarketContractRegistryInterface {

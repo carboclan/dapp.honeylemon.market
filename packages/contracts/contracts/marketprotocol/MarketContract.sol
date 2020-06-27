@@ -22,7 +22,6 @@ import '../libraries/MathLib.sol';
 import '../libraries/StringLib.sol';
 import './tokens/PositionToken.sol';
 
-
 /// @title MarketContract base contract implement all needed functionality for trading.
 /// @notice this is the abstract base contract that all contracts should inherit from to
 /// implement different oracle solutions.

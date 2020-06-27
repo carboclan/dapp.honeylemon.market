@@ -13,7 +13,11 @@ module.exports = async function(deployer, network, accounts) {
   await deployer.deploy(StringLib);
   await deployer.deploy(MathLib);
   await deployer.deploy(MarketContractRegistry);
-  await deployer.link(MathLib, [MarketContractMPX, MarketCollateralPool, MarketContractFactory]);
+  await deployer.link(MathLib, [
+    MarketContractMPX,
+    MarketCollateralPool,
+    MarketContractFactory
+  ]);
   await deployer.link(StringLib, MarketContractMPX);
   await deployer.deploy(
     MarketCollateralPool,

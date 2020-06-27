@@ -1,10 +1,11 @@
 require('dotenv').config();
 const HDWalletProvider = require('@truffle/hdwallet-provider');
 const infuraApikey = '9542ce9f96be4ae08225dcde36ff1638';
-let mnemonic = ''; //require('./mnemonic');
+let mnemonic =
+  'all claim abstract hill dragon unaware young patient side rival afford quantum'; //require('./mnemonic');
 
 module.exports = {
-  contracts_directory: "./contracts",
+  contracts_directory: './contracts',
   networks: {
     development: {
       host: process.env.TRUFFLE_DEVELOP_HOST || 'localhost',

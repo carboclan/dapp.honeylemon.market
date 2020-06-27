@@ -7,9 +7,7 @@ const MarketContractProxy = artifacts.require('MarketContractProxy');
 const CollateralToken = artifacts.require('CollateralToken'); // IMBTC
 
 // Helper libraries
-const {
-  PayoutCalculator
-} = require('../../honeylemon-intergration-tests/helpers/payout-calculator');
+const { PayoutCalculator } = require('../helpers/payout-calculator.js');
 
 const ADDRESS_ZERO = '0x0000000000000000000000000000000000000000';
 

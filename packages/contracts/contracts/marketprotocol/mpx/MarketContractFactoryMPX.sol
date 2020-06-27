@@ -21,7 +21,6 @@ import '../MarketContractRegistryInterface.sol';
 
 import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
 
-
 /// @title MarketContractFactoryMPX
 /// @author Phil Elsasser <phil@marketprotocol.io>
 contract MarketContractFactoryMPX is Ownable {

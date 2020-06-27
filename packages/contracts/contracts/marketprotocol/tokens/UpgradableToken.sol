@@ -20,7 +20,6 @@ import './UpgradeableTarget.sol';
 import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
 import 'openzeppelin-solidity/contracts/token/ERC20/ERC20Burnable.sol';
 
-
 /// @title Upgradeable Token
 /// @notice allows for us to update some of the needed functionality in our tokens post deployment. Inspiration taken
 /// from Golems migrate functionality.

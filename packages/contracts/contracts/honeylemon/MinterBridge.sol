@@ -12,7 +12,6 @@ import '../marketprotocol/tokens/PositionToken.sol';
 
 import './MarketContractProxy.sol';
 
-
 contract MinterBridge is ReentrancyGuard, Ownable {
     using MathLib for uint;
     using MathLib for int;

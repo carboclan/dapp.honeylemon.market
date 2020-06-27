@@ -20,7 +20,6 @@ import 'truffle/Assert.sol';
 import '../../../contracts/marketprotocol/tokens/MarketToken.sol';
 import '../../../contracts/marketprotocol/tokens/UpgradeableTokenMock.sol';
 
-
 /// @title TestUpgradeableToken
 /// @author Phil Elsasser <phil@marketprotcol.io>
 contract TestUpgradeableToken {

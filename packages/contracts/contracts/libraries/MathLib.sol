@@ -15,7 +15,6 @@
 */
 pragma solidity 0.5.2;
 
-
 /// @title Math function library with overflow protection inspired by Open Zeppelin
 library MathLib {
     int256 constant INT256_MIN = int256((uint256(1) << 255));

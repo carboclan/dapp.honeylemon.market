@@ -19,7 +19,6 @@ pragma solidity 0.5.2;
 import './UpgradeableTarget.sol';
 import './UpgradableToken.sol';
 
-
 /// @title Upgradeable Token Mock for testing only.
 /// @notice A token to be able to test upgrade from another token
 /// @author Phil Elsasser <phil@marketprotocol.io>
