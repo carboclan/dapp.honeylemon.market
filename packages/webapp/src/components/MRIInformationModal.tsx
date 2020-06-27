@@ -34,7 +34,7 @@ const MRIInformationModal: React.SFC<MRIInformationModalProps> = ({ open, onClos
         </Typography>
         <br />
         <br />
-        <Link href='#' target="_blank" rel='noopener' underline='always'>For mathematical definition of MRI_BTC see the docs.<OpenInNew fontSize='small'/></Link>
+        <Link href='https://docs.honeylemon.market/btc-mining-revenue-contract-1#index' target="_blank" rel='noopener' underline='always'>For mathematical definition of MRI_BTC see the docs.<OpenInNew fontSize='small'/></Link>
       </DialogContent>
     </Dialog>
   )

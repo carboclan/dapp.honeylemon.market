@@ -2,7 +2,7 @@ import * as React from "react";
 import Web3 from 'web3'
 import { useState, useEffect } from "react";
 import { MetamaskSubprovider, Web3JsProvider } from '@0x/subproviders';
-import { HoneylemonService, OrderbookService, COLLATERAL_TOKEN_DECIMALS, PAYMENT_TOKEN_DECIMALS, CONTRACT_DURATION } from "@honeylemon/honeylemonjs/lib/src";
+import { HoneylemonService, OrderbookService, COLLATERAL_TOKEN_DECIMALS, PAYMENT_TOKEN_DECIMALS } from "@honeylemon/honeylemonjs/lib/src";
 import { useOnboard } from "./OnboardContext";
 import { ethers } from 'ethers';
 import dayjs from 'dayjs';
@@ -141,6 +141,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
   const [isPortfolioRefreshing, setIsPortfolioRefreshing] = useState(false);
   const [isDailyContractDeployed, setIsDailyContractDeployed] = useState(false);
   const [orderbook, setOrderbook] = useState([]);
+  const [contractDuration, setContractDuration] = useState(0);
 
   const deployDSProxyContract = async () => {
     try {
@@ -270,8 +271,10 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
           process.env.REACT_APP_MARKET_CONTRACT_PROXY_ADDRESS,
           process.env.REACT_APP_COLLATERAL_TOKEN_ADDRESS,
           process.env.REACT_APP_PAYMENT_TOKEN_ADDRESS,
+          Number(process.env.REACT_APP_CONTRACT_DURATION),
         );
         setHoneylemonService(honeylemonService);
+        setContractDuration(honeylemonService.contractDuration);
         const collateral = await honeylemonService.getCollateralTokenAmounts(address);
         setCollateralTokenAllowance(Number(collateral.allowance.shiftedBy(-8).toString()));
         setCollateralTokenBalance(Number(collateral.balance.shiftedBy(-8).toString()));
@@ -329,7 +332,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
         try {
           const orderbookResponse = await orderbookService.getOrderbook();
           const book = orderbookResponse.asks.records.map((order: any) => ({
-            price: Number(new BigNumber(order.metaData.price).dividedBy(CONTRACT_DURATION).toString()),
+            price: Number(new BigNumber(order.metaData.price).dividedBy(contractDuration).toString()),
             quantity: Number(new BigNumber(order.order.makerAssetAmount).toString())
           }));
           setOrderbook(book)
@@ -347,7 +350,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
     return () => {
       clearInterval(poller);
     }
-  }, [orderbookService])
+  }, [orderbookService, contractDuration])
 
 
   // Market Data Poller
@@ -483,7 +486,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
         COLLATERAL_TOKEN_NAME,
         PAYMENT_TOKEN_DECIMALS,
         PAYMENT_TOKEN_NAME,
-        CONTRACT_DURATION,
+        CONTRACT_DURATION: contractDuration,
         CONTRACT_COLLATERAL_RATIO,
         paymentTokenAllowance,
         paymentTokenBalance,

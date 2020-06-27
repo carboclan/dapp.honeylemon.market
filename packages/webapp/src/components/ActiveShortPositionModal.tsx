@@ -3,7 +3,6 @@ import { Dialog, DialogTitle, DialogContent, TableRow, Table, TableCell, TableBo
 import { useHoneylemon } from '../contexts/HoneylemonContext';
 import { BigNumber } from '@0x/utils';
 import dayjs from 'dayjs';
-import { CONTRACT_DURATION } from '@honeylemon/honeylemonjs/lib/src';
 
 interface ActiveShortPositionModalProps {
   open: boolean,
@@ -12,7 +11,7 @@ interface ActiveShortPositionModalProps {
 };
 
 const ActiveShortPositionModal: React.SFC<ActiveShortPositionModalProps> = ({ open, onClose, position }) => {
-  const { PAYMENT_TOKEN_DECIMALS, PAYMENT_TOKEN_NAME, COLLATERAL_TOKEN_NAME, COLLATERAL_TOKEN_DECIMALS } = useHoneylemon();
+  const { PAYMENT_TOKEN_DECIMALS, PAYMENT_TOKEN_NAME, COLLATERAL_TOKEN_NAME, COLLATERAL_TOKEN_DECIMALS, CONTRACT_DURATION } = useHoneylemon();
   return (
     <Dialog open={open} onClose={onClose} aria-labelledby="dialog-title" maxWidth='sm' fullWidth>
       <DialogTitle id="dialog-title">Active Short Position Details</DialogTitle>
