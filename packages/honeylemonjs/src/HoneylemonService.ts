@@ -305,9 +305,9 @@ class HoneylemonService {
   }
 
   async approveCollateralToken(makerAddress, amount: Number) {
-    amount = new BigNumber(amount) || new BigNumber(2).pow(256).minus(1);
+    const approvalAmount = amount ? new BigNumber(amount) : new BigNumber(2).pow(256).minus(1);
     return await this.collateralToken
-      .approve(this.minterBridgeAddress, amount)
+      .approve(this.minterBridgeAddress, approvalAmount)
       .awaitTransactionSuccessAsync({
         from: makerAddress
       });
@@ -326,9 +326,9 @@ class HoneylemonService {
   }
 
   async approvePaymentToken(takerAddress, amount) {
-    amount = new BigNumber(amount) || new BigNumber(2).pow(256).minus(1);
+    const approvalAmount = amount ? new BigNumber(amount) : new BigNumber(2).pow(256).minus(1);
     return await this.paymentToken
-      .approve(this.contractWrappers.contractAddresses.erc20Proxy, amount)
+      .approve(this.contractWrappers.contractAddresses.erc20Proxy, approvalAmount)
       .awaitTransactionSuccessAsync({
         from: takerAddress
       });
