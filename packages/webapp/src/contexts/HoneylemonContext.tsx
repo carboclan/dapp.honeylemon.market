@@ -331,6 +331,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
       if (orderbookService) {
         try {
           const orderbookResponse = await orderbookService.getOrderbook();
+          console.log(contractDuration);
           const book = orderbookResponse.asks.records.map((order: any) => ({
             price: Number(new BigNumber(order.metaData.price).dividedBy(contractDuration).toString()),
             quantity: Number(new BigNumber(order.order.makerAssetAmount).toString())
@@ -350,7 +351,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
     return () => {
       clearInterval(poller);
     }
-  }, [orderbookService])
+  }, [orderbookService, contractDuration])
 
 
   // Market Data Poller
