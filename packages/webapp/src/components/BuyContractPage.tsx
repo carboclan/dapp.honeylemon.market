@@ -503,7 +503,7 @@ const BuyContractPage: React.SFC = () => {
                         <TableCell colSpan={2} >
                           <Typography variant='subtitle1'>WHAT DOES IT MEAN?</Typography> <br />
                           <Typography variant='body2' style={{ color: '#a9a9a9' }}>
-                            You will pay <strong>${PAYMENT_TOKEN_NAME} ${(orderValue || 0).toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}</strong> to
+                            You will pay <strong>{(orderValue || 0).toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })} {PAYMENT_TOKEN_NAME}</strong> to
                             buy <strong>{`${orderQuantity.toLocaleString()}`} TH</strong> of {CONTRACT_DURATION}-Day Mining Revenue Contracts at&nbsp;
                             <strong>{PAYMENT_TOKEN_NAME} {hashPrice.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}/TH/Day</strong>.
                           </Typography>
