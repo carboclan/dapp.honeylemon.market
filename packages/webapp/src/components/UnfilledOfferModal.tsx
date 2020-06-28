@@ -10,7 +10,7 @@ const useStyles = makeStyles(({ spacing, palette }) => ({
     width: 20,
     flexBasis: 'end',
     flexGrow: 0,
-    color: palette.secondary.main,
+    color: palette.primary.main,
   },
   cancelButton: {
     alignSelf: "center",
@@ -59,7 +59,6 @@ const UnfilledOfferModal: React.SFC<UnfilledOfferModalProps> = ({ open, onClose,
           from: address,
           gas: 1500000
         });
-      console.log('offer cancelled');
       await new Promise(resolve => {
         setTimeout(refreshPortfolio, 5000);
         resolve();

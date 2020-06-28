@@ -4,8 +4,6 @@ import { useOnboard } from '../contexts/OnboardContext';
 
 const useStyles = makeStyles(({ palette, spacing }) => ({
   button: {
-    backgroundColor: palette.secondary.main,
-    color: palette.common.black,
     paddingTop: spacing(1),
     paddingBottom: spacing(1),
     fontSize: 20,
@@ -18,7 +16,7 @@ const useStyles = makeStyles(({ palette, spacing }) => ({
     width: 20,
     flexBasis: 'end',
     flexGrow: 0,
-    color: palette.secondary.main,
+    color: palette.primary.main,
   },
 }))
 
@@ -42,6 +40,8 @@ const ConnectWalletButton: React.SFC = () => {
   if (!isReady) {
     return (
       <Button
+        color='primary'
+        variant='contained'
         onClick={() => { handleSelectWalletAndConnect() }}
         className={classes.button}
         fullWidth
