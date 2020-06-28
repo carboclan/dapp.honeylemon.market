@@ -36,7 +36,7 @@ import { forwardTo } from '../helpers/history';
 import ContractSpecificationModal from './ContractSpecificationModal'
 import dayjs from 'dayjs';
 import MRIDisplay from './MRIDisplay';
-import { OpenInNew, ExpandMore } from '@material-ui/icons';
+import { OpenInNew, ExpandMore, Info } from '@material-ui/icons';
 import { Link as RouterLink } from 'react-router-dom';
 import MRIInformationModal from './MRIInformationModal';
 import OrderbookModal from './OrderbookModal';
@@ -65,6 +65,11 @@ const useStyles = makeStyles(({ spacing, palette, transitions }) => ({
   },
   orderSummaryEstimate: {
     color: palette.secondary.main,
+    fontWeight: 'bold',
+    fontSize: 18
+  },
+  orderSummaryEstimateFootnote: {
+    color: palette.secondary.main,
   },
   orderSummaryBlur: {
     filter: 'blur(3px)',
@@ -80,12 +85,6 @@ const useStyles = makeStyles(({ spacing, palette, transitions }) => ({
   actionsContainer: {
     marginBottom: spacing(2),
   },
-  premium: {
-    color: palette.error.main,
-  },
-  discount: {
-    color: palette.success.main,
-  },
   expand: {
     transform: 'rotate(0deg)',
     marginLeft: 'auto',
@@ -96,6 +95,16 @@ const useStyles = makeStyles(({ spacing, palette, transitions }) => ({
   expandOpen: {
     transform: 'rotate(180deg)',
   },
+  viewOfferButton: {
+    borderColor: palette.secondary.main,
+    borderWidth: 2,
+    borderStyle: 'solid',
+    color: palette.secondary.main,
+    backgroundColor: '#303030',
+    '&:hover': {
+      backgroundColor: '#505050',
+    },
+  }
 }))
 
 enum BuyType { 'budget', 'quantity' };
@@ -302,7 +311,7 @@ const BuyContractPage: React.SFC = () => {
     setActiveStep(step);
   }, [skipDsProxy, isDsProxyDeployed, tokenApprovalGranted])
 
-  
+
 
   const steps = ['Deploy honeylemon vault', `Approve ${PAYMENT_TOKEN_NAME}`, 'Buy Contracts'];
 
@@ -358,7 +367,7 @@ const BuyContractPage: React.SFC = () => {
           <Typography style={{ fontWeight: 'bold' }}>Buy {CONTRACT_DURATION}-Day Mining Revenue Contract</Typography>
         </Grid>
         <Grid item xs={4} style={{ textAlign: 'end' }}>
-          <Link href='#' underline='always' onClick={() => setShowOrderbook(true)}>Order Book <OpenInNew fontSize='small' /></Link>
+          <Button onClick={() => setShowOrderbook(true)} className={classes.viewOfferButton} variant='contained'>View Offers</Button>
         </Grid>
         <Grid item xs={12}>
           <Tabs
@@ -432,7 +441,7 @@ const BuyContractPage: React.SFC = () => {
                 <Grid item xs={6} style={{ textAlign: 'right' }}>
                   <Typography variant='caption'>
                     <Link href='#' underline='always' onClick={() => setShowContractSpecificationModal(true)}>
-                      Contract Specification <OpenInNew fontSize='small' />
+                      Contract Specification <Info fontSize='small' />
                     </Link>
                   </Typography>
                 </Grid>
@@ -461,24 +470,16 @@ const BuyContractPage: React.SFC = () => {
                   </TableRow>
                   <TableRow>
                     <TableCell className={classes.orderSummaryEstimate}>
-                      Buy contract vs. Buy BTC * <br />
+                      {discountOnSpotPrice < 0 ? 'Premium' : 'Discount'} vs. Buy BTC * <br />
                       Estimated Revenue *
                   </TableCell>
-                    <TableCell align='right' className={clsx(classes.orderSummaryEstimate,
-                      { [classes.premium]: discountOnSpotPrice < 0 },
-                      { [classes.discount]: discountOnSpotPrice > 0 })}>
-                      {discountOnSpotPrice.toLocaleString(undefined, { maximumFractionDigits: 2 })}% <br />
+                    <TableCell align='right' className={classes.orderSummaryEstimate}>                      
+                      {Math.abs(discountOnSpotPrice).toLocaleString(undefined, { maximumFractionDigits: 2 })}% <br />
                       {`${(expectedBTCAccrual).toLocaleString(undefined, { maximumFractionDigits: 8 })} imBTC`}
                     </TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell className={classes.orderSummaryEstimate}>
-                    </TableCell>
-                    <TableCell align='right' className={classes.orderSummaryEstimate}>
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell colSpan={2}>
+                    <TableCell colSpan={2} className={classes.orderSummaryEstimateFootnote}>
                       * Assuming constant price and difficulty
                     </TableCell>
                   </TableRow>
