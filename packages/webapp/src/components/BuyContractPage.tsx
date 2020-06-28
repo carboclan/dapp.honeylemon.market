@@ -74,6 +74,9 @@ const useStyles = makeStyles(({ spacing, palette, transitions }) => ({
     marginRight: spacing(1),
     color: palette.common.black,
   },
+  skipButton: {
+    backgroundColor: palette.warning.main
+  },
   actionsContainer: {
     marginBottom: spacing(2),
   },
@@ -588,6 +591,15 @@ const BuyContractPage: React.SFC = () => {
                       disabled={txActive}>
                       Cancel
                     </Button>
+                    {activeStep === 0 &&
+                      <Button
+                        variant="contained"
+                        onClick={handleSkipDsProxy}
+                        className={clsx(classes.button, classes.skipButton)}
+                        disabled={txActive}>
+                        Skip
+                      </Button>
+                    }
                     <Button
                       variant="contained"
                       color="primary"
@@ -597,16 +609,6 @@ const BuyContractPage: React.SFC = () => {
                       {getStepButtonLabel(activeStep)}&nbsp;
                         {txActive && <CircularProgress className={classes.loadingSpinner} size={20} />}
                     </Button>
-                    {activeStep === 0 &&
-                      <Button
-                        variant="contained"
-                        color="secondary"
-                        onClick={handleSkipDsProxy}
-                        className={classes.button}
-                        disabled={txActive}>
-                        Skip
-                      </Button>
-                    }
                   </div>
                 </StepContent>
               </Step>
