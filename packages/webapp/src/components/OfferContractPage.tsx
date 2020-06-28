@@ -148,6 +148,7 @@ const OfferContractPage: React.SFC = () => {
 
   const errors = [];
   !sufficientCollateral && errors.push(`You do not have enough ${COLLATERAL_TOKEN_NAME} to proceed`);
+  totalContractPrice < 100 && errors.push('Transaction fees are high at the moment')
 
   const handleCloseOfferDialog = () => {
     setShowOfferModal(false);
