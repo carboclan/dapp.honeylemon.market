@@ -277,7 +277,6 @@ const PorfolioPage: React.SFC = () => {
             value={activeTab}
             onChange={handleSetActiveTab}
             indicatorColor="secondary"
-            textColor="secondary"
             variant='fullWidth'>
             <Tab label="Active" value='active' />
             <Tab label="Expired" value='expired' />
