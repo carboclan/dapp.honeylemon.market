@@ -68,7 +68,7 @@ const useStyles = makeStyles(({ spacing, palette, transitions }) => ({
     color: palette.common.black,
   },
   skipButton: {
-    color: palette.warning.main
+    backgroundColor: palette.warning.main
   },
   actionsContainer: {
     marginBottom: spacing(2),
