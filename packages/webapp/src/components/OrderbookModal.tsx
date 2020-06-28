@@ -11,7 +11,7 @@ const OrderbookModal: React.SFC<OrderbookModalProps> = ({ open, onClose }: Order
   const { orderbook, PAYMENT_TOKEN_DECIMALS, CONTRACT_DURATION } = useHoneylemon();
   return (
     <Dialog open={open} onClose={onClose} aria-labelledby="dialog-title" maxWidth='sm' fullWidth>
-      <DialogTitle id="dialog-title">Order Book (Offers Only)</DialogTitle>
+      <DialogTitle id="dialog-title">View Offers</DialogTitle>
       <DialogContent>
         <Typography>
           Miners can make offers and cancel before the listed offer is filled.<br />
