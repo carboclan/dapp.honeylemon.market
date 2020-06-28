@@ -74,6 +74,9 @@ const useStyles = makeStyles(({ spacing, palette, transitions }) => ({
     marginRight: spacing(1),
     color: palette.common.black,
   },
+  skipButton: {
+    backgroundColor: palette.warning.main
+  },
   actionsContainer: {
     marginBottom: spacing(2),
   },
@@ -306,7 +309,7 @@ const BuyContractPage: React.SFC = () => {
   const getStepContent = (step: number) => {
     switch (step) {
       case 0:
-        return `Deploy a honeylemon vault. This is a once-off operation. The honeylemon vault will reduce the transaction fees in future.`;
+        return `Deploy a honeylemon vault. The honeylemon vault will reduce the transaction fees paid when redeeming in future. This step is optional. This is a once-off operation.`;
       case 1:
         return `Approve ${PAYMENT_TOKEN_NAME}. This is a once-off operation`;
       case 2:
@@ -588,6 +591,15 @@ const BuyContractPage: React.SFC = () => {
                       disabled={txActive}>
                       Cancel
                     </Button>
+                    {activeStep === 0 &&
+                      <Button
+                        variant="contained"
+                        onClick={handleSkipDsProxy}
+                        className={clsx(classes.button, classes.skipButton)}
+                        disabled={txActive}>
+                        Skip
+                      </Button>
+                    }
                     <Button
                       variant="contained"
                       color="primary"
@@ -597,16 +609,6 @@ const BuyContractPage: React.SFC = () => {
                       {getStepButtonLabel(activeStep)}&nbsp;
                         {txActive && <CircularProgress className={classes.loadingSpinner} size={20} />}
                     </Button>
-                    {activeStep === 0 &&
-                      <Button
-                        variant="contained"
-                        color="secondary"
-                        onClick={handleSkipDsProxy}
-                        className={classes.button}
-                        disabled={txActive}>
-                        Skip
-                      </Button>
-                    }
                   </div>
                 </StepContent>
               </Step>
