@@ -308,12 +308,12 @@ const BuyContractPage: React.SFC = () => {
 
 
 
-  const steps = ['Deploy honeylemon vault', `Approve ${PAYMENT_TOKEN_NAME}`, 'Buy Contracts'];
+  const steps = ['Create honeylemon vault', `Approve ${PAYMENT_TOKEN_NAME}`, 'Buy Contracts'];
 
   const getStepContent = (step: number) => {
     switch (step) {
       case 0:
-        return `Deploy a honeylemon vault. The honeylemon vault will reduce the transaction fees paid when redeeming in future. This step is optional. This is a once-off operation.`;
+        return `Create a honeylemon vault. The honeylemon vault will reduce the transaction fees paid when redeeming in future. This step is optional. This is a once-off operation.`;
       case 1:
         return `Approve ${PAYMENT_TOKEN_NAME}. This is a once-off operation`;
       case 2:

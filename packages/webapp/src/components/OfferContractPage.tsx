@@ -204,12 +204,12 @@ const OfferContractPage: React.SFC = () => {
     setActiveStep(step);
   }, [skipDsProxy, isDsProxyDeployed, tokenApprovalGranted])
 
-  const steps = ['Deploy honeylemon vault', `Approve ${COLLATERAL_TOKEN_NAME} collateral`, 'Offer Contract'];
+  const steps = ['Create honeylemon vault', `Approve ${COLLATERAL_TOKEN_NAME} collateral`, 'Offer Contract'];
 
   const getStepContent = (step: number) => {
     switch (step) {
       case 0:
-        return `Deploy a honeylemon vault. The honeylemon vault will reduce the transaction fees paid when redeeming in future. This step is optional. This is a once-off operation.`;
+        return `Create a honeylemon vault. The honeylemon vault will reduce the transaction fees paid when redeeming in future. This step is optional. This is a once-off operation.`;
       case 1:
         return `Approve Honeylemon smart contract access to your wallet’s ${COLLATERAL_TOKEN_NAME} allowance. Your ${COLLATERAL_TOKEN_NAME} collateral will be auto-deposited into smart contract based on the MRI value at the time of your order being filled.`;
       case 2:
