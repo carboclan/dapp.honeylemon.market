@@ -12,8 +12,6 @@ dayjs.extend(duration);
 
 const useStyles = makeStyles(({ palette, spacing }) => ({
   button: {
-    backgroundColor: palette.secondary.main,
-    color: palette.common.black,
     paddingTop: spacing(1),
     paddingBottom: spacing(1),
     fontSize: 20,
@@ -24,7 +22,7 @@ const useStyles = makeStyles(({ palette, spacing }) => ({
   countdownDigit: {
     border: 3,
     borderStyle: 'solid',
-    borderColor: palette.secondary.main,
+    borderColor: palette.primary.main,
     borderRadius: 4,
     fontSize: 20,
     fontWeight: 'bold',
@@ -42,16 +40,16 @@ const useStyles = makeStyles(({ palette, spacing }) => ({
     width: 20,
     flexBasis: 'end',
     flexGrow: 0,
-    color: palette.secondary.main,
+    color: palette.primary.main,
   },
   mriInfo: {
     textAlign: 'center',
   },
   liveStatsButton: {
-    borderColor: palette.secondary.main,
+    borderColor: palette.primary.main,
     borderWidth: 2,
     borderStyle: 'solid',
-    color: palette.secondary.main,
+    color: palette.primary.main,
     backgroundColor: '#303030',
   }
 }))
@@ -139,11 +137,11 @@ const HomePage: React.SFC = () => {
         {isReady &&
           <>
             <Typography variant='h5' style={{ fontWeight: 'bold' }}>I am a BTC investor.</Typography>
-            <Typography color='secondary' style={{ fontWeight: 'bold' }} gutterBottom>Pay Cash & Earn Mining Revenue in BTC</Typography>
+            <Typography color='primary' style={{ fontWeight: 'bold' }} gutterBottom>Pay Cash & Earn Mining Revenue in BTC</Typography>
             <Button onClick={() => forwardTo('/buy')} className={classes.button}>BUY CONTRACTS</Button>
             <Divider className={classes.divider} />
             <Typography variant='h5' style={{ fontWeight: 'bold' }}>I am a BTC miner.</Typography>
-            <Typography color='secondary' style={{ fontWeight: 'bold' }}>Hedge Mining Risk & Get Cash Upfront</Typography>
+            <Typography color='primary' style={{ fontWeight: 'bold' }}>Hedge Mining Risk & Get Cash Upfront</Typography>
             <Button onClick={() => forwardTo('/offer')} className={classes.button}>OFFER CONTRACTS</Button>
           </>
         }

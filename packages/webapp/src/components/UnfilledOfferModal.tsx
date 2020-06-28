@@ -10,7 +10,7 @@ const useStyles = makeStyles(({ spacing, palette }) => ({
     width: 20,
     flexBasis: 'end',
     flexGrow: 0,
-    color: palette.secondary.main,
+    color: palette.primary.main,
   },
   cancelButton: {
     alignSelf: "center",

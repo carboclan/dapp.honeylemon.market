@@ -54,22 +54,22 @@ const useStyles = makeStyles(({ spacing, palette, transitions }) => ({
     width: 20,
     flexBasis: 'end',
     flexGrow: 0,
-    color: palette.secondary.main,
+    color: palette.primary.main,
   },
   errorList: {
-    color: palette.secondary.main,
+    color: palette.primary.main,
   },
   orderSummary: {
     padding: spacing(2),
     width: '100%'
   },
   orderSummaryEstimate: {
-    color: palette.secondary.main,
+    color: palette.primary.main,
     fontWeight: 'bold',
     fontSize: 18
   },
   orderSummaryEstimateFootnote: {
-    color: palette.secondary.main,
+    color: palette.primary.main,
   },
   orderSummaryBlur: {
     filter: 'blur(3px)',
@@ -77,10 +77,6 @@ const useStyles = makeStyles(({ spacing, palette, transitions }) => ({
   button: {
     marginTop: spacing(1),
     marginRight: spacing(1),
-    color: palette.common.black,
-  },
-  skipButton: {
-    backgroundColor: palette.warning.main
   },
   actionsContainer: {
     marginBottom: spacing(2),
@@ -96,10 +92,10 @@ const useStyles = makeStyles(({ spacing, palette, transitions }) => ({
     transform: 'rotate(180deg)',
   },
   viewOfferButton: {
-    borderColor: palette.secondary.main,
+    borderColor: palette.primary.main,
     borderWidth: 2,
     borderStyle: 'solid',
-    color: palette.secondary.main,
+    color: palette.primary.main,
     backgroundColor: '#303030',
     '&:hover': {
       backgroundColor: '#505050',
@@ -281,7 +277,6 @@ const BuyContractPage: React.SFC = () => {
   }
 
   const handleSkipDsProxy = () => {
-    console.log('skipping proxy deployment');
     setSkipDsProxy(true)
   }
 
@@ -403,7 +398,7 @@ const BuyContractPage: React.SFC = () => {
               disabled={showBuyModal} />
           </Grid>
           <Grid item xs={3} className={classes.rightAlign}>
-            <Typography style={{ fontWeight: 'bold' }} color='secondary'>{PAYMENT_TOKEN_NAME}</Typography>
+            <Typography style={{ fontWeight: 'bold' }} color='primary'>{PAYMENT_TOKEN_NAME}</Typography>
           </Grid>
         </TabPanel>
         <TabPanel value={buyType} index={2}>
@@ -426,7 +421,7 @@ const BuyContractPage: React.SFC = () => {
               disabled={showBuyModal} />
           </Grid>
           <Grid item xs={3} className={classes.rightAlign}>
-            <Typography style={{ fontWeight: 'bold' }} color='secondary'>TH for {CONTRACT_DURATION} Days</Typography>
+            <Typography style={{ fontWeight: 'bold' }} color='primary'>TH for {CONTRACT_DURATION} Days</Typography>
           </Grid>
         </TabPanel>
         <Grid item xs={12} container>
@@ -568,6 +563,7 @@ const BuyContractPage: React.SFC = () => {
         }
         <Grid item xs={12}>
           <Button
+            color='primary'
             fullWidth
             onClick={handleStartBuy}
             disabled={!isValid || showBuyModal || resultOrders.length === 0}>
@@ -587,21 +583,6 @@ const BuyContractPage: React.SFC = () => {
                   <Typography>{getStepContent(index)}</Typography>
                   <div className={classes.actionsContainer}>
                     <Button
-                      onClick={handleCloseBuyDialog}
-                      className={classes.button}
-                      disabled={txActive}>
-                      Cancel
-                    </Button>
-                    {activeStep === 0 &&
-                      <Button
-                        variant="contained"
-                        onClick={handleSkipDsProxy}
-                        className={clsx(classes.button, classes.skipButton)}
-                        disabled={txActive}>
-                        Skip
-                      </Button>
-                    }
-                    <Button
                       variant="contained"
                       color="primary"
                       onClick={() => handleStepperNext(activeStep)}
@@ -609,6 +590,22 @@ const BuyContractPage: React.SFC = () => {
                       disabled={txActive}>
                       {getStepButtonLabel(activeStep)}&nbsp;
                         {txActive && <CircularProgress className={classes.loadingSpinner} size={20} />}
+                    </Button>
+                    {activeStep === 0 &&
+                      <Button
+                        variant="contained"
+                        color='secondary'
+                        onClick={handleSkipDsProxy}
+                        className={classes.button}
+                        disabled={txActive}>
+                        Skip
+                      </Button>
+                    }
+                    <Button
+                      onClick={handleCloseBuyDialog}
+                      className={classes.button}
+                      disabled={txActive}>
+                      Cancel
                     </Button>
                   </div>
                 </StepContent>

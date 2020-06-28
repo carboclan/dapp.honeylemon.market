@@ -15,7 +15,7 @@ SL(Highcharts);
 const useStyles = makeStyles(({ palette }) => ({
   pageHeader: {
     fontWeight: 'bold',
-    color: palette.secondary.main,
+    color: palette.primary.main,
   },
   winner: {
     width: 20,

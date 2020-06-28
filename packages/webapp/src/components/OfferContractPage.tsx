@@ -57,10 +57,10 @@ const useStyles = makeStyles(({ spacing, palette, transitions }) => ({
     width: 20,
     flexBasis: 'end',
     flexGrow: 0,
-    color: palette.secondary.main,
+    color: palette.primary.main,
   },
   errorList: {
-    color: palette.secondary.main,
+    color: palette.primary.main,
   },
   button: {
     marginTop: spacing(1),
@@ -255,7 +255,7 @@ const OfferContractPage: React.SFC = () => {
           <MRIDisplay />
         </Grid>
         <Grid item xs={8}>
-          <Typography style={{ fontWeight: 'bold' }} color='secondary'>Offer a {CONTRACT_DURATION}-day Mining Revenue Contract</Typography>
+          <Typography style={{ fontWeight: 'bold' }} color='primary'>Offer a {CONTRACT_DURATION}-day Mining Revenue Contract</Typography>
         </Grid>
         <Grid item xs={4} style={{ textAlign: 'end' }}>
           <Link href='#' underline='always' onClick={() => setShowOrderbook(true)}>Order Book <OpenInNew fontSize='small' /></Link>
@@ -290,7 +290,7 @@ const OfferContractPage: React.SFC = () => {
             disabled={showOfferModal} />
         </Grid>
         <Grid item xs={4} className={classes.rightAlign}>
-          <Typography style={{ fontWeight: 'bold' }} color='secondary'>/TH/Day</Typography>
+          <Typography style={{ fontWeight: 'bold' }} color='primary'>/TH/Day</Typography>
         </Grid>
         <Grid item xs={4}><Typography style={{ fontWeight: 'bold' }}>Quantity</Typography></Grid>
         <Grid item xs={4}>
@@ -320,7 +320,7 @@ const OfferContractPage: React.SFC = () => {
             disabled={showOfferModal} />
         </Grid>
         <Grid item xs={4} className={classes.rightAlign}>
-          <Typography style={{ fontWeight: 'bold' }} color='secondary'>TH</Typography>
+          <Typography style={{ fontWeight: 'bold' }} color='primary'>TH</Typography>
         </Grid>
         <Grid item xs={12} container>
           <Paper className={clsx(classes.offerSummary, {

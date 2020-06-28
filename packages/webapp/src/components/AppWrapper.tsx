@@ -28,7 +28,7 @@ const useStyles = makeStyles(({ transitions, palette, mixins, spacing }) => ({
       duration: transitions.duration.leavingScreen,
     }),
     backgroundColor: '#424242',
-    color: palette.primary.main
+    color: palette.common.white,
   },
   appBarShift: {
     width: `calc(100% - ${drawerWidth}px)`,
@@ -53,7 +53,7 @@ const useStyles = makeStyles(({ transitions, palette, mixins, spacing }) => ({
     display: 'none',
   },
   hamburger: {
-    color: palette.secondary.main,
+    color: palette.primary.main,
   },
   drawer: {
     flexShrink: 0,
@@ -269,7 +269,12 @@ function AppWrapper(props: { children: ReactNode }) {
               </ListItemText>
             </ListItem> :
             <ListItem>
-              <Button onClick={deployDSProxyContract} fullWidth>Deploy honeylemon vault</Button>
+              <Button 
+                color='primary' 
+                onClick={deployDSProxyContract} 
+                fullWidth>
+                  Create honeylemon vault
+              </Button>
             </ListItem>
           }
         </List>
