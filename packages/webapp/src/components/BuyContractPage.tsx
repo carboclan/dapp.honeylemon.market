@@ -455,7 +455,7 @@ const BuyContractPage: React.SFC = () => {
                       Duration
                     </TableCell>
                     <TableCell align='right'>
-                      ${hashPrice.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}/TH/Day<br />
+                      <strong>${hashPrice.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}/TH/Day<br /></strong>
                       {`${orderQuantity.toLocaleString()}`} TH<br />
                       {`${CONTRACT_DURATION}`} Days
                     </TableCell>
@@ -525,14 +525,14 @@ const BuyContractPage: React.SFC = () => {
                           </Typography>
                           <Typography variant='body2' style={{ color: '#a9a9a9' }}>
                             At settlment, you will receive mining revenue (in {COLLATERAL_TOKEN_NAME}) over {CONTRACT_DURATION} days, which
-                            is the network average BTC block reward & transaction fees (MRI) per TH over contract duration, up to a max
+                            is the network average BTC block reward & transaction fees (MRI_BTC) per TH over contract duration, up to a max
                             revenue of <strong>{`${(((expectedBTCAccrual) || 0) * CONTRACT_COLLATERAL_RATIO).toLocaleString(undefined, { maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS })} ${COLLATERAL_TOKEN_NAME}`}.</strong>&nbsp;
                             You can withdraw your mining revenue (in {COLLATERAL_TOKEN_NAME}) after settlement.
                           </Typography>
                           <Typography variant='body2' style={{ color: '#a9a9a9' }}>
                             You will receive the network average BTC block reward & transaction fees per TH based on the average value of
                             the <Link href='#' underline='always' onClick={() => setShowMRIInformationModal(true)}>Bitcoin Mining Revenue
-                            Index (MRI) <OpenInNew fontSize='small' /></Link> over {CONTRACT_DURATION} days starting today.
+                            Index (MRI_BTC) <OpenInNew fontSize='small' /></Link> over {CONTRACT_DURATION} days starting today.
                           </Typography>
                           <Typography variant='body2' style={{ color: '#a9a9a9' }}>
                             You may check your PNL from your Portfolio once order is placed. You can withdraw your mining revenue

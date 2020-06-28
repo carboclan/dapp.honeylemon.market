@@ -14,7 +14,8 @@ const useStyles = makeStyles(({ spacing, palette }) => ({
   },
   cancelButton: {
     alignSelf: "center",
-    backgroundColor: palette.error.main,
+    backgroundColor: palette.secondary.main,
+    padding: spacing(2),
   }
 }))
 
