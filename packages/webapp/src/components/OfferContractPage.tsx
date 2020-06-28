@@ -240,6 +240,7 @@ const OfferContractPage: React.SFC = () => {
   }
 
   const handleStartOffer = () => {
+    setSkipDsProxy(false);
     setShowOfferModal(true);
     activeStep === 2 && handleCreateOffer();
   }
@@ -460,7 +461,12 @@ const OfferContractPage: React.SFC = () => {
           </Button>
         </Grid>
       </Grid>
-      <Dialog open={showOfferModal} onClose={handleCloseOfferDialog} aria-labelledby="form-dialog-title">
+      <Dialog 
+        open={showOfferModal} 
+        onClose={handleCloseOfferDialog} 
+        aria-labelledby="form-dialog-title" 
+        disableBackdropClick 
+        disableEscapeKeyDown>
         <DialogTitle id="form-dialog-title">Create Offer</DialogTitle>
         <DialogContent>
           <Stepper activeStep={activeStep} orientation="vertical">

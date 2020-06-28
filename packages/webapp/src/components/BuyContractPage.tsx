@@ -306,8 +306,6 @@ const BuyContractPage: React.SFC = () => {
     setActiveStep(step);
   }, [skipDsProxy, isDsProxyDeployed, tokenApprovalGranted])
 
-
-
   const steps = ['Create honeylemon vault', `Approve ${PAYMENT_TOKEN_NAME}`, 'Buy Contracts'];
 
   const getStepContent = (step: number) => {
@@ -344,6 +342,7 @@ const BuyContractPage: React.SFC = () => {
   }
 
   const handleStartBuy = () => {
+    setSkipDsProxy(false);
     setShowBuyModal(true);
     activeStep === 2 && handleBuyOffer();
   }
@@ -362,7 +361,12 @@ const BuyContractPage: React.SFC = () => {
           <Typography style={{ fontWeight: 'bold' }}>Buy {CONTRACT_DURATION}-Day Mining Revenue Contract</Typography>
         </Grid>
         <Grid item xs={4} style={{ textAlign: 'end' }}>
-          <Button onClick={() => setShowOrderbook(true)} className={classes.viewOfferButton} variant='contained'>View Offers</Button>
+          <Button
+            onClick={() => setShowOrderbook(true)}
+            className={classes.viewOfferButton}
+            variant='contained'>
+            View Offers
+          </Button>
         </Grid>
         <Grid item xs={12}>
           <Tabs
@@ -457,7 +461,7 @@ const BuyContractPage: React.SFC = () => {
                   </TableRow>
                   <TableRow>
                     <TableCell>Contract Total</TableCell>
-                    <TableCell align='right'>{`${PAYMENT_TOKEN_NAME} ${(orderValue || 0).toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}`}</TableCell>
+                    <TableCell align='right'>{`${(orderValue || 0).toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })} ${PAYMENT_TOKEN_NAME}`}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>Revenue Cap</TableCell>
@@ -468,7 +472,7 @@ const BuyContractPage: React.SFC = () => {
                       {discountOnSpotPrice < 0 ? 'Premium' : 'Discount'} vs. Buy BTC * <br />
                       Estimated Revenue *
                   </TableCell>
-                    <TableCell align='right' className={classes.orderSummaryEstimate}>                      
+                    <TableCell align='right' className={classes.orderSummaryEstimate}>
                       {Math.abs(discountOnSpotPrice).toLocaleString(undefined, { maximumFractionDigits: 2 })}% <br />
                       {`${(expectedBTCAccrual).toLocaleString(undefined, { maximumFractionDigits: 8 })} imBTC`}
                     </TableCell>
@@ -564,6 +568,7 @@ const BuyContractPage: React.SFC = () => {
         <Grid item xs={12}>
           <Button
             color='primary'
+            variant='contained'
             fullWidth
             onClick={handleStartBuy}
             disabled={!isValid || showBuyModal || resultOrders.length === 0}>
@@ -572,7 +577,12 @@ const BuyContractPage: React.SFC = () => {
           </Button>
         </Grid>
       </Grid>
-      <Dialog open={showBuyModal} onClose={handleCloseBuyDialog} aria-labelledby="form-dialog-title">
+      <Dialog
+        open={showBuyModal}
+        onClose={handleCloseBuyDialog}
+        aria-labelledby="form-dialog-title"
+        disableBackdropClick
+        disableEscapeKeyDown>
         <DialogTitle id="form-dialog-title">Buy Offer</DialogTitle>
         <DialogContent>
           <Stepper activeStep={activeStep} orientation="vertical">

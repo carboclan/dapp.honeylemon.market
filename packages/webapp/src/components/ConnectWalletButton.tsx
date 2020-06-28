@@ -4,8 +4,6 @@ import { useOnboard } from '../contexts/OnboardContext';
 
 const useStyles = makeStyles(({ palette, spacing }) => ({
   button: {
-    backgroundColor: palette.primary.main,
-    color: palette.common.black,
     paddingTop: spacing(1),
     paddingBottom: spacing(1),
     fontSize: 20,
@@ -43,6 +41,7 @@ const ConnectWalletButton: React.SFC = () => {
     return (
       <Button
         color='primary'
+        variant='contained'
         onClick={() => { handleSelectWalletAndConnect() }}
         className={classes.button}
         fullWidth

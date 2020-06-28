@@ -138,11 +138,11 @@ const HomePage: React.SFC = () => {
           <>
             <Typography variant='h5' style={{ fontWeight: 'bold' }}>I am a BTC investor.</Typography>
             <Typography color='primary' style={{ fontWeight: 'bold' }} gutterBottom>Pay Cash & Earn Mining Revenue in BTC</Typography>
-            <Button onClick={() => forwardTo('/buy')} className={classes.button}>BUY CONTRACTS</Button>
+            <Button variant='contained' color='primary' onClick={() => forwardTo('/buy')} className={classes.button}>BUY CONTRACTS</Button>
             <Divider className={classes.divider} />
             <Typography variant='h5' style={{ fontWeight: 'bold' }}>I am a BTC miner.</Typography>
             <Typography color='primary' style={{ fontWeight: 'bold' }}>Hedge Mining Risk & Get Cash Upfront</Typography>
-            <Button onClick={() => forwardTo('/offer')} className={classes.button}>OFFER CONTRACTS</Button>
+            <Button variant='contained' color='primary' onClick={() => forwardTo('/offer')} className={classes.button}>OFFER CONTRACTS</Button>
           </>
         }
       </Grid>

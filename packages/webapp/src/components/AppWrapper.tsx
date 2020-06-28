@@ -271,6 +271,7 @@ function AppWrapper(props: { children: ReactNode }) {
             <ListItem>
               <Button 
                 color='primary' 
+                variant='contained'
                 onClick={deployDSProxyContract} 
                 fullWidth>
                   Create honeylemon vault

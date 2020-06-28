@@ -16,14 +16,16 @@ const theme = (createMuiTheme)({
   },
   overrides: {
     MuiButton: {
-      root: {
+      containedPrimary: {
+        color: '#000',
+        backgroundColor: '#FFE500',
         "&$disabled": {
           "backgroundColor": "#4a4622"
         },
         "&:hover": {
           "backgroundColor": "#4a4622"
         }
-      },
+      }
     },
     MuiAppBar: {
       root: {
