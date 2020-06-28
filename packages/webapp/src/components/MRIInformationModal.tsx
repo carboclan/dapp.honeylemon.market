@@ -27,8 +27,8 @@ const MRIInformationModal: React.SFC<MRIInformationModalProps> = ({ open, onClos
         <Typography variant='caption'>
         • The index MUST have a clear physical meaning.<br />
         • The index SHOULD closely replicate miners’ revenue in reality.<br /> 
-        • The index SHOULD make the contract easy for miners to trade in order to hedge the risk <br /> 
-          exposure of mining practice over some certain period of time.
+        • The index SHOULD make the contract easy for miners to trade in order to hedge the risk
+          exposure of mining practice over some certain period of time.<br />
         • The index SHOULD be consistent with the mining industry conventional practices. MRI follows 
           the mining industry convention of Full Pay-Per-Share (FPPS) approach.
         </Typography>
