@@ -157,7 +157,6 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
   }
 
   const approveToken = async (tokenType: TokenType, amount?: number): Promise<void> => {
-    debugger;
     try {
       switch (tokenType) {
         case TokenType.CollateralToken:
