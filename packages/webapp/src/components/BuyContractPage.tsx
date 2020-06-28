@@ -294,7 +294,7 @@ const BuyContractPage: React.SFC = () => {
   !isDailyContractDeployed && errors.push("New contracts are not available right now");
   !sufficientPaymentTokens && errors.push(`You do not have enough ${PAYMENT_TOKEN_NAME} to proceed`);
   !isLiquid && errors.push("There are not enough contracts available right now");
-  orderValue < 100 && errors.push('Transaction fees are high at the moment')
+  orderValue && orderValue < 100 && errors.push('Suggest to increase your contract total to above 100 USDT due to recent high fees in ethereum network. See Fees for details.')
 
   const getActiveStep = () => {
     if (!skipDsProxy && !isDsProxyDeployed) return 0;
