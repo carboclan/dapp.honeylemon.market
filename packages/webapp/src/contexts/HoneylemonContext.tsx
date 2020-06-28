@@ -70,6 +70,7 @@ export type HoneylemonContext = {
   }
   orderbook: Array<OrderSummary>;
   btcStats: any,
+  isPortfolioRefreshing: boolean;
   deployDSProxyContract(): Promise<void>;
   approveToken(tokenType: TokenType, amount?: number): Promise<void>;
   refreshPortfolio(): Promise<void>;
@@ -156,7 +157,6 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
   }
 
   const approveToken = async (tokenType: TokenType, amount?: number): Promise<void> => {
-    debugger;
     try {
       switch (tokenType) {
         case TokenType.CollateralToken:
@@ -198,54 +198,60 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
     if (!position?.contract.settlement) {
       return PositionStatus.active;
     } else {
-      if (!position.isRedeemed && !position.canRedeem ) return PositionStatus.expiredAwaitingSettlement;
+      if (!position.isRedeemed && !position.canRedeem) return PositionStatus.expiredAwaitingSettlement;
       if (!position.isRedeemed && position.canRedeem) return PositionStatus.withdrawalPending;
-      return PositionStatus.withdrawn; 
+      return PositionStatus.withdrawn;
     }
   }
 
   const getPorfolio = async () => {
-    setIsPortfolioRefreshing(true);
-    const openOrdersRes = await honeylemonService.getOpenOrders(address);
-    setOpenOrdersMetadata(openOrdersRes.records.map((openOrder: any) => openOrder.metaData))
-    setOpenOrders(Object.fromEntries(
-      openOrdersRes.records.map(((openOrder: any) => [openOrder.metaData.orderHash, {
-        ...openOrder.order,
-        expirationDate: dayjs(openOrder.order.expirationTimeSeconds.toNumber() * 1000).toDate(),
-        listingDate: dayjs(openOrder.order.expirationTimeSeconds.toNumber() * 1000).subtract(10, 'd').toDate()}]))
-    ));
-    const positions = await honeylemonService.getPositions(address);
-    const allPositions = positions.longPositions.map((lp: any) => ({
-      ...lp,
-      contractName: lp.contractName + '-long',
-    })).concat(positions.shortPositions.map((sp: any) => ({
-      ...sp,
-      contractName: sp.contractName + '-short',
-    }))).map((p: any) => {
-      return {
-      ...p,
-      daysToExpiration: Math.ceil(dayjs(p.contract.expiration * 1000).diff(dayjs(), 'd', true)),
-      pendingReward: Number(p.pendingReward?.shiftedBy(-COLLATERAL_TOKEN_DECIMALS).toString()) || 0,
-      finalReward: Number(p.finalReward?.shiftedBy(-COLLATERAL_TOKEN_DECIMALS).toString()) || 0,
-      totalCost: Number(new BigNumber(p.price).multipliedBy(p.qtyToMint).toString()),
-      totalCollateralLocked: Number(new BigNumber(p.contract.collateralPerUnit).multipliedBy(p.qtyToMint).shiftedBy(-COLLATERAL_TOKEN_DECIMALS).toString()),
-      ...parseContractName(p.contractName),
-      status: getPositionStatus(p),
-    }});
+    try {
+      setIsPortfolioRefreshing(true);
+      const openOrdersRes = await honeylemonService.getOpenOrders(address);
+      setOpenOrdersMetadata(openOrdersRes.records.map((openOrder: any) => openOrder.metaData))
+      setOpenOrders(Object.fromEntries(
+        openOrdersRes.records.map(((openOrder: any) => [openOrder.metaData.orderHash, {
+          ...openOrder.order,
+          expirationDate: dayjs(openOrder.order.expirationTimeSeconds.toNumber() * 1000).toDate(),
+          listingDate: dayjs(openOrder.order.expirationTimeSeconds.toNumber() * 1000).subtract(10, 'd').toDate()
+        }]))
+      ));
+      const positions = await honeylemonService.getPositions(address);
+      const allPositions = positions.longPositions.map((lp: any) => ({
+        ...lp,
+        contractName: lp.contractName + '-long',
+      })).concat(positions.shortPositions.map((sp: any) => ({
+        ...sp,
+        contractName: sp.contractName + '-short',
+      }))).map((p: any) => {
+        return {
+          ...p,
+          daysToExpiration: Math.ceil(dayjs(p.contract.expiration * 1000).diff(dayjs(), 'd', true)),
+          pendingReward: Number(p.pendingReward?.shiftedBy(-COLLATERAL_TOKEN_DECIMALS).toString()) || 0,
+          finalReward: Number(p.finalReward?.shiftedBy(-COLLATERAL_TOKEN_DECIMALS).toString()) || 0,
+          totalCost: Number(new BigNumber(p.price).multipliedBy(p.qtyToMint).toString()),
+          totalCollateralLocked: Number(new BigNumber(p.contract.collateralPerUnit).multipliedBy(p.qtyToMint).shiftedBy(-COLLATERAL_TOKEN_DECIMALS).toString()),
+          ...parseContractName(p.contractName),
+          status: getPositionStatus(p),
+        }
+      });
 
-    const newActiveLongPositions = allPositions.filter((p: any) => p.status === PositionStatus.active && p.type === PositionType.Long)
-    setActiveLongPositions(newActiveLongPositions);
+      const newActiveLongPositions = allPositions.filter((p: any) => p.status === PositionStatus.active && p.type === PositionType.Long)
+      setActiveLongPositions(newActiveLongPositions);
 
-    const newActiveShortPositions = allPositions.filter((p: any) => p.status === PositionStatus.active && p.type === PositionType.Short)
-    setActiveShortPositions(newActiveShortPositions);
+      const newActiveShortPositions = allPositions.filter((p: any) => p.status === PositionStatus.active && p.type === PositionType.Short)
+      setActiveShortPositions(newActiveShortPositions);
 
-    const newExpiredLongPositions = allPositions.filter((p: any) => p.status !== PositionStatus.active && p.type === PositionType.Long)
-    setExpiredLongPositions(newExpiredLongPositions);
+      const newExpiredLongPositions = allPositions.filter((p: any) => p.status !== PositionStatus.active && p.type === PositionType.Long)
+      setExpiredLongPositions(newExpiredLongPositions);
 
-    const newExpiredShortPositions = allPositions.filter((p: any) => p.status !== PositionStatus.active && p.type === PositionType.Short)
-    setExpiredShortPositions(newExpiredShortPositions);
-
-    setIsPortfolioRefreshing(false);
+      const newExpiredShortPositions = allPositions.filter((p: any) => p.status !== PositionStatus.active && p.type === PositionType.Short)
+      setExpiredShortPositions(newExpiredShortPositions);
+    } catch (error) {
+      console.log('There was an error getting the market data')
+    } finally {
+      setIsPortfolioRefreshing(false);
+    }
   }
 
   // Instantiate honeylemon service and get all initial user data
@@ -385,10 +391,8 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
     let poller: NodeJS.Timeout;
 
     const getPortfolioData = async () => {
-      try {
-        !isPortfolioRefreshing && await getPorfolio();
-      } catch (error) {
-        console.log('There was an error getting the market data')
+      if (!isPortfolioRefreshing) {
+        await getPorfolio();
       }
     }
 
@@ -511,7 +515,8 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
         btcStats,
         deployDSProxyContract,
         approveToken,
-        refreshPortfolio: getPorfolio
+        refreshPortfolio: getPorfolio,
+        isPortfolioRefreshing,
       }}>
       {children}
     </HoneylemonContext.Provider>
