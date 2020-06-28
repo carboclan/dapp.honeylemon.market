@@ -19,7 +19,7 @@ import {
   CircularProgressProps,
   Box,
 } from '@material-ui/core';
-import { ExpandMore, RadioButtonUnchecked, Info } from '@material-ui/icons';
+import { ExpandMore, RadioButtonUnchecked, MoreVert } from '@material-ui/icons';
 import { useOnboard } from '../contexts/OnboardContext';
 import { useHoneylemon, PositionStatus } from '../contexts/HoneylemonContext';
 import { usePrevious } from '../helpers/usePrevious';
@@ -311,7 +311,7 @@ const PorfolioPage: React.SFC = () => {
                             <TableCell>${Number(order?.price.dividedBy(CONTRACT_DURATION).toString()).toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}</TableCell>
                             <TableCell align='center'>{order?.remainingFillableMakerAssetAmount.toLocaleString(undefined, { maximumFractionDigits: 0 })}</TableCell>
                             <TableCell align='right'>
-                              <Info onClick={() => handleShowUnfilledOfferDetails(i)} />
+                              <MoreVert onClick={() => handleShowUnfilledOfferDetails(i)} />
                             </TableCell>
                           </TableRow>
                         )}
@@ -358,7 +358,7 @@ const PorfolioPage: React.SFC = () => {
                             </TableCell>
                             <TableCell align='center'>{position.totalCost.toLocaleString(undefined, {maximumFractionDigits: 2})}</TableCell>
                             <TableCell align='center'>{position.pendingReward.toLocaleString(undefined, {maximumFractionDigits: 2})}</TableCell>
-                            <TableCell align='right'><Info onClick={() => handleShowActiveLongPositionDetails(i)} /></TableCell>
+                            <TableCell align='right'><MoreVert onClick={() => handleShowActiveLongPositionDetails(i)} /></TableCell>
                           </TableRow>
                         )}
                         {!isPortfolioRefreshing && activeLongPositions.length === 0 &&
@@ -404,7 +404,7 @@ const PorfolioPage: React.SFC = () => {
                             </TableCell>
                             <TableCell align='center'>{position.totalCost.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}</TableCell>
                             <TableCell align='center'>{position.totalCollateralLocked.toLocaleString(undefined, { maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS })}</TableCell>
-                            <TableCell align='right'><Info onClick={() => handleShowActiveShortPositionDetails(i)} /></TableCell>
+                            <TableCell align='right'><MoreVert onClick={() => handleShowActiveShortPositionDetails(i)} /></TableCell>
                           </TableRow>
                         )}
                         {!isPortfolioRefreshing && activeShortPositions.length === 0 &&
@@ -488,7 +488,7 @@ const PorfolioPage: React.SFC = () => {
                             <TableCell align='center'>{position.totalCost.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}</TableCell>
                             <TableCell align='center'>{position.finalReward}</TableCell>
                             <TableCell align='center'>{position.status}</TableCell>
-                            <TableCell align='right'><Info onClick={() => handleShowExpiredLongPositionDetails(i)} /></TableCell>
+                            <TableCell align='right'><MoreVert onClick={() => handleShowExpiredLongPositionDetails(i)} /></TableCell>
                           </TableRow>
                         )}
                         {!isPortfolioRefreshing && expiredLongPositions.length === 0 &&
@@ -532,7 +532,7 @@ const PorfolioPage: React.SFC = () => {
                             <TableCell align='center'>{position.totalCost.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}</TableCell>
                             <TableCell align='center'>{(position.totalCollateralLocked - position.finalReward).toLocaleString(undefined, { maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS })}</TableCell>
                             <TableCell align='center'>{position.status}</TableCell>
-                            <TableCell align='right'><Info onClick={() => handleShowExpiredShortPositionDetails(i)} /></TableCell>
+                            <TableCell align='right'><MoreVert onClick={() => handleShowExpiredShortPositionDetails(i)} /></TableCell>
                           </TableRow>
                         )}
                         {!isPortfolioRefreshing && activeShortPositions.length === 0 &&
