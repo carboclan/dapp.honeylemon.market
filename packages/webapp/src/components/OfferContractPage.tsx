@@ -33,7 +33,7 @@ import { forwardTo } from '../helpers/history';
 import ContractSpecificationModal from './ContractSpecificationModal';
 import OrderbookModal from './OrderbookModal';
 import MRIDisplay from './MRIDisplay';
-import { Info, ExpandMore } from '@material-ui/icons';
+import { Info, OpenInNew, ExpandMore } from '@material-ui/icons';
 import { Link as RouterLink } from 'react-router-dom';
 import MRIInformationModal from './MRIInformationModal';
 import dayjs from 'dayjs';
