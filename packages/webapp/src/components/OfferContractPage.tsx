@@ -436,7 +436,7 @@ const OfferContractPage: React.SFC = () => {
                         <Typography variant='body2'>
                           At the end of {CONTRACT_DURATION} days your counterparty will receive the network average BTC block reward & transaction
                           fees per TH based on the average value of the <Link href='#' underline='always' onClick={() => setShowMRIInformationModal(true)}>Bitcoin Mining Revenue
-                          Index (MRI) <OpenInNew fontSize='small' /></Link> over {CONTRACT_DURATION} days up to a <strong>max capped by your collateral</strong>.
+                          Index (MRI_BTC) <OpenInNew fontSize='small' /></Link> over {CONTRACT_DURATION} days up to a <strong>max capped by your collateral</strong>.
                         </Typography>
                         <Typography variant='body2'>
                           The payoff will be directly deducted from your collateral, and you can withdraw the remainder of your collateral after settlement.
@@ -470,6 +470,7 @@ const OfferContractPage: React.SFC = () => {
         <Grid item xs={12}>
           <Button
             fullWidth
+            variant='contained'
             color='primary'
             onClick={handleStartOffer}
             disabled={hashAmount === 0 || !sufficientCollateral || showOfferModal}>
@@ -494,10 +495,13 @@ const OfferContractPage: React.SFC = () => {
                   <Typography>{getStepContent(index)}</Typography>
                   <div className={classes.actionsContainer}>
                     <Button
-                      onClick={handleCloseOfferDialog}
+                      variant="contained"
+                      color="primary"
+                      onClick={() => handleStepperNext(activeStep)}
                       className={classes.button}
                       disabled={txActive}>
-                      Cancel
+                      {getStepButtonLabel(activeStep)}&nbsp;
+                        {txActive && <CircularProgress className={classes.loadingSpinner} size={20} />}
                     </Button>
                     {activeStep === 0 &&
                       <Button
@@ -509,13 +513,10 @@ const OfferContractPage: React.SFC = () => {
                       </Button>
                     }
                     <Button
-                      variant="contained"
-                      color="primary"
-                      onClick={() => handleStepperNext(activeStep)}
+                      onClick={handleCloseOfferDialog}
                       className={classes.button}
                       disabled={txActive}>
-                      {getStepButtonLabel(activeStep)}&nbsp;
-                        {txActive && <CircularProgress className={classes.loadingSpinner} size={20} />}
+                      Cancel
                     </Button>
                   </div>
                 </StepContent>

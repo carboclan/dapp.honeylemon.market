@@ -277,7 +277,6 @@ const PorfolioPage: React.SFC = () => {
             value={activeTab}
             onChange={handleSetActiveTab}
             indicatorColor="secondary"
-            textColor="secondary"
             variant='fullWidth'>
             <Tab label="Active" value='active' />
             <Tab label="Expired" value='expired' />
@@ -311,7 +310,7 @@ const PorfolioPage: React.SFC = () => {
                             <TableCell>${Number(order?.price.dividedBy(CONTRACT_DURATION).toString()).toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}</TableCell>
                             <TableCell align='center'>{order?.remainingFillableMakerAssetAmount.toLocaleString(undefined, { maximumFractionDigits: 0 })}</TableCell>
                             <TableCell align='right'>
-                              <MoreVert onClick={() => handleShowUnfilledOfferDetails(i)} />
+                              <MoreVert onClick={() => handleShowUnfilledOfferDetails(i)} style={{ cursor: 'pointer' }} />
                             </TableCell>
                           </TableRow>
                         )}
@@ -356,9 +355,9 @@ const PorfolioPage: React.SFC = () => {
                             <TableCell align='center'>
                               <TimeRemaining totalDuration={CONTRACT_DURATION} remainingDuration={position.daysToExpiration} unitLabel='d' />
                             </TableCell>
-                            <TableCell align='center'>{position.totalCost.toLocaleString(undefined, {maximumFractionDigits: 2})}</TableCell>
-                            <TableCell align='center'>{position.pendingReward.toLocaleString(undefined, {maximumFractionDigits: 2})}</TableCell>
-                            <TableCell align='right'><MoreVert onClick={() => handleShowActiveLongPositionDetails(i)} /></TableCell>
+                            <TableCell align='center'>{position.totalCost.toLocaleString(undefined, { maximumFractionDigits: 2 })}</TableCell>
+                            <TableCell align='center'>{position.pendingReward.toLocaleString(undefined, { maximumFractionDigits: 2 })}</TableCell>
+                            <TableCell align='right'><MoreVert onClick={() => handleShowActiveLongPositionDetails(i)} style={{ cursor: 'pointer' }} /></TableCell>
                           </TableRow>
                         )}
                         {!isPortfolioRefreshing && activeLongPositions.length === 0 &&
@@ -404,7 +403,7 @@ const PorfolioPage: React.SFC = () => {
                             </TableCell>
                             <TableCell align='center'>{position.totalCost.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}</TableCell>
                             <TableCell align='center'>{position.totalCollateralLocked.toLocaleString(undefined, { maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS })}</TableCell>
-                            <TableCell align='right'><MoreVert onClick={() => handleShowActiveShortPositionDetails(i)} /></TableCell>
+                            <TableCell align='right'><MoreVert onClick={() => handleShowActiveShortPositionDetails(i)} style={{ cursor: 'pointer' }} /></TableCell>
                           </TableRow>
                         )}
                         {!isPortfolioRefreshing && activeShortPositions.length === 0 &&
@@ -488,7 +487,7 @@ const PorfolioPage: React.SFC = () => {
                             <TableCell align='center'>{position.totalCost.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}</TableCell>
                             <TableCell align='center'>{position.finalReward}</TableCell>
                             <TableCell align='center'>{position.status}</TableCell>
-                            <TableCell align='right'><MoreVert onClick={() => handleShowExpiredLongPositionDetails(i)} /></TableCell>
+                            <TableCell align='right'><MoreVert onClick={() => handleShowExpiredLongPositionDetails(i)} style={{ cursor: 'pointer' }} /></TableCell>
                           </TableRow>
                         )}
                         {!isPortfolioRefreshing && expiredLongPositions.length === 0 &&
@@ -532,7 +531,7 @@ const PorfolioPage: React.SFC = () => {
                             <TableCell align='center'>{position.totalCost.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}</TableCell>
                             <TableCell align='center'>{(position.totalCollateralLocked - position.finalReward).toLocaleString(undefined, { maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS })}</TableCell>
                             <TableCell align='center'>{position.status}</TableCell>
-                            <TableCell align='right'><MoreVert onClick={() => handleShowExpiredShortPositionDetails(i)} /></TableCell>
+                            <TableCell align='right'><MoreVert onClick={() => handleShowExpiredShortPositionDetails(i)} style={{ cursor: 'pointer' }} /></TableCell>
                           </TableRow>
                         )}
                         {!isPortfolioRefreshing && activeShortPositions.length === 0 &&
@@ -563,7 +562,7 @@ const PorfolioPage: React.SFC = () => {
           onClose={() => setShowActiveShortPositionModal(false)}
           position={activeShortPositions[activeShortPositionModalIndex]} />
       }
-      {expiredLongPositionModalIndex > -1 && expiredLongPositions[expiredLongPositionModalIndex] && 
+      {expiredLongPositionModalIndex > -1 && expiredLongPositions[expiredLongPositionModalIndex] &&
         <ExpiredLongPositionModal
           open={showExpiredLongPositionModal}
           onClose={() => setShowExpiredLongPositionModal(false)}
