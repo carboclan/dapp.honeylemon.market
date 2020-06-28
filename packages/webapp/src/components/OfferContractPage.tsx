@@ -67,6 +67,9 @@ const useStyles = makeStyles(({ spacing, palette, transitions }) => ({
     marginRight: spacing(1),
     color: palette.common.black,
   },
+  skipButton: {
+    backgroundColor: palette.warning.main
+  },
   actionsContainer: {
     marginBottom: spacing(2),
   },
@@ -115,6 +118,8 @@ const OfferContractPage: React.SFC = () => {
   const [showOfferDetails, setShowOfferDetails] = useState(false);
   const [showOrderbook, setShowOrderbook] = useState(false);
   const [showMRIInformationModal, setShowMRIInformationModal] = useState(false);
+  const [skipDsProxy, setSkipDsProxy] = useState(false);
+  const [activeStep, setActiveStep] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -184,13 +189,20 @@ const OfferContractPage: React.SFC = () => {
     setTxActive(false);
   }
 
+  const handleSkipDsProxy = () => {
+    setSkipDsProxy(true)
+  }
+
   const getActiveStep = () => {
-    if (!isDsProxyDeployed) return 0;
+    if (!skipDsProxy && !isDsProxyDeployed) return 0;
     if (!tokenApprovalGranted) return 1;
     return 2;
   };
 
-  const activeStep = getActiveStep();
+  useEffect(() => {
+    const step = getActiveStep();
+    setActiveStep(step);
+  }, [skipDsProxy, isDsProxyDeployed, tokenApprovalGranted])
 
   const steps = ['Deploy honeylemon vault', `Approve ${COLLATERAL_TOKEN_NAME} collateral`, 'Offer Contract'];
 
@@ -464,6 +476,15 @@ const OfferContractPage: React.SFC = () => {
                       disabled={txActive}>
                       Cancel
                     </Button>
+                    {activeStep === 0 &&
+                      <Button
+                        variant="contained"
+                        onClick={handleSkipDsProxy}
+                        className={clsx(classes.button, classes.skipButton)}
+                        disabled={txActive}>
+                        Skip
+                      </Button>
+                    }
                     <Button
                       variant="contained"
                       color="primary"
