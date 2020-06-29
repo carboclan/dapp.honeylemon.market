@@ -1,7 +1,7 @@
 const PaymentToken = artifacts.require('PaymentToken');
 
 module.exports = async function(deployer, network, accounts) {
-  if (network == 'skip-migrations') return;
+  if (network == 'skip-migrations' || network == 'mainnet' || network == 'mainnet-fork') return;
 
   // Deploy USDC token (mock)
   await deployer.deploy(PaymentToken, 'USDC', 'USDC', '10000000000000', 6);
