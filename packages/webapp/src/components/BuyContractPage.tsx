@@ -441,7 +441,7 @@ const BuyContractPage: React.SFC = () => {
                 <Grid item xs={6} style={{ textAlign: 'right' }}>
                   <Typography variant='caption'>
                     <Link href='#' underline='always' onClick={() => setShowContractSpecificationModal(true)}>
-                      Contract Specification <Info fontSize='small' />
+                      Contract Specs <Info fontSize='small' />
                     </Link>
                   </Typography>
                 </Grid>
@@ -532,7 +532,7 @@ const BuyContractPage: React.SFC = () => {
                           <Typography variant='body2' style={{ color: '#a9a9a9' }}>
                             You will receive the network average BTC block reward & transaction fees per TH based on the average value of
                             the <Link href='#' underline='always' onClick={() => setShowMRIInformationModal(true)}>Bitcoin Mining Revenue
-                            Index (MRI_BTC) <OpenInNew fontSize='small' /></Link> over {CONTRACT_DURATION} days starting today.
+                            Index (MRI_BTC) <Info fontSize='small' /></Link> over {CONTRACT_DURATION} days starting today.
                           </Typography>
                           <Typography variant='body2' style={{ color: '#a9a9a9' }}>
                             You may check your PNL from your Portfolio once order is placed. You can withdraw your mining revenue
