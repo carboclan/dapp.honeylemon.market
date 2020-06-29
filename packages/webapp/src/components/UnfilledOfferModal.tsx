@@ -10,11 +10,11 @@ const useStyles = makeStyles(({ spacing, palette }) => ({
     width: 20,
     flexBasis: 'end',
     flexGrow: 0,
-    color: palette.secondary.main,
+    color: palette.primary.main,
   },
   cancelButton: {
     alignSelf: "center",
-    backgroundColor: palette.error.main,
+    backgroundColor: palette.secondary.main,
   }
 }))
 
@@ -24,7 +24,7 @@ interface UnfilledOfferModalProps {
   offer: any,
 };
 
-const UnfilledOfferModal: React.SFC<UnfilledOfferModalProps> = ({ open, onClose, offer }) => {
+const UnfilledOfferModal: React.SFC<UnfilledOfferModalProps> = ({ open, onClose, offer }: UnfilledOfferModalProps) => {
   const {
     PAYMENT_TOKEN_DECIMALS,
     honeylemonService,
@@ -43,7 +43,7 @@ const UnfilledOfferModal: React.SFC<UnfilledOfferModalProps> = ({ open, onClose,
   const classes = useStyles();
 
   const [isCancelling, setIsCancelling] = useState(false);
-  const offerData = openOrders?.[offer.orderHash];
+  const offerData = offer && openOrders?.[offer.orderHash];
 
   const cancelOpenOrder = async (orderHash: string) => {
     const order = openOrders?.[orderHash];
@@ -59,7 +59,11 @@ const UnfilledOfferModal: React.SFC<UnfilledOfferModalProps> = ({ open, onClose,
           from: address,
           gas: 1500000
         });
-      refreshPortfolio();
+      await new Promise(resolve => {
+        setTimeout(refreshPortfolio, 5000);
+        resolve();
+      })
+      onClose();
     } catch (error) {
       console.log(error)
     }
@@ -97,7 +101,7 @@ const UnfilledOfferModal: React.SFC<UnfilledOfferModalProps> = ({ open, onClose,
                 Quantity
               </TableCell>
               <TableCell align='right'>
-                {offer.remainingFillableMakerAssetAmount.toLocaleString()} TH
+                {offer?.remainingFillableMakerAssetAmount.toLocaleString()} TH
               </TableCell>
             </TableRow>
             <TableRow>
@@ -105,19 +109,19 @@ const UnfilledOfferModal: React.SFC<UnfilledOfferModalProps> = ({ open, onClose,
                 Contract Total
               </TableCell>
               <TableCell align='right'>
-                $ {(offer.price * offer.remainingFillableMakerAssetAmount).toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}
+                $ {(offer?.price * offer?.remainingFillableMakerAssetAmount).toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}
               </TableCell>
             </TableRow>
             <TableRow>
               <TableCell>Estimated Collateral</TableCell>
               <TableCell align='right'>
-                {(currentMRI * 
-                  offer.remainingFillableMakerAssetAmount * 
-                  CONTRACT_DURATION * 
+                {(currentMRI *
+                  offer?.remainingFillableMakerAssetAmount *
+                  CONTRACT_DURATION *
                   CONTRACT_COLLATERAL_RATIO).toLocaleString(
-                    undefined, 
-                    { 
-                      maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS 
+                    undefined,
+                    {
+                      maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS
                     })
                 } {COLLATERAL_TOKEN_NAME}
               </TableCell>
@@ -128,9 +132,9 @@ const UnfilledOfferModal: React.SFC<UnfilledOfferModalProps> = ({ open, onClose,
             </TableRow>
           </TableBody>
         </Table>
-        <Grid container justify='center' spacing={2}>
+        <Grid container justify='center' spacing={2} style={{padding: 16}}>
           <Grid item>
-            <Button onClick={() => cancelOpenOrder(offer.orderHash)} disabled={isCancelling} className={classes.cancelButton} fullWidth>
+            <Button onClick={() => cancelOpenOrder(offer?.orderHash)} disabled={isCancelling} className={classes.cancelButton} fullWidth>
               Cancel Offer &nbsp;
                 {isCancelling && <CircularProgress className={classes.loadingSpinner} size={20} />}
             </Button>

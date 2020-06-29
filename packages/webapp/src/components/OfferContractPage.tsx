@@ -33,7 +33,7 @@ import { forwardTo } from '../helpers/history';
 import ContractSpecificationModal from './ContractSpecificationModal';
 import OrderbookModal from './OrderbookModal';
 import MRIDisplay from './MRIDisplay';
-import { OpenInNew, ExpandMore } from '@material-ui/icons';
+import { Info, OpenInNew, ExpandMore } from '@material-ui/icons';
 import { Link as RouterLink } from 'react-router-dom';
 import MRIInformationModal from './MRIInformationModal';
 import dayjs from 'dayjs';
@@ -57,15 +57,17 @@ const useStyles = makeStyles(({ spacing, palette, transitions }) => ({
     width: 20,
     flexBasis: 'end',
     flexGrow: 0,
-    color: palette.secondary.main,
+    color: palette.primary.main,
   },
   errorList: {
-    color: palette.secondary.main,
+    color: palette.primary.main,
   },
   button: {
     marginTop: spacing(1),
     marginRight: spacing(1),
-    color: palette.common.black,
+  },
+  skipButton: {
+    backgroundColor: palette.warning.main
   },
   actionsContainer: {
     marginBottom: spacing(2),
@@ -80,6 +82,16 @@ const useStyles = makeStyles(({ spacing, palette, transitions }) => ({
   expandOpen: {
     transform: 'rotate(180deg)',
   },
+  viewOfferButton: {
+    borderColor: palette.primary.main,
+    borderWidth: 2,
+    borderStyle: 'solid',
+    color: palette.primary.main,
+    backgroundColor: '#303030',
+    '&:hover': {
+      backgroundColor: '#505050',
+    },
+  }
 }))
 
 const OfferContractPage: React.SFC = () => {
@@ -115,6 +127,8 @@ const OfferContractPage: React.SFC = () => {
   const [showOfferDetails, setShowOfferDetails] = useState(false);
   const [showOrderbook, setShowOrderbook] = useState(false);
   const [showMRIInformationModal, setShowMRIInformationModal] = useState(false);
+  const [skipDsProxy, setSkipDsProxy] = useState(false);
+  const [activeStep, setActiveStep] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -143,6 +157,7 @@ const OfferContractPage: React.SFC = () => {
 
   const errors = [];
   !sufficientCollateral && errors.push(`You do not have enough ${COLLATERAL_TOKEN_NAME} to proceed`);
+  totalContractPrice && totalContractPrice < 100 && errors.push('Suggest to increase your contract total to above 100 USDT due to recent high fees in ethereum network. See Fees for details.')
 
   const handleCloseOfferDialog = () => {
     setShowOfferModal(false);
@@ -165,12 +180,12 @@ const OfferContractPage: React.SFC = () => {
     if (hashAmount) {
       try {
         const order = honeylemonService.createOrder(
-          address, 
-          new BigNumber(hashAmount), 
-          new BigNumber(CONTRACT_DURATION).multipliedBy(hashPrice), 
+          address,
+          new BigNumber(hashAmount),
+          new BigNumber(CONTRACT_DURATION).multipliedBy(hashPrice),
           new BigNumber(Math.round(Date.now() / 1000) + 10 * 24 * 60 * 60)
         );
-        
+
         const signedOrder = await honeylemonService.signOrder(order);
         await honeylemonService.submitOrder(signedOrder);
         setShowOfferModal(false)
@@ -184,20 +199,27 @@ const OfferContractPage: React.SFC = () => {
     setTxActive(false);
   }
 
+  const handleSkipDsProxy = () => {
+    setSkipDsProxy(true)
+  }
+
   const getActiveStep = () => {
-    if (!isDsProxyDeployed) return 0;
+    if (!skipDsProxy && !isDsProxyDeployed) return 0;
     if (!tokenApprovalGranted) return 1;
     return 2;
   };
 
-  const activeStep = getActiveStep();
+  useEffect(() => {
+    const step = getActiveStep();
+    setActiveStep(step);
+  }, [skipDsProxy, isDsProxyDeployed, tokenApprovalGranted])
 
-  const steps = ['Deploy honeylemon vault', `Approve ${COLLATERAL_TOKEN_NAME} collateral`, 'Offer Contract'];
+  const steps = ['Create honeylemon vault', `Approve ${COLLATERAL_TOKEN_NAME} collateral`, 'Offer Contract'];
 
   const getStepContent = (step: number) => {
     switch (step) {
       case 0:
-        return `Deploy a honeylemon vault. The honeylemon vault will reduce the transaction fees paid when redeeming in future. This step is optional. This is a once-off operation.`;
+        return `Create a honeylemon vault. The honeylemon vault will reduce the transaction fees paid when redeeming in future. This step is optional. This is a once-off operation.`;
       case 1:
         return `Approve Honeylemon smart contract access to your wallet’s ${COLLATERAL_TOKEN_NAME} allowance. Your ${COLLATERAL_TOKEN_NAME} collateral will be auto-deposited into smart contract based on the MRI value at the time of your order being filled.`;
       case 2:
@@ -228,6 +250,7 @@ const OfferContractPage: React.SFC = () => {
   }
 
   const handleStartOffer = () => {
+    setSkipDsProxy(false);
     setShowOfferModal(true);
     activeStep === 2 && handleCreateOffer();
   }
@@ -243,10 +266,15 @@ const OfferContractPage: React.SFC = () => {
           <MRIDisplay />
         </Grid>
         <Grid item xs={8}>
-          <Typography style={{ fontWeight: 'bold' }} color='secondary'>Offer a {CONTRACT_DURATION}-day Mining Revenue Contract</Typography>
+          <Typography style={{ fontWeight: 'bold' }} color='primary'>Offer a {CONTRACT_DURATION}-day Mining Revenue Contract</Typography>
         </Grid>
         <Grid item xs={4} style={{ textAlign: 'end' }}>
-          <Link href='#' underline='always' onClick={() => setShowOrderbook(true)}>Order Book <OpenInNew fontSize='small' /></Link>
+          <Button
+            onClick={() => setShowOrderbook(true)}
+            className={classes.viewOfferButton}
+            variant='contained'>
+            View Offers
+          </Button>
         </Grid>
         <Grid item xs={4}><Typography style={{ fontWeight: 'bold' }}>Price:</Typography></Grid>
         <Grid item xs={4}>
@@ -278,7 +306,7 @@ const OfferContractPage: React.SFC = () => {
             disabled={showOfferModal} />
         </Grid>
         <Grid item xs={4} className={classes.rightAlign}>
-          <Typography style={{ fontWeight: 'bold' }} color='secondary'>/TH/Day</Typography>
+          <Typography style={{ fontWeight: 'bold' }} color='primary'>/TH/Day</Typography>
         </Grid>
         <Grid item xs={4}><Typography style={{ fontWeight: 'bold' }}>Quantity</Typography></Grid>
         <Grid item xs={4}>
@@ -308,7 +336,7 @@ const OfferContractPage: React.SFC = () => {
             disabled={showOfferModal} />
         </Grid>
         <Grid item xs={4} className={classes.rightAlign}>
-          <Typography style={{ fontWeight: 'bold' }} color='secondary'>TH</Typography>
+          <Typography style={{ fontWeight: 'bold' }} color='primary'>TH</Typography>
         </Grid>
         <Grid item xs={12} container>
           <Paper className={clsx(classes.offerSummary, {
@@ -321,7 +349,7 @@ const OfferContractPage: React.SFC = () => {
               <Grid item xs={6} style={{ textAlign: 'right' }}>
                 <Typography variant='caption'>
                   <Link href='#' underline='always' onClick={() => setShowContractSpecificationModal(true)}>
-                    Contract Specification <OpenInNew fontSize='small' />
+                    Contract Specs <Info fontSize='small' />
                   </Link>
                 </Typography>
               </Grid>
@@ -375,14 +403,14 @@ const OfferContractPage: React.SFC = () => {
                         Order-fill Date UTC 00:01 <br />
                         {`${CONTRACT_DURATION} Days After Start`} <br />
                         24 Hours After Expiration <br />
-                        {`${dayjs().add(10,'d').format('DD-MMM-YY')}`}
+                        {`${dayjs().add(10, 'd').format('DD-MMM-YY')}`}
                       </TableCell>
                     </TableRow>
                     <TableRow>
                       <TableCell colSpan={2} style={{ color: '#a9a9a9' }}>
-                        * Estimated collateral is calcuated based on current MRI value; actual collateral 
+                        * Estimated collateral is calcuated based on current MRI value; actual collateral
                           deposited will be based on the actual MRI value at at the time your order being filled. <br />
-                        * If you do not have sufficient {COLLATERAL_TOKEN_NAME} in your wallet as collateral when your offer is being taken, 
+                        * If you do not have sufficient {COLLATERAL_TOKEN_NAME} in your wallet as collateral when your offer is being taken,
                           a portion of the order will still be filled based on your available {COLLATERAL_TOKEN_NAME} balance at the time.<br />
                         * Your limit order may be partially filled. <br />
                         * Your offer will be valid for 10 days. Any unfilled portion of your limit order can be cancelled in your portfolio.<br />
@@ -399,15 +427,15 @@ const OfferContractPage: React.SFC = () => {
                           <strong>{PAYMENT_TOKEN_NAME} {hashPrice.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}/TH/Day</strong>.
                         </Typography>
                         <Typography variant='body2'>
-                          You need to have at least {collateralAmount.toLocaleString(undefined, { maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS })} {PAYMENT_TOKEN_NAME} in
-                          your wallet balance now, and approve Honeylemon smart contract to access your {PAYMENT_TOKEN_NAME} in your wallet as collateral to list your offer.
-                          You may cancel your offer from your Portfolio anytime prior to it being filled. As soon as your order is filled, your approved collateral will be 
-                          automatically deposited, you will receive payment in <strong>{PAYMENT_TOKEN_NAME}</strong> immediately and the contract will start.
+                          You need to have at least <strong>{collateralAmount.toLocaleString(undefined, { maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS })} {COLLATERAL_TOKEN_NAME}</strong> in
+                          your wallet balance now, and approve Honeylemon smart contract to access your {COLLATERAL_TOKEN_NAME} in your wallet as collateral to list your offer.
+                          You may cancel your offer from your Portfolio anytime prior to it being filled. As soon as your order is filled, your approved collateral will be
+                          automatically deposited, you will receive payment in {PAYMENT_TOKEN_NAME} immediately and the contract will start.
                         </Typography>
                         <Typography variant='body2'>
-                          At the end of {CONTRACT_DURATION} days your counterparty will receive the network average BTC block reward & transaction
+                          At the end of <strong>{CONTRACT_DURATION} days</strong> your counterparty will receive the network average BTC block reward & transaction
                           fees per TH based on the average value of the <Link href='#' underline='always' onClick={() => setShowMRIInformationModal(true)}>Bitcoin Mining Revenue
-                          Index (MRI) <OpenInNew fontSize='small' /></Link> over {CONTRACT_DURATION} days up to a <strong>max capped by your collateral</strong>.
+                          Index (MRI_BTC) <Info fontSize='small' /></Link> over {CONTRACT_DURATION} days up to a <strong>max capped by your collateral</strong>.
                         </Typography>
                         <Typography variant='body2'>
                           The payoff will be directly deducted from your collateral, and you can withdraw the remainder of your collateral after settlement.
@@ -441,6 +469,8 @@ const OfferContractPage: React.SFC = () => {
         <Grid item xs={12}>
           <Button
             fullWidth
+            variant='contained'
+            color='primary'
             onClick={handleStartOffer}
             disabled={hashAmount === 0 || !sufficientCollateral || showOfferModal}>
             OFFER LIMIT ORDER &nbsp;
@@ -448,7 +478,12 @@ const OfferContractPage: React.SFC = () => {
           </Button>
         </Grid>
       </Grid>
-      <Dialog open={showOfferModal} onClose={handleCloseOfferDialog} aria-labelledby="form-dialog-title">
+      <Dialog
+        open={showOfferModal}
+        onClose={handleCloseOfferDialog}
+        aria-labelledby="form-dialog-title"
+        disableBackdropClick
+        disableEscapeKeyDown>
         <DialogTitle id="form-dialog-title">Create Offer</DialogTitle>
         <DialogContent>
           <Stepper activeStep={activeStep} orientation="vertical">
@@ -459,12 +494,6 @@ const OfferContractPage: React.SFC = () => {
                   <Typography>{getStepContent(index)}</Typography>
                   <div className={classes.actionsContainer}>
                     <Button
-                      onClick={handleCloseOfferDialog}
-                      className={classes.button}
-                      disabled={txActive}>
-                      Cancel
-                    </Button>
-                    <Button
                       variant="contained"
                       color="primary"
                       onClick={() => handleStepperNext(activeStep)}
@@ -472,6 +501,22 @@ const OfferContractPage: React.SFC = () => {
                       disabled={txActive}>
                       {getStepButtonLabel(activeStep)}&nbsp;
                         {txActive && <CircularProgress className={classes.loadingSpinner} size={20} />}
+                    </Button>
+                    {activeStep === 0 &&
+                      <Button
+                        variant="contained"
+                        color='secondary'
+                        onClick={handleSkipDsProxy}
+                        className={classes.button}
+                        disabled={txActive}>
+                        Skip
+                      </Button>
+                    }
+                    <Button
+                      onClick={handleCloseOfferDialog}
+                      className={classes.button}
+                      disabled={txActive}>
+                      Cancel
                     </Button>
                   </div>
                 </StepContent>

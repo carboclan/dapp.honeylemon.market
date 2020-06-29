@@ -19,7 +19,7 @@ import {
   CircularProgressProps,
   Box,
 } from '@material-ui/core';
-import { ExpandMore, RadioButtonUnchecked, Info } from '@material-ui/icons';
+import { ExpandMore, RadioButtonUnchecked, MoreVert } from '@material-ui/icons';
 import { useOnboard } from '../contexts/OnboardContext';
 import { useHoneylemon, PositionStatus } from '../contexts/HoneylemonContext';
 import { usePrevious } from '../helpers/usePrevious';
@@ -49,17 +49,17 @@ const useStyles = makeStyles(({ spacing, palette }) => ({
     width: 20,
     flexBasis: 'end',
     flexGrow: 0,
-    color: palette.secondary.main,
+    color: palette.primary.main,
   },
   sectionHeadingText: {
     fontWeight: 'bold',
-    color: palette.secondary.main,
+    color: palette.primary.main,
   },
   placeholderRow: {
     height: 60,
   },
   infoButton: {
-    color: palette.secondary.main,
+    color: palette.primary.main,
   },
   sectionHeading: {
     justifyContent: 'space-between',
@@ -75,7 +75,7 @@ const TimeRemaining = (
   const { totalDuration, remainingDuration, unitLabel, ...cirularProgressProps } = props;
   return (
     <Box position="relative" display="inline-flex">
-      <CircularProgress variant="static" {...cirularProgressProps} value={(1 - remainingDuration / totalDuration) * 100} color='secondary' />
+      <CircularProgress variant="static" {...cirularProgressProps} value={(1 - remainingDuration / totalDuration) * 100} color='primary' />
       <Box
         top={0}
         left={0}
@@ -105,6 +105,7 @@ const PorfolioPage: React.SFC = () => {
     PAYMENT_TOKEN_NAME,
     COLLATERAL_TOKEN_DECIMALS,
     PAYMENT_TOKEN_DECIMALS,
+    isPortfolioRefreshing
   } = useHoneylemon();
 
   const {
@@ -120,7 +121,6 @@ const PorfolioPage: React.SFC = () => {
   const [shortCollateralForWithdraw, setShortCollateralForWithdraw] = useState<number>(0);
 
   const [isWithdrawing, setIsWithdrawing] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
 
   const [showOpenOrders, setShowOpenOrders] = useState(false);
   const [unfilledOfferModalIndex, setUnfilledOfferModalIndex] = useState(-1);
@@ -219,18 +219,9 @@ const PorfolioPage: React.SFC = () => {
 
   useEffect(() => {
     const loadPortfolioData = async () => {
-      setIsLoading(true);
-      try {
-        await refreshPortfolio();
-      } catch (error) {
-        console.log('There was an error getting the portfolio data');
-        console.log(error);
-      }
-      setIsLoading(false);
+      await refreshPortfolio();
     }
     loadPortfolioData()
-    return () => {
-    }
   }, [address])
 
   useEffect(() => {
@@ -279,14 +270,13 @@ const PorfolioPage: React.SFC = () => {
     <>
       <Grid container>
         <Grid item xs={12}>
-          <Typography variant='h5' style={{ fontWeight: 'bold', textAlign: 'center' }} color='secondary'>Portfolio</Typography>
+          <Typography variant='h5' style={{ fontWeight: 'bold', textAlign: 'center' }} color='primary'>Portfolio</Typography>
         </Grid>
         <Grid item xs={12}>
           <Tabs
             value={activeTab}
             onChange={handleSetActiveTab}
             indicatorColor="secondary"
-            textColor="secondary"
             variant='fullWidth'>
             <Tab label="Active" value='active' />
             <Tab label="Expired" value='expired' />
@@ -296,7 +286,7 @@ const PorfolioPage: React.SFC = () => {
               <>
                 <ExpansionPanel expanded={showOpenOrders}>
                   <ExpansionPanelSummary
-                    expandIcon={!isLoading ? <ExpandMore /> : <CircularProgress className={classes.loadingSpinner} size={20} />}
+                    expandIcon={!isPortfolioRefreshing ? <ExpandMore /> : <CircularProgress className={classes.loadingSpinner} size={20} />}
                     classes={{
                       content: classes.sectionHeading
                     }}
@@ -317,14 +307,14 @@ const PorfolioPage: React.SFC = () => {
                       <TableBody>
                         {openOrdersMetadata && openOrdersMetadata?.map((order, i) =>
                           <TableRow key={order.orderHash}>
-                            <TableCell>${Number(order?.price.dividedBy(CONTRACT_DURATION).toString()).toLocaleString(undefined, {maximumFractionDigits: PAYMENT_TOKEN_DECIMALS})}</TableCell>
-                            <TableCell align='center'>{order?.remainingFillableMakerAssetAmount.toLocaleString(undefined, {maximumFractionDigits: 0})}</TableCell>
+                            <TableCell>${Number(order?.price.dividedBy(CONTRACT_DURATION).toString()).toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}</TableCell>
+                            <TableCell align='center'>{order?.remainingFillableMakerAssetAmount.toLocaleString(undefined, { maximumFractionDigits: 0 })}</TableCell>
                             <TableCell align='right'>
-                              <Info onClick={() => handleShowUnfilledOfferDetails(i)} />
+                              <MoreVert onClick={() => handleShowUnfilledOfferDetails(i)} style={{ cursor: 'pointer' }} />
                             </TableCell>
                           </TableRow>
                         )}
-                        {!isLoading && openOrdersMetadata.length === 0 &&
+                        {!isPortfolioRefreshing && openOrdersMetadata.length === 0 &&
                           <TableRow>
                             <TableCell colSpan={3} align='center' className={classes.placeholderRow}>
                               No Unfilled Positions (Open Orders)
@@ -338,7 +328,7 @@ const PorfolioPage: React.SFC = () => {
                 <Divider className={classes.sectionDivider} light variant='middle' />
                 <ExpansionPanel expanded={showActiveLongPositions}>
                   <ExpansionPanelSummary
-                    expandIcon={!isLoading ? <ExpandMore /> : <CircularProgress className={classes.loadingSpinner} size={20} />}
+                    expandIcon={!isPortfolioRefreshing ? <ExpandMore /> : <CircularProgress className={classes.loadingSpinner} size={20} />}
                     classes={{
                       content: classes.sectionHeading
                     }}
@@ -365,12 +355,12 @@ const PorfolioPage: React.SFC = () => {
                             <TableCell align='center'>
                               <TimeRemaining totalDuration={CONTRACT_DURATION} remainingDuration={position.daysToExpiration} unitLabel='d' />
                             </TableCell>
-                            <TableCell align='center'>{position.totalCost}</TableCell>
-                            <TableCell align='center'>{position.pendingReward}</TableCell>
-                            <TableCell align='right'><Info onClick={() => handleShowActiveLongPositionDetails(i)} /></TableCell>
+                            <TableCell align='center'>{position.totalCost.toLocaleString(undefined, { maximumFractionDigits: 2 })}</TableCell>
+                            <TableCell align='center'>{position.pendingReward.toLocaleString(undefined, { maximumFractionDigits: 2 })}</TableCell>
+                            <TableCell align='right'><MoreVert onClick={() => handleShowActiveLongPositionDetails(i)} style={{ cursor: 'pointer' }} /></TableCell>
                           </TableRow>
                         )}
-                        {!isLoading && activeLongPositions.length === 0 &&
+                        {!isPortfolioRefreshing && activeLongPositions.length === 0 &&
                           <TableRow>
                             <TableCell colSpan={5} align='center' className={classes.placeholderRow}>
                               No Active Long Positions
@@ -384,7 +374,7 @@ const PorfolioPage: React.SFC = () => {
                 <Divider className={classes.sectionDivider} light variant='middle' />
                 <ExpansionPanel expanded={showActiveShortPositions}>
                   <ExpansionPanelSummary
-                    expandIcon={!isLoading ? <ExpandMore /> : <CircularProgress className={classes.loadingSpinner} size={20} />}
+                    expandIcon={!isPortfolioRefreshing ? <ExpandMore /> : <CircularProgress className={classes.loadingSpinner} size={20} />}
                     classes={{
                       content: classes.sectionHeading
                     }}
@@ -413,10 +403,10 @@ const PorfolioPage: React.SFC = () => {
                             </TableCell>
                             <TableCell align='center'>{position.totalCost.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}</TableCell>
                             <TableCell align='center'>{position.totalCollateralLocked.toLocaleString(undefined, { maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS })}</TableCell>
-                            <TableCell align='right'><Info onClick={() => handleShowActiveShortPositionDetails(i)} /></TableCell>
+                            <TableCell align='right'><MoreVert onClick={() => handleShowActiveShortPositionDetails(i)} style={{ cursor: 'pointer' }} /></TableCell>
                           </TableRow>
                         )}
-                        {!isLoading && activeShortPositions.length === 0 &&
+                        {!isPortfolioRefreshing && activeShortPositions.length === 0 &&
                           <TableRow>
                             <TableCell colSpan={5} align='center' className={classes.placeholderRow}>
                               No Active Long Positions
@@ -431,7 +421,7 @@ const PorfolioPage: React.SFC = () => {
               <>
                 <ExpansionPanel expanded={showPendingWithdraw}>
                   <ExpansionPanelSummary
-                    expandIcon={!isLoading ? <ExpandMore /> : <CircularProgress className={classes.loadingSpinner} size={20} />}
+                    expandIcon={!isPortfolioRefreshing ? <ExpandMore /> : <CircularProgress className={classes.loadingSpinner} size={20} />}
                     classes={{
                       content: classes.sectionHeading
                     }}
@@ -470,7 +460,7 @@ const PorfolioPage: React.SFC = () => {
                 <Divider className={classes.sectionDivider} light variant='middle' />
                 <ExpansionPanel expanded={showExpiredLongPositions}>
                   <ExpansionPanelSummary
-                    expandIcon={!isLoading ? <ExpandMore /> : <CircularProgress className={classes.loadingSpinner} size={20} />}
+                    expandIcon={!isPortfolioRefreshing ? <ExpandMore /> : <CircularProgress className={classes.loadingSpinner} size={20} />}
                     classes={{
                       content: classes.sectionHeading
                     }}
@@ -497,10 +487,10 @@ const PorfolioPage: React.SFC = () => {
                             <TableCell align='center'>{position.totalCost.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}</TableCell>
                             <TableCell align='center'>{position.finalReward}</TableCell>
                             <TableCell align='center'>{position.status}</TableCell>
-                            <TableCell align='right'><Info onClick={() => handleShowExpiredLongPositionDetails(i)} /></TableCell>
+                            <TableCell align='right'><MoreVert onClick={() => handleShowExpiredLongPositionDetails(i)} style={{ cursor: 'pointer' }} /></TableCell>
                           </TableRow>
                         )}
-                        {!isLoading && expiredLongPositions.length === 0 &&
+                        {!isPortfolioRefreshing && expiredLongPositions.length === 0 &&
                           <TableRow>
                             <TableCell colSpan={5} align='center' className={classes.placeholderRow}>
                               No Expired Long Positions
@@ -514,7 +504,7 @@ const PorfolioPage: React.SFC = () => {
                 <Divider className={classes.sectionDivider} light variant='middle' />
                 <ExpansionPanel expanded={showExpiredShortPositions}>
                   <ExpansionPanelSummary
-                    expandIcon={!isLoading ? <ExpandMore /> : <CircularProgress className={classes.loadingSpinner} size={20} />}
+                    expandIcon={!isPortfolioRefreshing ? <ExpandMore /> : <CircularProgress className={classes.loadingSpinner} size={20} />}
                     classes={{
                       content: classes.sectionHeading
                     }}
@@ -541,10 +531,10 @@ const PorfolioPage: React.SFC = () => {
                             <TableCell align='center'>{position.totalCost.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}</TableCell>
                             <TableCell align='center'>{(position.totalCollateralLocked - position.finalReward).toLocaleString(undefined, { maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS })}</TableCell>
                             <TableCell align='center'>{position.status}</TableCell>
-                            <TableCell align='right'><Info onClick={() => handleShowExpiredShortPositionDetails(i)} /></TableCell>
+                            <TableCell align='right'><MoreVert onClick={() => handleShowExpiredShortPositionDetails(i)} style={{ cursor: 'pointer' }} /></TableCell>
                           </TableRow>
                         )}
-                        {!isLoading && activeShortPositions.length === 0 &&
+                        {!isPortfolioRefreshing && activeShortPositions.length === 0 &&
                           <TableRow>
                             <TableCell colSpan={6} align='center' className={classes.placeholderRow}>
                               No Expired Short Positions
@@ -560,31 +550,31 @@ const PorfolioPage: React.SFC = () => {
           </div>
         </Grid>
       </Grid >
-      {activeLongPositionModalIndex > -1 &&
+      {activeLongPositionModalIndex > -1 && activeLongPositions[activeLongPositionModalIndex] &&
         <ActiveLongPositionModal
           open={showActiveLongPositionModal}
           onClose={() => setShowActiveLongPositionModal(false)}
           position={activeLongPositions[activeLongPositionModalIndex]} />
       }
-      {activeShortPositionModalIndex > -1 &&
+      {activeShortPositionModalIndex > -1 && activeShortPositions[activeShortPositionModalIndex] &&
         <ActiveShortPositionModal
           open={showActiveShortPositionModal}
           onClose={() => setShowActiveShortPositionModal(false)}
           position={activeShortPositions[activeShortPositionModalIndex]} />
       }
-      {expiredLongPositionModalIndex > -1 &&
+      {expiredLongPositionModalIndex > -1 && expiredLongPositions[expiredLongPositionModalIndex] &&
         <ExpiredLongPositionModal
           open={showExpiredLongPositionModal}
           onClose={() => setShowExpiredLongPositionModal(false)}
           position={expiredLongPositions[expiredLongPositionModalIndex]} />
       }
-      {expiredShortPositionModalIndex > -1 &&
+      {expiredShortPositionModalIndex > -1 && expiredShortPositions[expiredShortPositionModalIndex] &&
         <ExpiredShortPositionModal
           open={showExpiredShortPositionModal}
           onClose={() => setShowExpiredShortPositionModal(false)}
           position={expiredShortPositions[expiredShortPositionModalIndex]} />
       }
-      {unfilledOfferModalIndex > -1 &&
+      {unfilledOfferModalIndex > -1 && openOrdersMetadata[unfilledOfferModalIndex] &&
         <UnfilledOfferModal
           open={showUnfilledOfferModal}
           onClose={() => setShowUnfilledOfferModal(false)}

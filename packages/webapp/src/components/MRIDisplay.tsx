@@ -4,11 +4,14 @@ import { Info } from '@material-ui/icons';
 import { useHoneylemon } from '../contexts/HoneylemonContext';
 import MRIInformationModal from './MRIInformationModal';
 
-const useStyles = makeStyles(({ spacing }) => ({
+const useStyles = makeStyles(({ spacing, palette }) => ({
   mriInfo: {
     textAlign: 'center',
     padding: spacing(2),
   },
+  mriModalLink: {
+    color: palette.common.white,
+  }
 }))
 
 const MRIDisplay: React.SFC = () => {
@@ -26,14 +29,15 @@ const MRIDisplay: React.SFC = () => {
         <Link
           variant='body1'
           href='#' underline='always'
-          onClick={() => setShowMRIInformationModal(true)}>
+          onClick={() => setShowMRIInformationModal(true)}
+          className={classes.mriModalLink}>
           BTC Mining Revenue Index (MRI_BTC)
           <Info fontSize='small' />
         </Link>
         {currentMRI > 0 ?
           <>
-            <Typography align='center' color='secondary'>{`BTC ${currentMRI.toLocaleString(undefined, { maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS })}/TH/Day`}</Typography>
-            <Typography align='center' color='secondary'>{`(~$${(currentMRI * currentBTCSpotPrice).toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}/TH/Day)`}</Typography>
+            <Typography align='center'>{`BTC ${currentMRI.toLocaleString(undefined, { maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS })}/TH/Day`}</Typography>
+            <Typography align='center'>{`(~$${(currentMRI * currentBTCSpotPrice).toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}/TH/Day)`}</Typography>
           </> :
           <Typography>Loading...</Typography>
         }
