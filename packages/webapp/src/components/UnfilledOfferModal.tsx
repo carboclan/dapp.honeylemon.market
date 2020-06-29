@@ -15,7 +15,6 @@ const useStyles = makeStyles(({ spacing, palette }) => ({
   cancelButton: {
     alignSelf: "center",
     backgroundColor: palette.secondary.main,
-    padding: spacing(2),
   }
 }))
 
@@ -133,7 +132,7 @@ const UnfilledOfferModal: React.SFC<UnfilledOfferModalProps> = ({ open, onClose,
             </TableRow>
           </TableBody>
         </Table>
-        <Grid container justify='center' spacing={2}>
+        <Grid container justify='center' spacing={2} style={{padding: 16}}>
           <Grid item>
             <Button onClick={() => cancelOpenOrder(offer?.orderHash)} disabled={isCancelling} className={classes.cancelButton} fullWidth>
               Cancel Offer &nbsp;
