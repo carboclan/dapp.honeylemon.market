@@ -601,7 +601,7 @@ const BuyContractPage: React.SFC = () => {
                       {getStepButtonLabel(activeStep)}&nbsp;
                         {txActive && <CircularProgress className={classes.loadingSpinner} size={20} />}
                     </Button>
-                    {activeStep === 0 &&
+                    {activeStep === 0 ?
                       <Button
                         variant="contained"
                         color='secondary'
@@ -609,14 +609,14 @@ const BuyContractPage: React.SFC = () => {
                         className={classes.button}
                         disabled={txActive}>
                         Skip
+                      </Button> :
+                      <Button
+                        onClick={handleCloseBuyDialog}
+                        className={classes.button}
+                        disabled={txActive}>
+                        Cancel
                       </Button>
                     }
-                    <Button
-                      onClick={handleCloseBuyDialog}
-                      className={classes.button}
-                      disabled={txActive}>
-                      Cancel
-                    </Button>
                   </div>
                 </StepContent>
               </Step>
