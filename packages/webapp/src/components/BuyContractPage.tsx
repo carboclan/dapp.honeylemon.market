@@ -375,7 +375,6 @@ const BuyContractPage: React.SFC = () => {
             onChange={handleChangeBuyType}
             indicatorColor="secondary"
             variant="fullWidth"
-            textColor="primary"
             scrollButtons="auto" >
             <Tab label="ENTER BUDGET" />
             <Tab label="or" disabled />
