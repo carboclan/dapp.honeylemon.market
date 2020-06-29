@@ -1,0 +1,11 @@
+{
+  "name": "@honeylemon/bff",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "deploy:mainnet": "serverless deploy --stage mainnet"
+  },
+  "author": "",
+  "license": "ISC"
+}
