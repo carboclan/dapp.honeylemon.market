@@ -435,7 +435,7 @@ const OfferContractPage: React.SFC = () => {
                         <Typography variant='body2'>
                           At the end of {CONTRACT_DURATION} days your counterparty will receive the network average BTC block reward & transaction
                           fees per TH based on the average value of the <Link href='#' underline='always' onClick={() => setShowMRIInformationModal(true)}>Bitcoin Mining Revenue
-                          Index (MRI_BTC) <OpenInNew fontSize='small' /></Link> over {CONTRACT_DURATION} days up to a <strong>max capped by your collateral</strong>.
+                          Index (MRI_BTC) <Info fontSize='small' /></Link> over {CONTRACT_DURATION} days up to a <strong>max capped by your collateral</strong>.
                         </Typography>
                         <Typography variant='body2'>
                           The payoff will be directly deducted from your collateral, and you can withdraw the remainder of your collateral after settlement.
