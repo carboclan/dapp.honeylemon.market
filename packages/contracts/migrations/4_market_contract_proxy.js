@@ -11,7 +11,7 @@ module.exports = async function(deployer, network, accounts) {
   //TODO: update migrations to pull the address of this token from the respective network.
   // Deploy imBTC token
 
-  let collateralTokenAddress = process.env.IMBTC_ADDRESS;
+  let collateralTokenAddress = process.env.COLLATERAL_TOKEN_ADDRESS;
   if (network != 'mainnet' && network != 'mainnet-fork') {
     await deployer.deploy(CollateralToken, 'Mock imBTC', 'imBTC', 1000000000000000, 8);
     // Give some collateral token to miner

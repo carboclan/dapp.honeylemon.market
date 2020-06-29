@@ -1,7 +1,7 @@
 require('dotenv').config();
 const HDWalletProvider = require('@truffle/hdwallet-provider');
 const infuraApikey = '9542ce9f96be4ae08225dcde36ff1638';
-let mnemonic = require('./mnemonic');
+let mnemonic = ''; //require('./mnemonic');
 
 module.exports = {
   contracts_directory: "./contracts",
