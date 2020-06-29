@@ -300,7 +300,10 @@ function AppWrapper(props: { children: ReactNode }) {
             <ListItemIcon>
               <img src='imBtc.png' style={{ width: '40px' }} alt='imbtc logo' />
             </ListItemIcon>
-            <Switch checked={(collateralTokenAllowance > 0)} onChange={() => handleToggleTokenApproval(TokenType.CollateralToken)} />
+            <Switch 
+              color="primary" 
+              checked={(collateralTokenAllowance > 0)} 
+              onChange={() => handleToggleTokenApproval(TokenType.CollateralToken)} />
             <ListItemText
               primary={`${collateralTokenBalance.toLocaleString(undefined, {
                 useGrouping: true,
@@ -319,7 +322,10 @@ function AppWrapper(props: { children: ReactNode }) {
             <ListItemIcon>
               <img src='usdt.png' style={{ width: '40px' }} alt='usdt logo' />
             </ListItemIcon>
-            <Switch checked={(paymentTokenAllowance > 0)} onChange={() => handleToggleTokenApproval(TokenType.PaymentToken)} />
+            <Switch
+              color="primary"
+              checked={(paymentTokenAllowance > 0)} 
+              onChange={() => handleToggleTokenApproval(TokenType.PaymentToken)} />
             <ListItemText
               primary={`${paymentTokenBalance.toLocaleString(undefined, {
                 useGrouping: true,
