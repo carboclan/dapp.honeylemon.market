@@ -65,7 +65,6 @@ const useStyles = makeStyles(({ spacing, palette, transitions }) => ({
   button: {
     marginTop: spacing(1),
     marginRight: spacing(1),
-    color: palette.common.black,
   },
   skipButton: {
     backgroundColor: palette.warning.main
@@ -350,7 +349,7 @@ const OfferContractPage: React.SFC = () => {
               <Grid item xs={6} style={{ textAlign: 'right' }}>
                 <Typography variant='caption'>
                   <Link href='#' underline='always' onClick={() => setShowContractSpecificationModal(true)}>
-                    Contract Specification <Info fontSize='small' />
+                    Contract Specs <Info fontSize='small' />
                   </Link>
                 </Typography>
               </Grid>
@@ -506,8 +505,9 @@ const OfferContractPage: React.SFC = () => {
                     {activeStep === 0 &&
                       <Button
                         variant="contained"
+                        color='secondary'
                         onClick={handleSkipDsProxy}
-                        className={clsx(classes.button, classes.skipButton)}
+                        className={classes.button}
                         disabled={txActive}>
                         Skip
                       </Button>

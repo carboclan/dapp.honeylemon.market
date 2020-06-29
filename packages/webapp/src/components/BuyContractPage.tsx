@@ -441,7 +441,7 @@ const BuyContractPage: React.SFC = () => {
                 <Grid item xs={6} style={{ textAlign: 'right' }}>
                   <Typography variant='caption'>
                     <Link href='#' underline='always' onClick={() => setShowContractSpecificationModal(true)}>
-                      Contract Specification <Info fontSize='small' />
+                      Contract Specs <Info fontSize='small' />
                     </Link>
                   </Typography>
                 </Grid>
