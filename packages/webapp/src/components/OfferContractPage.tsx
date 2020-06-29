@@ -427,13 +427,13 @@ const OfferContractPage: React.SFC = () => {
                           <strong>{PAYMENT_TOKEN_NAME} {hashPrice.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}/TH/Day</strong>.
                         </Typography>
                         <Typography variant='body2'>
-                          You need to have at least {collateralAmount.toLocaleString(undefined, { maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS })} {PAYMENT_TOKEN_NAME} in
-                          your wallet balance now, and approve Honeylemon smart contract to access your {PAYMENT_TOKEN_NAME} in your wallet as collateral to list your offer.
+                          You need to have at least <strong>{collateralAmount.toLocaleString(undefined, { maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS })} {COLLATERAL_TOKEN_NAME}</strong> in
+                          your wallet balance now, and approve Honeylemon smart contract to access your {COLLATERAL_TOKEN_NAME} in your wallet as collateral to list your offer.
                           You may cancel your offer from your Portfolio anytime prior to it being filled. As soon as your order is filled, your approved collateral will be
-                          automatically deposited, you will receive payment in <strong>{PAYMENT_TOKEN_NAME}</strong> immediately and the contract will start.
+                          automatically deposited, you will receive payment in {PAYMENT_TOKEN_NAME} immediately and the contract will start.
                         </Typography>
                         <Typography variant='body2'>
-                          At the end of {CONTRACT_DURATION} days your counterparty will receive the network average BTC block reward & transaction
+                          At the end of <strong>{CONTRACT_DURATION} days</strong> your counterparty will receive the network average BTC block reward & transaction
                           fees per TH based on the average value of the <Link href='#' underline='always' onClick={() => setShowMRIInformationModal(true)}>Bitcoin Mining Revenue
                           Index (MRI_BTC) <Info fontSize='small' /></Link> over {CONTRACT_DURATION} days up to a <strong>max capped by your collateral</strong>.
                         </Typography>
