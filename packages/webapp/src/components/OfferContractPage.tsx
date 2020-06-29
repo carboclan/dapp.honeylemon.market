@@ -65,7 +65,6 @@ const useStyles = makeStyles(({ spacing, palette, transitions }) => ({
   button: {
     marginTop: spacing(1),
     marginRight: spacing(1),
-    color: palette.common.black,
   },
   skipButton: {
     backgroundColor: palette.warning.main
@@ -350,7 +349,7 @@ const OfferContractPage: React.SFC = () => {
               <Grid item xs={6} style={{ textAlign: 'right' }}>
                 <Typography variant='caption'>
                   <Link href='#' underline='always' onClick={() => setShowContractSpecificationModal(true)}>
-                    Contract Specification <Info fontSize='small' />
+                    Contract Specs <Info fontSize='small' />
                   </Link>
                 </Typography>
               </Grid>
@@ -436,7 +435,7 @@ const OfferContractPage: React.SFC = () => {
                         <Typography variant='body2'>
                           At the end of {CONTRACT_DURATION} days your counterparty will receive the network average BTC block reward & transaction
                           fees per TH based on the average value of the <Link href='#' underline='always' onClick={() => setShowMRIInformationModal(true)}>Bitcoin Mining Revenue
-                          Index (MRI_BTC) <OpenInNew fontSize='small' /></Link> over {CONTRACT_DURATION} days up to a <strong>max capped by your collateral</strong>.
+                          Index (MRI_BTC) <Info fontSize='small' /></Link> over {CONTRACT_DURATION} days up to a <strong>max capped by your collateral</strong>.
                         </Typography>
                         <Typography variant='body2'>
                           The payoff will be directly deducted from your collateral, and you can withdraw the remainder of your collateral after settlement.
@@ -506,8 +505,9 @@ const OfferContractPage: React.SFC = () => {
                     {activeStep === 0 &&
                       <Button
                         variant="contained"
+                        color='secondary'
                         onClick={handleSkipDsProxy}
-                        className={clsx(classes.button, classes.skipButton)}
+                        className={classes.button}
                         disabled={txActive}>
                         Skip
                       </Button>
