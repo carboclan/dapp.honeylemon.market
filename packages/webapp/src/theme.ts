@@ -5,10 +5,10 @@ const theme = (createMuiTheme)({
   palette: {
     type: 'dark',
     primary: {
-      main: '#FFFFFF',
+      main: '#FFE500'
     },
     secondary: {
-      main: '#FFE500'
+      main: '#FF6600'
     }
   },
   typography: {
@@ -16,7 +16,7 @@ const theme = (createMuiTheme)({
   },
   overrides: {
     MuiButton: {
-      root: {
+      containedPrimary: {
         color: '#000',
         backgroundColor: '#FFE500',
         "&$disabled": {
@@ -25,7 +25,7 @@ const theme = (createMuiTheme)({
         "&:hover": {
           "backgroundColor": "#4a4622"
         }
-      },
+      }
     },
     MuiAppBar: {
       root: {
