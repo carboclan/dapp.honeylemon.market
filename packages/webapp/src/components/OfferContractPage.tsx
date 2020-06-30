@@ -266,7 +266,7 @@ const OfferContractPage: React.SFC = () => {
           <MRIDisplay />
         </Grid>
         <Grid item xs={8}>
-          <Typography style={{ fontWeight: 'bold' }} color='primary'>Offer a {CONTRACT_DURATION}-day Mining Revenue Contract</Typography>
+          <Typography style={{ fontWeight: 'bold' }}>Offer a {CONTRACT_DURATION}-day Mining Revenue Contract</Typography>
         </Grid>
         <Grid item xs={4} style={{ textAlign: 'end' }}>
           <Button
