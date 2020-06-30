@@ -152,7 +152,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
     } catch (error) {
       console.log('Something went wrong deploying the DS Proxy wallet');
       console.log(error);
-      // TODO: Display error on modal
+      throw new Error('Something went wrong deploying the honeylemon vault. Please try again.')
     }
   }
 
@@ -177,7 +177,11 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
     } catch (error) {
       console.log('Something went wrong approving the tokens');
       console.log(error);
-      // TODO: Display error on modal
+      const errorMessage = tokenType === TokenType.CollateralToken ?
+        `${COLLATERAL_TOKEN_NAME} approval failed. Please try again later.` :
+        `${PAYMENT_TOKEN_NAME} approval failed. Please try again later.`
+
+      throw Error(errorMessage)
     }
   }
 
@@ -337,13 +341,12 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
       if (orderbookService) {
         try {
           const orderbookResponse = await orderbookService.getOrderbook();
-          console.log(orderbookResponse);
           const book = orderbookResponse.asks.records
             .filter((order: any) => new BigNumber(order.metaData.remainingFillableMakerAssetAmount).gt(0))
             .map((order: any) => ({
-            price: Number(new BigNumber(order.metaData.price).dividedBy(contractDuration).toString()),
-            quantity: Number(new BigNumber(order.metaData.remainingFillableMakerAssetAmount).toString())
-          }));
+              price: Number(new BigNumber(order.metaData.price).dividedBy(contractDuration).toString()),
+              quantity: Number(new BigNumber(order.metaData.remainingFillableMakerAssetAmount).toString())
+            }));
           setOrderbook(book)
         } catch (error) {
           console.log('There was an error getting the orderbook.')

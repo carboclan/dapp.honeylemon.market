@@ -145,6 +145,7 @@ const BuyContractPage: React.SFC = () => {
   const [showOrderbook, setShowOrderbook] = useState(false);
   const [skipDsProxy, setSkipDsProxy] = useState(false);
   const [activeStep, setActiveStep] = useState(0);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleChangeBuyType = (event: React.ChangeEvent<{}>, newValue: BuyType) => {
     setBuyType(newValue);
@@ -152,6 +153,7 @@ const BuyContractPage: React.SFC = () => {
   };
 
   const handleCloseBuyDialog = () => {
+    setErrorMessage('');
     setShowBuyModal(false);
   }
 
@@ -229,18 +231,29 @@ const BuyContractPage: React.SFC = () => {
 
   const handleDeployDSProxy = async () => {
     setTxActive(true);
-    await deployDSProxyContract();
+    setErrorMessage('');
+    try {
+      await deployDSProxyContract();
+    } catch (error) {
+      setErrorMessage(error);
+    }
     setTxActive(false);
   }
 
   const handleApprovePaymentToken = async () => {
     setTxActive(true);
-    await approveToken(TokenType.PaymentToken)
+    setErrorMessage('');
+    try {
+      await approveToken(TokenType.PaymentToken)
+    } catch (error) {
+      setErrorMessage(error.toString())
+    }
     setTxActive(false);
   }
 
   const handleBuyOffer = async () => {
     setTxActive(true);
+    setErrorMessage('')
     try {
       // TODO: I dont think this should be hardcoded in here
       const gasPrice = 5e9; // 5 GWEI
@@ -272,6 +285,7 @@ const BuyContractPage: React.SFC = () => {
       console.log('Something went wrong buying this contract');
       console.log(error);
       // TODO: Display error on modal
+      setErrorMessage('There was an error creating the offer. Please try again later.')
     }
     setTxActive(false);
   }
@@ -590,7 +604,8 @@ const BuyContractPage: React.SFC = () => {
               <Step key={label}>
                 <StepLabel>{label}</StepLabel>
                 <StepContent>
-                  <Typography>{getStepContent(index)}</Typography>
+                  <Typography paragraph>{getStepContent(index)}</Typography>
+                  {errorMessage && <Typography color='error'>{errorMessage}</Typography>}
                   <div className={classes.actionsContainer}>
                     <Button
                       variant="contained"
