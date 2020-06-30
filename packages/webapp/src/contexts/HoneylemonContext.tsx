@@ -337,9 +337,12 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
       if (orderbookService) {
         try {
           const orderbookResponse = await orderbookService.getOrderbook();
-          const book = orderbookResponse.asks.records.map((order: any) => ({
+          console.log(orderbookResponse);
+          const book = orderbookResponse.asks.records
+            .filter((order: any) => new BigNumber(order.metaData.remainingFillableMakerAssetAmount).gt(0))
+            .map((order: any) => ({
             price: Number(new BigNumber(order.metaData.price).dividedBy(contractDuration).toString()),
-            quantity: Number(new BigNumber(order.order.makerAssetAmount).toString())
+            quantity: Number(new BigNumber(order.metaData.remainingFillableMakerAssetAmount).toString())
           }));
           setOrderbook(book)
         } catch (error) {
