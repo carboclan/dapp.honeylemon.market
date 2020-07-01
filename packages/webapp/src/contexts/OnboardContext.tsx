@@ -42,7 +42,6 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
   const [gasPrice, setGasPrice] = useState(0);
 
   const infuraId = process.env.REACT_APP_INFURA_ID
-  // TODO: Update this for mainnet deployment
   const infuraRpc = `https://${networkName(network)}.infura.io/v3/${infuraId}`
 
   useEffect(() => {
@@ -60,7 +59,7 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
               { walletName: 'metamask', preferred: true },
               {
                 walletName: 'imToken',
-                rpcUrl: 'https://eth-testnet.tokenlon.im', //TODO update this for mainnet mainnet-eth.token.im
+                rpcUrl: onboardProps.networkId === 1 ? 'https://mainnet-eth.token.im' : 'https://eth-testnet.tokenlon.im',
                 preferred: true,
               },
               { walletName: "coinbase", preferred: true },
