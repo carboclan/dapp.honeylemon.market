@@ -38,6 +38,17 @@ module.exports = {
       network_id: 42,
       gas: 6500000, // default = 4712388
       gasPrice: 10000000000 // default = 100 gwei = 100000000000
+    },
+    mainnet: {
+      provider: function() {
+        return new HDWalletProvider(
+          mnemonic,
+          `https://mainnet.infura.io/v3/${infuraApikey}`
+        );
+      },
+      network_id: 1,
+      gas: 6500000, // default = 4712388
+      gasPrice: 30000000000 // default = 30 gwei
     }
   },
   compilers: {
