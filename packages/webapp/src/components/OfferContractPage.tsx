@@ -129,6 +129,7 @@ const OfferContractPage: React.SFC = () => {
   const [showMRIInformationModal, setShowMRIInformationModal] = useState(false);
   const [skipDsProxy, setSkipDsProxy] = useState(false);
   const [activeStep, setActiveStep] = useState(0);
+  const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
     let cancelled = false;
@@ -160,23 +161,34 @@ const OfferContractPage: React.SFC = () => {
   totalContractPrice && totalContractPrice < 100 && errors.push('Suggest to increase your contract total to above 100 USDT due to recent high fees in ethereum network. See Fees for details.')
 
   const handleCloseOfferDialog = () => {
+    setErrorMessage('');
     setShowOfferModal(false);
   }
 
   const handleDeployDSProxy = async () => {
-    setTxActive(true);
-    await deployDSProxyContract();
+    setErrorMessage('');
+    try {
+      await deployDSProxyContract();
+    } catch (error) {
+      setErrorMessage('There was an error deploying the honeylemon vault. Please try again.');
+    }
     setTxActive(false);
   }
 
   const handleApproveCollateralToken = async () => {
     setTxActive(true);
-    await approveToken(TokenType.CollateralToken)
+    setErrorMessage('');
+    try {
+      await approveToken(TokenType.CollateralToken)
+    } catch (error) {
+      setErrorMessage(error.toString())
+    }
     setTxActive(false);
   }
 
   const handleCreateOffer = async () => {
     setTxActive(true);
+    setErrorMessage('')
     if (hashAmount) {
       try {
         const order = honeylemonService.createOrder(
@@ -193,7 +205,7 @@ const OfferContractPage: React.SFC = () => {
       } catch (error) {
         console.log('Something went wrong creating the offer');
         console.log(error);
-        // TODO: Display error on modal
+        setErrorMessage('There was an error creating the offer. Please try again later.')
       }
     }
     setTxActive(false);
@@ -266,7 +278,7 @@ const OfferContractPage: React.SFC = () => {
           <MRIDisplay />
         </Grid>
         <Grid item xs={8}>
-          <Typography style={{ fontWeight: 'bold' }} color='primary'>Offer a {CONTRACT_DURATION}-day Mining Revenue Contract</Typography>
+          <Typography style={{ fontWeight: 'bold' }}>Offer a {CONTRACT_DURATION}-day Mining Revenue Contract</Typography>
         </Grid>
         <Grid item xs={4} style={{ textAlign: 'end' }}>
           <Button
@@ -491,7 +503,8 @@ const OfferContractPage: React.SFC = () => {
               <Step key={label}>
                 <StepLabel>{label}</StepLabel>
                 <StepContent>
-                  <Typography>{getStepContent(index)}</Typography>
+                <Typography paragraph>{getStepContent(index)}</Typography>
+                  {errorMessage && <Typography color='error'>{errorMessage}</Typography>}
                   <div className={classes.actionsContainer}>
                     <Button
                       variant="contained"
@@ -502,7 +515,7 @@ const OfferContractPage: React.SFC = () => {
                       {getStepButtonLabel(activeStep)}&nbsp;
                         {txActive && <CircularProgress className={classes.loadingSpinner} size={20} />}
                     </Button>
-                    {activeStep === 0 &&
+                    {activeStep === 0 ?
                       <Button
                         variant="contained"
                         color='secondary'
@@ -510,14 +523,14 @@ const OfferContractPage: React.SFC = () => {
                         className={classes.button}
                         disabled={txActive}>
                         Skip
+                      </Button> :
+                      <Button
+                        onClick={handleCloseOfferDialog}
+                        className={classes.button}
+                        disabled={txActive}>
+                        Cancel
                       </Button>
                     }
-                    <Button
-                      onClick={handleCloseOfferDialog}
-                      className={classes.button}
-                      disabled={txActive}>
-                      Cancel
-                    </Button>
                   </div>
                 </StepContent>
               </Step>

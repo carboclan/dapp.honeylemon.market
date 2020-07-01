@@ -106,7 +106,7 @@ const useStyles = makeStyles(({ spacing, palette, transitions }) => ({
 enum BuyType { 'budget', 'quantity' };
 
 const BuyContractPage: React.SFC = () => {
-  const { address } = useOnboard();
+  const { address, gasPrice, refreshGasPrice } = useOnboard();
   const {
     honeylemonService,
     PAYMENT_TOKEN_DECIMALS,
@@ -145,6 +145,7 @@ const BuyContractPage: React.SFC = () => {
   const [showOrderbook, setShowOrderbook] = useState(false);
   const [skipDsProxy, setSkipDsProxy] = useState(false);
   const [activeStep, setActiveStep] = useState(0);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleChangeBuyType = (event: React.ChangeEvent<{}>, newValue: BuyType) => {
     setBuyType(newValue);
@@ -152,6 +153,7 @@ const BuyContractPage: React.SFC = () => {
   };
 
   const handleCloseBuyDialog = () => {
+    setErrorMessage('');
     setShowBuyModal(false);
   }
 
@@ -229,30 +231,42 @@ const BuyContractPage: React.SFC = () => {
 
   const handleDeployDSProxy = async () => {
     setTxActive(true);
-    await deployDSProxyContract();
+    setErrorMessage('');
+    try {
+      await deployDSProxyContract();
+    } catch (error) {
+      setErrorMessage(error);
+    }
     setTxActive(false);
   }
 
   const handleApprovePaymentToken = async () => {
     setTxActive(true);
-    await approveToken(TokenType.PaymentToken)
+    setErrorMessage('');
+    try {
+      await approveToken(TokenType.PaymentToken)
+    } catch (error) {
+      setErrorMessage(error.toString())
+    }
     setTxActive(false);
   }
 
   const handleBuyOffer = async () => {
     setTxActive(true);
+    setErrorMessage('')
     try {
-      // TODO: I dont think this should be hardcoded in here
-      const gasPrice = 5e9; // 5 GWEI
+      await refreshGasPrice();
       const tx = await honeylemonService.getFillOrdersTx(
         resultOrders,
         takerAssetFillAmounts
       );
 
+      const orderGasPrice = Number(`${gasPrice}e9`);
       const value = await honeylemonService.get0xFeeForOrderBatch(
-        gasPrice,
+        orderGasPrice,
         resultOrders.length
       );
+      
 
       const gas = await honeylemonService.estimateGas(
         resultOrders,
@@ -263,7 +277,7 @@ const BuyContractPage: React.SFC = () => {
       await tx.awaitTransactionSuccessAsync({
         from: address,
         gas,
-        gasPrice,
+        gasPrice: orderGasPrice,
         value
       });
       setShowBuyModal(false);
@@ -272,6 +286,7 @@ const BuyContractPage: React.SFC = () => {
       console.log('Something went wrong buying this contract');
       console.log(error);
       // TODO: Display error on modal
+      setErrorMessage('There was an error creating the offer. Please try again later.')
     }
     setTxActive(false);
   }
@@ -590,7 +605,8 @@ const BuyContractPage: React.SFC = () => {
               <Step key={label}>
                 <StepLabel>{label}</StepLabel>
                 <StepContent>
-                  <Typography>{getStepContent(index)}</Typography>
+                  <Typography paragraph>{getStepContent(index)}</Typography>
+                  {errorMessage && <Typography color='error'>{errorMessage}</Typography>}
                   <div className={classes.actionsContainer}>
                     <Button
                       variant="contained"
@@ -601,7 +617,7 @@ const BuyContractPage: React.SFC = () => {
                       {getStepButtonLabel(activeStep)}&nbsp;
                         {txActive && <CircularProgress className={classes.loadingSpinner} size={20} />}
                     </Button>
-                    {activeStep === 0 &&
+                    {activeStep === 0 ?
                       <Button
                         variant="contained"
                         color='secondary'
@@ -609,14 +625,14 @@ const BuyContractPage: React.SFC = () => {
                         className={classes.button}
                         disabled={txActive}>
                         Skip
+                      </Button> :
+                      <Button
+                        onClick={handleCloseBuyDialog}
+                        className={classes.button}
+                        disabled={txActive}>
+                        Cancel
                       </Button>
                     }
-                    <Button
-                      onClick={handleCloseBuyDialog}
-                      className={classes.button}
-                      disabled={txActive}>
-                      Cancel
-                    </Button>
                   </div>
                 </StepContent>
               </Step>
