@@ -42,7 +42,6 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
   const [gasPrice, setGasPrice] = useState(0);
 
   const infuraId = process.env.REACT_APP_INFURA_ID
-  // TODO: Update this for mainnet deployment
   const infuraRpc = `https://${networkName(network)}.infura.io/v3/${infuraId}`
 
   useEffect(() => {

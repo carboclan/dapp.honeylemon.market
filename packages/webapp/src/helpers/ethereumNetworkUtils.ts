@@ -1,7 +1,7 @@
 export function networkName(id: any) {
     switch (Number(id)) {
         case 1:
-            return 'main'
+            return 'mainnet'
         case 3:
             return 'ropsten'
         case 4:
