@@ -303,7 +303,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
           const { emitter } = notify.account(address);
           const etherscanUrl = (network === 1) ? 'https://etherscan.io' : `https://${networkName(network)}.etherscan.io`
           emitter.on('all', tx => ({
-            onclick: () => window.open(`https://${etherscanUrl}/tx/${tx.hash}`) // TODO: update this to work on other networks
+            onclick: () => window.open(`${etherscanUrl}/tx/${tx.hash}`) // TODO: update this to work on other networks
           }))
         }
       };
