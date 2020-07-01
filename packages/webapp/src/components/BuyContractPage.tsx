@@ -285,7 +285,6 @@ const BuyContractPage: React.SFC = () => {
     } catch (error) {
       console.log('Something went wrong buying this contract');
       console.log(error);
-      // TODO: Display error on modal
       setErrorMessage('There was an error creating the offer. Please try again later.')
     }
     setTxActive(false);

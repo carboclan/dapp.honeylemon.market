@@ -60,7 +60,7 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
               { walletName: 'metamask', preferred: true },
               {
                 walletName: 'imToken',
-                rpcUrl: 'https://eth-testnet.tokenlon.im', //TODO update this for mainnet mainnet-eth.token.im
+                rpcUrl: onboardProps.networkId === 1 ? 'https://mainnet-eth.token.im' : 'https://eth-testnet.tokenlon.im',
                 preferred: true,
               },
               { walletName: "coinbase", preferred: true },
