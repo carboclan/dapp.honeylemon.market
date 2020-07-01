@@ -2,7 +2,17 @@ import { Web3Wrapper } from "@0x/web3-wrapper";
 
 const { GraphQLClient } = require('graphql-request');
 const { HttpClient, OrderbookRequest } = require('@0x/connect');
-const { MinterBridge, MarketContractProxy, MarketContractMPX, CollateralToken, PaymentToken, DSProxy, TetherERC20 } = require('@honeylemon/contracts');
+const { 
+  MinterBridge, 
+  MarketContractProxy, 
+  MarketContractMPX, 
+  CollateralToken, 
+  PaymentToken, 
+  DSProxy, 
+  TetherERC20, 
+  PositionToken,
+  MarketCollateralPool,
+} = require('@honeylemon/contracts');
 
 const {
   marketUtils,
@@ -11,6 +21,7 @@ const {
   assetDataUtils,
   orderCalculationUtils
 } = require('@0x/order-utils');
+
 const { ContractWrappers, ERC20TokenContract } = require('@0x/contract-wrappers');
 const { BigNumber } = require('@0x/utils');
 const Web3 = require('web3');
@@ -407,6 +418,23 @@ class HoneylemonService {
       .call({ from: address });
     // if the address is not the same as the DSProxy address then the user has a DSProxy
     return DSProxyAddress.toLowerCase() != address.toLowerCase();
+  }
+
+  async redeemPosition(recipientAddress, positionTokenAddress, marketContractAddress, amount) {
+    const positionToken = new web3.eth.Contract(PositionToken.abi, positionTokenAddress);
+
+    await positionToken.approve(marketContractAddress, amount, {
+      from: recipientAddress
+    });
+    
+    const marketCollateralPoolAddress = await this.marketContractProxy.methods
+      .getCollateralPool(marketContractAddress)
+
+    const marketContractPool = new web3.eth.Contract(MarketCollateralPool.abi, marketCollateralPoolAddress);
+
+    await marketContractPool.settleAndClose(marketContractAddress, 0, amount, {
+      from: recipientAddress
+    });
   }
 
   async batchRedeem(recipientAddress) {
