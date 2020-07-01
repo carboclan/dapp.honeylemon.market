@@ -148,6 +148,8 @@ function AppWrapper(props: { children: ReactNode }) {
     }
   })
 
+  const etherscanUrl = (network === 1) ? 'https://etherscan.io' : `https://${networkName(network)}.etherscan.io`
+
   return (
     <div className={classes.root}>
       <AppBar
@@ -239,7 +241,7 @@ function AppWrapper(props: { children: ReactNode }) {
               secondaryTypographyProps={{
                 align: 'right'
               }}>
-              <Link href={`https://${networkName(network)}.etherscan.io/address/${address}`} target="_blank" rel='noopener' underline='always' >
+              <Link href={`${etherscanUrl}/address/${address}`} target="_blank" rel='noopener' underline='always' >
                 {displayAddress(address || '0x', 20)}
               </Link>
             </ListItemText>
@@ -260,7 +262,7 @@ function AppWrapper(props: { children: ReactNode }) {
                 secondaryTypographyProps={{
                   align: 'right'
                 }}>
-                <Link href={`https://${networkName(network)}.etherscan.io/address/${dsProxyAddress}`} target="_blank" rel='noopener' underline='always' >
+                <Link href={`${etherscanUrl}/address/${dsProxyAddress}`} target="_blank" rel='noopener' underline='always' >
                   {displayAddress(dsProxyAddress || '0x', 20)}
                 </Link>
               </ListItemText>
