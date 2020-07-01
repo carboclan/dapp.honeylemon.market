@@ -106,7 +106,7 @@ const useStyles = makeStyles(({ spacing, palette, transitions }) => ({
 enum BuyType { 'budget', 'quantity' };
 
 const BuyContractPage: React.SFC = () => {
-  const { address } = useOnboard();
+  const { address, gasPrice, refreshGasPrice } = useOnboard();
   const {
     honeylemonService,
     PAYMENT_TOKEN_DECIMALS,
@@ -255,17 +255,18 @@ const BuyContractPage: React.SFC = () => {
     setTxActive(true);
     setErrorMessage('')
     try {
-      // TODO: I dont think this should be hardcoded in here
-      const gasPrice = 5e9; // 5 GWEI
+      await refreshGasPrice();
       const tx = await honeylemonService.getFillOrdersTx(
         resultOrders,
         takerAssetFillAmounts
       );
 
+      const orderGasPrice = Number(`${gasPrice}e9`);
       const value = await honeylemonService.get0xFeeForOrderBatch(
-        gasPrice,
+        orderGasPrice,
         resultOrders.length
       );
+      
 
       const gas = await honeylemonService.estimateGas(
         resultOrders,
@@ -276,7 +277,7 @@ const BuyContractPage: React.SFC = () => {
       await tx.awaitTransactionSuccessAsync({
         from: address,
         gas,
-        gasPrice,
+        gasPrice: orderGasPrice,
         value
       });
       setShowBuyModal(false);
