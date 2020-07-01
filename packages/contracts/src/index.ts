@@ -31,6 +31,7 @@ import * as StringLib from '../build/contracts/StringLib.json'
 import * as UpgradeableTarget from '../build/contracts/UpgradeableTarget.json'
 import * as UpgradeableToken from '../build/contracts/UpgradeableToken.json'
 import * as UpgradeableTokenMock from '../build/contracts/UpgradeableTokenMock.json'
+import * as TetherERC20 from '../build/contracts/TetherERC20.json'
 
 export {
     Address,
@@ -65,5 +66,6 @@ export {
     StringLib,
     UpgradeableTarget,
     UpgradeableToken,
-    UpgradeableTokenMock
+    UpgradeableTokenMock,
+    TetherERC20
 };

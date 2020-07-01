@@ -1,0 +1,288 @@
+{
+  "contractName": "UpgradeableTarget",
+  "abi": [
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "from",
+          "type": "address"
+        },
+        {
+          "name": "value",
+          "type": "uint256"
+        }
+      ],
+      "name": "upgradeFrom",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "metadata": "",
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "sourceMap": "",
+  "deployedSourceMap": "",
+  "source": "/*\n    Copyright 2017-2019 Phillip A. Elsasser\n\n    Licensed under the Apache License, Version 2.0 (the \"License\");\n    you may not use this file except in compliance with the License.\n    You may obtain a copy of the License at\n\n    http://www.apache.org/licenses/LICENSE-2.0\n\n    Unless required by applicable law or agreed to in writing, software\n    distributed under the License is distributed on an \"AS IS\" BASIS,\n    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n    See the License for the specific language governing permissions and\n    limitations under the License.\n*/\n\npragma solidity 0.5.2;\n\n\n/// @title Upgradeable Target\n/// @notice A contract (or a token itself) that can facilitate the upgrade from an existing deployed token\n/// to allow us to upgrade our token's functionality.\n/// @author Phil Elsasser <phil@marketprotocol.io>\ncontract UpgradeableTarget {\n    function upgradeFrom(address from, uint256 value) external; // note: implementation should require(from == oldToken)\n}\n",
+  "sourcePath": "/Users/andreianisimov/projects/honeylemon/dapp.honeylemon.market/packages/contracts/contracts/marketprotocol/tokens/UpgradeableTarget.sol",
+  "ast": {
+    "absolutePath": "/Users/andreianisimov/projects/honeylemon/dapp.honeylemon.market/packages/contracts/contracts/marketprotocol/tokens/UpgradeableTarget.sol",
+    "exportedSymbols": {
+      "UpgradeableTarget": [
+        3837
+      ]
+    },
+    "id": 3838,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 3829,
+        "literals": [
+          "solidity",
+          "0.5",
+          ".2"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "608:22:18"
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": "@title Upgradeable Target\n @notice A contract (or a token itself) that can facilitate the upgrade from an existing deployed token\n to allow us to upgrade our token's functionality.\n @author Phil Elsasser <phil@marketprotocol.io>",
+        "fullyImplemented": false,
+        "id": 3837,
+        "linearizedBaseContracts": [
+          3837
+        ],
+        "name": "UpgradeableTarget",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "body": null,
+            "documentation": null,
+            "id": 3836,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "upgradeFrom",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 3834,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 3831,
+                  "name": "from",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 3836,
+                  "src": "929:12:18",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 3830,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "929:7:18",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 3833,
+                  "name": "value",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 3836,
+                  "src": "943:13:18",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 3832,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "943:7:18",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "928:29:18"
+            },
+            "returnParameters": {
+              "id": 3835,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "966:0:18"
+            },
+            "scope": 3837,
+            "src": "908:59:18",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "external"
+          }
+        ],
+        "scope": 3838,
+        "src": "875:151:18"
+      }
+    ],
+    "src": "608:419:18"
+  },
+  "legacyAST": {
+    "absolutePath": "/Users/andreianisimov/projects/honeylemon/dapp.honeylemon.market/packages/contracts/contracts/marketprotocol/tokens/UpgradeableTarget.sol",
+    "exportedSymbols": {
+      "UpgradeableTarget": [
+        3837
+      ]
+    },
+    "id": 3838,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 3829,
+        "literals": [
+          "solidity",
+          "0.5",
+          ".2"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "608:22:18"
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": "@title Upgradeable Target\n @notice A contract (or a token itself) that can facilitate the upgrade from an existing deployed token\n to allow us to upgrade our token's functionality.\n @author Phil Elsasser <phil@marketprotocol.io>",
+        "fullyImplemented": false,
+        "id": 3837,
+        "linearizedBaseContracts": [
+          3837
+        ],
+        "name": "UpgradeableTarget",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "body": null,
+            "documentation": null,
+            "id": 3836,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "upgradeFrom",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 3834,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 3831,
+                  "name": "from",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 3836,
+                  "src": "929:12:18",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 3830,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "929:7:18",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 3833,
+                  "name": "value",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 3836,
+                  "src": "943:13:18",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 3832,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "943:7:18",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "928:29:18"
+            },
+            "returnParameters": {
+              "id": 3835,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "966:0:18"
+            },
+            "scope": 3837,
+            "src": "908:59:18",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "external"
+          }
+        ],
+        "scope": 3838,
+        "src": "875:151:18"
+      }
+    ],
+    "src": "608:419:18"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.5.2+commit.1df8f40c.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "3.0.23",
+  "updatedAt": "2020-06-24T23:29:22.617Z",
+  "devdoc": {
+    "author": "Phil Elsasser <phil@marketprotocol.io>",
+    "methods": {},
+    "title": "Upgradeable Target"
+  },
+  "userdoc": {
+    "methods": {},
+    "notice": "A contract (or a token itself) that can facilitate the upgrade from an existing deployed token to allow us to upgrade our token's functionality."
+  }
+}
