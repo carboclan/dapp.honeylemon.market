@@ -143,7 +143,7 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
   const refreshGasPrice = async () => {
     try {
       const response = await (await fetch('https://www.etherchain.org/api/gasPriceOracle')).json();
-      const newGasPrice = !isNaN(Number(response.standard)) ? Number(response.standard)/10 : 35;
+      const newGasPrice = !isNaN(Number(response.standard)) ? Number(response.standard) : 35;
       setGasPrice(newGasPrice);
     } catch (error) {
       setGasPrice(35);
