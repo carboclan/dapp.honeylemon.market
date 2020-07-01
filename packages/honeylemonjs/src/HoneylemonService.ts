@@ -1,6 +1,8 @@
+import { Web3Wrapper } from "@0x/web3-wrapper";
+
 const { GraphQLClient } = require('graphql-request');
 const { HttpClient, OrderbookRequest } = require('@0x/connect');
-const { MinterBridge, MarketContractProxy, MarketContractMPX, CollateralToken, PaymentToken, DSProxy } = require('@honeylemon/contracts');
+const { MinterBridge, MarketContractProxy, MarketContractMPX, CollateralToken, PaymentToken, DSProxy, TetherERC20 } = require('@honeylemon/contracts');
 
 const {
   marketUtils,
@@ -20,6 +22,7 @@ const TH_DECIMALS = 0; // TH has 6 decimals
 const PAYMENT_TOKEN_DECIMALS = 6; // USDT has 6 decimals
 const COLLATERAL_TOKEN_DECIMALS = 8; // imBTC has 8 decimals
 const SHIFT_PRICE_BY = TH_DECIMALS - PAYMENT_TOKEN_DECIMALS;
+const USDT_ADDRESS = '0xdAC17F958D2ee523a2206206994597C13D831ec7';
 
 class HoneylemonService {
   subgraphClient: any;
@@ -87,8 +90,8 @@ class HoneylemonService {
       MarketContractProxy.abi,
       this.marketContractProxyAddress
     );
-
     this.marketContractProxy.setProvider(this.provider);
+
     console.log('Honeylemon service initiated!');
   }
 
@@ -327,11 +330,24 @@ class HoneylemonService {
 
   async approvePaymentToken(takerAddress, amount) {
     const approvalAmount = amount === 0 ? new BigNumber(0) : new BigNumber(2).pow(256).minus(1);
-    return await this.paymentToken
+    if (this.paymentTokenAddress.toLowerCase() == USDT_ADDRESS.toLowerCase()) {
+      // Hack for Tether approval not being compliant with ERC20
+      const usdt = new web3.eth.Contract(
+        TetherERC20.abi,
+        this.paymentTokenAddress
+      );
+      usdt.setProvider(this.provider);
+      const result = await usdt.methods.approve(this.contractWrappers.contractAddresses.erc20Proxy, approvalAmount.toString())
+        .send({ from: takerAddress });
+      const web3Wrapper: Web3Wrapper = new Web3Wrapper(this.provider);
+      return await web3Wrapper.awaitTransactionSuccessAsync(result.transactionHash);
+    } else {
+      return await this.paymentToken
       .approve(this.contractWrappers.contractAddresses.erc20Proxy, approvalAmount)
       .awaitTransactionSuccessAsync({
         from: takerAddress
       });
+    }
   }
 
   async getCollateralTokenAmounts(makerAddress) {
