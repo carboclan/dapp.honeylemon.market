@@ -1792,8 +1792,8 @@
     "version": "0.5.2+commit.1df8f40c.Emscripten.clang"
   },
   "networks": {},
-  "schemaVersion": "3.0.23",
-  "updatedAt": "2020-07-01T01:54:53.220Z",
+  "schemaVersion": "3.2.0",
+  "updatedAt": "2020-07-02T03:29:22.736Z",
   "devdoc": {
     "details": "Tether's approve method does not conform with the ERC20 interface",
     "methods": {
