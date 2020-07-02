@@ -96,13 +96,16 @@ const ExpiredLongPositionModal: React.SFC<ExpiredLongPositionModalProps> = ({ op
         {position.status === PositionStatus.withdrawalPending && !position.canBeBatchRedeemed &&
           <Grid container justify='center' spacing={2} style={{ padding: 16 }}>
             <Grid item>
-              <Button onClick={() =>
-                handleWithdraw(
-                  position.longTokenAddress,
-                  position.contract.id,
-                  position.qtyToMint,
-                  position.type
-                )}
+              <Button
+                variant='contained'
+                color='primary'
+                onClick={() =>
+                  handleWithdraw(
+                    position.longTokenAddress,
+                    position.contract.id,
+                    position.qtyToMint,
+                    position.type
+                  )}
                 disabled={isWithdrawing} className={classes.withdrawButton} fullWidth>
                 Withdraw&nbsp;
                 {isWithdrawing && <CircularProgress className={classes.loadingSpinner} size={20} />}

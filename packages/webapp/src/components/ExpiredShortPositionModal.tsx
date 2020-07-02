@@ -101,7 +101,10 @@ const ExpiredShortPositionModal: React.SFC<ExpiredShortPositionModalProps> = ({ 
         {position.status === PositionStatus.withdrawalPending && !position.canBeBatchRedeemed &&
           <Grid container justify='center' spacing={2} style={{ padding: 16 }}>
             <Grid item>
-              <Button onClick={() =>
+              <Button
+                variant='contained'
+                color='primary'
+                onClick={() =>
                 handleWithdraw(
                   position.longTokenAddress,
                   position.contract.id,
