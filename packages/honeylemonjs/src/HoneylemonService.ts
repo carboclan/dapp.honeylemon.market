@@ -430,9 +430,9 @@ class HoneylemonService {
     const marketCollateralPoolAddress = await this.marketContractProxy.methods
       .getCollateralPool(marketContractAddress)
 
-    const marketContractPool = new web3.eth.Contract(MarketCollateralPool.abi, marketCollateralPoolAddress);
+    const marketCollateralPool = new web3.eth.Contract(MarketCollateralPool.abi, marketCollateralPoolAddress);
 
-    await marketContractPool.settleAndClose(marketContractAddress, 0, amount, {
+    await marketCollateralPool.settleAndClose(marketContractAddress, 0, amount, {
       from: recipientAddress
     });
   }
