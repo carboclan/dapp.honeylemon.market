@@ -2,14 +2,14 @@ import { Web3Wrapper } from "@0x/web3-wrapper";
 
 const { GraphQLClient } = require('graphql-request');
 const { HttpClient, OrderbookRequest } = require('@0x/connect');
-const { 
-  MinterBridge, 
-  MarketContractProxy, 
-  MarketContractMPX, 
-  CollateralToken, 
-  PaymentToken, 
-  DSProxy, 
-  TetherERC20, 
+const {
+  MinterBridge,
+  MarketContractProxy,
+  MarketContractMPX,
+  CollateralToken,
+  PaymentToken,
+  DSProxy,
+  TetherERC20,
   PositionToken,
   MarketCollateralPool,
 } = require('@honeylemon/contracts');
@@ -354,10 +354,10 @@ class HoneylemonService {
       return await web3Wrapper.awaitTransactionSuccessAsync(result.transactionHash);
     } else {
       return await this.paymentToken
-      .approve(this.contractWrappers.contractAddresses.erc20Proxy, approvalAmount)
-      .awaitTransactionSuccessAsync({
-        from: takerAddress
-      });
+        .approve(this.contractWrappers.contractAddresses.erc20Proxy, approvalAmount)
+        .awaitTransactionSuccessAsync({
+          from: takerAddress
+        });
     }
   }
 
@@ -420,21 +420,33 @@ class HoneylemonService {
     return DSProxyAddress.toLowerCase() != address.toLowerCase();
   }
 
-  async redeemPosition(recipientAddress, positionTokenAddress, marketContractAddress, amount) {
+  async redeemPosition(
+    recipientAddress: string,
+    positionTokenAddress: string,
+    marketContractAddress: string,
+    amount: Number,
+    positionType: 'Long' | 'Short') {
     const positionToken = new web3.eth.Contract(PositionToken.abi, positionTokenAddress);
 
-    await positionToken.approve(marketContractAddress, amount, {
-      from: recipientAddress
-    });
-    
+    await positionToken.approve(marketContractAddress, amount)
+      .awaitTransactionSuccessAsync({
+        from: recipientAddress
+      });
+
     const marketCollateralPoolAddress = await this.marketContractProxy.methods
-      .getCollateralPool(marketContractAddress)
+      .getCollateralPool(marketContractAddress).call();
 
     const marketCollateralPool = new web3.eth.Contract(MarketCollateralPool.abi, marketCollateralPoolAddress);
 
-    await marketCollateralPool.settleAndClose(marketContractAddress, 0, amount, {
-      from: recipientAddress
-    });
+    positionType === 'Long' ?
+      await marketCollateralPool.settleAndClose(marketContractAddress, 0, amount)
+        .awaitTransactionSuccessAsync({
+          from: recipientAddress
+        }) :
+      await marketCollateralPool.settleAndClose(marketContractAddress, amount, 0)
+        .awaitTransactionSuccessAsync({
+          from: recipientAddress
+        })
   }
 
   async batchRedeem(recipientAddress) {
@@ -650,9 +662,9 @@ class HoneylemonService {
         : position.longTokenDSProxy;
 
       position.isRedeemed =
-      (await positionToken.balanceOf(dsProxyAddress).callAsync()).toString() == '0'
-        ? true
-        : false;
+        (await positionToken.balanceOf(dsProxyAddress).callAsync()).toString() == '0'
+          ? true
+          : false;
 
       // position.tokensToRedeem = (x
       //   await positionToken.balanceOf(dsProxyAddress).callAsync()

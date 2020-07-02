@@ -1,17 +1,51 @@
 import React from 'react';
-import { Dialog, DialogTitle, DialogContent, TableRow, Table, TableCell, TableBody } from '@material-ui/core';
-import { useHoneylemon, PositionStatus } from '../contexts/HoneylemonContext';
+import { Dialog, DialogTitle, DialogContent, TableRow, Table, TableCell, TableBody, makeStyles, Grid, Button, CircularProgress } from '@material-ui/core';
+import { useHoneylemon, PositionStatus, PositionType } from '../contexts/HoneylemonContext';
 import { BigNumber } from '@0x/utils';
 import dayjs from 'dayjs';
+
+const useStyles = makeStyles(({ palette }) => ({
+  loadingSpinner: {
+    width: 20,
+    flexBasis: 'end',
+    flexGrow: 0,
+  },
+  withdrawButton: {
+    alignSelf: "center",
+  }
+}))
 
 interface ExpiredShortPositionModalProps {
   open: boolean,
   onClose(): void,
+  withdrawPosition(
+    positionTokenAddress: string,
+    marketContractAddress: string,
+    amount: number,
+    type: PositionType): void,
+  isWithdrawing: boolean
   position: any,
 };
 
-const ExpiredShortPositionModal: React.SFC<ExpiredShortPositionModalProps> = ({ open, onClose, position }) => {
-  const { PAYMENT_TOKEN_DECIMALS, PAYMENT_TOKEN_NAME, COLLATERAL_TOKEN_NAME, COLLATERAL_TOKEN_DECIMALS } = useHoneylemon();
+const ExpiredShortPositionModal: React.SFC<ExpiredShortPositionModalProps> = ({ open, onClose, position, withdrawPosition, isWithdrawing }) => {
+  const { PAYMENT_TOKEN_DECIMALS, PAYMENT_TOKEN_NAME, COLLATERAL_TOKEN_NAME, COLLATERAL_TOKEN_DECIMALS, refreshPortfolio } = useHoneylemon();
+  
+  const classes = useStyles();
+
+  const handleWithdraw = async (
+    positionTokenAddress: string,
+    marketContractAddress: string,
+    amount: number,
+    type: PositionType
+  ) => {
+    try {
+      await withdrawPosition(positionTokenAddress, marketContractAddress, amount, type);
+      refreshPortfolio();
+    } catch (error) {
+      console.log('Error withdrawing');
+    }
+  }
+  
   return (
     <Dialog open={open} onClose={onClose} aria-labelledby="dialog-title" maxWidth='sm' fullWidth>
       <DialogTitle id="dialog-title">Expired Short Position Details</DialogTitle>
@@ -64,6 +98,22 @@ const ExpiredShortPositionModal: React.SFC<ExpiredShortPositionModalProps> = ({ 
             </TableRow>
           </TableBody>
         </Table>
+        {position.status === PositionStatus.withdrawalPending && !position.canBeBatchRedeemed &&
+          <Grid container justify='center' spacing={2} style={{ padding: 16 }}>
+            <Grid item>
+              <Button onClick={() =>
+                handleWithdraw(
+                  position.longTokenAddress,
+                  position.contract.id,
+                  position.qtyToMint,
+                  position.type
+                )}
+                disabled={isWithdrawing} className={classes.withdrawButton} fullWidth>
+                Withdraw&nbsp;
+                {isWithdrawing && <CircularProgress className={classes.loadingSpinner} size={20} />}
+              </Button>
+            </Grid>
+          </Grid>}
       </DialogContent >
     </Dialog >
   )
