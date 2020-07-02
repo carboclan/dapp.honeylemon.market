@@ -15777,10 +15777,103 @@
       "links": {},
       "address": "0xA4Bc40BbaF5bdAf983b4D01E80F9bC1c91a4Fc0f",
       "transactionHash": "0x662d1b7a922746d91cfd51b70be6af6c6adebeb54ecdf3bf15db6aa6e45ede23"
+    },
+    "1337": {
+      "events": {
+        "0x1e551210cd64464d2a2d2b08a00acc53863e5e3c0b7c943a9a8fe11d71a71ae2": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "marketContract",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "user",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "feeToken",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "qtyMinted",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "name": "collateralLocked",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "name": "feesPaid",
+              "type": "uint256"
+            }
+          ],
+          "name": "TokensMinted",
+          "type": "event"
+        },
+        "0x75b6073dcb0773119aa05ecb4a5866ef9323b20a5b4e795d5a436532deeae4f7": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "marketContract",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "user",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "longQtyRedeemed",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "name": "shortQtyRedeemed",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "name": "collateralUnlocked",
+              "type": "uint256"
+            }
+          ],
+          "name": "TokensRedeemed",
+          "type": "event"
+        },
+        "0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "previousOwner",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "newOwner",
+              "type": "address"
+            }
+          ],
+          "name": "OwnershipTransferred",
+          "type": "event"
+        }
+      },
+      "links": {},
+      "address": "0xda54ecF5A234D6CD85Ce93A955860834aCA75878",
+      "transactionHash": "0xfa60bffbfa99775d18b53035875b45ea9e0cf277c831d85941c0576eff4a4b6a"
     }
   },
-  "schemaVersion": "3.0.23",
-  "updatedAt": "2020-06-25T01:43:07.436Z",
+  "schemaVersion": "3.2.0",
+  "updatedAt": "2020-07-02T03:29:27.517Z",
   "networkType": "ethereum",
   "devdoc": {
     "author": "Phil Elsasser <phil@marketprotocol.io>",

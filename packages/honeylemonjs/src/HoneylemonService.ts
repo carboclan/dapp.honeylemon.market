@@ -547,6 +547,10 @@ class HoneylemonService {
         existing.qtyToMint = new BigNumber(existing.qtyToMint)
           .plus(pos.qtyToMint)
           .toString();
+        // Merge fills for correct price calculation
+        if (existing.transaction.id != pos.transaction.id) {
+          existing.transaction.fills.push(...pos.transaction.fills);
+        }
       } else {
         res[mergeBy] = pos;
       }
@@ -560,8 +564,11 @@ class HoneylemonService {
     // 1. merge positions by transaction in order to correctly represent fills and price
     positions = this._mergePositions(positions, pos => pos.transaction.id);
 
-    // 2. merge positions by marketId
-    positions = this._mergePositions(positions, pos => pos.marketId);
+    // 2. merge positions by marketId and recepient/DSProxy
+    positions = this._mergePositions(
+      positions,
+      pos => `${pos.marketId}/${isShort ? pos.shortTokenDSProxy : pos.longTokenDSProxy}`
+    );
 
     for (let i = 0; i < positions.length; i++) {
       const position = positions[i];
@@ -615,9 +622,9 @@ class HoneylemonService {
         : position.longTokenDSProxy;
 
       position.isRedeemed =
-        (await positionToken.balanceOf(dsProxyAddress).callAsync()).toString() == '0'
-          ? true
-          : false;
+      (await positionToken.balanceOf(dsProxyAddress).callAsync()).toString() == '0'
+        ? true
+        : false;
 
       // position.tokensToRedeem = (x
       //   await positionToken.balanceOf(dsProxyAddress).callAsync()

@@ -5503,10 +5503,82 @@
       "links": {},
       "address": "0x24E43839c735fA5a036b6b45908149833572138F",
       "transactionHash": "0x4ca08b30cc66b662af2a30241cc483f3e248f0a85e349fbf8a113060999f0700"
+    },
+    "1337": {
+      "events": {
+        "0x534d18c8ff24ba5980906d732f3075704749427353734fbbf05d50485643b124": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "contractAddress",
+              "type": "address"
+            }
+          ],
+          "name": "AddressAddedToWhitelist",
+          "type": "event"
+        },
+        "0x535611fb62fa2a833988f283b779e417e996813e44046f521d76c17b5943b08c": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "contractAddress",
+              "type": "address"
+            }
+          ],
+          "name": "AddressRemovedFromWhitelist",
+          "type": "event"
+        },
+        "0x960c6a67a1f0f46ddffd138f2b7f44cbc573d0e0a073363b287a257b121dc48a": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "factoryAddress",
+              "type": "address"
+            }
+          ],
+          "name": "FactoryAddressAdded",
+          "type": "event"
+        },
+        "0x5d6ac55db628f137c53a554c300a684dc6b3db9d8f24e9611ea5e84c282d177d": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "factoryAddress",
+              "type": "address"
+            }
+          ],
+          "name": "FactoryAddressRemoved",
+          "type": "event"
+        },
+        "0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "previousOwner",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "newOwner",
+              "type": "address"
+            }
+          ],
+          "name": "OwnershipTransferred",
+          "type": "event"
+        }
+      },
+      "links": {},
+      "address": "0xC1bE2c0bb387aa13d5019a9c518E8BC93cb53360",
+      "transactionHash": "0xf73854170adef57d03a2aa6d0bcc837c93a0a88eb9d57aca89cb269fad62d958"
     }
   },
-  "schemaVersion": "3.0.23",
-  "updatedAt": "2020-06-25T01:43:07.442Z",
+  "schemaVersion": "3.2.0",
+  "updatedAt": "2020-07-02T03:29:27.529Z",
   "networkType": "ethereum",
   "devdoc": {
     "author": "Phil Elsasser <phil@marketprotocol.io>",

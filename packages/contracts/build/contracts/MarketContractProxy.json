@@ -32059,10 +32059,173 @@
       "links": {},
       "address": "0x3270070240747337Dbc27C7C7CD70D1921098eD2",
       "transactionHash": "0x16c00cf1dd6b1d111e11b66e57a975709798b61544983ae8a1d1ef21f83a9111"
+    },
+    "1337": {
+      "events": {
+        "0x9a401714d85871064da5e28ca5e7e523ea910cbe7e7e4eef8bd81bf46d18e8c9": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "qtyToMint",
+              "type": "uint256"
+            },
+            {
+              "indexed": true,
+              "name": "marketId",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "name": "contractName",
+              "type": "string"
+            },
+            {
+              "indexed": true,
+              "name": "longTokenRecipient",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "longTokenDSProxy",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "shortTokenRecipient",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "shortTokenDSProxy",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "latestMarketContract",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "longTokenAddress",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "shortTokenAddress",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "time",
+              "type": "uint256"
+            }
+          ],
+          "name": "PositionTokensMinted",
+          "type": "event"
+        },
+        "0x726a84c9ab637ed2eb063e4432f70689120b2af16b668f84cbb5979273ab9f83": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "contractAddress",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "revenuePerUnit",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "name": "index",
+              "type": "uint256"
+            }
+          ],
+          "name": "MarketContractSettled",
+          "type": "event"
+        },
+        "0xead8d114e3d6854da1cd7b08361720f8d1be0a657fcd7d9094748420898b20ec": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "currentMRI",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "name": "contractName",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "name": "expiration",
+              "type": "uint256"
+            },
+            {
+              "indexed": true,
+              "name": "index",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "name": "contractAddress",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "collateralPerUnit",
+              "type": "uint256"
+            }
+          ],
+          "name": "MarketContractDeployed",
+          "type": "event"
+        },
+        "0x3e391cc46bb19378d04dc06707355be58c38457f63fd3a02163cbbbef700258d": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "DSProxy",
+              "type": "address"
+            }
+          ],
+          "name": "dSProxyCreated",
+          "type": "event"
+        },
+        "0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "previousOwner",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "newOwner",
+              "type": "address"
+            }
+          ],
+          "name": "OwnershipTransferred",
+          "type": "event"
+        }
+      },
+      "links": {},
+      "address": "0x45B3A72221E571017C0f0ec42189E11d149D0ACE",
+      "transactionHash": "0x1d8bc2037946bfb4e97d7b5912454988e15f1438c9372ebfafd4dcd6528299ad"
     }
   },
-  "schemaVersion": "3.0.23",
-  "updatedAt": "2020-07-01T01:54:53.189Z",
+  "schemaVersion": "3.2.0",
+  "updatedAt": "2020-07-02T03:29:27.498Z",
+  "networkType": "ethereum",
   "devdoc": {
     "details": "This contract is responsible for 1) daily deployment of new market contracts 2) settling old contracts 3) minting of long and short tokens 4) storage of DSProxy info 5) enabling batch token redemption.",
     "methods": {
