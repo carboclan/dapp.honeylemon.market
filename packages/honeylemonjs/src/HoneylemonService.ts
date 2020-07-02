@@ -2,14 +2,14 @@ import { Web3Wrapper } from "@0x/web3-wrapper";
 
 const { GraphQLClient } = require('graphql-request');
 const { HttpClient, OrderbookRequest } = require('@0x/connect');
-const {
-  MinterBridge,
-  MarketContractProxy,
-  MarketContractMPX,
-  CollateralToken,
-  PaymentToken,
-  DSProxy,
-  TetherERC20,
+const { 
+  MinterBridge, 
+  MarketContractProxy, 
+  MarketContractMPX, 
+  CollateralToken, 
+  PaymentToken, 
+  DSProxy, 
+  TetherERC20, 
   PositionToken,
   MarketCollateralPool,
 } = require('@honeylemon/contracts');
