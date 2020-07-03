@@ -4155,8 +4155,8 @@
     "version": "0.5.2+commit.1df8f40c.Emscripten.clang"
   },
   "networks": {},
-  "schemaVersion": "3.0.23",
-  "updatedAt": "2020-06-25T01:31:35.964Z",
+  "schemaVersion": "3.2.0",
+  "updatedAt": "2020-07-02T03:29:25.587Z",
   "networkType": "ethereum",
   "devdoc": {
     "author": "Phil Elsasser <phil@marketprotocol.io>",
