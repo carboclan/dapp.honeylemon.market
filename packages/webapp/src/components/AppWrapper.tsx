@@ -148,6 +148,8 @@ function AppWrapper(props: { children: ReactNode }) {
     }
   })
 
+  const etherscanUrl = (network === 1) ? 'https://etherscan.io' : `https://${networkName(network)}.etherscan.io`
+
   return (
     <div className={classes.root}>
       <AppBar
@@ -239,7 +241,7 @@ function AppWrapper(props: { children: ReactNode }) {
               secondaryTypographyProps={{
                 align: 'right'
               }}>
-              <Link href={`https://${networkName(network)}.etherscan.io/address/${address}`} target="_blank" rel='noopener' underline='always' >
+              <Link href={`${etherscanUrl}/address/${address}`} target="_blank" rel='noopener' underline='always' >
                 {displayAddress(address || '0x', 20)}
               </Link>
             </ListItemText>
@@ -260,7 +262,7 @@ function AppWrapper(props: { children: ReactNode }) {
                 secondaryTypographyProps={{
                   align: 'right'
                 }}>
-                <Link href={`https://${networkName(network)}.etherscan.io/address/${dsProxyAddress}`} target="_blank" rel='noopener' underline='always' >
+                <Link href={`${etherscanUrl}/address/${dsProxyAddress}`} target="_blank" rel='noopener' underline='always' >
                   {displayAddress(dsProxyAddress || '0x', 20)}
                 </Link>
               </ListItemText>
@@ -300,7 +302,10 @@ function AppWrapper(props: { children: ReactNode }) {
             <ListItemIcon>
               <img src='imBtc.png' style={{ width: '40px' }} alt='imbtc logo' />
             </ListItemIcon>
-            <Switch checked={(collateralTokenAllowance > 0)} onChange={() => handleToggleTokenApproval(TokenType.CollateralToken)} />
+            <Switch 
+              color="primary" 
+              checked={(collateralTokenAllowance > 0)} 
+              onChange={() => handleToggleTokenApproval(TokenType.CollateralToken)} />
             <ListItemText
               primary={`${collateralTokenBalance.toLocaleString(undefined, {
                 useGrouping: true,
@@ -319,7 +324,10 @@ function AppWrapper(props: { children: ReactNode }) {
             <ListItemIcon>
               <img src='usdt.png' style={{ width: '40px' }} alt='usdt logo' />
             </ListItemIcon>
-            <Switch checked={(paymentTokenAllowance > 0)} onChange={() => handleToggleTokenApproval(TokenType.PaymentToken)} />
+            <Switch
+              color="primary"
+              checked={(paymentTokenAllowance > 0)} 
+              onChange={() => handleToggleTokenApproval(TokenType.PaymentToken)} />
             <ListItemText
               primary={`${paymentTokenBalance.toLocaleString(undefined, {
                 useGrouping: true,

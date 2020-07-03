@@ -25,6 +25,8 @@ export type OnboardContext = {
   isReady: boolean,
   checkIsReady(): Promise<boolean>,
   resetOnboard(): void,
+  gasPrice: number,
+  refreshGasPrice(): Promise<void>,
 }
 
 const OnboardContext = React.createContext<OnboardContext | undefined>(undefined);
@@ -37,9 +39,9 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
   const [onboard, setOnboard] = useState<OnboardApi | undefined>(undefined)
   const [isReady, setIsReady] = useState<boolean>(false);
   const [notify, setNotify] = useState<NotifyApi | undefined>(undefined)
+  const [gasPrice, setGasPrice] = useState(0);
 
   const infuraId = process.env.REACT_APP_INFURA_ID
-  // TODO: Update this for mainnet deployment
   const infuraRpc = `https://${networkName(network)}.infura.io/v3/${infuraId}`
 
   useEffect(() => {
@@ -57,7 +59,7 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
               { walletName: 'metamask', preferred: true },
               {
                 walletName: 'imToken',
-                rpcUrl: 'https://eth-testnet.tokenlon.im', //TODO update this for mainnet mainnet-eth.token.im
+                rpcUrl: onboardProps.networkId === 1 ? 'https://mainnet-eth.token.im' : 'https://eth-testnet.tokenlon.im',
                 preferred: true,
               },
               { walletName: "coinbase", preferred: true },
@@ -138,6 +140,29 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
     onboard?.walletReset();
   }
 
+  const refreshGasPrice = async () => {
+    try {
+      const response = await (await fetch('https://www.etherchain.org/api/gasPriceOracle')).json();
+      const newGasPrice = !isNaN(Number(response.standard)) ? Number(response.standard) : 35;
+      setGasPrice(newGasPrice);
+    } catch (error) {
+      setGasPrice(35);
+    }
+  }
+
+  // Gas Price poller
+  useEffect(() => {
+    const getGasPrice = refreshGasPrice;
+   
+    let poller: NodeJS.Timeout;
+    getGasPrice();
+    poller = setInterval(getGasPrice, 60000);
+
+    return () => {
+      clearInterval(poller);
+    }
+  }, [])
+
   return (
     <OnboardContext.Provider value={{
       address: address,
@@ -149,6 +174,8 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
       isReady: isReady,
       checkIsReady,
       resetOnboard,
+      gasPrice,
+      refreshGasPrice,
     }}>
       {children}
     </OnboardContext.Provider>

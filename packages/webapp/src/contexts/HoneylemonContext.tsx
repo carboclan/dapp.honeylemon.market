@@ -8,6 +8,7 @@ import { ethers } from 'ethers';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import { BigNumber } from "@0x/utils";
+import { networkName } from "../helpers/ethereumNetworkUtils";
 
 dayjs.extend(utc);
 
@@ -28,7 +29,6 @@ export enum PositionStatus {
   withdrawn = 'Withdrawn'
 }
 
-//TODO: Extract this from library when TS conversion is done
 const COLLATERAL_TOKEN_NAME = process.env.REACT_APP_COLLATERAL_TOKEN_NAME || 'imBTC';
 const PAYMENT_TOKEN_NAME = process.env.REACT_APP_PAYMENT_TOKEN_NAME || 'USDT';
 const CONTRACT_COLLATERAL_RATIO = Number(process.env.REACT_APP_CONTRACT_COLLATERAL_RATIO) || 1.25;
@@ -152,7 +152,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
     } catch (error) {
       console.log('Something went wrong deploying the DS Proxy wallet');
       console.log(error);
-      // TODO: Display error on modal
+      throw new Error('Something went wrong deploying the honeylemon vault. Please try again.')
     }
   }
 
@@ -177,7 +177,11 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
     } catch (error) {
       console.log('Something went wrong approving the tokens');
       console.log(error);
-      // TODO: Display error on modal
+      const errorMessage = tokenType === TokenType.CollateralToken ?
+        `${COLLATERAL_TOKEN_NAME} approval failed. Please try again later.` :
+        `${PAYMENT_TOKEN_NAME} approval failed. Please try again later.`
+
+      throw Error(errorMessage)
     }
   }
 
@@ -297,8 +301,9 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
         setIsDailyContractDeployed(isContractDeployed);
         if (address && notify) {
           const { emitter } = notify.account(address);
+          const etherscanUrl = (network === 1) ? 'https://etherscan.io' : `https://${networkName(network)}.etherscan.io`
           emitter.on('all', tx => ({
-            onclick: () => window.open(`https://kovan.etherscan.io/tx/${tx.hash}`) // TODO update this to work on other networks
+            onclick: () => window.open(`${etherscanUrl}/tx/${tx.hash}`) // TODO: update this to work on other networks
           }))
         }
       };
@@ -337,10 +342,12 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
       if (orderbookService) {
         try {
           const orderbookResponse = await orderbookService.getOrderbook();
-          const book = orderbookResponse.asks.records.map((order: any) => ({
-            price: Number(new BigNumber(order.metaData.price).dividedBy(contractDuration).toString()),
-            quantity: Number(new BigNumber(order.order.makerAssetAmount).toString())
-          }));
+          const book = orderbookResponse.asks.records
+            .filter((order: any) => new BigNumber(order.metaData.remainingFillableMakerAssetAmount).gt(0))
+            .map((order: any) => ({
+              price: Number(new BigNumber(order.metaData.price).dividedBy(contractDuration).toString()),
+              quantity: Number(new BigNumber(order.metaData.remainingFillableMakerAssetAmount).toString())
+            }));
           setOrderbook(book)
         } catch (error) {
           console.log('There was an error getting the orderbook.')

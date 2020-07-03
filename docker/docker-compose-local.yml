@@ -22,7 +22,7 @@ services:
         ports:
             - "5432:5432"
     mesh:
-        image: docker.pkg.github.com/carboclan/0x-mesh/0x-mesh:1.2
+        image: docker.pkg.github.com/carboclan/0x-mesh/0x-mesh:1.4
         depends_on:
             - ganache
         restart: on-failure

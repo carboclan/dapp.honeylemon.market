@@ -1,5 +1,5 @@
 specVersion: 0.0.2
-description: Honeylemon graph
+description: Honeylemon graph - {{network}}
 repository: https://github.com/carboclan/dapp.honeylemon.market
 schema:
     file: ./schema.graphql
