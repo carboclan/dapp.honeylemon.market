@@ -4332,10 +4332,35 @@
       "links": {},
       "address": "0xE874aD2963dc4BE26A69E6bA0112023aAD0Cd1c1",
       "transactionHash": "0xc426ed482c4f10ef55259d193e5a1cf4784ef824eacb9f0f47fc636295f490a1"
+    },
+    "1337": {
+      "events": {
+        "0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "previousOwner",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "newOwner",
+              "type": "address"
+            }
+          ],
+          "name": "OwnershipTransferred",
+          "type": "event"
+        }
+      },
+      "links": {},
+      "address": "0xc7124963Ab16C33E5bF421D4c0090116622B3074",
+      "transactionHash": "0x15d2e5c3aa04b528c5a70eb882d3fe69b4c40fc1adf3ff75f91439e73e662cc8"
     }
   },
-  "schemaVersion": "3.0.23",
-  "updatedAt": "2020-07-01T01:54:53.219Z",
+  "schemaVersion": "3.2.0",
+  "updatedAt": "2020-07-02T03:29:27.486Z",
+  "networkType": "ethereum",
   "devdoc": {
     "methods": {
       "bridgeTransferFrom(address,address,address,uint256,bytes)": {

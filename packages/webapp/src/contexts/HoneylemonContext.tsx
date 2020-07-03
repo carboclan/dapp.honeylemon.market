@@ -17,7 +17,7 @@ enum TokenType {
   PaymentToken
 }
 
-enum PositionType {
+export enum PositionType {
   Long = 'Long',
   Short = 'Short'
 }
@@ -112,7 +112,6 @@ export type ContractDetails = {
   startDate: Date,
   expirationDate: Date,
   settlementDate: Date,
-  type: PositionType,
 }
 
 const HoneylemonContext = React.createContext<HoneylemonContext | undefined>(undefined);
@@ -186,11 +185,10 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
   }
 
   const parseContractName = (contractName: string): ContractDetails => {
-    const [indexType, collateralInstrument, durationString, startDate, position] = contractName.split('-');
+    const [indexType, collateralInstrument, durationString, startDate] = contractName.split('-');
     const duration = Number(durationString.replace('D', ''));
     return {
       instrumentName: `${indexType}-${collateralInstrument}`,
-      type: (position === 'long') ? PositionType.Long : PositionType.Short,
       startDate: dayjs(startDate).startOf('day').utc().toDate(), //This will always be UTC 00:00 the date the contract was concluded
       expirationDate: dayjs(startDate).startOf('day').utc().add(duration, 'd').toDate(),
       settlementDate: dayjs(startDate).startOf('day').utc().add(duration + 1, 'd').toDate(),
@@ -224,9 +222,11 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
       const allPositions = positions.longPositions.map((lp: any) => ({
         ...lp,
         contractName: lp.contractName + '-long',
+        type: PositionType.Long
       })).concat(positions.shortPositions.map((sp: any) => ({
         ...sp,
         contractName: sp.contractName + '-short',
+        type: PositionType.Short
       }))).map((p: any) => {
         return {
           ...p,
@@ -235,10 +235,15 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
           finalReward: Number(p.finalReward?.shiftedBy(-COLLATERAL_TOKEN_DECIMALS).toString()) || 0,
           totalCost: Number(new BigNumber(p.price).multipliedBy(p.qtyToMint).toString()),
           totalCollateralLocked: Number(new BigNumber(p.contract.collateralPerUnit).multipliedBy(p.qtyToMint).shiftedBy(-COLLATERAL_TOKEN_DECIMALS).toString()),
+          canBeBatchRedeemed: (p.type === PositionType.Long) ? 
+            (p.longTokenDSProxy !== p.longTokenRecipient.id) :
+            (p.shortTokenDSProxy !== p.shortTokenRecipient.id),
           ...parseContractName(p.contractName),
           status: getPositionStatus(p),
         }
       });
+
+      console.log(allPositions);
 
       const newActiveLongPositions = allPositions.filter((p: any) => p.status === PositionStatus.active && p.type === PositionType.Long)
       setActiveLongPositions(newActiveLongPositions);

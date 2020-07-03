@@ -1594,10 +1594,61 @@
       "links": {},
       "address": "0x3CE983761C26c2F36CB438a3B0103Aa72D43B299",
       "transactionHash": "0xaf7b6fc99e14a2dcc41dbed42167361dbad6f410b3854beae2e88694651b374d"
+    },
+    "1337": {
+      "events": {
+        "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "from",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "to",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "value",
+              "type": "uint256"
+            }
+          ],
+          "name": "Transfer",
+          "type": "event"
+        },
+        "0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "spender",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "value",
+              "type": "uint256"
+            }
+          ],
+          "name": "Approval",
+          "type": "event"
+        }
+      },
+      "links": {},
+      "address": "0xd2aa8d362b1CaA68553642831b86Abb3D24B4579",
+      "transactionHash": "0xa7a56355985c1add96c3e901c0ab26b458b2fbc5ed4528f7b5ab43abf7b1ba9f"
     }
   },
-  "schemaVersion": "3.0.23",
-  "updatedAt": "2020-06-25T01:43:14.469Z",
+  "schemaVersion": "3.2.0",
+  "updatedAt": "2020-07-02T03:29:28.117Z",
   "networkType": "ethereum",
   "devdoc": {
     "methods": {

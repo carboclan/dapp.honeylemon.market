@@ -2,7 +2,17 @@ import { Web3Wrapper } from "@0x/web3-wrapper";
 
 const { GraphQLClient } = require('graphql-request');
 const { HttpClient, OrderbookRequest } = require('@0x/connect');
-const { MinterBridge, MarketContractProxy, MarketContractMPX, CollateralToken, PaymentToken, DSProxy, TetherERC20 } = require('@honeylemon/contracts');
+const { 
+  MinterBridge, 
+  MarketContractProxy, 
+  MarketContractMPX, 
+  CollateralToken, 
+  PaymentToken, 
+  DSProxy, 
+  TetherERC20, 
+  PositionToken,
+  MarketCollateralPool,
+} = require('@honeylemon/contracts');
 
 const {
   marketUtils,
@@ -11,6 +21,7 @@ const {
   assetDataUtils,
   orderCalculationUtils
 } = require('@0x/order-utils');
+
 const { ContractWrappers, ERC20TokenContract } = require('@0x/contract-wrappers');
 const { BigNumber } = require('@0x/utils');
 const Web3 = require('web3');
@@ -343,10 +354,10 @@ class HoneylemonService {
       return await web3Wrapper.awaitTransactionSuccessAsync(result.transactionHash);
     } else {
       return await this.paymentToken
-      .approve(this.contractWrappers.contractAddresses.erc20Proxy, approvalAmount)
-      .awaitTransactionSuccessAsync({
-        from: takerAddress
-      });
+        .approve(this.contractWrappers.contractAddresses.erc20Proxy, approvalAmount)
+        .awaitTransactionSuccessAsync({
+          from: takerAddress
+        });
     }
   }
 
@@ -407,6 +418,35 @@ class HoneylemonService {
       .call({ from: address });
     // if the address is not the same as the DSProxy address then the user has a DSProxy
     return DSProxyAddress.toLowerCase() != address.toLowerCase();
+  }
+
+  async redeemPosition(
+    recipientAddress: string,
+    positionTokenAddress: string,
+    marketContractAddress: string,
+    amount: Number,
+    positionType: 'Long' | 'Short') {
+    const positionToken = new web3.eth.Contract(PositionToken.abi, positionTokenAddress);
+
+    await positionToken.approve(marketContractAddress, amount)
+      .awaitTransactionSuccessAsync({
+        from: recipientAddress
+      });
+
+    const marketCollateralPoolAddress = await this.marketContractProxy.methods
+      .getCollateralPool(marketContractAddress).call();
+
+    const marketCollateralPool = new web3.eth.Contract(MarketCollateralPool.abi, marketCollateralPoolAddress);
+
+    positionType === 'Long' ?
+      await marketCollateralPool.settleAndClose(marketContractAddress, 0, amount)
+        .awaitTransactionSuccessAsync({
+          from: recipientAddress
+        }) :
+      await marketCollateralPool.settleAndClose(marketContractAddress, amount, 0)
+        .awaitTransactionSuccessAsync({
+          from: recipientAddress
+        })
   }
 
   async batchRedeem(recipientAddress) {
@@ -547,6 +587,10 @@ class HoneylemonService {
         existing.qtyToMint = new BigNumber(existing.qtyToMint)
           .plus(pos.qtyToMint)
           .toString();
+        // Merge fills for correct price calculation
+        if (existing.transaction.id != pos.transaction.id) {
+          existing.transaction.fills.push(...pos.transaction.fills);
+        }
       } else {
         res[mergeBy] = pos;
       }
@@ -560,8 +604,11 @@ class HoneylemonService {
     // 1. merge positions by transaction in order to correctly represent fills and price
     positions = this._mergePositions(positions, pos => pos.transaction.id);
 
-    // 2. merge positions by marketId
-    positions = this._mergePositions(positions, pos => pos.marketId);
+    // 2. merge positions by marketId and recepient/DSProxy
+    positions = this._mergePositions(
+      positions,
+      pos => `${pos.marketId}/${isShort ? pos.shortTokenDSProxy : pos.longTokenDSProxy}`
+    );
 
     for (let i = 0; i < positions.length; i++) {
       const position = positions[i];

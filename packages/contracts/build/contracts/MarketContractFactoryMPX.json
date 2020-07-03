@@ -5030,10 +5030,51 @@
       "links": {},
       "address": "0x4d9DC4956879b31fBedb117Ba09694Df50d2377C",
       "transactionHash": "0x182c226fefaa5a9fd44327ffd468af1fdf282f991d93357a244d4ca27c511294"
+    },
+    "1337": {
+      "events": {
+        "0x38ee3ff13b5d3453452a79e0799d83b2c8207bf126b2798fa512343680f643ee": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "creator",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "contractAddress",
+              "type": "address"
+            }
+          ],
+          "name": "MarketContractCreated",
+          "type": "event"
+        },
+        "0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "previousOwner",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "newOwner",
+              "type": "address"
+            }
+          ],
+          "name": "OwnershipTransferred",
+          "type": "event"
+        }
+      },
+      "links": {},
+      "address": "0x33DeF1aA867Be09809F3a01CE41d5eC1888846c9",
+      "transactionHash": "0x0cef1f489753ee0f89214e3454ce52e654fddc9b3b11eee76de95f3d25085dbd"
     }
   },
-  "schemaVersion": "3.0.23",
-  "updatedAt": "2020-06-25T01:43:07.447Z",
+  "schemaVersion": "3.2.0",
+  "updatedAt": "2020-07-02T03:29:27.535Z",
   "networkType": "ethereum",
   "devdoc": {
     "author": "Phil Elsasser <phil@marketprotocol.io>",
