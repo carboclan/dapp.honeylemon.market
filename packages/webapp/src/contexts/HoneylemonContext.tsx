@@ -189,9 +189,9 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
     const duration = Number(durationString.replace('D', ''));
     return {
       instrumentName: `${indexType}-${collateralInstrument}`,
-      startDate: dayjs(startDate).startOf('day').utc().toDate(), //This will always be UTC 00:00 the date the contract was concluded
-      expirationDate: dayjs(startDate).startOf('day').utc().add(duration, 'd').toDate(),
-      settlementDate: dayjs(startDate).startOf('day').utc().add(duration + 1, 'd').toDate(),
+      startDate: dayjs(startDate, {utc: true}).startOf('day').toDate(), //This will always be UTC 00:00 the date the contract was concluded
+      expirationDate: dayjs(startDate, {utc: true}).startOf('day').add(duration, 'd').toDate(),
+      settlementDate: dayjs(startDate, {utc: true}).startOf('day').add(duration + 1, 'd').toDate(),
       duration,
     }
   }

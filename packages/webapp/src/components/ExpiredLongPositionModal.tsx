@@ -65,7 +65,7 @@ const ExpiredLongPositionModal: React.SFC<ExpiredLongPositionModalProps> = ({ op
               <TableCell align='right'>
                 {dayjs(position.startDate).format('DD-MMM-YY')} <br />
                 {dayjs(position.expirationDate).format('DD-MMM-YY')} <br />
-                {position.status === PositionStatus.expiredAwaitingSettlement && <>{Math.ceil(dayjs().utc().diff(dayjs(position.settlementDate), 'h', true))} <br /></>}
+                {position.status === PositionStatus.expiredAwaitingSettlement && <>{Math.ceil(dayjs(position.settlementDate).diff(dayjs(), 'h', true))} hours<br /></>}
                 {dayjs(position.settlementDate).format('DD-MMM-YY')} <br />
               </TableCell>
             </TableRow>
