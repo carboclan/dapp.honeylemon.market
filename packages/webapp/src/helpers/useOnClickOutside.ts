@@ -1,7 +1,5 @@
 import { useEffect, MutableRefObject } from "react";
 
-// Hook
-// TODO Fix type definition here
 export function useOnClickOutside(ref: MutableRefObject<any>, handler: (event: any) => void) {
   useEffect(
     () => {

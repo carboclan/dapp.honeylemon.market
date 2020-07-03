@@ -8,6 +8,7 @@ import { ethers } from 'ethers';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import { BigNumber } from "@0x/utils";
+import { networkName } from "../helpers/ethereumNetworkUtils";
 
 dayjs.extend(utc);
 
@@ -28,7 +29,6 @@ export enum PositionStatus {
   withdrawn = 'Withdrawn'
 }
 
-//TODO: Extract this from library when TS conversion is done
 const COLLATERAL_TOKEN_NAME = process.env.REACT_APP_COLLATERAL_TOKEN_NAME || 'imBTC';
 const PAYMENT_TOKEN_NAME = process.env.REACT_APP_PAYMENT_TOKEN_NAME || 'USDT';
 const CONTRACT_COLLATERAL_RATIO = Number(process.env.REACT_APP_CONTRACT_COLLATERAL_RATIO) || 1.25;
@@ -70,6 +70,7 @@ export type HoneylemonContext = {
   }
   orderbook: Array<OrderSummary>;
   btcStats: any,
+  isPortfolioRefreshing: boolean;
   deployDSProxyContract(): Promise<void>;
   approveToken(tokenType: TokenType, amount?: number): Promise<void>;
   refreshPortfolio(): Promise<void>;
@@ -151,12 +152,11 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
     } catch (error) {
       console.log('Something went wrong deploying the DS Proxy wallet');
       console.log(error);
-      // TODO: Display error on modal
+      throw new Error('Something went wrong deploying the honeylemon vault. Please try again.')
     }
   }
 
   const approveToken = async (tokenType: TokenType, amount?: number): Promise<void> => {
-    debugger;
     try {
       switch (tokenType) {
         case TokenType.CollateralToken:
@@ -177,7 +177,11 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
     } catch (error) {
       console.log('Something went wrong approving the tokens');
       console.log(error);
-      // TODO: Display error on modal
+      const errorMessage = tokenType === TokenType.CollateralToken ?
+        `${COLLATERAL_TOKEN_NAME} approval failed. Please try again later.` :
+        `${PAYMENT_TOKEN_NAME} approval failed. Please try again later.`
+
+      throw Error(errorMessage)
     }
   }
 
@@ -198,54 +202,60 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
     if (!position?.contract.settlement) {
       return PositionStatus.active;
     } else {
-      if (!position.isRedeemed && !position.canRedeem ) return PositionStatus.expiredAwaitingSettlement;
+      if (!position.isRedeemed && !position.canRedeem) return PositionStatus.expiredAwaitingSettlement;
       if (!position.isRedeemed && position.canRedeem) return PositionStatus.withdrawalPending;
-      return PositionStatus.withdrawn; 
+      return PositionStatus.withdrawn;
     }
   }
 
   const getPorfolio = async () => {
-    setIsPortfolioRefreshing(true);
-    const openOrdersRes = await honeylemonService.getOpenOrders(address);
-    setOpenOrdersMetadata(openOrdersRes.records.map((openOrder: any) => openOrder.metaData))
-    setOpenOrders(Object.fromEntries(
-      openOrdersRes.records.map(((openOrder: any) => [openOrder.metaData.orderHash, {
-        ...openOrder.order,
-        expirationDate: dayjs(openOrder.order.expirationTimeSeconds.toNumber() * 1000).toDate(),
-        listingDate: dayjs(openOrder.order.expirationTimeSeconds.toNumber() * 1000).subtract(10, 'd').toDate()}]))
-    ));
-    const positions = await honeylemonService.getPositions(address);
-    const allPositions = positions.longPositions.map((lp: any) => ({
-      ...lp,
-      contractName: lp.contractName + '-long',
-    })).concat(positions.shortPositions.map((sp: any) => ({
-      ...sp,
-      contractName: sp.contractName + '-short',
-    }))).map((p: any) => {
-      return {
-      ...p,
-      daysToExpiration: Math.ceil(dayjs(p.contract.expiration * 1000).diff(dayjs(), 'd', true)),
-      pendingReward: Number(p.pendingReward?.shiftedBy(-COLLATERAL_TOKEN_DECIMALS).toString()) || 0,
-      finalReward: Number(p.finalReward?.shiftedBy(-COLLATERAL_TOKEN_DECIMALS).toString()) || 0,
-      totalCost: Number(new BigNumber(p.price).multipliedBy(p.qtyToMint).toString()),
-      totalCollateralLocked: Number(new BigNumber(p.contract.collateralPerUnit).multipliedBy(p.qtyToMint).shiftedBy(-COLLATERAL_TOKEN_DECIMALS).toString()),
-      ...parseContractName(p.contractName),
-      status: getPositionStatus(p),
-    }});
+    try {
+      setIsPortfolioRefreshing(true);
+      const openOrdersRes = await honeylemonService.getOpenOrders(address);
+      setOpenOrdersMetadata(openOrdersRes.records.map((openOrder: any) => openOrder.metaData))
+      setOpenOrders(Object.fromEntries(
+        openOrdersRes.records.map(((openOrder: any) => [openOrder.metaData.orderHash, {
+          ...openOrder.order,
+          expirationDate: dayjs(openOrder.order.expirationTimeSeconds.toNumber() * 1000).toDate(),
+          listingDate: dayjs(openOrder.order.expirationTimeSeconds.toNumber() * 1000).subtract(10, 'd').toDate()
+        }]))
+      ));
+      const positions = await honeylemonService.getPositions(address);
+      const allPositions = positions.longPositions.map((lp: any) => ({
+        ...lp,
+        contractName: lp.contractName + '-long',
+      })).concat(positions.shortPositions.map((sp: any) => ({
+        ...sp,
+        contractName: sp.contractName + '-short',
+      }))).map((p: any) => {
+        return {
+          ...p,
+          daysToExpiration: Math.ceil(dayjs(p.contract.expiration * 1000).diff(dayjs(), 'd', true)),
+          pendingReward: Number(p.pendingReward?.shiftedBy(-COLLATERAL_TOKEN_DECIMALS).toString()) || 0,
+          finalReward: Number(p.finalReward?.shiftedBy(-COLLATERAL_TOKEN_DECIMALS).toString()) || 0,
+          totalCost: Number(new BigNumber(p.price).multipliedBy(p.qtyToMint).toString()),
+          totalCollateralLocked: Number(new BigNumber(p.contract.collateralPerUnit).multipliedBy(p.qtyToMint).shiftedBy(-COLLATERAL_TOKEN_DECIMALS).toString()),
+          ...parseContractName(p.contractName),
+          status: getPositionStatus(p),
+        }
+      });
 
-    const newActiveLongPositions = allPositions.filter((p: any) => p.status === PositionStatus.active && p.type === PositionType.Long)
-    setActiveLongPositions(newActiveLongPositions);
+      const newActiveLongPositions = allPositions.filter((p: any) => p.status === PositionStatus.active && p.type === PositionType.Long)
+      setActiveLongPositions(newActiveLongPositions);
 
-    const newActiveShortPositions = allPositions.filter((p: any) => p.status === PositionStatus.active && p.type === PositionType.Short)
-    setActiveShortPositions(newActiveShortPositions);
+      const newActiveShortPositions = allPositions.filter((p: any) => p.status === PositionStatus.active && p.type === PositionType.Short)
+      setActiveShortPositions(newActiveShortPositions);
 
-    const newExpiredLongPositions = allPositions.filter((p: any) => p.status !== PositionStatus.active && p.type === PositionType.Long)
-    setExpiredLongPositions(newExpiredLongPositions);
+      const newExpiredLongPositions = allPositions.filter((p: any) => p.status !== PositionStatus.active && p.type === PositionType.Long)
+      setExpiredLongPositions(newExpiredLongPositions);
 
-    const newExpiredShortPositions = allPositions.filter((p: any) => p.status !== PositionStatus.active && p.type === PositionType.Short)
-    setExpiredShortPositions(newExpiredShortPositions);
-
-    setIsPortfolioRefreshing(false);
+      const newExpiredShortPositions = allPositions.filter((p: any) => p.status !== PositionStatus.active && p.type === PositionType.Short)
+      setExpiredShortPositions(newExpiredShortPositions);
+    } catch (error) {
+      console.log('There was an error getting the market data')
+    } finally {
+      setIsPortfolioRefreshing(false);
+    }
   }
 
   // Instantiate honeylemon service and get all initial user data
@@ -291,8 +301,9 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
         setIsDailyContractDeployed(isContractDeployed);
         if (address && notify) {
           const { emitter } = notify.account(address);
+          const etherscanUrl = (network === 1) ? 'https://etherscan.io' : `https://${networkName(network)}.etherscan.io`
           emitter.on('all', tx => ({
-            onclick: () => window.open(`https://kovan.etherscan.io/tx/${tx.hash}`) // TODO update this to work on other networks
+            onclick: () => window.open(`${etherscanUrl}/tx/${tx.hash}`) // TODO: update this to work on other networks
           }))
         }
       };
@@ -331,10 +342,12 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
       if (orderbookService) {
         try {
           const orderbookResponse = await orderbookService.getOrderbook();
-          const book = orderbookResponse.asks.records.map((order: any) => ({
-            price: Number(new BigNumber(order.metaData.price).dividedBy(contractDuration).toString()),
-            quantity: Number(new BigNumber(order.order.makerAssetAmount).toString())
-          }));
+          const book = orderbookResponse.asks.records
+            .filter((order: any) => new BigNumber(order.metaData.remainingFillableMakerAssetAmount).gt(0))
+            .map((order: any) => ({
+              price: Number(new BigNumber(order.metaData.price).dividedBy(contractDuration).toString()),
+              quantity: Number(new BigNumber(order.metaData.remainingFillableMakerAssetAmount).toString())
+            }));
           setOrderbook(book)
         } catch (error) {
           console.log('There was an error getting the orderbook.')
@@ -385,10 +398,8 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
     let poller: NodeJS.Timeout;
 
     const getPortfolioData = async () => {
-      try {
-        !isPortfolioRefreshing && await getPorfolio();
-      } catch (error) {
-        console.log('There was an error getting the market data')
+      if (!isPortfolioRefreshing) {
+        await getPorfolio();
       }
     }
 
@@ -511,7 +522,8 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
         btcStats,
         deployDSProxyContract,
         approveToken,
-        refreshPortfolio: getPorfolio
+        refreshPortfolio: getPorfolio,
+        isPortfolioRefreshing,
       }}>
       {children}
     </HoneylemonContext.Provider>

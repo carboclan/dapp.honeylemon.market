@@ -36,10 +36,11 @@ import { forwardTo } from '../helpers/history';
 import ContractSpecificationModal from './ContractSpecificationModal'
 import dayjs from 'dayjs';
 import MRIDisplay from './MRIDisplay';
-import { OpenInNew, ExpandMore } from '@material-ui/icons';
+import { OpenInNew, ExpandMore, Info } from '@material-ui/icons';
 import { Link as RouterLink } from 'react-router-dom';
 import MRIInformationModal from './MRIInformationModal';
 import OrderbookModal from './OrderbookModal';
+import { useEffect } from 'react';
 
 const useStyles = makeStyles(({ spacing, palette, transitions }) => ({
   rightAlign: {
@@ -53,17 +54,22 @@ const useStyles = makeStyles(({ spacing, palette, transitions }) => ({
     width: 20,
     flexBasis: 'end',
     flexGrow: 0,
-    color: palette.secondary.main,
+    color: palette.primary.main,
   },
   errorList: {
-    color: palette.secondary.main,
+    color: palette.primary.main,
   },
   orderSummary: {
     padding: spacing(2),
     width: '100%'
   },
   orderSummaryEstimate: {
-    color: palette.secondary.main,
+    color: palette.primary.main,
+    fontWeight: 'bold',
+    fontSize: 18
+  },
+  orderSummaryEstimateFootnote: {
+    color: palette.primary.main,
   },
   orderSummaryBlur: {
     filter: 'blur(3px)',
@@ -71,16 +77,9 @@ const useStyles = makeStyles(({ spacing, palette, transitions }) => ({
   button: {
     marginTop: spacing(1),
     marginRight: spacing(1),
-    color: palette.common.black,
   },
   actionsContainer: {
     marginBottom: spacing(2),
-  },
-  premium: {
-    color: palette.error.main,
-  },
-  discount: {
-    color: palette.success.main,
   },
   expand: {
     transform: 'rotate(0deg)',
@@ -92,12 +91,22 @@ const useStyles = makeStyles(({ spacing, palette, transitions }) => ({
   expandOpen: {
     transform: 'rotate(180deg)',
   },
+  viewOfferButton: {
+    borderColor: palette.primary.main,
+    borderWidth: 2,
+    borderStyle: 'solid',
+    color: palette.primary.main,
+    backgroundColor: '#303030',
+    '&:hover': {
+      backgroundColor: '#505050',
+    },
+  }
 }))
 
 enum BuyType { 'budget', 'quantity' };
 
 const BuyContractPage: React.SFC = () => {
-  const { address } = useOnboard();
+  const { address, gasPrice, refreshGasPrice } = useOnboard();
   const {
     honeylemonService,
     PAYMENT_TOKEN_DECIMALS,
@@ -134,6 +143,9 @@ const BuyContractPage: React.SFC = () => {
   const [showOrderDetails, setShowOrderDetails] = useState(false);
   const [showMRIInformationModal, setShowMRIInformationModal] = useState(false);
   const [showOrderbook, setShowOrderbook] = useState(false);
+  const [skipDsProxy, setSkipDsProxy] = useState(false);
+  const [activeStep, setActiveStep] = useState(0);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleChangeBuyType = (event: React.ChangeEvent<{}>, newValue: BuyType) => {
     setBuyType(newValue);
@@ -141,6 +153,7 @@ const BuyContractPage: React.SFC = () => {
   };
 
   const handleCloseBuyDialog = () => {
+    setErrorMessage('');
     setShowBuyModal(false);
   }
 
@@ -218,31 +231,42 @@ const BuyContractPage: React.SFC = () => {
 
   const handleDeployDSProxy = async () => {
     setTxActive(true);
-    await deployDSProxyContract();
+    setErrorMessage('');
+    try {
+      await deployDSProxyContract();
+    } catch (error) {
+      setErrorMessage(error);
+    }
     setTxActive(false);
   }
 
   const handleApprovePaymentToken = async () => {
     setTxActive(true);
-    await approveToken(TokenType.PaymentToken)
+    setErrorMessage('');
+    try {
+      await approveToken(TokenType.PaymentToken)
+    } catch (error) {
+      setErrorMessage(error.toString())
+    }
     setTxActive(false);
   }
 
   const handleBuyOffer = async () => {
     setTxActive(true);
+    setErrorMessage('')
     try {
-      // TODO: I dont think this should be hardcoded in here
-      const gasPrice = 5e9; // 5 GWEI
-
+      await refreshGasPrice();
       const tx = await honeylemonService.getFillOrdersTx(
         resultOrders,
         takerAssetFillAmounts
       );
 
+      const orderGasPrice = Number(`${gasPrice}e9`);
       const value = await honeylemonService.get0xFeeForOrderBatch(
-        gasPrice,
+        orderGasPrice,
         resultOrders.length
       );
+      
 
       const gas = await honeylemonService.estimateGas(
         resultOrders,
@@ -253,7 +277,7 @@ const BuyContractPage: React.SFC = () => {
       await tx.awaitTransactionSuccessAsync({
         from: address,
         gas,
-        gasPrice,
+        gasPrice: orderGasPrice,
         value
       });
       setShowBuyModal(false);
@@ -261,9 +285,13 @@ const BuyContractPage: React.SFC = () => {
     } catch (error) {
       console.log('Something went wrong buying this contract');
       console.log(error);
-      // TODO: Display error on modal
+      setErrorMessage('There was an error creating the offer. Please try again later.')
     }
     setTxActive(false);
+  }
+
+  const handleSkipDsProxy = () => {
+    setSkipDsProxy(true)
   }
 
   let sufficientPaymentTokens = true
@@ -280,21 +308,25 @@ const BuyContractPage: React.SFC = () => {
   !isDailyContractDeployed && errors.push("New contracts are not available right now");
   !sufficientPaymentTokens && errors.push(`You do not have enough ${PAYMENT_TOKEN_NAME} to proceed`);
   !isLiquid && errors.push("There are not enough contracts available right now");
+  orderValue && orderValue < 100 && errors.push('Suggest to increase your contract total to above 100 USDT due to recent high fees in ethereum network. See Fees for details.')
 
   const getActiveStep = () => {
-    if (!isDsProxyDeployed) return 0;
+    if (!skipDsProxy && !isDsProxyDeployed) return 0;
     if (!tokenApprovalGranted) return 1;
     return 2;
   };
 
-  const activeStep = getActiveStep()
+  useEffect(() => {
+    const step = getActiveStep();
+    setActiveStep(step);
+  }, [skipDsProxy, isDsProxyDeployed, tokenApprovalGranted])
 
-  const steps = ['Deploy honeylemon vault', `Approve ${PAYMENT_TOKEN_NAME}`, 'Buy Contracts'];
+  const steps = ['Create honeylemon vault', `Approve ${PAYMENT_TOKEN_NAME}`, 'Buy Contracts'];
 
   const getStepContent = (step: number) => {
     switch (step) {
       case 0:
-        return `Deploy a honeylemon vault. This is a once-off operation. The honeylemon vault will reduce the transaction fees in future.`;
+        return `Create a honeylemon vault. The honeylemon vault will reduce the transaction fees paid when redeeming in future. This step is optional. This is a once-off operation.`;
       case 1:
         return `Approve ${PAYMENT_TOKEN_NAME}. This is a once-off operation`;
       case 2:
@@ -325,6 +357,7 @@ const BuyContractPage: React.SFC = () => {
   }
 
   const handleStartBuy = () => {
+    setSkipDsProxy(false);
     setShowBuyModal(true);
     activeStep === 2 && handleBuyOffer();
   }
@@ -343,7 +376,12 @@ const BuyContractPage: React.SFC = () => {
           <Typography style={{ fontWeight: 'bold' }}>Buy {CONTRACT_DURATION}-Day Mining Revenue Contract</Typography>
         </Grid>
         <Grid item xs={4} style={{ textAlign: 'end' }}>
-          <Link href='#' underline='always' onClick={() => setShowOrderbook(true)}>Order Book <OpenInNew fontSize='small' /></Link>
+          <Button
+            onClick={() => setShowOrderbook(true)}
+            className={classes.viewOfferButton}
+            variant='contained'>
+            View Offers
+          </Button>
         </Grid>
         <Grid item xs={12}>
           <Tabs
@@ -351,7 +389,6 @@ const BuyContractPage: React.SFC = () => {
             onChange={handleChangeBuyType}
             indicatorColor="secondary"
             variant="fullWidth"
-            textColor="primary"
             scrollButtons="auto" >
             <Tab label="ENTER BUDGET" />
             <Tab label="or" disabled />
@@ -379,7 +416,7 @@ const BuyContractPage: React.SFC = () => {
               disabled={showBuyModal} />
           </Grid>
           <Grid item xs={3} className={classes.rightAlign}>
-            <Typography style={{ fontWeight: 'bold' }} color='secondary'>{PAYMENT_TOKEN_NAME}</Typography>
+            <Typography style={{ fontWeight: 'bold' }} color='primary'>{PAYMENT_TOKEN_NAME}</Typography>
           </Grid>
         </TabPanel>
         <TabPanel value={buyType} index={2}>
@@ -402,7 +439,7 @@ const BuyContractPage: React.SFC = () => {
               disabled={showBuyModal} />
           </Grid>
           <Grid item xs={3} className={classes.rightAlign}>
-            <Typography style={{ fontWeight: 'bold' }} color='secondary'>TH for {CONTRACT_DURATION} Days</Typography>
+            <Typography style={{ fontWeight: 'bold' }} color='primary'>TH for {CONTRACT_DURATION} Days</Typography>
           </Grid>
         </TabPanel>
         <Grid item xs={12} container>
@@ -417,7 +454,7 @@ const BuyContractPage: React.SFC = () => {
                 <Grid item xs={6} style={{ textAlign: 'right' }}>
                   <Typography variant='caption'>
                     <Link href='#' underline='always' onClick={() => setShowContractSpecificationModal(true)}>
-                      Contract Specification <OpenInNew fontSize='small' />
+                      Contract Specs <Info fontSize='small' />
                     </Link>
                   </Typography>
                 </Grid>
@@ -431,39 +468,31 @@ const BuyContractPage: React.SFC = () => {
                       Duration
                     </TableCell>
                     <TableCell align='right'>
-                      ${hashPrice.toLocaleString(undefined, {maximumFractionDigits: PAYMENT_TOKEN_DECIMALS})}/TH/Day<br />
+                      <strong>${hashPrice.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}/TH/Day<br /></strong>
                       {`${orderQuantity.toLocaleString()}`} TH<br />
                       {`${CONTRACT_DURATION}`} Days
                     </TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>Contract Total</TableCell>
-                    <TableCell align='right'>{`${PAYMENT_TOKEN_NAME} ${(orderValue || 0).toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}`}</TableCell>
+                    <TableCell align='right'>{`${(orderValue || 0).toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })} ${PAYMENT_TOKEN_NAME}`}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>Revenue Cap</TableCell>
-                    <TableCell align='right'>{`${((expectedBTCAccrual || 0) * CONTRACT_COLLATERAL_RATIO).toLocaleString(undefined, { maximumFractionDigits: 2 })} ${COLLATERAL_TOKEN_NAME}`}</TableCell>
+                    <TableCell align='right'>{`${((expectedBTCAccrual || 0) * CONTRACT_COLLATERAL_RATIO).toLocaleString(undefined, { maximumFractionDigits: 8 })} ${COLLATERAL_TOKEN_NAME}`}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell className={classes.orderSummaryEstimate}>
-                      Buy contract vs. Buy BTC * <br />
+                      {discountOnSpotPrice < 0 ? 'Premium' : 'Discount'} vs. Buy BTC * <br />
                       Estimated Revenue *
                   </TableCell>
-                    <TableCell align='right' className={clsx(classes.orderSummaryEstimate,
-                      { [classes.premium]: discountOnSpotPrice < 0 },
-                      { [classes.discount]: discountOnSpotPrice > 0 })}>
-                      {discountOnSpotPrice.toLocaleString(undefined, { maximumFractionDigits: 2 })}% <br />
-                      {`${(expectedBTCAccrual).toLocaleString(undefined, { maximumFractionDigits: 8 })} imBTC`}
-                  </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className={classes.orderSummaryEstimate}>
-                    </TableCell>
                     <TableCell align='right' className={classes.orderSummaryEstimate}>
+                      {Math.abs(discountOnSpotPrice).toLocaleString(undefined, { maximumFractionDigits: 2 })}% <br />
+                      {`${(expectedBTCAccrual).toLocaleString(undefined, { maximumFractionDigits: 8 })} imBTC`}
                     </TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell colSpan={2}>
+                    <TableCell colSpan={2} className={classes.orderSummaryEstimateFootnote}>
                       * Assuming constant price and difficulty
                     </TableCell>
                   </TableRow>
@@ -508,15 +537,15 @@ const BuyContractPage: React.SFC = () => {
                             <strong>{PAYMENT_TOKEN_NAME} {hashPrice.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}/TH/Day</strong>.
                           </Typography>
                           <Typography variant='body2' style={{ color: '#a9a9a9' }}>
-                            At settlment, you will receive mining revenue (in {COLLATERAL_TOKEN_NAME}) over {CONTRACT_DURATION} days, which 
-                            is the network average BTC block reward & transaction fees (MRI) per TH over contract duration, up to a max 
-                            revenue of {`${(((expectedBTCAccrual) || 0) * CONTRACT_COLLATERAL_RATIO).toLocaleString(undefined, {maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS})} ${COLLATERAL_TOKEN_NAME}`}.
+                            At settlement, you will receive mining revenue (in {COLLATERAL_TOKEN_NAME}) over {CONTRACT_DURATION} days, which
+                            is the network average BTC block reward & transaction fees (MRI_BTC) per TH over contract duration, up to a max
+                            revenue of <strong>{`${(((expectedBTCAccrual) || 0) * CONTRACT_COLLATERAL_RATIO).toLocaleString(undefined, { maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS })} ${COLLATERAL_TOKEN_NAME}`}.</strong>&nbsp;
                             You can withdraw your mining revenue (in {COLLATERAL_TOKEN_NAME}) after settlement.
                           </Typography>
                           <Typography variant='body2' style={{ color: '#a9a9a9' }}>
                             You will receive the network average BTC block reward & transaction fees per TH based on the average value of
-                            the <Link href='#' underline='always' onClick={() => setShowMRIInformationModal(true)}>Bitcoin Mining Revenue 
-                            Index (MRI) <OpenInNew fontSize='small' /></Link> over {CONTRACT_DURATION} days starting today.
+                            the <Link href='#' underline='always' onClick={() => setShowMRIInformationModal(true)}>Bitcoin Mining Revenue
+                            Index (MRI_BTC) <Info fontSize='small' /></Link> over {CONTRACT_DURATION} days starting today.
                           </Typography>
                           <Typography variant='body2' style={{ color: '#a9a9a9' }}>
                             You may check your PNL from your Portfolio once order is placed. You can withdraw your mining revenue
@@ -552,6 +581,8 @@ const BuyContractPage: React.SFC = () => {
         }
         <Grid item xs={12}>
           <Button
+            color='primary'
+            variant='contained'
             fullWidth
             onClick={handleStartBuy}
             disabled={!isValid || showBuyModal || resultOrders.length === 0}>
@@ -560,7 +591,12 @@ const BuyContractPage: React.SFC = () => {
           </Button>
         </Grid>
       </Grid>
-      <Dialog open={showBuyModal} onClose={handleCloseBuyDialog} aria-labelledby="form-dialog-title">
+      <Dialog
+        open={showBuyModal}
+        onClose={handleCloseBuyDialog}
+        aria-labelledby="form-dialog-title"
+        disableBackdropClick
+        disableEscapeKeyDown>
         <DialogTitle id="form-dialog-title">Buy Offer</DialogTitle>
         <DialogContent>
           <Stepper activeStep={activeStep} orientation="vertical">
@@ -568,14 +604,9 @@ const BuyContractPage: React.SFC = () => {
               <Step key={label}>
                 <StepLabel>{label}</StepLabel>
                 <StepContent>
-                  <Typography>{getStepContent(index)}</Typography>
+                  <Typography paragraph>{getStepContent(index)}</Typography>
+                  {errorMessage && <Typography color='error'>{errorMessage}</Typography>}
                   <div className={classes.actionsContainer}>
-                    <Button
-                      onClick={handleCloseBuyDialog}
-                      className={classes.button}
-                      disabled={txActive}>
-                      Cancel
-                    </Button>
                     <Button
                       variant="contained"
                       color="primary"
@@ -585,6 +616,22 @@ const BuyContractPage: React.SFC = () => {
                       {getStepButtonLabel(activeStep)}&nbsp;
                         {txActive && <CircularProgress className={classes.loadingSpinner} size={20} />}
                     </Button>
+                    {activeStep === 0 ?
+                      <Button
+                        variant="contained"
+                        color='secondary'
+                        onClick={handleSkipDsProxy}
+                        className={classes.button}
+                        disabled={txActive}>
+                        Skip
+                      </Button> :
+                      <Button
+                        onClick={handleCloseBuyDialog}
+                        className={classes.button}
+                        disabled={txActive}>
+                        Cancel
+                      </Button>
+                    }
                   </div>
                 </StepContent>
               </Step>

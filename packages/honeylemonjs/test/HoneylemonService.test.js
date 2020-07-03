@@ -3,8 +3,8 @@ const { BigNumber } = require('@0x/utils');
 const { Web3Wrapper } = require('@0x/web3-wrapper');
 const { orderHashUtils } = require('@0x/order-utils');
 const sinon = require('sinon');
-const contractStub = require('../stubs/contract');
-const positionStub = require('../stubs/position');
+const contractStub = require('./stubs/contract');
+const positionStub = require('./stubs/position');
 const { time } = require('@openzeppelin/test-helpers');
 
 const MinterBridge = artifacts.require('MinterBridge');
@@ -19,14 +19,15 @@ const {
   HoneylemonService,
   POSITIONS_QUERY,
   CONTRACTS_QUERY,
-  PAYMENT_TOKEN_DECIMALS,
-  CONTRACT_DURATION
-} = require('../../src/lib/HoneylemonService');
-const { revertToSnapShot, takeSnapshot } = require('../helpers/snapshot');
-const { resetSubgraph } = require('../helpers/subgraph');
-const delay = require('../helpers/delay');
+  PAYMENT_TOKEN_DECIMALS
+} = require('../lib/src/HoneylemonService');
+const { revertToSnapShot, takeSnapshot } = require('./helpers/snapshot');
+const { resetSubgraph } = require('./helpers/subgraph');
+const delay = require('./helpers/delay');
 
 const web3Wrapper = new Web3Wrapper(web3.currentProvider);
+
+const CONTRACT_DURATION = 28;
 
 let accounts = null,
   // addresses
@@ -68,7 +69,8 @@ before(async function() {
     minterBridge.address,
     marketContractProxy.address,
     collateralToken.address,
-    paymentToken.address
+    paymentToken.address,
+    CONTRACT_DURATION
   );
 
   // Stub orders
@@ -503,7 +505,7 @@ contract('HoneylemonService', () => {
     }
   });
 
-  it('merges related positions', async () => {
+  it.only('merges related positions', async () => {
     // Stub subgraph
     subgraphStub = sinon.stub(honeylemonService.subgraphClient, 'request');
 
@@ -519,14 +521,31 @@ contract('HoneylemonService', () => {
       id: 'tx2',
       fills: [
         { makerAssetFilledAmount: '5', takerAssetFilledAmount: '6000' },
+        { makerAssetFilledAmount: '6', takerAssetFilledAmount: '6000' }
+      ]
+    };
+    const tx3 = {
+      id: 'tx3',
+      fills: [
         { makerAssetFilledAmount: '9', takerAssetFilledAmount: '9500' }
       ]
     };
+    const tx4 = {
+      id: 'tx4',
+      fills: [
+        { makerAssetFilledAmount: '12', takerAssetFilledAmount: '9000' }
+      ]
+    };
+    const dsProxy1 = '0xaaaa';
+    const dsProxy2 = '0xbbbb';
+    const dsProxy3 = '0xcccc';
     const positions = [
-      positionStub({ marketId: '0', qtyToMint: '10', transaction: tx1 }),
-      positionStub({ marketId: '0', qtyToMint: '7', transaction: tx1 }),
-      positionStub({ marketId: '1', qtyToMint: '5', transaction: tx2 }),
-      positionStub({ marketId: '1', qtyToMint: '9', transaction: tx2 })
+      positionStub({ marketId: '0', qtyToMint: '10', transaction: tx1, shortTokenDSProxy: dsProxy1 }),
+      positionStub({ marketId: '0', qtyToMint: '7', transaction: tx1, shortTokenDSProxy: dsProxy1 }),
+      positionStub({ marketId: '1', qtyToMint: '5', transaction: tx2, shortTokenDSProxy: dsProxy2 }),
+      positionStub({ marketId: '1', qtyToMint: '6', transaction: tx2, shortTokenDSProxy: dsProxy2 }),
+      positionStub({ marketId: '1', qtyToMint: '9', transaction: tx3, shortTokenDSProxy: dsProxy2 }),
+      positionStub({ marketId: '1', qtyToMint: '12', transaction: tx4, shortTokenDSProxy: dsProxy3 })
     ];
     stubPositions(subgraphStub, positions, [], makerAddress);
     stubContracts(subgraphStub, []);
@@ -535,13 +554,15 @@ contract('HoneylemonService', () => {
       makerAddress
     );
 
-    expect(shortPositions.length).to.eq(2);
-    const [p1, p2] = shortPositions;
+    expect(shortPositions.length).to.eq(3);
+    const [p1, p2, p3] = shortPositions;
     expect(p1.qtyToMint.toString()).to.eq('17');
-    expect(p2.qtyToMint.toString()).to.eq('14');
-    // TODO: fix price assertions
-    // expect(p1.price).to.eql(new BigNumber((10 * 10000 + 7 * 8000) / (10000 + 8000)));
-    // expect(p2.price).to.eql(new BigNumber((5 * 6000 + 9 * 9500) / (6000 + 9500)));
+    expect(p2.qtyToMint.toString()).to.eq('20');
+    expect(p3.qtyToMint.toString()).to.eq('12');
+    // price
+    expect(p1.price).to.eql(BigNumber(10000 + 8000).dividedBy(10 + 7).shiftedBy(-6));
+    expect(p2.price).to.eql(BigNumber(6000 + 6000 + 9500).dividedBy(5 + 6 + 9).shiftedBy(-6));
+    expect(p3.price).to.eql(BigNumber(9000).dividedBy(12).shiftedBy(-6));
 
     // clean up stubs
     subgraphStub.restore();

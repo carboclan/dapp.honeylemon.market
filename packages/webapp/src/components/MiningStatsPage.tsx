@@ -15,7 +15,7 @@ SL(Highcharts);
 const useStyles = makeStyles(({ palette }) => ({
   pageHeader: {
     fontWeight: 'bold',
-    color: palette.secondary.main,
+    color: palette.primary.main,
   },
   winner: {
     width: 20,
@@ -36,10 +36,10 @@ const MiningStatsPage: React.SFC = () => {
     PAYMENT_TOKEN_DECIMALS,
     orderbook,
     btcStats,
+    
   } = useHoneylemon();
 
   const contractDurations = [90, 180, 360];
-
   const bestHoneylemonPrice = (orderbook.length > 0) ? orderbook[0].price : currentMRI * currentBTCSpotPrice;
 
   const chartOptions: Highcharts.Options | undefined =

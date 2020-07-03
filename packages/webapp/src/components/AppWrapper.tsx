@@ -28,7 +28,7 @@ const useStyles = makeStyles(({ transitions, palette, mixins, spacing }) => ({
       duration: transitions.duration.leavingScreen,
     }),
     backgroundColor: '#424242',
-    color: palette.primary.main
+    color: palette.common.white,
   },
   appBarShift: {
     width: `calc(100% - ${drawerWidth}px)`,
@@ -53,7 +53,7 @@ const useStyles = makeStyles(({ transitions, palette, mixins, spacing }) => ({
     display: 'none',
   },
   hamburger: {
-    color: palette.secondary.main,
+    color: palette.primary.main,
   },
   drawer: {
     flexShrink: 0,
@@ -82,9 +82,6 @@ const useStyles = makeStyles(({ transitions, palette, mixins, spacing }) => ({
   contentWrapper: {
     paddingBottom: footerHeight,
   },
-  approveTokenSwitch: {
-    transform: 'rotate(-90deg)'
-  }
 }));
 
 function AppWrapper(props: { children: ReactNode }) {
@@ -150,6 +147,8 @@ function AppWrapper(props: { children: ReactNode }) {
       setOpen(false)
     }
   })
+
+  const etherscanUrl = (network === 1) ? 'https://etherscan.io' : `https://${networkName(network)}.etherscan.io`
 
   return (
     <div className={classes.root}>
@@ -242,7 +241,7 @@ function AppWrapper(props: { children: ReactNode }) {
               secondaryTypographyProps={{
                 align: 'right'
               }}>
-              <Link href={`https://${networkName(network)}.etherscan.io/address/${address}`} target="_blank" rel='noopener' underline='always' >
+              <Link href={`${etherscanUrl}/address/${address}`} target="_blank" rel='noopener' underline='always' >
                 {displayAddress(address || '0x', 20)}
               </Link>
             </ListItemText>
@@ -263,13 +262,19 @@ function AppWrapper(props: { children: ReactNode }) {
                 secondaryTypographyProps={{
                   align: 'right'
                 }}>
-                <Link href={`https://${networkName(network)}.etherscan.io/address/${dsProxyAddress}`} target="_blank" rel='noopener' underline='always' >
+                <Link href={`${etherscanUrl}/address/${dsProxyAddress}`} target="_blank" rel='noopener' underline='always' >
                   {displayAddress(dsProxyAddress || '0x', 20)}
                 </Link>
               </ListItemText>
             </ListItem> :
             <ListItem>
-              <Button onClick={deployDSProxyContract} fullWidth>Deploy honeylemon vault</Button>
+              <Button 
+                color='primary' 
+                variant='contained'
+                onClick={deployDSProxyContract} 
+                fullWidth>
+                  Create honeylemon vault
+              </Button>
             </ListItem>
           }
         </List>
@@ -297,7 +302,10 @@ function AppWrapper(props: { children: ReactNode }) {
             <ListItemIcon>
               <img src='imBtc.png' style={{ width: '40px' }} alt='imbtc logo' />
             </ListItemIcon>
-            <Switch className={classes.approveTokenSwitch} checked={(collateralTokenAllowance > 0)} onChange={() => handleToggleTokenApproval(TokenType.CollateralToken)} />
+            <Switch 
+              color="primary" 
+              checked={(collateralTokenAllowance > 0)} 
+              onChange={() => handleToggleTokenApproval(TokenType.CollateralToken)} />
             <ListItemText
               primary={`${collateralTokenBalance.toLocaleString(undefined, {
                 useGrouping: true,
@@ -316,7 +324,10 @@ function AppWrapper(props: { children: ReactNode }) {
             <ListItemIcon>
               <img src='usdt.png' style={{ width: '40px' }} alt='usdt logo' />
             </ListItemIcon>
-            <Switch className={classes.approveTokenSwitch} checked={(paymentTokenAllowance > 0)} onChange={() => handleToggleTokenApproval(TokenType.PaymentToken)} />
+            <Switch
+              color="primary"
+              checked={(paymentTokenAllowance > 0)} 
+              onChange={() => handleToggleTokenApproval(TokenType.PaymentToken)} />
             <ListItemText
               primary={`${paymentTokenBalance.toLocaleString(undefined, {
                 useGrouping: true,
