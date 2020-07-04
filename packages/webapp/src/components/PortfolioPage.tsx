@@ -170,7 +170,7 @@ const PorfolioPage: React.SFC = () => {
     type: PositionType) => {
     setIsWithdrawing(true);
     try {
-      !!address &&
+      !!address && 
         await honeylemonService.redeemPosition(address, positionTokenAddress, marketContractAddress, amount, type)
     } catch (error) {
       console.log("Something went wrong during the withdrawal");
