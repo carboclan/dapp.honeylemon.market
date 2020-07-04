@@ -21,7 +21,7 @@ interface ExpiredShortPositionModalProps {
   withdrawPosition(
     positionTokenAddress: string,
     marketContractAddress: string,
-    amount: number,
+    amount: string,
     type: PositionType): void,
   isWithdrawing: boolean
   position: any,
@@ -35,7 +35,7 @@ const ExpiredShortPositionModal: React.SFC<ExpiredShortPositionModalProps> = ({ 
   const handleWithdraw = async (
     positionTokenAddress: string,
     marketContractAddress: string,
-    amount: number,
+    amount: string,
     type: PositionType
   ) => {
     try {

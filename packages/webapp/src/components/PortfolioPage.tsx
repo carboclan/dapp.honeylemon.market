@@ -166,7 +166,7 @@ const PorfolioPage: React.SFC = () => {
   const withdrawPosition = async (
     positionTokenAddress: string,
     marketContractAddress: string,
-    amount: number,
+    amount: string,
     type: PositionType) => {
     setIsWithdrawing(true);
     try {
