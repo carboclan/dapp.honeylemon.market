@@ -2,14 +2,14 @@ import { Web3Wrapper } from "@0x/web3-wrapper";
 
 const { GraphQLClient } = require('graphql-request');
 const { HttpClient, OrderbookRequest } = require('@0x/connect');
-const { 
-  MinterBridge, 
-  MarketContractProxy, 
-  MarketContractMPX, 
-  CollateralToken, 
-  PaymentToken, 
-  DSProxy, 
-  TetherERC20, 
+const {
+  MinterBridge,
+  MarketContractProxy,
+  MarketContractMPX,
+  CollateralToken,
+  PaymentToken,
+  DSProxy,
+  TetherERC20,
   PositionToken,
   MarketCollateralPool,
 } = require('@honeylemon/contracts');
@@ -424,29 +424,38 @@ class HoneylemonService {
     recipientAddress: string,
     positionTokenAddress: string,
     marketContractAddress: string,
-    amount: Number,
+    amount: string,
     positionType: 'Long' | 'Short') {
     const positionToken = new web3.eth.Contract(PositionToken.abi, positionTokenAddress);
+    positionToken.setProvider(this.provider);
+    const web3Wrapper: Web3Wrapper = new Web3Wrapper(this.provider);
 
-    await positionToken.approve(marketContractAddress, amount)
-      .awaitTransactionSuccessAsync({
-        from: recipientAddress
-      });
-
+    const allowance = new BigNumber(await positionToken.methods.allowance(recipientAddress, marketContractAddress).call())
+    const isApprovalRequired = !allowance.isGreaterThanOrEqualTo(amount);
+    
+    if (isApprovalRequired) {
+      const approvalResult = await positionToken.methods.approve(marketContractAddress, amount)
+        .send({
+          from: recipientAddress
+        });
+      await web3Wrapper.awaitTransactionSuccessAsync(approvalResult.transactionHash);
+    }
+    
     const marketCollateralPoolAddress = await this.marketContractProxy.methods
       .getCollateralPool(marketContractAddress).call();
 
     const marketCollateralPool = new web3.eth.Contract(MarketCollateralPool.abi, marketCollateralPoolAddress);
+    marketCollateralPool.setProvider(this.provider);
 
-    positionType === 'Long' ?
-      await marketCollateralPool.settleAndClose(marketContractAddress, 0, amount)
-        .awaitTransactionSuccessAsync({
-          from: recipientAddress
-        }) :
-      await marketCollateralPool.settleAndClose(marketContractAddress, amount, 0)
-        .awaitTransactionSuccessAsync({
-          from: recipientAddress
-        })
+    const redeemTx = positionType === 'Long' ?
+      marketCollateralPool.methods.settleAndClose(marketContractAddress, 0, amount) :
+      marketCollateralPool.methods.settleAndClose(marketContractAddress, amount, 0)
+
+    // const redeemResult = await redeemTx.send({ from: recipientAddress});
+    const gas = await redeemTx.estimateGas({ from: recipientAddress, gas: 13000000 });
+    const redeemResult = await redeemTx.send({ from: recipientAddress, gas });
+
+    await web3Wrapper.awaitTransactionSuccessAsync(redeemResult.transactionHash)
   }
 
   async batchRedeem(recipientAddress) {
