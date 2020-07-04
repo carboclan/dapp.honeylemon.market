@@ -340,12 +340,11 @@ const OfferContractPage: React.SFC = () => {
             placeholder='0'
             onChange={e => {
               const newValueString = e.target.value;
-              const test = newValueString.replace(',', '')
-              if (!test) {
+              if (!newValueString) {
                 setHashAmount(0);
                 return;
               }
-              const newValue = parseInt(test);
+              const newValue = parseInt(newValueString);
               !isNaN(newValue) && setHashAmount(newValue);
             }}
             value={hashAmount || ''}
