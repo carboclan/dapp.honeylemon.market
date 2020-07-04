@@ -27,6 +27,7 @@ export type OnboardContext = {
   resetOnboard(): void,
   gasPrice: number,
   refreshGasPrice(): Promise<void>,
+  isMobile: boolean,
 }
 
 const OnboardContext = React.createContext<OnboardContext | undefined>(undefined);
@@ -42,7 +43,7 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
   const [gasPrice, setGasPrice] = useState(0);
 
   const infuraId = process.env.REACT_APP_INFURA_ID
-  const infuraRpc = `https://${networkName(network)}.infura.io/v3/${infuraId}`
+  const infuraRpc = `https://${networkName(onboardProps.networkId)}.infura.io/v3/${infuraId}`
 
   useEffect(() => {
     const initializeOnboard = async () => {
@@ -70,7 +71,7 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
               { walletName: "dapper" },
               {
                 walletName: "walletConnect",
-                infuraKey: infuraId
+                rpc: { [onboardProps.networkId]: infuraRpc },
               },
               { walletName: "walletLink", rpcUrl: infuraRpc },
               { walletName: "opera" },
@@ -78,7 +79,7 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
               { walletName: "torus" },
               { walletName: "status" },
               { walletName: "unilogin" },
-              { walletName: "authereum"},
+              { walletName: "authereum" },
               {
                 walletName: 'ledger',
                 rpcUrl: infuraRpc
@@ -153,7 +154,7 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
   // Gas Price poller
   useEffect(() => {
     const getGasPrice = refreshGasPrice;
-   
+
     let poller: NodeJS.Timeout;
     getGasPrice();
     poller = setInterval(getGasPrice, 60000);
@@ -162,6 +163,8 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
       clearInterval(poller);
     }
   }, [])
+
+  const onboardState = onboard?.getState();
 
   return (
     <OnboardContext.Provider value={{
@@ -176,6 +179,7 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
       resetOnboard,
       gasPrice,
       refreshGasPrice,
+      isMobile: !!onboardState?.mobileDevice
     }}>
       {children}
     </OnboardContext.Provider>

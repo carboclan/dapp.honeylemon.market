@@ -119,7 +119,7 @@ const HomePage: React.SFC = () => {
             <span>Secs</span>
           </Grid>
           <Grid item xs={12}>
-            <Typography style={{ fontWeight: 'bold' }}>Estimate: {dayjs(btcDifficultyAdjustmentDate).format('MMM DD, YYYY HH:mm')} GMT</Typography>
+            <Typography style={{ fontWeight: 'bold' }}>Estimate: {dayjs(btcDifficultyAdjustmentDate).format('MMM DD, YYYY HH:mm')} UTC</Typography>
           </Grid>
         </Grid>
         <Grid item xs={12} style={{textAlign: 'center'}}>
