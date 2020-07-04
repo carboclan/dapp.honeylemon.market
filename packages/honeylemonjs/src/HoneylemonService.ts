@@ -442,7 +442,7 @@ class HoneylemonService {
     
     const marketCollateralPoolAddress = await this.marketContractProxy.methods
       .getCollateralPool(marketContractAddress).call();
-
+    console.log(marketCollateralPoolAddress);
     const marketCollateralPool = new web3.eth.Contract(MarketCollateralPool.abi, marketCollateralPoolAddress);
     marketCollateralPool.setProvider(this.provider);
 
@@ -452,7 +452,7 @@ class HoneylemonService {
 
     // const redeemResult = await redeemTx.send({ from: recipientAddress});
     debugger;
-    const gas = await redeemTx.estimateGas({ from: recipientAddress, gas: 12000000 });
+    const gas = await redeemTx.estimateGas({ from: recipientAddress });
     debugger;
     const redeemResult = await redeemTx.send({ from: recipientAddress, gas });
 
