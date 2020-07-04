@@ -431,7 +431,7 @@ class HoneylemonService {
     const web3Wrapper: Web3Wrapper = new Web3Wrapper(this.provider);
     const allowance = new BigNumber(await positionToken.methods.allowance(recipientAddress, marketContractAddress).call())
     const isApprovalRequired = !allowance.isGreaterThanOrEqualTo(amount);
-    
+
     if (isApprovalRequired) {
       const approvalResult = await positionToken.methods.approve(marketContractAddress, amount)
         .send({
@@ -439,7 +439,7 @@ class HoneylemonService {
         });
       await web3Wrapper.awaitTransactionSuccessAsync(approvalResult.transactionHash);
     }
-    
+
     const marketCollateralPoolAddress = await this.marketContractProxy.methods
       .getCollateralPool(marketContractAddress).call();
     console.log(marketCollateralPoolAddress);
@@ -447,13 +447,10 @@ class HoneylemonService {
     marketCollateralPool.setProvider(this.provider);
 
     const redeemTx = positionType === 'Long' ?
-      marketCollateralPool.methods.settleAndClose(marketContractAddress, 0, amount) :
-      marketCollateralPool.methods.settleAndClose(marketContractAddress, amount, 0)
+      marketCollateralPool.methods.settleAndClose(marketContractAddress, amount, 0) :
+      marketCollateralPool.methods.settleAndClose(marketContractAddress, 0, amount)
 
-    // const redeemResult = await redeemTx.send({ from: recipientAddress});
-    debugger;
     const gas = await redeemTx.estimateGas({ from: recipientAddress });
-    debugger;
     const redeemResult = await redeemTx.send({ from: recipientAddress, gas });
 
     await web3Wrapper.awaitTransactionSuccessAsync(redeemResult.transactionHash)
