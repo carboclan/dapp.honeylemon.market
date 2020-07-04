@@ -118,7 +118,7 @@ const OfferContractPage: React.SFC = () => {
     Number(
       (btcStats.mri * marketData.currentBTCSpotPrice)
         .toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })));
-  const [hashAmount, setHashAmount] = useState<number | undefined>(10000);
+  const [hashAmount, setHashAmount] = useState<number | undefined>(0);
   const [totalContractPrice, setTotalContractPrice] = useState(0);
   const [collateralAmount, setCollateralAmount] = useState(0);
   const [showOfferModal, setShowOfferModal] = useState(false);
@@ -130,6 +130,13 @@ const OfferContractPage: React.SFC = () => {
   const [skipDsProxy, setSkipDsProxy] = useState(false);
   const [activeStep, setActiveStep] = useState(0);
   const [errorMessage, setErrorMessage] = useState('');
+
+  // Set default quantity
+  useEffect(() => {
+    const maxQuanityCollateralized = collateralTokenBalance / CONTRACT_COLLATERAL_RATIO / marketData.currentMRI
+    const startingQuantity = Math.min(1000, maxQuanityCollateralized);
+    setHashAmount(startingQuantity);
+  }, [])
 
   useEffect(() => {
     let cancelled = false;
@@ -333,11 +340,12 @@ const OfferContractPage: React.SFC = () => {
             placeholder='0'
             onChange={e => {
               const newValueString = e.target.value;
-              if (!newValueString) {
+              const test = newValueString.replace(',', '')
+              if (!test) {
                 setHashAmount(0);
                 return;
               }
-              const newValue = parseInt(newValueString);
+              const newValue = parseInt(test);
               !isNaN(newValue) && setHashAmount(newValue);
             }}
             value={hashAmount || ''}
@@ -350,6 +358,9 @@ const OfferContractPage: React.SFC = () => {
         <Grid item xs={4} className={classes.rightAlign}>
           <Typography style={{ fontWeight: 'bold' }} color='primary'>TH</Typography>
         </Grid>
+        <Typography onClick={() => {}}>
+          You are offering a limit order, list your offer by approving imBTC allowance as collateral. <Info />
+        </Typography>
         <Grid item xs={12} container>
           <Paper className={clsx(classes.offerSummary, {
             [classes.offerSummaryBlur]: !sufficientCollateral,
@@ -370,13 +381,13 @@ const OfferContractPage: React.SFC = () => {
               <TableBody>
                 <TableRow>
                   <TableCell>
-                    Price <br />
-                    Quantity <br />
+                    Your Price <br />
+                    Your Quantity <br />
                     Duration <br />
                   </TableCell>
                   <TableCell align='right'>
-                    {PAYMENT_TOKEN_NAME} {hashPrice.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}/Th/Day <br />
-                    {hashAmount} TH <br />
+                    $ {hashPrice.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}/Th/Day <br />
+                    {hashAmount?.toLocaleString()} TH <br />
                     {CONTRACT_DURATION} Days
                   </TableCell>
                 </TableRow>
@@ -503,7 +514,7 @@ const OfferContractPage: React.SFC = () => {
               <Step key={label}>
                 <StepLabel>{label}</StepLabel>
                 <StepContent>
-                <Typography paragraph>{getStepContent(index)}</Typography>
+                  <Typography paragraph>{getStepContent(index)}</Typography>
                   {errorMessage && <Typography color='error'>{errorMessage}</Typography>}
                   <div className={classes.actionsContainer}>
                     <Button

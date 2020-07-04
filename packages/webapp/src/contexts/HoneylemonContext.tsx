@@ -189,9 +189,9 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
     const duration = Number(durationString.replace('D', ''));
     return {
       instrumentName: `${indexType}-${collateralInstrument}`,
-      startDate: dayjs(startDate, {utc: true}).startOf('day').toDate(), //This will always be UTC 00:00 the date the contract was concluded
-      expirationDate: dayjs(startDate, {utc: true}).startOf('day').add(duration, 'd').toDate(),
-      settlementDate: dayjs(startDate, {utc: true}).startOf('day').add(duration + 1, 'd').toDate(),
+      startDate: dayjs(startDate, { utc: true }).startOf('day').toDate(), //This will always be UTC 00:00 the date the contract was concluded
+      expirationDate: dayjs(startDate, { utc: true }).startOf('day').add(duration, 'd').toDate(),
+      settlementDate: dayjs(startDate, { utc: true }).startOf('day').add(duration + 1, 'd').toDate(),
       duration,
     }
   }
@@ -235,15 +235,13 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
           finalReward: Number(p.finalReward?.shiftedBy(-COLLATERAL_TOKEN_DECIMALS).toString()) || 0,
           totalCost: Number(new BigNumber(p.price).multipliedBy(p.qtyToMint).toString()),
           totalCollateralLocked: Number(new BigNumber(p.contract.collateralPerUnit).multipliedBy(p.qtyToMint).shiftedBy(-COLLATERAL_TOKEN_DECIMALS).toString()),
-          canBeBatchRedeemed: (p.type === PositionType.Long) ? 
+          canBeBatchRedeemed: (p.type === PositionType.Long) ?
             (p.longTokenDSProxy !== p.longTokenRecipient.id) :
             (p.shortTokenDSProxy !== p.shortTokenRecipient.id),
           ...parseContractName(p.contractName),
           status: getPositionStatus(p),
         }
       });
-
-      console.log(allPositions);
 
       const newActiveLongPositions = allPositions.filter((p: any) => p.status === PositionStatus.active && p.type === PositionType.Long)
       setActiveLongPositions(newActiveLongPositions);
@@ -265,6 +263,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
 
   // Instantiate honeylemon service and get all initial user data
   useEffect(() => {
+    setContractDuration(Number(process.env.REACT_APP_CONTRACT_DURATION));
     if (isReady && wallet && network && address) {
       const initHoneylemonService = async () => {
         let wrappedSubprovider;
@@ -286,253 +285,252 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
           process.env.REACT_APP_MARKET_CONTRACT_PROXY_ADDRESS,
           process.env.REACT_APP_COLLATERAL_TOKEN_ADDRESS,
           process.env.REACT_APP_PAYMENT_TOKEN_ADDRESS,
-          Number(process.env.REACT_APP_CONTRACT_DURATION),
+          contractDuration,
         );
-        setHoneylemonService(honeylemonService);
-        setContractDuration(honeylemonService.contractDuration);
-        const collateral = await honeylemonService.getCollateralTokenAmounts(address);
-        setCollateralTokenAllowance(Number(collateral.allowance.shiftedBy(-8).toString()));
-        setCollateralTokenBalance(Number(collateral.balance.shiftedBy(-8).toString()));
-        const payment = await honeylemonService.getPaymentTokenAmounts(address);
-        setPaymentTokenAllowance(Number(payment.allowance.shiftedBy(-6).toString()));
-        setPaymentTokenBalance(Number(payment.balance.shiftedBy(-6).toString()));
-        const proxyDeployed: boolean = await honeylemonService.addressHasDSProxy(address)
-        setIsDsProxyDeployed(proxyDeployed);
-        if (proxyDeployed) {
-          const proxyAddress = await honeylemonService.getDSProxyAddress(address);
-          setDsProxyAddress(proxyAddress);
-        }
-        const isContractDeployed = await honeylemonService.isDailyContractDeployed();
-        setIsDailyContractDeployed(isContractDeployed);
-        if (address && notify) {
-          const { emitter } = notify.account(address);
-          const etherscanUrl = (network === 1) ? 'https://etherscan.io' : `https://${networkName(network)}.etherscan.io`
-          emitter.on('all', tx => ({
-            onclick: () => window.open(`${etherscanUrl}/tx/${tx.hash}`) // TODO: update this to work on other networks
-          }))
-        }
-      };
-      initHoneylemonService();
+  setHoneylemonService(honeylemonService);
+  const collateral = await honeylemonService.getCollateralTokenAmounts(address);
+  setCollateralTokenAllowance(Number(collateral.allowance.shiftedBy(-8).toString()));
+  setCollateralTokenBalance(Number(collateral.balance.shiftedBy(-8).toString()));
+  const payment = await honeylemonService.getPaymentTokenAmounts(address);
+  setPaymentTokenAllowance(Number(payment.allowance.shiftedBy(-6).toString()));
+  setPaymentTokenBalance(Number(payment.balance.shiftedBy(-6).toString()));
+  const proxyDeployed: boolean = await honeylemonService.addressHasDSProxy(address)
+  setIsDsProxyDeployed(proxyDeployed);
+  if (proxyDeployed) {
+    const proxyAddress = await honeylemonService.getDSProxyAddress(address);
+    setDsProxyAddress(proxyAddress);
+  }
+  const isContractDeployed = await honeylemonService.isDailyContractDeployed();
+  setIsDailyContractDeployed(isContractDeployed);
+  if (address && notify) {
+    const { emitter } = notify.account(address);
+    const etherscanUrl = (network === 1) ? 'https://etherscan.io' : `https://${networkName(network)}.etherscan.io`
+    emitter.on('all', tx => ({
+      onclick: () => window.open(`${etherscanUrl}/tx/${tx.hash}`) // TODO: update this to work on other networks
+    }))
+  }
+};
+initHoneylemonService();
 
-      return () => {
-        setHoneylemonService(undefined);
-        setCollateralTokenAllowance(0)
-        setCollateralTokenBalance(0);
-        setPaymentTokenAllowance(0);
-        setPaymentTokenBalance(0);
-        setIsDsProxyDeployed(false);
-        setDsProxyAddress('');
-        notify?.unsubscribe(address || "0x");
-      }
+return () => {
+  setHoneylemonService(undefined);
+  setCollateralTokenAllowance(0)
+  setCollateralTokenBalance(0);
+  setPaymentTokenAllowance(0);
+  setPaymentTokenBalance(0);
+  setIsDsProxyDeployed(false);
+  setDsProxyAddress('');
+  notify?.unsubscribe(address || "0x");
+}
     }
   }, [wallet, network, isReady, address]);
 
-  // Instantiate Orderbook service
-  useEffect(() => {
-    const initOrderbookService = async () => {
-      const orderbookServiceInstance = new OrderbookService(
-        process.env.REACT_APP_SRA_URL,
-        process.env.REACT_APP_MINTER_BRIDGE_ADDRESS,
-        process.env.REACT_APP_MARKET_CONTRACT_PROXY_ADDRESS,
-        process.env.REACT_APP_PAYMENT_TOKEN_ADDRESS,
-      );
-      setOrderbookService(orderbookServiceInstance);
-    }
-    initOrderbookService();
-  }, []);
+// Instantiate Orderbook service
+useEffect(() => {
+  const initOrderbookService = async () => {
+    const orderbookServiceInstance = new OrderbookService(
+      process.env.REACT_APP_SRA_URL,
+      process.env.REACT_APP_MINTER_BRIDGE_ADDRESS,
+      process.env.REACT_APP_MARKET_CONTRACT_PROXY_ADDRESS,
+      process.env.REACT_APP_PAYMENT_TOKEN_ADDRESS,
+    );
+    setOrderbookService(orderbookServiceInstance);
+  }
+  initOrderbookService();
+}, []);
 
-  // Order book poller
-  useEffect(() => {
-    const getOrderbookData = async () => {
-      if (orderbookService) {
-        try {
-          const orderbookResponse = await orderbookService.getOrderbook();
-          const book = orderbookResponse.asks.records
-            .filter((order: any) => new BigNumber(order.metaData.remainingFillableMakerAssetAmount).gt(0))
-            .map((order: any) => ({
-              price: Number(new BigNumber(order.metaData.price).dividedBy(contractDuration).toString()),
-              quantity: Number(new BigNumber(order.metaData.remainingFillableMakerAssetAmount).toString())
-            }));
-          setOrderbook(book)
-        } catch (error) {
-          console.log('There was an error getting the orderbook.')
-          console.log(error);
-        }
-      }
-    }
-
-    let poller: NodeJS.Timeout;
-    getOrderbookData();
-    poller = setInterval(getOrderbookData, 30000);
-
-    return () => {
-      clearInterval(poller);
-    }
-  }, [orderbookService, contractDuration])
-
-
-  // Market Data Poller
-  useEffect(() => {
-    const getMarketData = async () => {
+// Order book poller
+useEffect(() => {
+  const getOrderbookData = async () => {
+    if (orderbookService) {
       try {
-        const marketDataApiUrl = process.env.REACT_APP_MARKET_DATA_API_URL;
-        if (marketDataApiUrl) {
-          const { contracts } = await (await fetch(`${marketDataApiUrl}/blockchain/agg?coin=BTC`)).json();
-          const stats = await (await fetch(`${marketDataApiUrl}/blockchain/stats`)).json();
-          setMiningContracts(contracts);
-          setCurrentBTCSpotPrice(stats.quote?.price);
-          setCurrentMRI(stats.mri);
-          setBtcStats(stats);
-        }
+        const orderbookResponse = await orderbookService.getOrderbook();
+        const book = orderbookResponse.asks.records
+          .filter((order: any) => new BigNumber(order.metaData.remainingFillableMakerAssetAmount).gt(0))
+          .map((order: any) => ({
+            price: Number(new BigNumber(order.metaData.price).dividedBy(contractDuration).toString()),
+            quantity: Number(new BigNumber(order.metaData.remainingFillableMakerAssetAmount).toString())
+          }));
+        setOrderbook(book)
       } catch (error) {
-        console.log('There was an error getting the market data')
+        console.log('There was an error getting the orderbook.')
+        console.log(error);
       }
     }
+  }
 
-    let poller: NodeJS.Timeout;
-    getMarketData();
-    poller = setInterval(getMarketData, 30000);
+  let poller: NodeJS.Timeout;
+  getOrderbookData();
+  poller = setInterval(getOrderbookData, 30000);
 
+  return () => {
+    clearInterval(poller);
+  }
+}, [orderbookService, contractDuration])
+
+
+// Market Data Poller
+useEffect(() => {
+  const getMarketData = async () => {
+    try {
+      const marketDataApiUrl = process.env.REACT_APP_MARKET_DATA_API_URL;
+      if (marketDataApiUrl) {
+        const { contracts } = await (await fetch(`${marketDataApiUrl}/blockchain/agg?coin=BTC`)).json();
+        const stats = await (await fetch(`${marketDataApiUrl}/blockchain/stats`)).json();
+        setMiningContracts(contracts);
+        setCurrentBTCSpotPrice(stats.quote?.price);
+        setCurrentMRI(stats.mri);
+        setBtcStats(stats);
+      }
+    } catch (error) {
+      console.log('There was an error getting the market data')
+    }
+  }
+
+  let poller: NodeJS.Timeout;
+  getMarketData();
+  poller = setInterval(getMarketData, 30000);
+
+  return () => {
+    clearInterval(poller);
+  }
+}, [])
+
+// Portfolio Data Poller
+useEffect(() => {
+  let poller: NodeJS.Timeout;
+
+  const getPortfolioData = async () => {
+    if (!isPortfolioRefreshing) {
+      await getPorfolio();
+    }
+  }
+
+  if (honeylemonService && address) {
+    getPortfolioData();
+    poller = setInterval(getPortfolioData, 30000);
+  }
+  return () => {
+    clearInterval(poller);
+  }
+}, [honeylemonService, address])
+
+// Difficulty Adjustment Date
+useEffect(() => {
+  const getDifficultyAdjustmentDate = async () => {
+    try {
+      const btcStatsUrl = process.env.REACT_APP_BTC_STATS_URL;
+      if (btcStatsUrl) {
+        const { currentBlockHeight, avgBlockTime } = await (await fetch(btcStatsUrl)).json()
+        const currentEpochBlocks = currentBlockHeight % 2016;
+        const remainingEpochTime = (2016 - currentEpochBlocks) * avgBlockTime;
+        const date = dayjs().utc().add(remainingEpochTime, 's');
+        setBtcDifficultyAdjustmentDate(date.toDate());
+      }
+    } catch (error) {
+      console.log('Error getting next difficulty adjustment date');
+    }
+  }
+  getDifficultyAdjustmentDate()
+}, [])
+
+// Transfer & Approval event listeners for Payment & Collateral Tokens
+useEffect(() => {
+  const checkBalancesAndApprovals = async () => {
+    const collateral = await honeylemonService.getCollateralTokenAmounts(address);
+    setCollateralTokenAllowance(Number(collateral.allowance.shiftedBy(-8).toString()));
+    setCollateralTokenBalance(Number(collateral.balance.shiftedBy(-8).toString()));
+    const payment = await honeylemonService.getPaymentTokenAmounts(address);
+    setPaymentTokenAllowance(Number(payment.allowance.shiftedBy(-6).toString()));
+    setPaymentTokenBalance(Number(payment.balance.shiftedBy(-6).toString()));
+  }
+  if (honeylemonService && address) {
+    checkBalancesAndApprovals();
+
+    const erc20Abi = [
+      "function transfer(address to, uint256 value) returns (bool)",
+      "function approve(address spender, uint256 value) returns (bool)",
+      "function transferFrom(address from, address to, uint256 value) returns (bool)",
+      "function totalSupply() view returns (uint256)",
+      "function balanceOf(address who) view returns (uint256)",
+      "function allowance(address owner, address spender) view returns (uint256)",
+      "event Transfer(address indexed from, address indexed to, uint256 value)",
+      "event Approval(address indexed owner, address indexed spender, uint256 value)",
+    ]
+
+    let provider = new ethers.providers.Web3Provider(honeylemonService.provider);
+    const paymentTokenContractAddress = honeylemonService.paymentTokenAddress;
+    const paymentTokenContract = new ethers.Contract(paymentTokenContractAddress, erc20Abi, provider);
+    const filterPaymentTokenApproval = paymentTokenContract.filters.Approval(address);
+    const transferPaymentTokenFrom = paymentTokenContract.filters.Transfer(address, null, null);
+    const transferPaymentTokenTo = paymentTokenContract.filters.Transfer(null, address, null);
+    paymentTokenContract.on(filterPaymentTokenApproval, () => checkBalancesAndApprovals())
+    paymentTokenContract.on(transferPaymentTokenFrom, () => checkBalancesAndApprovals())
+    paymentTokenContract.on(transferPaymentTokenTo, () => checkBalancesAndApprovals())
+
+    const collateralTokenContractAddress = honeylemonService.collateralTokenAddress;
+    const collateralTokenContract = new ethers.Contract(collateralTokenContractAddress, erc20Abi, provider);
+    const filterCollateralTokenApproval = collateralTokenContract.filters.Approval(address);
+    const transferCollateralTokenFrom = collateralTokenContract.filters.Transfer(address, null, null);
+    const transferCollateralTokenTo = collateralTokenContract.filters.Transfer(null, address, null);
+
+    collateralTokenContract.on(filterCollateralTokenApproval, () => checkBalancesAndApprovals())
+    collateralTokenContract.on(transferCollateralTokenFrom, () => checkBalancesAndApprovals())
+    collateralTokenContract.on(transferCollateralTokenTo, () => checkBalancesAndApprovals())
     return () => {
-      clearInterval(poller);
+      paymentTokenContract.removeAllListeners(filterPaymentTokenApproval)
+      paymentTokenContract.removeAllListeners(transferPaymentTokenFrom)
+      paymentTokenContract.removeAllListeners(transferPaymentTokenTo)
+      collateralTokenContract.removeAllListeners(filterCollateralTokenApproval)
+      collateralTokenContract.removeAllListeners(transferCollateralTokenFrom)
+      collateralTokenContract.removeAllListeners(transferCollateralTokenTo)
     }
-  }, [])
+  }
 
-  // Portfolio Data Poller
-  useEffect(() => {
-    let poller: NodeJS.Timeout;
+}, [honeylemonService, address])
 
-    const getPortfolioData = async () => {
-      if (!isPortfolioRefreshing) {
-        await getPorfolio();
-      }
-    }
-
-    if (honeylemonService && address) {
-      getPortfolioData();
-      poller = setInterval(getPortfolioData, 30000);
-    }
-    return () => {
-      clearInterval(poller);
-    }
-  }, [honeylemonService, address])
-
-  // Difficulty Adjustment Date
-  useEffect(() => {
-    const getDifficultyAdjustmentDate = async () => {
-      try {
-        const btcStatsUrl = process.env.REACT_APP_BTC_STATS_URL;
-        if (btcStatsUrl) {
-          const { currentBlockHeight, avgBlockTime } = await (await fetch(btcStatsUrl)).json()
-          const currentEpochBlocks = currentBlockHeight % 2016;
-          const remainingEpochTime = (2016 - currentEpochBlocks) * avgBlockTime;
-          const date = dayjs().add(remainingEpochTime, 's');
-          setBtcDifficultyAdjustmentDate(date.toDate());
-        }
-      } catch (error) {
-        console.log('Error getting next difficulty adjustment date');
-      }
-    }
-    getDifficultyAdjustmentDate()
-  }, [])
-
-  // Transfer & Approval event listeners for Payment & Collateral Tokens
-  useEffect(() => {
-    const checkBalancesAndApprovals = async () => {
-      const collateral = await honeylemonService.getCollateralTokenAmounts(address);
-      setCollateralTokenAllowance(Number(collateral.allowance.shiftedBy(-8).toString()));
-      setCollateralTokenBalance(Number(collateral.balance.shiftedBy(-8).toString()));
-      const payment = await honeylemonService.getPaymentTokenAmounts(address);
-      setPaymentTokenAllowance(Number(payment.allowance.shiftedBy(-6).toString()));
-      setPaymentTokenBalance(Number(payment.balance.shiftedBy(-6).toString()));
-    }
-    if (honeylemonService && address) {
-      checkBalancesAndApprovals();
-
-      const erc20Abi = [
-        "function transfer(address to, uint256 value) returns (bool)",
-        "function approve(address spender, uint256 value) returns (bool)",
-        "function transferFrom(address from, address to, uint256 value) returns (bool)",
-        "function totalSupply() view returns (uint256)",
-        "function balanceOf(address who) view returns (uint256)",
-        "function allowance(address owner, address spender) view returns (uint256)",
-        "event Transfer(address indexed from, address indexed to, uint256 value)",
-        "event Approval(address indexed owner, address indexed spender, uint256 value)",
-      ]
-
-      let provider = new ethers.providers.Web3Provider(honeylemonService.provider);
-      const paymentTokenContractAddress = honeylemonService.paymentTokenAddress;
-      const paymentTokenContract = new ethers.Contract(paymentTokenContractAddress, erc20Abi, provider);
-      const filterPaymentTokenApproval = paymentTokenContract.filters.Approval(address);
-      const transferPaymentTokenFrom = paymentTokenContract.filters.Transfer(address, null, null);
-      const transferPaymentTokenTo = paymentTokenContract.filters.Transfer(null, address, null);
-      paymentTokenContract.on(filterPaymentTokenApproval, () => checkBalancesAndApprovals())
-      paymentTokenContract.on(transferPaymentTokenFrom, () => checkBalancesAndApprovals())
-      paymentTokenContract.on(transferPaymentTokenTo, () => checkBalancesAndApprovals())
-
-      const collateralTokenContractAddress = honeylemonService.collateralTokenAddress;
-      const collateralTokenContract = new ethers.Contract(collateralTokenContractAddress, erc20Abi, provider);
-      const filterCollateralTokenApproval = collateralTokenContract.filters.Approval(address);
-      const transferCollateralTokenFrom = collateralTokenContract.filters.Transfer(address, null, null);
-      const transferCollateralTokenTo = collateralTokenContract.filters.Transfer(null, address, null);
-
-      collateralTokenContract.on(filterCollateralTokenApproval, () => checkBalancesAndApprovals())
-      collateralTokenContract.on(transferCollateralTokenFrom, () => checkBalancesAndApprovals())
-      collateralTokenContract.on(transferCollateralTokenTo, () => checkBalancesAndApprovals())
-      return () => {
-        paymentTokenContract.removeAllListeners(filterPaymentTokenApproval)
-        paymentTokenContract.removeAllListeners(transferPaymentTokenFrom)
-        paymentTokenContract.removeAllListeners(transferPaymentTokenTo)
-        collateralTokenContract.removeAllListeners(filterCollateralTokenApproval)
-        collateralTokenContract.removeAllListeners(transferCollateralTokenFrom)
-        collateralTokenContract.removeAllListeners(transferCollateralTokenTo)
-      }
-    }
-
-  }, [honeylemonService, address])
-
-  return (
-    <HoneylemonContext.Provider
-      value={{
-        honeylemonService,
-        orderbookService,
-        collateralTokenBalance,
-        collateralTokenAllowance,
-        COLLATERAL_TOKEN_DECIMALS,
-        COLLATERAL_TOKEN_NAME,
-        PAYMENT_TOKEN_DECIMALS,
-        PAYMENT_TOKEN_NAME,
-        CONTRACT_DURATION: contractDuration,
-        CONTRACT_COLLATERAL_RATIO,
-        paymentTokenAllowance,
-        paymentTokenBalance,
-        isDsProxyDeployed,
-        dsProxyAddress,
-        isDailyContractDeployed,
-        marketData: {
-          miningContracts,
-          currentBTCSpotPrice,
-          currentMRI,
-          btcDifficultyAdjustmentDate,
-        },
-        portfolioData: {
-          activeLongPositions,
-          activeShortPositions,
-          openOrders,
-          openOrdersMetadata,
-          expiredLongPositions,
-          expiredShortPositions,
-        },
-        orderbook,
-        btcStats,
-        deployDSProxyContract,
-        approveToken,
-        refreshPortfolio: getPorfolio,
-        isPortfolioRefreshing,
-      }}>
-      {children}
-    </HoneylemonContext.Provider>
-  );
+return (
+  <HoneylemonContext.Provider
+    value={{
+      honeylemonService,
+      orderbookService,
+      collateralTokenBalance,
+      collateralTokenAllowance,
+      COLLATERAL_TOKEN_DECIMALS,
+      COLLATERAL_TOKEN_NAME,
+      PAYMENT_TOKEN_DECIMALS,
+      PAYMENT_TOKEN_NAME,
+      CONTRACT_DURATION: contractDuration,
+      CONTRACT_COLLATERAL_RATIO,
+      paymentTokenAllowance,
+      paymentTokenBalance,
+      isDsProxyDeployed,
+      dsProxyAddress,
+      isDailyContractDeployed,
+      marketData: {
+        miningContracts,
+        currentBTCSpotPrice,
+        currentMRI,
+        btcDifficultyAdjustmentDate,
+      },
+      portfolioData: {
+        activeLongPositions,
+        activeShortPositions,
+        openOrders,
+        openOrdersMetadata,
+        expiredLongPositions,
+        expiredShortPositions,
+      },
+      orderbook,
+      btcStats,
+      deployDSProxyContract,
+      approveToken,
+      refreshPortfolio: getPorfolio,
+      isPortfolioRefreshing,
+    }}>
+    {children}
+  </HoneylemonContext.Provider>
+);
 }
 
 function useHoneylemon() {

@@ -21,6 +21,9 @@ const useStyles = makeStyles(({ palette }) => ({
     width: 20,
     height: 20,
   },
+  honeylemonCell: {
+    color: palette.primary.main,
+  },
   decrease: {
     color: palette.error.main,
   },
@@ -36,10 +39,9 @@ const MiningStatsPage: React.SFC = () => {
     PAYMENT_TOKEN_DECIMALS,
     orderbook,
     btcStats,
-    
   } = useHoneylemon();
 
-  const contractDurations = [90, 180, 360];
+  const contractDurations = [0, 100, 180, 360, 720];
   const bestHoneylemonPrice = (orderbook.length > 0) ? orderbook[0].price : currentMRI * currentBTCSpotPrice;
 
   const chartOptions: Highcharts.Options | undefined =
@@ -131,16 +133,36 @@ const MiningStatsPage: React.SFC = () => {
         },
         data: [
           ...miningContracts
+            .filter(c => contractDurations.includes(c.duration))
             .concat({ duration: 28, contract_cost: bestHoneylemonPrice, durationAlias: 'honeylemon' })
             .sort((c1, c2) => c1.duration < c2.duration ? -1 : 1)
-            .filter(c => c.duration <= 730).map(c => ({
+            .map(c => ({
               x: Date.now() + c.duration * 1000 * 86400,
               y: c.contract_cost || c.contract_cost_btc * currentBTCSpotPrice,
               desc: c.durationAlias,
             }))
         ]
-      },
-      {
+      }, {
+        name: '',
+        type: 'line',
+        yAxis: 0,
+        tooltip: {
+          valueDecimals: 4,
+          valueSuffix: `$/TH/Day`
+        },
+        dataLabels: { enabled: true },
+        data: [{
+          x: Date.now() + 28 * 1000 * 86400,
+          y: bestHoneylemonPrice,
+          //@ts-ignore
+          desc: 'honeylemon',
+        }],
+        marker: {
+          symbol: 'url(favicon.ico)',
+          width: 32,
+          height: 32
+        }
+      }, {
         name: 'Avg daily block rewards<br/>(assume constant price & difficulty)',
         type: 'spline',
         yAxis: 0,
@@ -155,8 +177,7 @@ const MiningStatsPage: React.SFC = () => {
           [Date.now(), currentMRI * currentBTCSpotPrice],
           [Date.now() + 730 * 1000 * 86400, currentMRI * currentBTCSpotPrice]
         ]
-      }
-      ]
+      }]
     }
 
   const difficultyChange = ((btcStats?.difficulty?.current - btcStats?.difficulty?.last) / btcStats?.difficulty?.last) * 100;
@@ -178,7 +199,7 @@ const MiningStatsPage: React.SFC = () => {
                   <Typography>$ {btcStats?.quote.price.toLocaleString(undefined, { maximumFractionDigits: 2 })}</Typography>
                   <Typography className={clsx(
                     { [classes.decrease]: btcStats?.quote?.percentChange24h < 0 },
-                    { [classes.increase]: btcStats?.quote?.percentChange24h > 0 })}>({btcStats?.quote?.percentChange24h.toLocaleString(undefined, { maximumFractionDigits: 1 })}%)
+                    { [classes.increase]: btcStats?.quote?.percentChange24h > 0 })}>{btcStats?.quote?.percentChange24h.toLocaleString(undefined, { maximumFractionDigits: 1 })}%
                   </Typography>
                 </TableCell>
               </TableRow>
@@ -192,7 +213,7 @@ const MiningStatsPage: React.SFC = () => {
                   <Typography className={clsx(
                     { [classes.decrease]: difficultyChange < 0 },
                     { [classes.increase]: difficultyChange > 0 })}>
-                    ({difficultyChange.toLocaleString(undefined, { maximumFractionDigits: 1 })}%)
+                    {`${(difficultyChange > 0) ? '+' : ''} ${difficultyChange.toLocaleString(undefined, { maximumFractionDigits: 1 })}`}%
                   </Typography>
                 </TableCell>
               </TableRow>
@@ -220,7 +241,7 @@ const MiningStatsPage: React.SFC = () => {
                 <TableCell><Typography>% Block Rewards</Typography></TableCell>
                 <TableCell align='right'>
                   <Typography>
-                    {(btcStats?.reward24h?.block / btcStats?.reward24h?.total * 100).toLocaleString(undefined, { maximumSignificantDigits: 2 })} %
+                    {(btcStats?.reward24h?.block / btcStats?.reward24h?.total * 100).toLocaleString(undefined, { maximumFractionDigits: 1 })} %
                     </Typography>
                 </TableCell>
               </TableRow>
@@ -228,7 +249,7 @@ const MiningStatsPage: React.SFC = () => {
                 <TableCell><Typography>% Transaction Fee</Typography></TableCell>
                 <TableCell align='right'>
                   <Typography>
-                    {(btcStats?.reward24h?.fees / btcStats?.reward24h?.total * 100).toLocaleString(undefined, { maximumSignificantDigits: 2 })} %
+                    {(btcStats?.reward24h?.fees / btcStats?.reward24h?.total * 100).toLocaleString(undefined, { maximumFractionDigits: 1 })} %
                   </Typography>
                 </TableCell>
               </TableRow>
@@ -276,8 +297,8 @@ const MiningStatsPage: React.SFC = () => {
               <TableCell></TableCell>
             </TableRow>
             <TableRow>
-              <TableCell>28-Day Honeylemon</TableCell>
-              <TableCell>$ {bestHoneylemonPrice.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}</TableCell>
+              <TableCell className={classes.honeylemonCell}><b>28-Day Honeylemon</b></TableCell>
+              <TableCell className={classes.honeylemonCell}><b>$ {bestHoneylemonPrice.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}</b></TableCell>
               <TableCell style={{ width: 50 }} align="right">
                 <HoneyLemonLogo className={classes.winner} />
               </TableCell>
@@ -292,14 +313,11 @@ const MiningStatsPage: React.SFC = () => {
                   </TableCell>
                 </TableRow>
               ))}
-            <TableRow >
-              <TableCell colSpan={2} align="center">Visit the Honeylemon Aggregator</TableCell>
-              <TableCell style={{ width: 50 }} align="right">
-                <Link href={`https://honeylemon.market/`} target="_blank" rel="noopener"><OpenInNew /></Link>
-              </TableCell>
-            </TableRow>
           </TableBody>
         </Table>
+        <Grid item xs={12} style={{paddingTop: 16}}>
+          <Link href={`https://honeylemon.market/`} target="_blank" rel="noopener">Find out more at the Honeylemon Mining Contract Aggregator<OpenInNew /></Link>
+        </Grid>
       </Grid>
     </Grid>
   )

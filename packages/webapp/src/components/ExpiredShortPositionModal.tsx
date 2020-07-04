@@ -21,7 +21,7 @@ interface ExpiredShortPositionModalProps {
   withdrawPosition(
     positionTokenAddress: string,
     marketContractAddress: string,
-    amount: number,
+    amount: string,
     type: PositionType): void,
   isWithdrawing: boolean
   position: any,
@@ -35,7 +35,7 @@ const ExpiredShortPositionModal: React.SFC<ExpiredShortPositionModalProps> = ({ 
   const handleWithdraw = async (
     positionTokenAddress: string,
     marketContractAddress: string,
-    amount: number,
+    amount: string,
     type: PositionType
   ) => {
     try {
@@ -66,7 +66,7 @@ const ExpiredShortPositionModal: React.SFC<ExpiredShortPositionModalProps> = ({ 
               <TableCell align='right'>
                 {dayjs(position.startDate).format('DD-MMM-YY')} <br />
                 {dayjs(position.expirationDate).format('DD-MMM-YY')} <br />
-                {position.status === PositionStatus.expiredAwaitingSettlement && <>{Math.ceil(dayjs(position.settlementDate).diff(dayjs(), 'h', true))} hours<br /></>}
+                {position.status === PositionStatus.expiredAwaitingSettlement && <>{Math.ceil(dayjs(position.settlementDate).diff(dayjs(), 'h', true))} hour(s)<br /></>}
                 {dayjs(position.settlementDate).format('DD-MMM-YY')} <br />
               </TableCell>
             </TableRow>
