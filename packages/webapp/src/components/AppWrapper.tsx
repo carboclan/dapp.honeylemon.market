@@ -1,4 +1,4 @@
-import React, { ReactNode, useRef } from 'react';
+import React, { ReactNode, useRef, useEffect } from 'react';
 import clsx from 'clsx';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
 import { Drawer, AppBar, Toolbar, Divider, IconButton, Typography, ListItem, ListItemIcon, ListItemText, List, Avatar, Link, Button, Switch } from '@material-ui/core';
@@ -82,6 +82,19 @@ const useStyles = makeStyles(({ transitions, palette, mixins, spacing }) => ({
   contentWrapper: {
     paddingBottom: footerHeight,
   },
+  deployWalletButton: {
+    borderColor: palette.primary.main,
+    borderWidth: 2,
+    borderStyle: 'solid',
+    color: palette.primary.main,
+    backgroundColor: '#424242',
+    '&:hover': {
+      backgroundColor: '#303030',
+    },
+  },
+  menuHeading: {
+    paddingTop: spacing(1),
+   }
 }));
 
 function AppWrapper(props: { children: ReactNode }) {
@@ -89,7 +102,7 @@ function AppWrapper(props: { children: ReactNode }) {
   const theme = useTheme();
   const location = useLocation();
   const [open, setOpen] = React.useState(false);
-  const { isReady, address, network, ethBalance, resetOnboard } = useOnboard();
+  const { isReady, address, network, ethBalance, resetOnboard, isMobile } = useOnboard();
   const {
     isDsProxyDeployed, 
     dsProxyAddress, 
@@ -121,7 +134,7 @@ function AppWrapper(props: { children: ReactNode }) {
 
   const handleNavigate = (path: string) => {
     forwardTo(path);
-    setOpen(false);
+    isMobile && setOpen(false);
   }
 
   const handleToggleTokenApproval = (tokenType: TokenType) => {
@@ -143,10 +156,14 @@ function AppWrapper(props: { children: ReactNode }) {
 
   const ref = useRef(null);
   useOnClickOutside(ref, () => {
-    if (open) {
+    if (open && isMobile) {
       setOpen(false)
     }
   })
+
+  useEffect(() => {
+    isReady && setOpen(!isMobile)
+  }, [isReady])
 
   const etherscanUrl = (network === 1) ? 'https://etherscan.io' : `https://${networkName(network)}.etherscan.io`
 
@@ -225,6 +242,7 @@ function AppWrapper(props: { children: ReactNode }) {
           </ListItem>
         </List>
         <Divider />
+        <Typography align='center' variant='subtitle1' className={classes.menuHeading}>Your Wallet</Typography>
         <List>
           <ListItem>
             <ListItemIcon>
@@ -237,7 +255,7 @@ function AppWrapper(props: { children: ReactNode }) {
                 align: 'right',
                 noWrap: true
               }}
-              secondary='Your Wallet'
+              secondary='Connected Wallet'
               secondaryTypographyProps={{
                 align: 'right'
               }}>
@@ -269,8 +287,8 @@ function AppWrapper(props: { children: ReactNode }) {
             </ListItem> :
             <ListItem>
               <Button 
-                color='primary' 
                 variant='contained'
+                className={classes.deployWalletButton}
                 onClick={deployDSProxyContract} 
                 fullWidth>
                   Create honeylemon vault
@@ -279,6 +297,7 @@ function AppWrapper(props: { children: ReactNode }) {
           }
         </List>
         <Divider />
+        <Typography align='center' variant='subtitle1' className={classes.menuHeading}>Manage Token Access</Typography>
         <List>
           <ListItem>
             <ListItemIcon>
