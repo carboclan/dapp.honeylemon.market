@@ -243,8 +243,6 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
         }
       });
 
-      console.log(allPositions);
-
       const newActiveLongPositions = allPositions.filter((p: any) => p.status === PositionStatus.active && p.type === PositionType.Long)
       setActiveLongPositions(newActiveLongPositions);
 

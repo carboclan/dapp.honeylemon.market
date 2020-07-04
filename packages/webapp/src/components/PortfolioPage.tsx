@@ -494,7 +494,7 @@ const PorfolioPage: React.SFC = () => {
                           .sort((a, b) => a.settlementDate < b.settlementDate ? -1 : 1)
                           .map(p =>
                             <TableRow>
-                              <TableCell>{p.settlementDate.format('DD-MMM-YY')}</TableCell>
+                              <TableCell>{dayjs(p.settlementDate).format('DD-MMM-YY')}</TableCell>
                               <TableCell align='center'>{p.type}</TableCell>
                               <TableCell align='center'>{p.finalReward.toLocaleString(undefined, { maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS })}</TableCell>
                               <TableCell>

@@ -429,7 +429,6 @@ class HoneylemonService {
     const positionToken = new web3.eth.Contract(PositionToken.abi, positionTokenAddress);
     positionToken.setProvider(this.provider);
     const web3Wrapper: Web3Wrapper = new Web3Wrapper(this.provider);
-
     const allowance = new BigNumber(await positionToken.methods.allowance(recipientAddress, marketContractAddress).call())
     const isApprovalRequired = !allowance.isGreaterThanOrEqualTo(amount);
     
@@ -452,7 +451,9 @@ class HoneylemonService {
       marketCollateralPool.methods.settleAndClose(marketContractAddress, amount, 0)
 
     // const redeemResult = await redeemTx.send({ from: recipientAddress});
-    const gas = await redeemTx.estimateGas({ from: recipientAddress, gas: 13000000 });
+    debugger;
+    const gas = await redeemTx.estimateGas({ from: recipientAddress, gas: 12000000 });
+    debugger;
     const redeemResult = await redeemTx.send({ from: recipientAddress, gas });
 
     await web3Wrapper.awaitTransactionSuccessAsync(redeemResult.transactionHash)
