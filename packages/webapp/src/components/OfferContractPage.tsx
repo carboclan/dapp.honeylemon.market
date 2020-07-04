@@ -399,7 +399,7 @@ const OfferContractPage: React.SFC = () => {
                   <TableCell align='right'>
                     {`${totalContractPrice.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })} ${PAYMENT_TOKEN_NAME}`} <br />
                     {`${collateralAmount.toLocaleString(undefined, { maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS })} ${COLLATERAL_TOKEN_NAME}`} <br />
-                    {`(${CONTRACT_COLLATERAL_RATIO * 100} % MRI)`}
+                    {`(${CONTRACT_COLLATERAL_RATIO * 100} % * MRI)`}
                   </TableCell>
                 </TableRow>
                 {!showOfferDetails ?
