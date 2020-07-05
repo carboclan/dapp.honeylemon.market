@@ -123,6 +123,7 @@ const OfferContractPage: React.SFC = () => {
   const [collateralAmount, setCollateralAmount] = useState(0);
   const [showOfferModal, setShowOfferModal] = useState(false);
   const [showOfferFinePrintModal, setShowOfferFinePrintModal] = useState(false);
+  const [showimBtcModal, setShowimBTCModal] = useState(false);
   const [txActive, setTxActive] = useState(false);
   const [showContractSpecificationModal, setShowContractSpecificationModal] = useState(false);
   const [showOfferDetails, setShowOfferDetails] = useState(false);
@@ -165,8 +166,8 @@ const OfferContractPage: React.SFC = () => {
   const sufficientCollateral = collateralTokenBalance >= collateralAmount;
 
   const errors = [];
-  !sufficientCollateral && errors.push(`You do not have enough ${COLLATERAL_TOKEN_NAME} to proceed`);
-  totalContractPrice && totalContractPrice < 100 && errors.push('Suggest to increase your contract total to above 100 USDT due to recent high fees in ethereum network. See Fees for details.')
+  !sufficientCollateral && errors.push(`You do not have enough ${COLLATERAL_TOKEN_NAME} to proceed.`);
+  totalContractPrice && totalContractPrice < 99 && errors.push('Suggest to increase your contract total to above 100 USDT due to recent high fees in ethereum network. See Fees for details.')
 
   const handleCloseOfferDialog = () => {
     setErrorMessage('');
@@ -279,7 +280,7 @@ const OfferContractPage: React.SFC = () => {
     setShowOfferDetails(!showOfferDetails);
   };
 
-  const premiumOverMRI = (hashPrice - (btcStats.mri * marketData.currentBTCSpotPrice))/(btcStats.mri * marketData.currentBTCSpotPrice) * 100
+  const premiumOverMRI = (hashPrice - (btcStats.mri * marketData.currentBTCSpotPrice)) / (btcStats.mri * marketData.currentBTCSpotPrice) * 100
 
   return (
     <>
@@ -362,9 +363,21 @@ const OfferContractPage: React.SFC = () => {
         </Grid>
         <Grid item>
           <Typography onClick={() => { setShowOfferFinePrintModal(true) }} variant='caption' style={{ cursor: 'pointer', textDecoration: 'underline' }}>
-            You are offering a limit order, list your offer by approving imBTC allowance as collateral. <Info />
+            You are offering a limit order, list your offer by approving imBTC allowance as collateral. <Info fontSize='small' />
           </Typography>
         </Grid>
+        {errors.length > 0 &&
+          <Grid item xs={12}>
+            <List className={classes.errorList}>
+              {errors.map((error: string, i) =>
+                <ListItem key={i} onClick={() => (error.includes('imBTC')) ? setShowimBTCModal(true) : null} >
+                  <ListItemText>
+                    {error}{(error.includes('imBTC')) && <Info fontSize='small' />}
+                  </ListItemText>
+                </ListItem>)}
+            </List>
+          </Grid>
+        }
         <Grid item xs={12} container>
           <Paper className={clsx(classes.offerSummary, {
             [classes.offerSummaryBlur]: !sufficientCollateral,
@@ -404,7 +417,7 @@ const OfferContractPage: React.SFC = () => {
                   </TableCell>
                   <TableCell align='right'>
                     {`${totalContractPrice.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })} ${PAYMENT_TOKEN_NAME}`} <br />
-                    {`${premiumOverMRI.toLocaleString(undefined, { maximumFractionDigits: 1})} %`}<br />
+                    {`${premiumOverMRI.toLocaleString(undefined, { maximumFractionDigits: 1 })} %`}<br />
                     {`${(collateralAmount > 0) ? '+' : ''}${collateralAmount.toLocaleString(undefined, { maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS })} ${COLLATERAL_TOKEN_NAME}`} <br />
                     {`(${CONTRACT_COLLATERAL_RATIO * 100} % x MRI_BTC x ${CONTRACT_DURATION})`}
                   </TableCell>
@@ -479,16 +492,6 @@ const OfferContractPage: React.SFC = () => {
             </Table>
           </Paper>
         </Grid>
-        {errors.length > 0 &&
-          <Grid item xs={12}>
-            <List className={classes.errorList}>
-              {errors.map((error, i) =>
-                <ListItem key={i}>
-                  <ListItemText>{error}</ListItemText>
-                </ListItem>)}
-            </List>
-          </Grid>
-        }
         <Grid item xs={12}>
           <Button
             fullWidth
@@ -514,7 +517,20 @@ const OfferContractPage: React.SFC = () => {
             • If you do not have sufficient {COLLATERAL_TOKEN_NAME} (an ERC20 representation of BTC on ethereum network) in your wallet as collateral when your offer is being taken, a portion of the order will still be filled based on your available {COLLATERAL_TOKEN_NAME} balance at the time.<br /><br />
             • You also need to have some ETH to pay for ethereum transaction fees (gas). You will only be charge for gas fees when offering the contract and withdrawing your collateral after contract settlement. <br /><br />
             • We suggest a minimum contract quantity of 1,000 TH to take into consideration the recent high gas cost. If you consider using Honeylemon more than once, we suggest you choose “Creating Honeylemon Vault”, which deploys DSProxy contract, to reduce gas costs and streamline user experience across multiple orders.<br /><br />
-            • You may view your current available {COLLATERAL_TOKEN_NAME} and ETH balance on the sidebar menu. <Link href='https://docs.honeylemon.market/fees'>Learn more about Fees.<OpenInNew fontSize='small' /></Link>
+            • You may view your current available {COLLATERAL_TOKEN_NAME} and ETH balance on the sidebar menu. <Link href='https://docs.honeylemon.market/fees' target="_blank" rel='noopener' underline='always'>Learn more about Fees.<OpenInNew fontSize='small' /></Link>
+          </Typography>
+        </DialogContent>
+      </Dialog>
+      <Dialog
+        open={showimBtcModal}
+        onClose={() => setShowimBTCModal(false)}
+        aria-labelledby="form-dialog-title">
+        <DialogTitle>Get more imBTC</DialogTitle>
+        <DialogContent>
+          <Typography>
+            To get more imBTC, you have 2 choices: <br />
+            1. Buy imBTC with ETH or USDT on <Link href='https://tokenlon.im/' target="_blank" rel='noopener' underline='always'>tokenlon.im<OpenInNew fontSize='small' /></Link>, or <br />
+            2. Mint imBTC with your BTC on the <Link href='https://www.token.im/' target="_blank" rel='noopener' underline='always'>imToken wallet app<OpenInNew fontSize='small' /></Link>.
           </Typography>
         </DialogContent>
       </Dialog>
