@@ -122,6 +122,8 @@ const OfferContractPage: React.SFC = () => {
   const [totalContractPrice, setTotalContractPrice] = useState(0);
   const [collateralAmount, setCollateralAmount] = useState(0);
   const [showOfferModal, setShowOfferModal] = useState(false);
+  const [showOfferFinePrintModal, setShowOfferFinePrintModal] = useState(false);
+  const [showimBtcModal, setShowimBTCModal] = useState(false);
   const [txActive, setTxActive] = useState(false);
   const [showContractSpecificationModal, setShowContractSpecificationModal] = useState(false);
   const [showOfferDetails, setShowOfferDetails] = useState(false);
@@ -164,8 +166,8 @@ const OfferContractPage: React.SFC = () => {
   const sufficientCollateral = collateralTokenBalance >= collateralAmount;
 
   const errors = [];
-  !sufficientCollateral && errors.push(`You do not have enough ${COLLATERAL_TOKEN_NAME} to proceed`);
-  totalContractPrice && totalContractPrice < 100 && errors.push('Suggest to increase your contract total to above 100 USDT due to recent high fees in ethereum network. See Fees for details.')
+  !sufficientCollateral && errors.push(`You do not have enough ${COLLATERAL_TOKEN_NAME} to proceed.`);
+  totalContractPrice && totalContractPrice < 99 && errors.push('Suggest to increase your contract total to above 100 USDT due to recent high fees in ethereum network. See Fees for details.')
 
   const handleCloseOfferDialog = () => {
     setErrorMessage('');
@@ -278,6 +280,8 @@ const OfferContractPage: React.SFC = () => {
     setShowOfferDetails(!showOfferDetails);
   };
 
+  const premiumOverMRI = (hashPrice - (btcStats.mri * marketData.currentBTCSpotPrice)) / (btcStats.mri * marketData.currentBTCSpotPrice) * 100
+
   return (
     <>
       <Grid container alignItems='center' justify='flex-start' spacing={2}>
@@ -357,9 +361,23 @@ const OfferContractPage: React.SFC = () => {
         <Grid item xs={4} className={classes.rightAlign}>
           <Typography style={{ fontWeight: 'bold' }} color='primary'>TH</Typography>
         </Grid>
-        <Typography onClick={() => {}}>
-          You are offering a limit order, list your offer by approving imBTC allowance as collateral. <Info />
-        </Typography>
+        <Grid item>
+          <Typography onClick={() => { setShowOfferFinePrintModal(true) }} variant='caption' style={{ cursor: 'pointer', textDecoration: 'underline' }}>
+            You are offering a limit order, list your offer by approving imBTC allowance as collateral. <Info fontSize='small' />
+          </Typography>
+        </Grid>
+        {errors.length > 0 &&
+          <Grid item xs={12}>
+            <List className={classes.errorList}>
+              {errors.map((error: string, i) =>
+                <ListItem key={i} onClick={() => (error.includes('imBTC')) ? setShowimBTCModal(true) : null} >
+                  <ListItemText>
+                    {error}{(error.includes('imBTC')) && <Info fontSize='small' />}
+                  </ListItemText>
+                </ListItem>)}
+            </List>
+          </Grid>
+        }
         <Grid item xs={12} container>
           <Paper className={clsx(classes.offerSummary, {
             [classes.offerSummaryBlur]: !sufficientCollateral,
@@ -393,13 +411,22 @@ const OfferContractPage: React.SFC = () => {
                 <TableRow>
                   <TableCell>
                     Contract Total <br />
-                    Estimated Collateral<br />
+                    {premiumOverMRI > 0 ? 'Premium over' : 'Discount to'} MRI_BTC <br />
+                    Estimated Collateral *<br />
                     <br />
                   </TableCell>
                   <TableCell align='right'>
                     {`${totalContractPrice.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })} ${PAYMENT_TOKEN_NAME}`} <br />
-                    {`${collateralAmount.toLocaleString(undefined, { maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS })} ${COLLATERAL_TOKEN_NAME}`} <br />
-                    {`(${CONTRACT_COLLATERAL_RATIO * 100} % * MRI)`}
+                    {`${premiumOverMRI.toLocaleString(undefined, { maximumFractionDigits: 1 })} %`}<br />
+                    {`${(collateralAmount > 0) ? '+' : ''}${collateralAmount.toLocaleString(undefined, { maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS })} ${COLLATERAL_TOKEN_NAME}`} <br />
+                    {`(${CONTRACT_COLLATERAL_RATIO * 100} % x MRI_BTC x ${CONTRACT_DURATION})`}
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell colSpan={2} style={{ color: '#a9a9a9' }}>
+                    <Typography variant='caption'>
+                      * Estimated collateral is calculated as {CONTRACT_COLLATERAL_RATIO * 100}% of current MRI_BTC times {CONTRACT_DURATION} days; actual collateral locked will be based on the MRI_BTC value at the time your offer is taken.
+                    </Typography>
                   </TableCell>
                 </TableRow>
                 {!showOfferDetails ?
@@ -424,21 +451,8 @@ const OfferContractPage: React.SFC = () => {
                       <TableCell align='right'>
                         Order-fill Date UTC 00:01 <br />
                         {`${CONTRACT_DURATION} Days After Start`} <br />
-                        24 Hours After Expiration <br />
+                        24 Hours After Exp <br />
                         {`${dayjs().add(10, 'd').format('DD-MMM-YY')}`}
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell colSpan={2} style={{ color: '#a9a9a9' }}>
-                        * Estimated collateral is calcuated based on current MRI value; actual collateral
-                          deposited will be based on the actual MRI value at at the time your order being filled. <br />
-                        * If you do not have sufficient {COLLATERAL_TOKEN_NAME} in your wallet as collateral when your offer is being taken,
-                          a portion of the order will still be filled based on your available {COLLATERAL_TOKEN_NAME} balance at the time.<br />
-                        * Your limit order may be partially filled. <br />
-                        * Your offer will be valid for 10 days. Any unfilled portion of your limit order can be cancelled in your portfolio.<br />
-                        * Your order will be subject to additional Ethereum network transaction fee,
-                          and 0x Protocol fee, both denominated in ETH. Honeylemon does not charge&nbsp;
-                        <Link component={RouterLink} to="/stats" underline='always' >fees.<OpenInNew fontSize='small' /></Link>
                       </TableCell>
                     </TableRow>
                     <TableRow>
@@ -478,16 +492,6 @@ const OfferContractPage: React.SFC = () => {
             </Table>
           </Paper>
         </Grid>
-        {errors.length > 0 &&
-          <Grid item xs={12}>
-            <List className={classes.errorList}>
-              {errors.map((error, i) =>
-                <ListItem key={i}>
-                  <ListItemText>{error}</ListItemText>
-                </ListItem>)}
-            </List>
-          </Grid>
-        }
         <Grid item xs={12}>
           <Button
             fullWidth
@@ -500,6 +504,36 @@ const OfferContractPage: React.SFC = () => {
           </Button>
         </Grid>
       </Grid>
+      <Dialog
+        open={showOfferFinePrintModal}
+        onClose={() => setShowOfferFinePrintModal(false)}
+        aria-labelledby="form-dialog-title">
+        <DialogTitle>Offer Details</DialogTitle>
+        <DialogContent>
+          <Typography>
+            • Your offer will be valid for 10 days, you may cancel any time prior to offer being taken.<br />
+            • Your offer may be partially filled.<br /><br />
+            • You need to have sufficient amount of {COLLATERAL_TOKEN_NAME} in wallet and grant Honeylemon smart contract permission to access it as collateral. The {COLLATERAL_TOKEN_NAME} collateral will only be deposited when your offer is taken. <br /><br />
+            • If you do not have sufficient {COLLATERAL_TOKEN_NAME} (an ERC20 representation of BTC on ethereum network) in your wallet as collateral when your offer is being taken, a portion of the order will still be filled based on your available {COLLATERAL_TOKEN_NAME} balance at the time.<br /><br />
+            • You also need to have some ETH to pay for ethereum transaction fees (gas). You will only be charge for gas fees when offering the contract and withdrawing your collateral after contract settlement. <br /><br />
+            • We suggest a minimum contract quantity of 1,000 TH to take into consideration the recent high gas cost. If you consider using Honeylemon more than once, we suggest you choose “Creating Honeylemon Vault”, which deploys DSProxy contract, to reduce gas costs and streamline user experience across multiple orders.<br /><br />
+            • You may view your current available {COLLATERAL_TOKEN_NAME} and ETH balance on the sidebar menu. <Link href='https://docs.honeylemon.market/fees' target="_blank" rel='noopener' underline='always'>Learn more about Fees.<OpenInNew fontSize='small' /></Link>
+          </Typography>
+        </DialogContent>
+      </Dialog>
+      <Dialog
+        open={showimBtcModal}
+        onClose={() => setShowimBTCModal(false)}
+        aria-labelledby="form-dialog-title">
+        <DialogTitle>Get more imBTC</DialogTitle>
+        <DialogContent>
+          <Typography>
+            To get more imBTC, you have 2 choices: <br />
+            1. Buy imBTC with ETH or USDT on <Link href='https://tokenlon.im/' target="_blank" rel='noopener' underline='always'>tokenlon.im<OpenInNew fontSize='small' /></Link>, or <br />
+            2. Mint imBTC with your BTC on the <Link href='https://www.token.im/' target="_blank" rel='noopener' underline='always'>imToken wallet app<OpenInNew fontSize='small' /></Link>.
+          </Typography>
+        </DialogContent>
+      </Dialog>
       <Dialog
         open={showOfferModal}
         onClose={handleCloseOfferDialog}
