@@ -135,7 +135,7 @@ const OfferContractPage: React.SFC = () => {
 
   // Set default quantity
   useEffect(() => {
-    const maxQuanityCollateralized = collateralTokenBalance / CONTRACT_COLLATERAL_RATIO / marketData.currentMRI
+    const maxQuanityCollateralized = Math.floor(collateralTokenBalance / CONTRACT_COLLATERAL_RATIO / marketData.currentMRI / CONTRACT_DURATION)
     const startingQuantity = Math.min(1000, maxQuanityCollateralized);
     setHashAmount(startingQuantity);
   }, [])
@@ -417,8 +417,8 @@ const OfferContractPage: React.SFC = () => {
                   </TableCell>
                   <TableCell align='right'>
                     {`${totalContractPrice.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })} ${PAYMENT_TOKEN_NAME}`} <br />
-                    {`${premiumOverMRI.toLocaleString(undefined, { maximumFractionDigits: 1 })} %`}<br />
-                    {`${(collateralAmount > 0) ? '+' : ''}${collateralAmount.toLocaleString(undefined, { maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS })} ${COLLATERAL_TOKEN_NAME}`} <br />
+                    {`${(premiumOverMRI > 0) ? '+' : ''}${premiumOverMRI.toLocaleString(undefined, { maximumFractionDigits: 1 })} %`}<br />
+                    {`${collateralAmount.toLocaleString(undefined, { maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS })} ${COLLATERAL_TOKEN_NAME}`} <br />
                     {`(${CONTRACT_COLLATERAL_RATIO * 100} % x MRI_BTC x ${CONTRACT_DURATION})`}
                   </TableCell>
                 </TableRow>
@@ -511,7 +511,7 @@ const OfferContractPage: React.SFC = () => {
         <DialogTitle>Offer Details</DialogTitle>
         <DialogContent>
           <Typography>
-            • Your offer will be valid for 10 days, you may cancel any time prior to offer being taken.<br />
+            • Your offer will be valid for 10 days, you may cancel any time prior to offer being taken.<br /><br />
             • Your offer may be partially filled.<br /><br />
             • You need to have sufficient amount of {COLLATERAL_TOKEN_NAME} in wallet and grant Honeylemon smart contract permission to access it as collateral. The {COLLATERAL_TOKEN_NAME} collateral will only be deposited when your offer is taken. <br /><br />
             • If you do not have sufficient {COLLATERAL_TOKEN_NAME} (an ERC20 representation of BTC on ethereum network) in your wallet as collateral when your offer is being taken, a portion of the order will still be filled based on your available {COLLATERAL_TOKEN_NAME} balance at the time.<br /><br />
