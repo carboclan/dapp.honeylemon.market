@@ -41,7 +41,7 @@ const MiningStatsPage: React.SFC = () => {
     btcStats,
   } = useHoneylemon();
 
-  const contractDurations = [0, 100, 180, 360, 720];
+  const contractDurations = [0, 100, 180, 360];
   const bestHoneylemonPrice = (orderbook.length > 0) ? orderbook[0].price : currentMRI * currentBTCSpotPrice;
 
   const chartOptions: Highcharts.Options | undefined =
@@ -163,7 +163,7 @@ const MiningStatsPage: React.SFC = () => {
           height: 32
         }
       }, {
-        name: 'Avg daily block rewards<br/>(assume constant price & difficulty)',
+        name: 'MRI_BTC',
         type: 'spline',
         yAxis: 0,
         color: 'white',
@@ -175,7 +175,7 @@ const MiningStatsPage: React.SFC = () => {
         dashStyle: 'Dash',
         data: [
           [Date.now(), currentMRI * currentBTCSpotPrice],
-          [Date.now() + 730 * 1000 * 86400, currentMRI * currentBTCSpotPrice]
+          [Date.now() + 370 * 1000 * 86400, currentMRI * currentBTCSpotPrice]
         ]
       }]
     }
