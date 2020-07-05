@@ -259,7 +259,7 @@ function AppWrapper(props: { children: ReactNode }) {
               secondaryTypographyProps={{
                 align: 'right'
               }}>
-              <Link href={`${etherscanUrl}/address/${address}`} target="_blank" rel='noopener' underline='always' >
+              <Link href={`${etherscanUrl}/address/${address}`} target="_blank" rel='noopener' underline='always'>
                 {displayAddress(address || '0x', 20)}
               </Link>
             </ListItemText>

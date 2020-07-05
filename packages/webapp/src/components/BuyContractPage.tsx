@@ -141,6 +141,8 @@ const BuyContractPage: React.SFC = () => {
   const [expectedBTCAccrual, setExpectedBTCAccrual] = useState(0);
   const [discountOnSpotPrice, setDiscountOnSpotPrice] = useState(0);
   const [showOrderDetails, setShowOrderDetails] = useState(false);
+  const [showBuyFinePrintModal, setShowBuyFinePrintModal] = useState(false);
+  const [showUSDTModal, setShowUSDTModal] = useState(false);
   const [showMRIInformationModal, setShowMRIInformationModal] = useState(false);
   const [showOrderbook, setShowOrderbook] = useState(false);
   const [skipDsProxy, setSkipDsProxy] = useState(false);
@@ -156,6 +158,12 @@ const BuyContractPage: React.SFC = () => {
     setErrorMessage('');
     setShowBuyModal(false);
   }
+
+  // Set default quantity
+  useEffect(() => {
+    const startingBudget = Math.min(100, paymentTokenBalance);
+    setBudget(startingBudget);
+  }, [])
 
   const validateOrderQuantity = async (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const newValueString = e.target.value;
@@ -266,7 +274,7 @@ const BuyContractPage: React.SFC = () => {
         orderGasPrice,
         resultOrders.length
       );
-      
+
 
       const gas = await honeylemonService.estimateGas(
         resultOrders,
@@ -308,7 +316,7 @@ const BuyContractPage: React.SFC = () => {
   !isDailyContractDeployed && errors.push("New contracts are not available right now");
   !sufficientPaymentTokens && errors.push(`You do not have enough ${PAYMENT_TOKEN_NAME} to proceed`);
   !isLiquid && errors.push("There are not enough contracts available right now");
-  orderValue && orderValue < 100 && errors.push('Suggest to increase your contract total to above 100 USDT due to recent high fees in ethereum network. See Fees for details.')
+  orderValue && orderValue < 99 && errors.push('Suggest to increase your contract total to above 100 USDT due to recent high fees in ethereum network. See Fees for details.')
 
   const getActiveStep = () => {
     if (!skipDsProxy && !isDsProxyDeployed) return 0;
@@ -392,56 +400,86 @@ const BuyContractPage: React.SFC = () => {
             scrollButtons="auto" >
             <Tab label="ENTER BUDGET" />
             <Tab label="or" disabled />
-            <Tab label="ENTER QUANTITY" />
+            <Tab label="ENTER AMOUNT" />
           </Tabs>
         </Grid>
         <TabPanel value={buyType} index={0}>
-          <Grid item xs={9} className={classes.rightAlign}>
-            <FilledInput
-              fullWidth
-              disableUnderline
-              inputProps={{
-                className: classes.inputBase,
-                min: 0,
-                step: 1
-              }}
-              placeholder='0'
-              startAdornment={<InputAdornment position="start">$</InputAdornment>}
-              onChange={validateOrderValue}
-              value={budget || ''}
-              type='number'
-              onBlur={e => {
-                e.target.value = e.target.value.replace(/^(-)?0+(0\.|\d)/, '$1$2')
-              }}
-              disabled={showBuyModal} />
-          </Grid>
-          <Grid item xs={3} className={classes.rightAlign}>
-            <Typography style={{ fontWeight: 'bold' }} color='primary'>{PAYMENT_TOKEN_NAME}</Typography>
+          <Grid container direction='row'>
+            <Grid item xs={9} className={classes.rightAlign}>
+              <FilledInput
+                fullWidth
+                disableUnderline
+                inputProps={{
+                  className: classes.inputBase,
+                  min: 0,
+                  step: 1
+                }}
+                placeholder='0'
+                startAdornment={<InputAdornment position="start">$</InputAdornment>}
+                onChange={validateOrderValue}
+                value={budget || ''}
+                type='number'
+                onBlur={e => {
+                  e.target.value = e.target.value.replace(/^(-)?0+(0\.|\d)/, '$1$2')
+                }}
+                disabled={showBuyModal} />
+            </Grid>
+            <Grid item xs={3} className={classes.rightAlign}>
+              <Typography style={{ fontWeight: 'bold' }} color='primary'>{PAYMENT_TOKEN_NAME}</Typography>
+            </Grid>
+            <Grid item xs={12}>
+              <Typography
+                onClick={() => { setShowBuyFinePrintModal(true) }}
+                variant='caption' style={{ cursor: 'pointer' }}>
+                Enter quantity as budget (in {PAYMENT_TOKEN_NAME}) to check the best market price below. <Info fontSize='small' />
+              </Typography>
+            </Grid>
           </Grid>
         </TabPanel>
         <TabPanel value={buyType} index={2}>
-          <Grid item xs={9} className={classes.rightAlign}>
-            <FilledInput
-              fullWidth
-              disableUnderline
-              inputProps={{
-                className: classes.inputBase,
-                min: 0,
-                step: 1
-              }}
-              placeholder='0'
-              onChange={validateOrderQuantity}
-              value={orderQuantity || ''}
-              type='number'
-              onBlur={e => {
-                e.target.value = e.target.value.replace(/^(-)?0+(0\.|\d)/, '$1$2')
-              }}
-              disabled={showBuyModal} />
-          </Grid>
-          <Grid item xs={3} className={classes.rightAlign}>
-            <Typography style={{ fontWeight: 'bold' }} color='primary'>TH for {CONTRACT_DURATION} Days</Typography>
+          <Grid container direction='row'>
+            <Grid item xs={9} className={classes.rightAlign}>
+              <FilledInput
+                fullWidth
+                disableUnderline
+                inputProps={{
+                  className: classes.inputBase,
+                  min: 0,
+                  step: 1
+                }}
+                placeholder='0'
+                onChange={validateOrderQuantity}
+                value={orderQuantity || ''}
+                type='number'
+                onBlur={e => {
+                  e.target.value = e.target.value.replace(/^(-)?0+(0\.|\d)/, '$1$2')
+                }}
+                disabled={showBuyModal} />
+            </Grid>
+            <Grid item xs={3} className={classes.rightAlign}>
+              <Typography style={{ fontWeight: 'bold' }} color='primary'>TH for {CONTRACT_DURATION} Days</Typography>
+            </Grid>
+            <Grid item xs={12}>
+              <Typography
+                onClick={() => { setShowBuyFinePrintModal(true) }}
+                variant='caption' style={{ cursor: 'pointer' }}>
+                Enter Quantity as the amount of hash power (in TH) to check the best market price below.<Info fontSize='small' />
+              </Typography>
+            </Grid>
           </Grid>
         </TabPanel>
+        {errors.length > 0 &&
+          <Grid item xs={12}>
+            <List className={classes.errorList}>
+              {errors.map((error: string, i) =>
+                <ListItem key={i} onClick={() => (error.includes('enough')) ? setShowUSDTModal(true) : null} >
+                  <ListItemText>
+                    {error}{(error.includes('enough')) && <Info fontSize='small' />}
+                  </ListItemText>
+                </ListItem>)}
+            </List>
+          </Grid>
+        }
         <Grid item xs={12} container>
           <Grid item xs={12} style={{ paddingLeft: 0, paddingRight: 0 }}>
             <Paper className={clsx(classes.orderSummary, {
@@ -478,22 +516,23 @@ const BuyContractPage: React.SFC = () => {
                     <TableCell align='right'>{`${(orderValue || 0).toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })} ${PAYMENT_TOKEN_NAME}`}</TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell>Revenue Cap</TableCell>
-                    <TableCell align='right'>{`${((expectedBTCAccrual || 0) * CONTRACT_COLLATERAL_RATIO).toLocaleString(undefined, { maximumFractionDigits: 8 })} ${COLLATERAL_TOKEN_NAME}`}</TableCell>
-                  </TableRow>
-                  <TableRow>
                     <TableCell className={classes.orderSummaryEstimate}>
                       {discountOnSpotPrice < 0 ? 'Premium' : 'Discount'} vs. Buy BTC * <br />
-                      Estimated Revenue *
+                      Estimated Revenue * <br />
+                      Revenue Cap * <br />
+                      <br />
                   </TableCell>
                     <TableCell align='right' className={classes.orderSummaryEstimate}>
                       {Math.abs(discountOnSpotPrice).toLocaleString(undefined, { maximumFractionDigits: 2 })}% <br />
-                      {`${(expectedBTCAccrual).toLocaleString(undefined, { maximumFractionDigits: 8 })} imBTC`}
+                      {`${(expectedBTCAccrual).toLocaleString(undefined, { maximumFractionDigits: 8 })} imBTC`} <br />
+                      {`${((expectedBTCAccrual || 0) * CONTRACT_COLLATERAL_RATIO).toLocaleString(undefined, { maximumFractionDigits: 8 })} ${COLLATERAL_TOKEN_NAME}`} <br/>
+                      <Typography variant='caption'>{`${CONTRACT_COLLATERAL_RATIO * 100} % x MRI_BTC x 28`}</Typography>
                     </TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell colSpan={2} className={classes.orderSummaryEstimateFootnote}>
-                      * Assuming constant price and difficulty
+                      * Assuming constant price and difficulty <br />
+                      * Revenue Cap is calculated as 125% of current MRI_BTC times 28 days.
                     </TableCell>
                   </TableRow>
                   {!showOrderDetails ?
@@ -569,16 +608,6 @@ const BuyContractPage: React.SFC = () => {
             </Paper>
           </Grid>
         </Grid>
-        {errors.length > 0 &&
-          <Grid item xs={12}>
-            <List className={classes.errorList}>
-              {errors.map((error, i) =>
-                <ListItem key={i}>
-                  <ListItemText>{error}</ListItemText>
-                </ListItem>)}
-            </List>
-          </Grid>
-        }
         <Grid item xs={12}>
           <Button
             color='primary'
@@ -591,6 +620,34 @@ const BuyContractPage: React.SFC = () => {
           </Button>
         </Grid>
       </Grid>
+      <Dialog
+        open={showBuyFinePrintModal}
+        onClose={() => setShowBuyFinePrintModal(false)}
+        aria-labelledby="form-dialog-title">
+        <DialogTitle>Buy Order Details</DialogTitle>
+        <DialogContent>
+          <Typography>
+            • You need to have sufficient amount of {PAYMENT_TOKEN_NAME} to pay for the contract costs upfront and some ETH to pay for the ethereum network transaction fee (gas fee).<br /><br />
+            • We suggest your contract total value of above $100 to take into consideration the recent high gas cost. If you consider using Honeylemon more than once, we suggest you choose “Creating Honeylemon Vault”, which deploys DSProxy contract, to reduce gas costs and streamline user experience across multiple orders. <br /><br />
+            • You may view your current available {PAYMENT_TOKEN_NAME} and ETH balance on the sidebar menu.<br /><br />
+            • You will be prompted for ethereum network transaction fees (gas fees), and 0x protocol transaction fee. Honeylemon Alpha does not charge fees.<Link href='https://docs.honeylemon.market/fees'>Learn more about Fees.<OpenInNew fontSize='small' /></Link>
+          </Typography>
+        </DialogContent>
+      </Dialog>
+      <Dialog
+        open={showUSDTModal}
+        onClose={() => setShowUSDTModal(false)}
+        aria-labelledby="form-dialog-title">
+        <DialogTitle>Get more USDT</DialogTitle>
+        <DialogContent>
+          <Typography>
+            To get more USDT, you have many choices: <br />
+            1. From <Link href='https://tokenlon.im/' target="_blank" rel='noopener' underline='always'>tokenlon.im<OpenInNew fontSize='small' /></Link>, or <br />
+            2. From other decentralized exchange, such as <Link href='https://balancer.exchange/' target="_blank" rel='noopener' underline='always'>Balancer<OpenInNew fontSize='small' /></Link>, or <br />
+            3. Centralized exchanges of your choice, such as <Link href='https://www.binance.com/en' target="_blank" rel='noopener' underline='always'>Binance<OpenInNew fontSize='small' /></Link>
+          </Typography>
+        </DialogContent>
+      </Dialog>
       <Dialog
         open={showBuyModal}
         onClose={handleCloseBuyDialog}
