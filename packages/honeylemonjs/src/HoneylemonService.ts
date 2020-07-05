@@ -393,14 +393,15 @@ class HoneylemonService {
       .call();
   }
 
-  async deployDSProxyContract(deployer) {
-    const address = await this.marketContractProxy.methods
-      .createDSProxyWallet()
-      .call({ from: deployer });
-    await this.marketContractProxy.methods.createDSProxyWallet().send({
-      from: deployer,
-      gas: 9000000
-    });
+  async deployDSProxyContract(deployer: string) {
+    const address = await this.marketContractProxy.methods.createDSProxyWallet().call({ from: deployer });
+    const deployDSProxyTx = this.marketContractProxy.methods.createDSProxyWallet();
+
+    const gas = await deployDSProxyTx.estimateGas({ from: deployer });
+    const deployResult = await deployDSProxyTx.send({ from: deployer, gas });
+    const web3Wrapper: Web3Wrapper = new Web3Wrapper(this.provider);
+    await web3Wrapper.awaitTransactionSuccessAsync(deployResult.transactionHash)
+
     return address;
   }
 
