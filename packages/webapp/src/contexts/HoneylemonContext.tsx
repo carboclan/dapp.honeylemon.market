@@ -119,7 +119,7 @@ export type ContractDetails = {
 const HoneylemonContext = React.createContext<HoneylemonContext | undefined>(undefined);
 
 const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
-  const { wallet, network, isReady, address, notify } = useOnboard();
+  const { wallet, network, isReady, address, notify, gasPrice } = useOnboard();
 
   const [honeylemonService, setHoneylemonService] = useState<any | undefined>(undefined);
   const [orderbookService, setOrderbookService] = useState<any | undefined>(undefined);
@@ -148,7 +148,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
 
   const deployDSProxyContract = async () => {
     try {
-      const dsProxyAddress = await honeylemonService.deployDSProxyContract(address);
+      const dsProxyAddress = await honeylemonService.deployDSProxyContract(address, gasPrice);
       setIsDsProxyDeployed(true);
       setDsProxyAddress(dsProxyAddress);
     } catch (error) {
@@ -162,13 +162,13 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
     try {
       switch (tokenType) {
         case TokenType.CollateralToken:
-          await honeylemonService.approveCollateralToken(address, amount);
+          await honeylemonService.approveCollateralToken(address, amount, gasPrice);
           const collateral = await honeylemonService.getCollateralTokenAmounts(address);
           setCollateralTokenAllowance(Number(collateral.allowance.shiftedBy(-COLLATERAL_TOKEN_DECIMALS).toString()));
           setCollateralTokenBalance(Number(collateral.balance.shiftedBy(-COLLATERAL_TOKEN_DECIMALS).toString()));
           break;
         case TokenType.PaymentToken:
-          await honeylemonService.approvePaymentToken(address, amount);
+          await honeylemonService.approvePaymentToken(address, amount, gasPrice);
           const payment = await honeylemonService.getPaymentTokenAmounts(address);
           setCollateralTokenAllowance(Number(payment.allowance.shiftedBy(-PAYMENT_TOKEN_DECIMALS).toString()));
           setCollateralTokenBalance(Number(payment.balance.shiftedBy(-PAYMENT_TOKEN_DECIMALS).toString()));
