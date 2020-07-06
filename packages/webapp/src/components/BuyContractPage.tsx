@@ -280,8 +280,8 @@ const BuyContractPage: React.SFC = () => {
         address,
         orderGasPrice,
       );
-      
-      const gas = new BigNumber(gasEstimate).multipliedBy(1.5);
+
+      const gas = Math.ceil(Number(new BigNumber(gasEstimate).multipliedBy(1.5).toString()));
 
       await tx.awaitTransactionSuccessAsync({
         from: address,
