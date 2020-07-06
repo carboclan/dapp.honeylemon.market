@@ -34,7 +34,6 @@ import ContractSpecificationModal from './ContractSpecificationModal';
 import OrderbookModal from './OrderbookModal';
 import MRIDisplay from './MRIDisplay';
 import { Info, OpenInNew, ExpandMore } from '@material-ui/icons';
-import { Link as RouterLink } from 'react-router-dom';
 import MRIInformationModal from './MRIInformationModal';
 import dayjs from 'dayjs';
 
@@ -110,6 +109,7 @@ const OfferContractPage: React.SFC = () => {
     PAYMENT_TOKEN_DECIMALS,
     deployDSProxyContract,
     approveToken,
+    setShowTokenInfoModal
   } = useHoneylemon();
   const { address = '0x' } = useOnboard();
   const classes = useStyles();
@@ -123,7 +123,6 @@ const OfferContractPage: React.SFC = () => {
   const [collateralAmount, setCollateralAmount] = useState(0);
   const [showOfferModal, setShowOfferModal] = useState(false);
   const [showOfferFinePrintModal, setShowOfferFinePrintModal] = useState(false);
-  const [showimBtcModal, setShowimBTCModal] = useState(false);
   const [txActive, setTxActive] = useState(false);
   const [showContractSpecificationModal, setShowContractSpecificationModal] = useState(false);
   const [showOfferDetails, setShowOfferDetails] = useState(false);
@@ -370,7 +369,7 @@ const OfferContractPage: React.SFC = () => {
           <Grid item xs={12}>
             <List className={classes.errorList}>
               {errors.map((error: string, i) =>
-                <ListItem key={i} onClick={() => (error.includes('imBTC')) ? setShowimBTCModal(true) : null} >
+                <ListItem key={i} onClick={() => (error.includes('imBTC')) ? setShowTokenInfoModal(true) : null} >
                   <ListItemText>
                     {error}{(error.includes('imBTC')) && <Info fontSize='small' />}
                   </ListItemText>
@@ -518,19 +517,6 @@ const OfferContractPage: React.SFC = () => {
             • You also need to have some ETH to pay for ethereum transaction fees (gas). You will only be charge for gas fees when offering the contract and withdrawing your collateral after contract settlement. <br /><br />
             • We suggest a minimum contract quantity of 1,000 TH to take into consideration the recent high gas cost. If you consider using Honeylemon more than once, we suggest you choose “Creating Honeylemon Vault”, which deploys DSProxy contract, to reduce gas costs and streamline user experience across multiple orders.<br /><br />
             • You may view your current available {COLLATERAL_TOKEN_NAME} and ETH balance on the sidebar menu. <Link href='https://docs.honeylemon.market/fees' target="_blank" rel='noopener' underline='always'>Learn more about Fees.<OpenInNew fontSize='small' /></Link>
-          </Typography>
-        </DialogContent>
-      </Dialog>
-      <Dialog
-        open={showimBtcModal}
-        onClose={() => setShowimBTCModal(false)}
-        aria-labelledby="form-dialog-title">
-        <DialogTitle>Get more imBTC</DialogTitle>
-        <DialogContent>
-          <Typography>
-            To get more imBTC, you have 2 choices: <br />
-            1. Buy imBTC with ETH or USDT on <Link href='https://tokenlon.im/' target="_blank" rel='noopener' underline='always'>tokenlon.im<OpenInNew fontSize='small' /></Link>, or <br />
-            2. Mint imBTC with your BTC on the <Link href='https://www.token.im/' target="_blank" rel='noopener' underline='always'>imToken wallet app<OpenInNew fontSize='small' /></Link>.
           </Typography>
         </DialogContent>
       </Dialog>

@@ -2,13 +2,15 @@ import React, { ReactNode, useRef, useEffect } from 'react';
 import clsx from 'clsx';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
 import { Drawer, AppBar, Toolbar, Divider, IconButton, Typography, ListItem, ListItemIcon, ListItemText, List, Avatar, Link, Button, Switch } from '@material-ui/core';
-import { Menu, ChevronLeft, ChevronRight, AccountBalance, Assessment, MonetizationOn, Whatshot, ExitToApp, Home } from '@material-ui/icons';
+import { Menu, ChevronLeft, ChevronRight, AccountBalance, Assessment, MonetizationOn, Whatshot, ExitToApp, Home, Info } from '@material-ui/icons';
 import Blockies from 'react-blockies';
 
 import { forwardTo } from '../helpers/history';
 import { ReactComponent as HoneyLemonLogo } from '../images/honeylemon-logo.svg';
 import { useOnboard } from '../contexts/OnboardContext';
 import { useHoneylemon, TokenType } from '../contexts/HoneylemonContext';
+import TokenInfoModal from '../components/TokenInfoModal';
+
 import Footer from './Footer';
 import { useOnClickOutside } from '../helpers/useOnClickOutside';
 import { networkName } from '../helpers/ethereumNetworkUtils';
@@ -94,18 +96,18 @@ const useStyles = makeStyles(({ transitions, palette, mixins, spacing }) => ({
   },
   menuHeading: {
     paddingTop: spacing(1),
-   }
+  }
 }));
 
 function AppWrapper(props: { children: ReactNode }) {
   const classes = useStyles();
   const theme = useTheme();
   const location = useLocation();
-  const [open, setOpen] = React.useState(false);
+  const [drawerOpen, setDrawerOpen] = React.useState(false);
   const { isReady, address, network, ethBalance, resetOnboard, isMobile } = useOnboard();
   const {
-    isDsProxyDeployed, 
-    dsProxyAddress, 
+    isDsProxyDeployed,
+    dsProxyAddress,
     deployDSProxyContract,
     collateralTokenBalance,
     collateralTokenAllowance,
@@ -115,54 +117,56 @@ function AppWrapper(props: { children: ReactNode }) {
     paymentTokenAllowance,
     PAYMENT_TOKEN_DECIMALS,
     PAYMENT_TOKEN_NAME,
-    approveToken
+    approveToken,
+    showTokenInfoModal, 
+    setShowTokenInfoModal
   } = useHoneylemon();
 
   const handleLogout = () => {
     resetOnboard();
-    setOpen(false);
+    setDrawerOpen(false);
     forwardTo('/');
   }
 
   const handleDrawerOpen = () => {
-    setOpen(true);
+    setDrawerOpen(true);
   };
 
   const handleDrawerClose = () => {
-    setOpen(false);
+    setDrawerOpen(false);
   };
 
   const handleNavigate = (path: string) => {
     forwardTo(path);
-    isMobile && setOpen(false);
+    isMobile && setDrawerOpen(false);
   }
 
   const handleToggleTokenApproval = (tokenType: TokenType) => {
     switch (tokenType) {
       case TokenType.CollateralToken: {
-        (collateralTokenAllowance === 0) ? 
+        (collateralTokenAllowance === 0) ?
           approveToken(TokenType.CollateralToken) :
           approveToken(TokenType.CollateralToken, 0);
         break;
       }
       case TokenType.PaymentToken: {
-        (paymentTokenAllowance === 0) ? 
+        (paymentTokenAllowance === 0) ?
           approveToken(TokenType.PaymentToken) :
           approveToken(TokenType.PaymentToken, 0);
         break;
       }
-    }    
+    }
   }
 
   const ref = useRef(null);
   useOnClickOutside(ref, () => {
-    if (open && isMobile) {
-      setOpen(false)
+    if (drawerOpen && isMobile) {
+      setDrawerOpen(false)
     }
   })
 
   useEffect(() => {
-    isReady && setOpen(!isMobile)
+    isReady && setDrawerOpen(!isMobile)
   }, [isReady])
 
   const etherscanUrl = (network === 1) ? 'https://etherscan.io' : `https://${networkName(network)}.etherscan.io`
@@ -172,13 +176,13 @@ function AppWrapper(props: { children: ReactNode }) {
       <AppBar
         position="fixed"
         className={clsx(classes.appBar, {
-          [classes.appBarShift]: open,
+          [classes.appBarShift]: drawerOpen,
         })}>
         <Toolbar>
           <HoneyLemonLogo className={classes.logo} onClick={() => forwardTo('/')} />
           <Typography
             className={clsx(classes.title,
-              { [classes.hide]: open })}
+              { [classes.hide]: drawerOpen })}
             onClick={() => forwardTo('/')}>
             honeylemon.market
           </Typography>
@@ -187,13 +191,13 @@ function AppWrapper(props: { children: ReactNode }) {
             edge="end"
             onClick={handleDrawerOpen}
             className={clsx(classes.hamburger,
-              { [classes.hide]: open },
+              { [classes.hide]: drawerOpen },
               { [classes.hide]: !isReady })} >
             <Menu fontSize='large' />
           </IconButton>
         </Toolbar>
       </AppBar>
-      <main className={clsx(classes.content, { [classes.contentDrawerOpen]: open })}>
+      <main className={clsx(classes.content, { [classes.contentDrawerOpen]: drawerOpen })}>
         <div className={classes.contentWrapper}>
           {props.children}
         </div>
@@ -202,14 +206,14 @@ function AppWrapper(props: { children: ReactNode }) {
       <Drawer
         ref={ref}
         className={clsx(classes.drawer, {
-          [classes.drawerOpen]: open,
+          [classes.drawerOpen]: drawerOpen,
         })}
         variant="persistent"
         anchor="right"
-        open={open}
+        open={drawerOpen}
         classes={{
           paper: clsx(classes.drawerPaper, {
-            [classes.drawerOpen]: open
+            [classes.drawerOpen]: drawerOpen
           }),
         }}
       >
@@ -286,18 +290,22 @@ function AppWrapper(props: { children: ReactNode }) {
               </ListItemText>
             </ListItem> :
             <ListItem>
-              <Button 
+              <Button
                 variant='contained'
                 className={classes.deployWalletButton}
-                onClick={deployDSProxyContract} 
+                onClick={deployDSProxyContract}
                 fullWidth>
-                  Create honeylemon vault
+                Create honeylemon vault
               </Button>
             </ListItem>
           }
         </List>
         <Divider />
-        <Typography align='center' variant='subtitle1' className={classes.menuHeading}>Manage Token Access</Typography>
+        <Typography align='center' variant='subtitle1' className={classes.menuHeading}>
+          Manage Token Access 
+          <IconButton onClick={() => setShowTokenInfoModal(true)}><Info fontSize='small' /></IconButton>
+        </Typography>
+        
         <List>
           <ListItem>
             <ListItemIcon>
@@ -321,9 +329,9 @@ function AppWrapper(props: { children: ReactNode }) {
             <ListItemIcon>
               <img src='imBtc.png' style={{ width: '40px' }} alt='imbtc logo' />
             </ListItemIcon>
-            <Switch 
-              color="primary" 
-              checked={(collateralTokenAllowance > 0)} 
+            <Switch
+              color="primary"
+              checked={(collateralTokenAllowance > 0)}
               onChange={() => handleToggleTokenApproval(TokenType.CollateralToken)} />
             <ListItemText
               primary={`${collateralTokenBalance.toLocaleString(undefined, {
@@ -345,7 +353,7 @@ function AppWrapper(props: { children: ReactNode }) {
             </ListItemIcon>
             <Switch
               color="primary"
-              checked={(paymentTokenAllowance > 0)} 
+              checked={(paymentTokenAllowance > 0)}
               onChange={() => handleToggleTokenApproval(TokenType.PaymentToken)} />
             <ListItemText
               primary={`${paymentTokenBalance.toLocaleString(undefined, {
@@ -371,6 +379,7 @@ function AppWrapper(props: { children: ReactNode }) {
           </List>
         </List>
       </Drawer>
+      <TokenInfoModal open={showTokenInfoModal} onClose={() => setShowTokenInfoModal(false)} />
     </div>
   );
 }
