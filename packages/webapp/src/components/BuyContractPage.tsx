@@ -159,12 +159,6 @@ const BuyContractPage: React.SFC = () => {
     setShowBuyModal(false);
   }
 
-  // Set default quantity
-  useEffect(() => {
-    const startingBudget = Math.min(100, paymentTokenBalance);
-    setBudget(startingBudget);
-  }, [])
-
   const validateOrderQuantity = async (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const newValueString = e.target.value;
     if (!newValueString) {
@@ -260,6 +254,10 @@ const BuyContractPage: React.SFC = () => {
   }
 
   const handleBuyOffer = async () => {
+    if (!address) {
+      console.log("Wallet is not connected. Unable to start buy");
+      return;
+    }
     setTxActive(true);
     setErrorMessage('')
     try {
@@ -276,11 +274,14 @@ const BuyContractPage: React.SFC = () => {
       );
 
 
-      const gas = await honeylemonService.estimateGas(
+      const gasEstimate = await honeylemonService.estimateGas(
         resultOrders,
         takerAssetFillAmounts,
         address,
+        orderGasPrice,
       );
+
+      const gas = Math.ceil(Number(new BigNumber(gasEstimate).multipliedBy(1.5).toString()));
 
       await tx.awaitTransactionSuccessAsync({
         from: address,
@@ -373,6 +374,12 @@ const BuyContractPage: React.SFC = () => {
   const handleOrderDetailsClick = () => {
     setShowOrderDetails(!showOrderDetails);
   };
+
+  // Set default quantity
+  useEffect(() => {
+    const startingBudget = Math.min(100, paymentTokenBalance);
+    setBudget(startingBudget);
+  }, [])
 
   return (
     <>
@@ -521,11 +528,11 @@ const BuyContractPage: React.SFC = () => {
                       Estimated Revenue * <br />
                       Revenue Cap * <br />
                       <br />
-                  </TableCell>
+                    </TableCell>
                     <TableCell align='right' className={classes.orderSummaryEstimate}>
                       {Math.abs(discountOnSpotPrice).toLocaleString(undefined, { maximumFractionDigits: 2 })}% <br />
                       {`${(expectedBTCAccrual).toLocaleString(undefined, { maximumFractionDigits: 8 })} imBTC`} <br />
-                      {`${((expectedBTCAccrual || 0) * CONTRACT_COLLATERAL_RATIO).toLocaleString(undefined, { maximumFractionDigits: 8 })} ${COLLATERAL_TOKEN_NAME}`} <br/>
+                      {`${((expectedBTCAccrual || 0) * CONTRACT_COLLATERAL_RATIO).toLocaleString(undefined, { maximumFractionDigits: 8 })} ${COLLATERAL_TOKEN_NAME}`} <br />
                       <Typography variant='caption'>{`${CONTRACT_COLLATERAL_RATIO * 100} % x MRI_BTC x 28`}</Typography>
                     </TableCell>
                   </TableRow>
@@ -614,7 +621,7 @@ const BuyContractPage: React.SFC = () => {
             variant='contained'
             fullWidth
             onClick={handleStartBuy}
-            disabled={!isValid || showBuyModal || resultOrders.length === 0}>
+            disabled={!isValid || showBuyModal || orderValue === 0 || resultOrders.length === 0}>
             BUY NOW &nbsp;
               {showBuyModal && <CircularProgress className={classes.loadingSpinner} size={20} />}
           </Button>
