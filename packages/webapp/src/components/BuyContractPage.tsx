@@ -122,6 +122,7 @@ const BuyContractPage: React.SFC = () => {
     isDailyContractDeployed,
     deployDSProxyContract,
     approveToken,
+    setShowTokenInfoModal,
   } = useHoneylemon()
   const classes = useStyles();
 
@@ -142,7 +143,6 @@ const BuyContractPage: React.SFC = () => {
   const [discountOnSpotPrice, setDiscountOnSpotPrice] = useState(0);
   const [showOrderDetails, setShowOrderDetails] = useState(false);
   const [showBuyFinePrintModal, setShowBuyFinePrintModal] = useState(false);
-  const [showUSDTModal, setShowUSDTModal] = useState(false);
   const [showMRIInformationModal, setShowMRIInformationModal] = useState(false);
   const [showOrderbook, setShowOrderbook] = useState(false);
   const [skipDsProxy, setSkipDsProxy] = useState(false);
@@ -431,7 +431,7 @@ const BuyContractPage: React.SFC = () => {
               <Typography
                 onClick={() => { setShowBuyFinePrintModal(true) }}
                 variant='caption' style={{ cursor: 'pointer' }}>
-                Enter quantity as budget (in {PAYMENT_TOKEN_NAME}) to check the best market price below. <Info fontSize='small' />
+                Enter quantity you would like to buy as budget in {PAYMENT_TOKEN_NAME} to check the best market price below. <Info fontSize='small' />
               </Typography>
             </Grid>
           </Grid>
@@ -463,7 +463,7 @@ const BuyContractPage: React.SFC = () => {
               <Typography
                 onClick={() => { setShowBuyFinePrintModal(true) }}
                 variant='caption' style={{ cursor: 'pointer' }}>
-                Enter Quantity as the amount of hash power (in TH) to check the best market price below.<Info fontSize='small' />
+                Enter quantity you would like to buy as hash power in terahash (TH) to check the best market price below.<Info fontSize='small' />
               </Typography>
             </Grid>
           </Grid>
@@ -472,7 +472,7 @@ const BuyContractPage: React.SFC = () => {
           <Grid item xs={12}>
             <List className={classes.errorList}>
               {errors.map((error: string, i) =>
-                <ListItem key={i} onClick={() => (error.includes('enough')) ? setShowUSDTModal(true) : null} >
+                <ListItem key={i} onClick={() => (error.includes('enough USDT')) ? setShowTokenInfoModal(true) : null} >
                   <ListItemText>
                     {error}{(error.includes('enough')) && <Info fontSize='small' />}
                   </ListItemText>
@@ -630,21 +630,7 @@ const BuyContractPage: React.SFC = () => {
             • You need to have sufficient amount of {PAYMENT_TOKEN_NAME} to pay for the contract costs upfront and some ETH to pay for the ethereum network transaction fee (gas fee).<br /><br />
             • We suggest your contract total value of above $100 to take into consideration the recent high gas cost. If you consider using Honeylemon more than once, we suggest you choose “Creating Honeylemon Vault”, which deploys DSProxy contract, to reduce gas costs and streamline user experience across multiple orders. <br /><br />
             • You may view your current available {PAYMENT_TOKEN_NAME} and ETH balance on the sidebar menu.<br /><br />
-            • You will be prompted for ethereum network transaction fees (gas fees), and 0x protocol transaction fee. Honeylemon Alpha does not charge fees.<Link href='https://docs.honeylemon.market/fees'>Learn more about Fees.<OpenInNew fontSize='small' /></Link>
-          </Typography>
-        </DialogContent>
-      </Dialog>
-      <Dialog
-        open={showUSDTModal}
-        onClose={() => setShowUSDTModal(false)}
-        aria-labelledby="form-dialog-title">
-        <DialogTitle>Get more USDT</DialogTitle>
-        <DialogContent>
-          <Typography>
-            To get more USDT, you have many choices: <br />
-            1. From <Link href='https://tokenlon.im/' target="_blank" rel='noopener' underline='always'>tokenlon.im<OpenInNew fontSize='small' /></Link>, or <br />
-            2. From other decentralized exchange, such as <Link href='https://balancer.exchange/' target="_blank" rel='noopener' underline='always'>Balancer<OpenInNew fontSize='small' /></Link>, or <br />
-            3. Centralized exchanges of your choice, such as <Link href='https://www.binance.com/en' target="_blank" rel='noopener' underline='always'>Binance<OpenInNew fontSize='small' /></Link>
+            • You will be prompted for ethereum network transaction fees (gas fees), and 0x protocol transaction fee. Honeylemon Alpha does not charge fees.&nbsp;<Link href='https://docs.honeylemon.market/fees'>Learn more about Fees.<OpenInNew fontSize='small' /></Link>
           </Typography>
         </DialogContent>
       </Dialog>

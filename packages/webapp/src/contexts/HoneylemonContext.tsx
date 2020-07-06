@@ -1,6 +1,6 @@
 import * as React from "react";
 import Web3 from 'web3'
-import { useState, useEffect } from "react";
+import { useState, useEffect, Dispatch, SetStateAction } from "react";
 import { MetamaskSubprovider, Web3JsProvider } from '@0x/subproviders';
 import { HoneylemonService, OrderbookService, COLLATERAL_TOKEN_DECIMALS, PAYMENT_TOKEN_DECIMALS } from "@honeylemon/honeylemonjs/lib/src";
 import { useOnboard } from "./OnboardContext";
@@ -54,6 +54,8 @@ export type HoneylemonContext = {
   dsProxyAddress: string;
   CONTRACT_COLLATERAL_RATIO: number;
   isDailyContractDeployed: boolean;
+  showTokenInfoModal: boolean;
+  setShowTokenInfoModal: Dispatch<SetStateAction<boolean>>;
   marketData: {
     miningContracts: Array<any>;
     currentMRI: number;
@@ -142,6 +144,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
   const [isDailyContractDeployed, setIsDailyContractDeployed] = useState(false);
   const [orderbook, setOrderbook] = useState([]);
   const [contractDuration, setContractDuration] = useState(0);
+  const [showTokenInfoModal, setShowTokenInfoModal] = useState(false);
 
   const deployDSProxyContract = async () => {
     try {
@@ -527,6 +530,8 @@ return (
       approveToken,
       refreshPortfolio: getPorfolio,
       isPortfolioRefreshing,
+      showTokenInfoModal,
+      setShowTokenInfoModal,
     }}>
     {children}
   </HoneylemonContext.Provider>
