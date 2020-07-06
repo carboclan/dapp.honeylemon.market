@@ -191,9 +191,6 @@ const PorfolioPage: React.SFC = () => {
     setShowActiveShortPositions(!showActiveShortPositions);
   }
 
-  const handleTogglePendingWithdrawPanel = () => {
-    setShowPendingWithdraw(!showPendingWithdraw);
-  }
   const handleToggleExpiredLongPositionsPanel = () => {
     setShowExpiredLongPositions(!showExpiredLongPositions);
   }
