@@ -126,7 +126,7 @@ const BuyContractPage: React.SFC = () => {
 
   const [budget, setBudget] = useState<number>(0);
   const [orderQuantity, setOrderQuantity] = useState(0);
-  
+
   const [hashPrice, setHashPrice] = useState(0);
   const [isLiquid, setIsLiquid] = useState(true);
   const [orderValue, setOrderValue] = useState<number | undefined>(undefined);
@@ -333,7 +333,7 @@ const BuyContractPage: React.SFC = () => {
         const discountValue = (!isLiquid) ?
           0 :
           ((currentBTCSpotPrice - (newOrderValue / newExpectedAccrual)) / currentBTCSpotPrice) * 100
-  
+
         setIsLiquid(newIsLiquid);
         setHashPrice(Number(result?.price?.dividedBy(CONTRACT_DURATION).toString()) || 0);
         setOrderQuantity(Number(result?.totalMakerFillAmount?.toString()) || 0);
@@ -358,12 +358,12 @@ const BuyContractPage: React.SFC = () => {
           await honeylemonService.calculateRequiredCollateral(new BigNumber(orderQuantity))
         ).shiftedBy(-COLLATERAL_TOKEN_DECIMALS)
           .dividedBy(CONTRACT_COLLATERAL_RATIO).toString());
-  
+
         const { currentBTCSpotPrice } = marketData;
         const discountValue = (!isLiquid) ?
           0 :
           ((currentBTCSpotPrice - (newOrderValue / newExpectedAccrual)) / currentBTCSpotPrice) * 100
-  
+
         setIsLiquid(newIsLiquid);
         setHashPrice(Number(result?.price?.dividedBy(CONTRACT_DURATION).toString()) || 0);
         setOrderValue(newOrderValue);
@@ -492,7 +492,6 @@ const BuyContractPage: React.SFC = () => {
                 paragraph
                 color='secondary'
                 onClick={() => (error.includes('enough USDT')) ? setShowTokenInfoModal(true) : null} >
-                {error}&nbsp;{(error.includes('enough USDT')) && <Info fontSize='small' />}
               </Typography>
             )}
           </Grid>
@@ -532,12 +531,14 @@ const BuyContractPage: React.SFC = () => {
                     <TableCell>Contract Total</TableCell>
                     <TableCell align='right'>{`${(orderValue || 0).toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })} ${PAYMENT_TOKEN_NAME}`}</TableCell>
                   </TableRow>
-                  {orderValue && orderValue < 99 ?
+                  {orderValue && orderValue < 98 ?
                     <TableRow>
                       <TableCell colSpan={2}>
                         <Typography variant='caption'>
-                          Suggest to increase your contract total to above 100 {PAYMENT_TOKEN_NAME} due to recent high fees in ethereum network.
-                          See <Link href='https://docs.honeylemon.market/fees' target="_blank" rel='noopener'>fees.<OpenInNew fontSize='small' /></Link> for details.
+                          <i>
+                            Suggest to increase your contract total to above 100 {PAYMENT_TOKEN_NAME} due to recent high fees in ethereum network.
+                            See <Link href='https://docs.honeylemon.market/fees' target="_blank" rel='noopener'>fees.<OpenInNew fontSize='small' /></Link> for details.
+                          </i>
                         </Typography>
                       </TableCell>
                     </TableRow> :
@@ -548,31 +549,35 @@ const BuyContractPage: React.SFC = () => {
                       {discountOnSpotPrice < 0 ? 'Premium' : 'Discount'} vs. Buy BTC *
                     </TableCell>
                     <TableCell align='right' className={classes.orderSummaryEstimate}>
-                      {`${(discountOnSpotPrice < 0) ? '-' : '+'}${Math.abs(discountOnSpotPrice).toLocaleString(undefined, { maximumFractionDigits: 2 })}`}%
+                      {`${(discountOnSpotPrice < 0) ? '-' : (discountOnSpotPrice > 0) ? '+' : ''}${Math.abs(discountOnSpotPrice).toLocaleString(undefined, { maximumFractionDigits: 2 })}`}%
                     </TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell>
+                    <TableCell className={classes.orderSummaryEstimate}>
                       Estimated Revenue *
                     </TableCell>
-                    <TableCell>
+                    <TableCell align='right' className={classes.orderSummaryEstimate}>
                       {`${(expectedBTCAccrual).toLocaleString(undefined, { maximumFractionDigits: 8 })} imBTC`}
                     </TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell>
+                    <TableCell className={classes.orderSummaryEstimate}>
                       Revenue Cap *
                     </TableCell>
-                    <TableCell>
+                    <TableCell align='right' className={classes.orderSummaryEstimate}>
                       {`${((expectedBTCAccrual || 0) * CONTRACT_COLLATERAL_RATIO).toLocaleString(undefined, { maximumFractionDigits: 8 })} ${COLLATERAL_TOKEN_NAME}`} <br />
-                      <Typography variant='caption'>{`${CONTRACT_COLLATERAL_RATIO * 100} % x MRI_BTC x 28`}</Typography>
+                      <Typography variant='caption'><i>{`${CONTRACT_COLLATERAL_RATIO * 100} % x MRI_BTC x ${CONTRACT_DURATION}`}</i></Typography>
                     </TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell colSpan={2} className={classes.orderSummaryEstimateFootnote}>
-                      * Assuming constant price and difficulty <br />
-                    * Revenue Cap is calculated as 125% of current MRI_BTC times 28 days.
-                  </TableCell>
+                    <TableCell colSpan={2} className={classes.orderSummaryEstimate}>
+                      <Typography variant='caption'>
+                        <i>
+                          * Assuming constant price and difficulty <br />
+                          * Revenue Cap is calculated as 125% of current MRI_BTC times 28 days.
+                        </i>
+                      </Typography>
+                    </TableCell>
                   </TableRow>
                   {!showOrderDetails ?
                     <TableRow>

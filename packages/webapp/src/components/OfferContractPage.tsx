@@ -36,6 +36,7 @@ import MRIDisplay from './MRIDisplay';
 import { Info, OpenInNew, ExpandMore } from '@material-ui/icons';
 import MRIInformationModal from './MRIInformationModal';
 import dayjs from 'dayjs';
+import AboutHoneylemonContractModal from './AboutHoneylemonContractModal';
 
 const useStyles = makeStyles(({ spacing, palette, transitions }) => ({
   rightAlign: {
@@ -90,7 +91,10 @@ const useStyles = makeStyles(({ spacing, palette, transitions }) => ({
     '&:hover': {
       backgroundColor: '#505050',
     },
-  }
+  },
+  offerSummaryEstimate: {
+    color: palette.primary.main,
+  },
 }))
 
 const OfferContractPage: React.SFC = () => {
@@ -122,7 +126,7 @@ const OfferContractPage: React.SFC = () => {
   const [totalContractPrice, setTotalContractPrice] = useState(0);
   const [collateralAmount, setCollateralAmount] = useState(0);
   const [showOfferModal, setShowOfferModal] = useState(false);
-  const [showOfferFinePrintModal, setShowOfferFinePrintModal] = useState(false);
+  const [showAboutHoneylemonContractModal, setShowAboutHoneylemonContractModal] = useState(false);
   const [txActive, setTxActive] = useState(false);
   const [showContractSpecificationModal, setShowContractSpecificationModal] = useState(false);
   const [showOfferDetails, setShowOfferDetails] = useState(false);
@@ -165,8 +169,8 @@ const OfferContractPage: React.SFC = () => {
   const sufficientCollateral = collateralTokenBalance >= collateralAmount;
 
   const errors = [];
-  !sufficientCollateral && errors.push(`You do not have enough ${COLLATERAL_TOKEN_NAME} to proceed.`);
-  totalContractPrice && totalContractPrice < 99 && errors.push('Suggest to increase your contract total to above 100 USDT due to recent high fees in ethereum network. See Fees for details.')
+  !sufficientCollateral && errors.push(`You need at least ${collateralAmount.toLocaleString(undefined, { maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS })} ${COLLATERAL_TOKEN_NAME} to proceed. Open Side Menu (top-right) to manage your wallet balance and get more`);
+  // totalContractPrice && totalContractPrice < 99 && errors.push('')
 
   const handleCloseOfferDialog = () => {
     setErrorMessage('');
@@ -288,7 +292,7 @@ const OfferContractPage: React.SFC = () => {
           <MRIDisplay />
         </Grid>
         <Grid item xs={8}>
-          <Typography style={{ fontWeight: 'bold' }}>Offer a {CONTRACT_DURATION}-day Mining Revenue Contract</Typography>
+          <Typography style={{ fontWeight: 'bold' }}>Offer a {CONTRACT_DURATION}-day Mining Revenue Contract<Info fontSize='small' onClick={() => { setShowAboutHoneylemonContractModal(true) }} /></Typography>
         </Grid>
         <Grid item xs={4} style={{ textAlign: 'end' }}>
           <Button
@@ -361,8 +365,8 @@ const OfferContractPage: React.SFC = () => {
           <Typography style={{ fontWeight: 'bold' }} color='primary'>TH</Typography>
         </Grid>
         <Grid item>
-          <Typography onClick={() => { setShowOfferFinePrintModal(true) }} variant='caption' style={{ cursor: 'pointer', textDecoration: 'underline' }}>
-            You are offering a limit order, list your offer by approving imBTC allowance as collateral. <Info fontSize='small' />
+          <Typography variant='caption'>
+            Offer/cancel limit order for free as long as you have sufficient {COLLATERAL_TOKEN_NAME} collateral. Ethereum gas fee (in ETH) will apply.
           </Typography>
         </Grid>
         {errors.length > 0 &&
@@ -402,29 +406,56 @@ const OfferContractPage: React.SFC = () => {
                     Duration <br />
                   </TableCell>
                   <TableCell align='right'>
-                    $ {hashPrice.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}/Th/Day <br />
+                    ${hashPrice.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}/Th/Day<br />
                     {hashAmount?.toLocaleString()} TH <br />
                     {CONTRACT_DURATION} Days
                   </TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell>
-                    Contract Total <br />
-                    {premiumOverMRI > 0 ? 'Premium over' : 'Discount to'} MRI_BTC <br />
-                    Estimated Collateral *<br />
-                    <br />
+                  <TableCell className={classes.offerSummaryEstimate}>
+                    Contract Total *
                   </TableCell>
-                  <TableCell align='right'>
-                    {`${totalContractPrice.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })} ${PAYMENT_TOKEN_NAME}`} <br />
-                    {`${(premiumOverMRI > 0) ? '+' : ''}${premiumOverMRI.toLocaleString(undefined, { maximumFractionDigits: 1 })} %`}<br />
+                  <TableCell align='right' className={classes.offerSummaryEstimate}>
+                    {`${totalContractPrice.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS - 2 })} ${PAYMENT_TOKEN_NAME}`}<br />
+                  </TableCell>
+                </TableRow>
+                {totalContractPrice && totalContractPrice < 100 ?
+                  <TableRow>
+                    <TableCell colSpan={2}>
+                      <Typography variant='caption'>
+                        <i>
+                          Suggest to increase your contract total to above 100 {PAYMENT_TOKEN_NAME} due to recent high fees in ethereum network.
+                          See <Link href='https://docs.honeylemon.market/fees' target="_blank" rel='noopener'>fees.<OpenInNew fontSize='small' /></Link> for details.
+                        </i>
+                      </Typography>
+                    </TableCell>
+                  </TableRow> :
+                  null
+                }
+                <TableRow>
+                  <TableCell className={classes.offerSummaryEstimate}>
+                    Required Collateral (125%)*
+                  </TableCell>
+                  <TableCell align='right' className={classes.offerSummaryEstimate}>
                     {`${collateralAmount.toLocaleString(undefined, { maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS })} ${COLLATERAL_TOKEN_NAME}`} <br />
-                    {`(${CONTRACT_COLLATERAL_RATIO * 100} % x MRI_BTC x ${CONTRACT_DURATION})`}
                   </TableCell>
                 </TableRow>
                 <TableRow>
+                  <TableCell className={classes.offerSummaryEstimate}>
+                    {premiumOverMRI > 0 ? 'Premium over' : 'Discount to'} MRI_BTC<br />
+                  </TableCell>
+                  <TableCell align='right' className={classes.offerSummaryEstimate}>
+                    {`${(premiumOverMRI < -0) ? '-' : (premiumOverMRI > 0) ? '+' : ''}${Math.abs(premiumOverMRI).toLocaleString(undefined, { maximumFractionDigits: 2 })}`}%
+                  </TableCell>
+                </TableRow>
+                <TableRow className={classes.offerSummaryEstimate}>
                   <TableCell colSpan={2} style={{ color: '#a9a9a9' }}>
                     <Typography variant='caption'>
-                      * Estimated collateral is calculated as {CONTRACT_COLLATERAL_RATIO * 100}% of current MRI_BTC times {CONTRACT_DURATION} days; actual collateral locked will be based on the MRI_BTC value at the time your offer is taken.
+                      <i>
+                        * <b>Contract Total</b> is the amount of USDT you will receive upfront upon your offer being taken. <br />
+                        * <b>Required Collateral</b> is an estimate based on current MRI_BTC; you need to have at least this much in wallet and approve Honeylemon access to your imBTC to complete your listing. Actual collateral (auto-deposited) will be based on MRI_BTC at the time your offer is taken.
+                        * <b>Premium/Discount over MRI_BTC</b> is how much your price compare to the current MRI_BTC.
+                      </i>
                     </Typography>
                   </TableCell>
                 </TableRow>
@@ -503,30 +534,14 @@ const OfferContractPage: React.SFC = () => {
           </Button>
         </Grid>
       </Grid>
-      <Dialog
-        open={showOfferFinePrintModal}
-        onClose={() => setShowOfferFinePrintModal(false)}
-        aria-labelledby="form-dialog-title">
-        <DialogTitle>Offer Details</DialogTitle>
-        <DialogContent>
-          <Typography>
-            • Your offer will be valid for 10 days, you may cancel any time prior to offer being taken.<br /><br />
-            • Your offer may be partially filled.<br /><br />
-            • You need to have sufficient amount of {COLLATERAL_TOKEN_NAME} in wallet and grant Honeylemon smart contract permission to access it as collateral. The {COLLATERAL_TOKEN_NAME} collateral will only be deposited when your offer is taken. <br /><br />
-            • If you do not have sufficient {COLLATERAL_TOKEN_NAME} (an ERC20 representation of BTC on ethereum network) in your wallet as collateral when your offer is being taken, a portion of the order will still be filled based on your available {COLLATERAL_TOKEN_NAME} balance at the time.<br /><br />
-            • You also need to have some ETH to pay for ethereum transaction fees (gas). You will only be charge for gas fees when offering the contract and withdrawing your collateral after contract settlement. <br /><br />
-            • We suggest a minimum contract quantity of 1,000 TH to take into consideration the recent high gas cost. If you consider using Honeylemon more than once, we suggest you choose “Creating Honeylemon Vault”, which deploys DSProxy contract, to reduce gas costs and streamline user experience across multiple orders.<br /><br />
-            • You may view your current available {COLLATERAL_TOKEN_NAME} and ETH balance on the sidebar menu. <Link href='https://docs.honeylemon.market/fees' target="_blank" rel='noopener' underline='always'>Learn more about Fees.<OpenInNew fontSize='small' /></Link>
-          </Typography>
-        </DialogContent>
-      </Dialog>
+      <AboutHoneylemonContractModal open={showAboutHoneylemonContractModal} onClose={() => setShowAboutHoneylemonContractModal(false)} />
       <Dialog
         open={showOfferModal}
         onClose={handleCloseOfferDialog}
         aria-labelledby="form-dialog-title"
         disableBackdropClick
         disableEscapeKeyDown
-        maxWidth='sm' 
+        maxWidth='sm'
         fullWidth>
         <DialogTitle id="form-dialog-title">Create Offer</DialogTitle>
         <DialogContent>

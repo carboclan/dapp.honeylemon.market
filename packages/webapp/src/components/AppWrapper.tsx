@@ -2,7 +2,7 @@ import React, { ReactNode, useRef, useEffect, useState } from 'react';
 import clsx from 'clsx';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
 import { Drawer, AppBar, Toolbar, Divider, IconButton, Typography, ListItem, ListItemIcon, ListItemText, List, Avatar, Link, Button, Switch } from '@material-ui/core';
-import { Menu, ChevronLeft, ChevronRight, AccountBalance, Assessment, MonetizationOn, Whatshot, ExitToApp, Home, Info, OpenInNew } from '@material-ui/icons';
+import { Menu, ChevronLeft, ChevronRight, AccountBalance, Assessment, MonetizationOn, Whatshot, ExitToApp, Home, Info, OpenInNew, Settings } from '@material-ui/icons';
 import Blockies from 'react-blockies';
 
 import { forwardTo } from '../helpers/history';
@@ -96,6 +96,7 @@ const useStyles = makeStyles(({ transitions, palette, mixins, spacing }) => ({
   },
   menuHeading: {
     paddingTop: spacing(1),
+    color: palette.secondary.main,
   }
 }));
 
@@ -264,11 +265,17 @@ function AppWrapper(props: { children: ReactNode }) {
           </ListItem>
         </List>
         <Divider />
-        <Typography align='center' variant='subtitle1' className={classes.menuHeading}>
-          Manage My Wallet
-          <IconButton onClick={() => setShowTokenInfoModal(true)}><Info fontSize='small' /></IconButton>
-        </Typography>
         <List>
+          <ListItem onClick={() => setShowTokenInfoModal(true)} className={classes.menuHeading}>
+            <ListItemIcon>
+              <IconButton style={{ padding: 2.5 }}>
+                <Settings color='secondary' fontSize='large' />
+              </IconButton>
+            </ListItemIcon>
+            <ListItemText primaryTypographyProps={{ align: 'center' }}>
+              Manage My Wallet
+            </ListItemText>
+          </ListItem>
           <ListItem>
             <ListItemIcon>
               <img src='eth.png' style={{ width: '40px' }} alt='eth logo' />
