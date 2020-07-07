@@ -525,7 +525,9 @@ const OfferContractPage: React.SFC = () => {
         onClose={handleCloseOfferDialog}
         aria-labelledby="form-dialog-title"
         disableBackdropClick
-        disableEscapeKeyDown>
+        disableEscapeKeyDown
+        maxWidth='sm' 
+        fullWidth>
         <DialogTitle id="form-dialog-title">Create Offer</DialogTitle>
         <DialogContent>
           <Stepper activeStep={activeStep} orientation="vertical">

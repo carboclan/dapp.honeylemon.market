@@ -646,7 +646,9 @@ const BuyContractPage: React.SFC = () => {
         onClose={handleCloseBuyDialog}
         aria-labelledby="form-dialog-title"
         disableBackdropClick
-        disableEscapeKeyDown>
+        disableEscapeKeyDown
+        maxWidth='sm' 
+        fullWidth>
         <DialogTitle id="form-dialog-title">Buy Offer</DialogTitle>
         <DialogContent>
           <Stepper activeStep={activeStep} orientation="vertical">
