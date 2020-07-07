@@ -1,4 +1,4 @@
-import React, { ReactNode, useRef, useEffect } from 'react';
+import React, { ReactNode, useRef, useEffect, useState } from 'react';
 import clsx from 'clsx';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
 import { Drawer, AppBar, Toolbar, Divider, IconButton, Typography, ListItem, ListItemIcon, ListItemText, List, Avatar, Link, Button, Switch } from '@material-ui/core';
@@ -103,7 +103,9 @@ function AppWrapper(props: { children: ReactNode }) {
   const classes = useStyles();
   const theme = useTheme();
   const location = useLocation();
-  const [drawerOpen, setDrawerOpen] = React.useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [txActive, setTxActive] = useState(false);
+
   const { isReady, address, network, ethBalance, resetOnboard, isMobile } = useOnboard();
   const {
     isDsProxyDeployed,
@@ -118,7 +120,7 @@ function AppWrapper(props: { children: ReactNode }) {
     PAYMENT_TOKEN_DECIMALS,
     PAYMENT_TOKEN_NAME,
     approveToken,
-    showTokenInfoModal, 
+    showTokenInfoModal,
     setShowTokenInfoModal
   } = useHoneylemon();
 
@@ -141,21 +143,37 @@ function AppWrapper(props: { children: ReactNode }) {
     isMobile && setDrawerOpen(false);
   }
 
-  const handleToggleTokenApproval = (tokenType: TokenType) => {
-    switch (tokenType) {
-      case TokenType.CollateralToken: {
-        (collateralTokenAllowance === 0) ?
-          approveToken(TokenType.CollateralToken) :
-          approveToken(TokenType.CollateralToken, 0);
-        break;
+  const handleToggleTokenApproval = async (tokenType: TokenType) => {
+    setTxActive(true);
+    try {
+      switch (tokenType) {
+        case TokenType.CollateralToken: {
+          (collateralTokenAllowance === 0) ?
+            await approveToken(TokenType.CollateralToken) :
+            await approveToken(TokenType.CollateralToken, 0);
+          break;
+        }
+        case TokenType.PaymentToken: {
+          (paymentTokenAllowance === 0) ?
+            await approveToken(TokenType.PaymentToken) :
+            await approveToken(TokenType.PaymentToken, 0);
+          break;
+        }
       }
-      case TokenType.PaymentToken: {
-        (paymentTokenAllowance === 0) ?
-          approveToken(TokenType.PaymentToken) :
-          approveToken(TokenType.PaymentToken, 0);
-        break;
-      }
+    } catch (error) {
+      console.log(error)
     }
+    setTxActive(false);
+  }
+
+  const handleDeployDSProxy = async () => {
+    setTxActive(true);
+    try {
+      await deployDSProxyContract();
+    } catch (error) {
+      console.log(error)
+    }
+    setTxActive(false);
   }
 
   const ref = useRef(null);
@@ -293,7 +311,8 @@ function AppWrapper(props: { children: ReactNode }) {
               <Button
                 variant='contained'
                 className={classes.deployWalletButton}
-                onClick={deployDSProxyContract}
+                onClick={handleDeployDSProxy}
+                disabled={txActive}
                 fullWidth>
                 Create honeylemon vault
               </Button>
@@ -302,10 +321,10 @@ function AppWrapper(props: { children: ReactNode }) {
         </List>
         <Divider />
         <Typography align='center' variant='subtitle1' className={classes.menuHeading}>
-          Manage Token Access 
+          Manage Token Access
           <IconButton onClick={() => setShowTokenInfoModal(true)}><Info fontSize='small' /></IconButton>
         </Typography>
-        
+
         <List>
           <ListItem>
             <ListItemIcon>
@@ -332,7 +351,8 @@ function AppWrapper(props: { children: ReactNode }) {
             <Switch
               color="primary"
               checked={(collateralTokenAllowance > 0)}
-              onChange={() => handleToggleTokenApproval(TokenType.CollateralToken)} />
+              onChange={() => handleToggleTokenApproval(TokenType.CollateralToken)} 
+              disabled={txActive} />
             <ListItemText
               primary={`${collateralTokenBalance.toLocaleString(undefined, {
                 useGrouping: true,
@@ -354,6 +374,7 @@ function AppWrapper(props: { children: ReactNode }) {
             <Switch
               color="primary"
               checked={(paymentTokenAllowance > 0)}
+              disabled={txActive}
               onChange={() => handleToggleTokenApproval(TokenType.PaymentToken)} />
             <ListItemText
               primary={`${paymentTokenBalance.toLocaleString(undefined, {
