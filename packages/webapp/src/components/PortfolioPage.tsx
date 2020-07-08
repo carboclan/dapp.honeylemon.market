@@ -330,6 +330,7 @@ const PorfolioPage: React.SFC = () => {
                         <TableRow>
                           <TableCell>Price ($/TH/Day)</TableCell>
                           <TableCell align='center'>Quantity (TH)</TableCell>
+                          <TableCell align='right'>Contract Total ({PAYMENT_TOKEN_NAME})</TableCell>
                           <TableCell></TableCell>
                         </TableRow>
                       </TableHead>
@@ -337,7 +338,8 @@ const PorfolioPage: React.SFC = () => {
                         {openOrdersMetadata && openOrdersMetadata?.map((order, i) =>
                           <TableRow key={order.orderHash}>
                             <TableCell>${Number(order?.price.dividedBy(CONTRACT_DURATION).toString()).toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}</TableCell>
-                            <TableCell align='center'>{order?.remainingFillableMakerAssetAmount.toLocaleString(undefined, { maximumFractionDigits: 0 })}</TableCell>
+                            <TableCell align='center'>{Number(order?.remainingFillableMakerAssetAmount.toString()).toLocaleString(undefined, { maximumFractionDigits: 0 })}</TableCell>
+                            <TableCell align='right'>{Number(order.price.multipliedBy(order.remainingFillableMakerAssetAmount)).toLocaleString(undefined, { minimumFractionDigits: 2,maximumFractionDigits: 2 })}</TableCell>
                             <TableCell align='right'>
                               <MoreVert onClick={() => handleShowUnfilledOfferDetails(i)} style={{ cursor: 'pointer' }} />
                             </TableCell>
@@ -382,7 +384,7 @@ const PorfolioPage: React.SFC = () => {
                             <TableCell align='center'>
                               <TimeRemaining totalDuration={CONTRACT_DURATION} remainingDuration={position.daysToExpiration} unitLabel='d' />
                             </TableCell>
-                            <TableCell align='center'>{position.totalCost.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}</TableCell>
+                            <TableCell align='center'>{position.totalCost.toLocaleString(undefined, { minimumFractionDigits: 2,maximumFractionDigits: 2 })}</TableCell>
                             <TableCell align='center'>{position.totalCollateralLocked.toLocaleString(undefined, { maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS })}</TableCell>
                             <TableCell align='right'><MoreVert onClick={() => handleShowActiveShortPositionDetails(i)} style={{ cursor: 'pointer' }} /></TableCell>
                           </TableRow>
@@ -416,7 +418,7 @@ const PorfolioPage: React.SFC = () => {
                         <TableRow>
                           <TableCell align='center'>Days till Expiration</TableCell>
                           <TableCell align='center'>Cost ({PAYMENT_TOKEN_NAME})</TableCell>
-                          <TableCell align='center'>Receivable ({COLLATERAL_TOKEN_NAME})</TableCell>
+                          <TableCell align='center'>Revenue Accrued ({COLLATERAL_TOKEN_NAME})</TableCell>
                           <TableCell></TableCell>
                         </TableRow>
                       </TableHead>
@@ -426,8 +428,8 @@ const PorfolioPage: React.SFC = () => {
                             <TableCell align='center'>
                               <TimeRemaining totalDuration={CONTRACT_DURATION} remainingDuration={position.daysToExpiration} unitLabel='d' />
                             </TableCell>
-                            <TableCell align='center'>{position.totalCost.toLocaleString(undefined, { maximumFractionDigits: 2 })}</TableCell>
-                            <TableCell align='center'>{position.pendingReward.toLocaleString(undefined, { maximumFractionDigits: 2 })}</TableCell>
+                            <TableCell align='center'>{position.totalCost.toLocaleString(undefined, { minimumFractionDigits: 2,maximumFractionDigits: 2 })}</TableCell>
+                            <TableCell align='center'>{position.pendingReward.toLocaleString(undefined, { maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS })}</TableCell>
                             <TableCell align='right'><MoreVert onClick={() => handleShowActiveLongPositionDetails(i)} style={{ cursor: 'pointer' }} /></TableCell>
                           </TableRow>
                         )}
@@ -526,7 +528,7 @@ const PorfolioPage: React.SFC = () => {
                       <Table>
                         <TableHead>
                           <TableRow>
-                            <TableCell align='center'>Received ({PAYMENT_TOKEN_NAME}</TableCell>
+                            <TableCell align='center'>Received ({PAYMENT_TOKEN_NAME})</TableCell>
                             <TableCell align='center'>Paid ({COLLATERAL_TOKEN_NAME})</TableCell>
                             <TableCell align='center'>Status</TableCell>
                             <TableCell></TableCell>
@@ -535,7 +537,7 @@ const PorfolioPage: React.SFC = () => {
                         <TableBody>
                           {expiredShortPositions && expiredShortPositions?.map((position: any, i) =>
                             <TableRow key={i}>
-                              <TableCell align='center'>{position.totalCost.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}</TableCell>
+                              <TableCell align='center'>{position.totalCost.toLocaleString(undefined, { minimumFractionDigits: 2,maximumFractionDigits: 2 })}</TableCell>
                               <TableCell align='center'>{(position.totalCollateralLocked - position.finalReward).toLocaleString(undefined, { maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS })}</TableCell>
                               <TableCell align='center'>{position.status}</TableCell>
                               <TableCell align='right'><MoreVert onClick={() => handleShowExpiredShortPositionDetails(i)} style={{ cursor: 'pointer' }} /></TableCell>
@@ -576,7 +578,7 @@ const PorfolioPage: React.SFC = () => {
                         <TableBody>
                           {expiredLongPositions && expiredLongPositions?.map((position: any, i) =>
                             <TableRow key={i}>
-                              <TableCell align='center'>{position.totalCost.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}</TableCell>
+                              <TableCell align='center'>{position.totalCost.toLocaleString(undefined, { minimumFractionDigits: 2,maximumFractionDigits: 2 })}</TableCell>
                               <TableCell align='center'>{position.finalReward}</TableCell>
                               <TableCell align='center'>{position.status}</TableCell>
                               <TableCell align='right'><MoreVert onClick={() => handleShowExpiredLongPositionDetails(i)} style={{ cursor: 'pointer' }} /></TableCell>

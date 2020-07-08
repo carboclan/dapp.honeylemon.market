@@ -1,8 +1,11 @@
 import React from 'react';
-import { Dialog, DialogTitle, DialogContent, TableRow, Table, TableCell, TableBody } from '@material-ui/core';
+import { Dialog, DialogTitle, DialogContent, TableRow, Table, TableCell, TableBody, Typography, Link } from '@material-ui/core';
 import { useHoneylemon } from '../contexts/HoneylemonContext';
 import { BigNumber } from '@0x/utils';
 import dayjs from 'dayjs';
+import { displayAddress } from '../helpers/displayAddress';
+import { useOnboard } from '../contexts/OnboardContext';
+import { networkName } from '../helpers/ethereumNetworkUtils';
 
 interface ActiveShortPositionModalProps {
   open: boolean,
@@ -12,6 +15,10 @@ interface ActiveShortPositionModalProps {
 
 const ActiveShortPositionModal: React.SFC<ActiveShortPositionModalProps> = ({ open, onClose, position }) => {
   const { PAYMENT_TOKEN_DECIMALS, PAYMENT_TOKEN_NAME, COLLATERAL_TOKEN_NAME, COLLATERAL_TOKEN_DECIMALS, CONTRACT_DURATION } = useHoneylemon();
+  const { network } = useOnboard();
+
+  const etherscanUrl = (network === 1) ? 'https://etherscan.io' : `https://${networkName(network)}.etherscan.io`
+
   return (
     <Dialog open={open} onClose={onClose} aria-labelledby="dialog-title" maxWidth='sm' fullWidth>
       <DialogTitle id="dialog-title">Active Short Position Details</DialogTitle>
@@ -60,6 +67,14 @@ const ActiveShortPositionModal: React.SFC<ActiveShortPositionModalProps> = ({ op
                 {position.totalCollateralLocked.toLocaleString(undefined, { maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS })} {COLLATERAL_TOKEN_NAME} <br />
                 {(position.totalCollateralLocked - position.pendingReward).toLocaleString(undefined, { maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS })} {COLLATERAL_TOKEN_NAME} <br />
                 {position.pendingReward.toLocaleString(undefined, { maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS })} {COLLATERAL_TOKEN_NAME}
+              </TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell colSpan={2}>
+                <Typography>
+                  Your transaction was executed on Ethereum blockchain, check 
+                  on <Link href={`${etherscanUrl}/tx/${position.transaction.id}`} target="_blank" rel='noopener' underline='always'>Etherscan</Link>: {`${displayAddress(position.transaction.id, 20)}`}
+                </Typography>
               </TableCell>
             </TableRow>
           </TableBody>

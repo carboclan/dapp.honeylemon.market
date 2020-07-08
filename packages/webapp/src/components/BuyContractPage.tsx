@@ -11,9 +11,7 @@ import {
   Tab,
   Paper,
   CircularProgress,
-  List,
-  ListItem,
-  ListItemText,
+
   TableRow,
   Table,
   TableCell,
@@ -37,8 +35,9 @@ import ContractSpecificationModal from './ContractSpecificationModal'
 import dayjs from 'dayjs';
 import MRIDisplay from './MRIDisplay';
 import { OpenInNew, ExpandMore, Info } from '@material-ui/icons';
-import { Link as RouterLink } from 'react-router-dom';
 import MRIInformationModal from './MRIInformationModal';
+import AboutHoneylemonContractModal from './AboutHoneylemonContractModal';
+
 import OrderbookModal from './OrderbookModal';
 import { useEffect } from 'react';
 
@@ -58,6 +57,7 @@ const useStyles = makeStyles(({ spacing, palette, transitions }) => ({
   },
   errorList: {
     color: palette.primary.main,
+    fontSize: 0.75,
   },
   orderSummary: {
     padding: spacing(2),
@@ -65,8 +65,6 @@ const useStyles = makeStyles(({ spacing, palette, transitions }) => ({
   },
   orderSummaryEstimate: {
     color: palette.primary.main,
-    fontWeight: 'bold',
-    fontSize: 18
   },
   orderSummaryEstimateFootnote: {
     color: palette.primary.main,
@@ -126,12 +124,12 @@ const BuyContractPage: React.SFC = () => {
   } = useHoneylemon()
   const classes = useStyles();
 
-  const [budget, setBudget] = useState<number | undefined>(undefined);
-  const [orderValue, setOrderValue] = useState<number | undefined>(undefined);
+  const [budget, setBudget] = useState<number>(0);
+  const [orderQuantity, setOrderQuantity] = useState(0);
 
   const [hashPrice, setHashPrice] = useState(0);
-  const [orderQuantity, setOrderQuantity] = useState(0);
   const [isLiquid, setIsLiquid] = useState(true);
+  const [orderValue, setOrderValue] = useState<number | undefined>(undefined);
 
   const [resultOrders, setResultOrders] = useState([]);
   const [takerAssetFillAmounts, setTakerFillAmounts] = useState<Array<any>>([]);
@@ -142,7 +140,7 @@ const BuyContractPage: React.SFC = () => {
   const [expectedBTCAccrual, setExpectedBTCAccrual] = useState(0);
   const [discountOnSpotPrice, setDiscountOnSpotPrice] = useState(0);
   const [showOrderDetails, setShowOrderDetails] = useState(false);
-  const [showBuyFinePrintModal, setShowBuyFinePrintModal] = useState(false);
+  const [showAboutHoneylemonContractModal, setShowAboutHoneylemonContractModal] = useState(false);
   const [showMRIInformationModal, setShowMRIInformationModal] = useState(false);
   const [showOrderbook, setShowOrderbook] = useState(false);
   const [skipDsProxy, setSkipDsProxy] = useState(false);
@@ -151,7 +149,7 @@ const BuyContractPage: React.SFC = () => {
 
   const handleChangeBuyType = (event: React.ChangeEvent<{}>, newValue: BuyType) => {
     setBuyType(newValue);
-    setBudget(orderValue);
+    setBudget(orderValue || 0);
   };
 
   const handleCloseBuyDialog = () => {
@@ -167,68 +165,16 @@ const BuyContractPage: React.SFC = () => {
     }
     const newValue = parseInt(newValueString);
     !isNaN(newValue) && setOrderQuantity(newValue);
-
-    try {
-      const result = await honeylemonService.getQuoteForSize(new BigNumber(newValue))
-      const newIsLiquid = !!(Number(result?.remainingMakerFillAmount?.toString() || -1) === 0)
-      const newOrderValue = Number(result?.totalTakerFillAmount?.shiftedBy(-PAYMENT_TOKEN_DECIMALS).toString()) || 0;
-      const newExpectedAccrual = Number(new BigNumber(
-        await honeylemonService.calculateRequiredCollateral(new BigNumber(newValue))
-      ).shiftedBy(-COLLATERAL_TOKEN_DECIMALS)
-        .dividedBy(CONTRACT_COLLATERAL_RATIO).toString());
-
-      const { currentBTCSpotPrice } = marketData;
-      const discountValue = (!isLiquid) ?
-        0 :
-        ((currentBTCSpotPrice - (newOrderValue / newExpectedAccrual)) / currentBTCSpotPrice) * 100
-
-      setIsLiquid(newIsLiquid);
-      setHashPrice(Number(result?.price?.dividedBy(CONTRACT_DURATION).toString()) || 0);
-      setOrderValue(newOrderValue);
-      setResultOrders(result?.resultOrders || undefined);
-      setTakerFillAmounts(result?.takerAssetFillAmounts || undefined);
-      setExpectedBTCAccrual(newExpectedAccrual);
-      !isNaN(discountValue) && setDiscountOnSpotPrice(discountValue);
-    } catch (error) {
-      console.log('Error getting the current liquidity')
-      console.log(error);
-      setIsLiquid(false);
-    }
   }
 
-  const validateOrderValue = async (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const validateBudget = async (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const newBudgetString = e.target.value;
     if (!newBudgetString) {
-      setOrderValue(0);
+      setBudget(0);
       return;
     }
     const newBudgetValue = parseFloat(newBudgetString);
     !isNaN(newBudgetValue) && setBudget(newBudgetValue)
-    try {
-      const result = await honeylemonService.getQuoteForBudget(newBudgetValue);
-      const newIsLiquid = !!(Number(result?.remainingTakerFillAmount?.toString() || -1) === 0)
-      const newOrderValue = Number(result?.totalTakerFillAmount?.shiftedBy(-PAYMENT_TOKEN_DECIMALS).toString()) || 0;
-      const collateralRequiredForPosition = await honeylemonService.calculateRequiredCollateral(new BigNumber(result.totalMakerFillAmount))
-      const newExpectedAccrual = Number(new BigNumber(collateralRequiredForPosition).shiftedBy(-COLLATERAL_TOKEN_DECIMALS)
-        .dividedBy(CONTRACT_COLLATERAL_RATIO).toString());
-      const { currentBTCSpotPrice } = marketData;
-      const discountValue = (!isLiquid) ?
-        0 :
-        ((currentBTCSpotPrice - (newOrderValue / newExpectedAccrual)) / currentBTCSpotPrice) * 100
-
-      setIsLiquid(newIsLiquid);
-      setHashPrice(Number(result?.price?.dividedBy(CONTRACT_DURATION).toString()) || 0);
-      setOrderQuantity(Number(result?.totalMakerFillAmount?.toString()) || 0);
-      setOrderValue(newOrderValue);
-      setResultOrders(result?.resultOrders || undefined);
-      setTakerFillAmounts(result?.takerAssetFillAmounts || undefined);
-      setExpectedBTCAccrual(newExpectedAccrual);
-      !isNaN(discountValue) && setDiscountOnSpotPrice(discountValue);
-    } catch (error) {
-      console.log('Error getting the current liquidity')
-      console.log(error);
-      setIsLiquid(false);
-    }
   }
 
   const handleDeployDSProxy = async () => {
@@ -314,10 +260,9 @@ const BuyContractPage: React.SFC = () => {
   }
   const errors = [];
 
-  !isDailyContractDeployed && errors.push("New contracts are not available right now");
-  !sufficientPaymentTokens && errors.push(`You do not have enough ${PAYMENT_TOKEN_NAME} to proceed`);
-  !isLiquid && errors.push("There are not enough contracts available right now");
-  orderValue && orderValue < 99 && errors.push('Suggest to increase your contract total to above 100 USDT due to recent high fees in ethereum network. See Fees for details.')
+  !isDailyContractDeployed && errors.push('New contracts are not available right now');
+  !sufficientPaymentTokens && errors.push(`You do not have enough ${PAYMENT_TOKEN_NAME} to proceed. Open Side Menu (top-right) to manage your wallet balance and get more.`);
+  !isLiquid && errors.push('There are not enough contracts available right now');
 
   const getActiveStep = () => {
     if (!skipDsProxy && !isDsProxyDeployed) return 0;
@@ -330,16 +275,16 @@ const BuyContractPage: React.SFC = () => {
     setActiveStep(step);
   }, [skipDsProxy, isDsProxyDeployed, tokenApprovalGranted])
 
-  const steps = ['Create honeylemon vault', `Approve ${PAYMENT_TOKEN_NAME}`, 'Buy Contracts'];
+  const steps = ['Honeylemon Vault', `Approve ${PAYMENT_TOKEN_NAME} for Payment`, 'Execute Order'];
 
   const getStepContent = (step: number) => {
     switch (step) {
       case 0:
-        return `Create a honeylemon vault. The honeylemon vault will reduce the transaction fees paid when redeeming in future. This step is optional. This is a once-off operation.`;
+        return `If you may use Honeylemon more than once or may place multiple orders, Honeylemon Vault can reduce future Ethereum gas fee and streamline your experience by deploying a DSProxy contract. You only need to do it once for your wallet then you are good to go. This step will incur additional gas fee, and is optional.`;
       case 1:
-        return `Approve ${PAYMENT_TOKEN_NAME}. This is a once-off operation`;
+        return `You are granting permission to Honeylemon smart contracts to access ${PAYMENT_TOKEN_NAME} in your wallet. You only need to do it once for your wallet then you are good to go. This step is necessary to enable payment with your USDT. You can turn OFF permission afterwards, simply open Side Menu (top-right) - Manage Your Wallet,  click on the switch knob next to ${PAYMENT_TOKEN_NAME}. Additional Ethereum gas fee applies.`;
       case 2:
-        return `Finalize Purchase`;
+        return `You are paying a total contract cost of ${PAYMENT_TOKEN_NAME} ${orderValue?.toLocaleString(undefined, {maximumFractionDigits: PAYMENT_TOKEN_DECIMALS})} , and receive ${orderQuantity} ERC-20 tokens MRI-BTC-${CONTRACT_DURATION}D-${dayjs().utc().format('YYYYMMDD')}-long, each representing a long position on 1 TH of ${CONTRACT_DURATION}-Day Mining Revenue Contract in your Honeylemon Vault (if created) or your connect wallet. Additional Ethereum gas fee and 0x transaction fee applies.`;
     }
   }
 
@@ -375,6 +320,71 @@ const BuyContractPage: React.SFC = () => {
     setShowOrderDetails(!showOrderDetails);
   };
 
+  useEffect(() => {
+    const getQuoteForBudget = async () => {
+      try {
+        const result = await honeylemonService.getQuoteForBudget(budget);
+        const newIsLiquid = !!(Number(result?.remainingTakerFillAmount?.toString() || -1) === 0)
+        const newOrderValue = Number(result?.totalTakerFillAmount?.shiftedBy(-PAYMENT_TOKEN_DECIMALS).toString()) || 0;
+        const collateralRequiredForPosition = await honeylemonService.calculateRequiredCollateral(new BigNumber(result.totalMakerFillAmount))
+        const newExpectedAccrual = Number(new BigNumber(collateralRequiredForPosition).shiftedBy(-COLLATERAL_TOKEN_DECIMALS)
+          .dividedBy(CONTRACT_COLLATERAL_RATIO).toString());
+        const { currentBTCSpotPrice } = marketData;
+        const discountValue = (!isLiquid) ?
+          0 :
+          ((currentBTCSpotPrice - (newOrderValue / newExpectedAccrual)) / currentBTCSpotPrice) * 100
+
+        setIsLiquid(newIsLiquid);
+        setHashPrice(Number(result?.price?.dividedBy(CONTRACT_DURATION).toString()) || 0);
+        setOrderQuantity(Number(result?.totalMakerFillAmount?.toString()) || 0);
+        setOrderValue(newOrderValue);
+        setResultOrders(result?.resultOrders || undefined);
+        setTakerFillAmounts(result?.takerAssetFillAmounts || undefined);
+        setExpectedBTCAccrual(newExpectedAccrual);
+        !isNaN(discountValue) && setDiscountOnSpotPrice(discountValue);
+      } catch (error) {
+        console.log('Error getting the current liquidity')
+        console.log(error);
+        setIsLiquid(false);
+      }
+    }
+
+    const getQuoteForSize = async () => {
+      try {
+        const result = await honeylemonService.getQuoteForSize(new BigNumber(orderQuantity))
+        const newIsLiquid = !!(Number(result?.remainingMakerFillAmount?.toString() || -1) === 0)
+        const newOrderValue = Number(result?.totalTakerFillAmount?.shiftedBy(-PAYMENT_TOKEN_DECIMALS).toString()) || 0;
+        const newExpectedAccrual = Number(new BigNumber(
+          await honeylemonService.calculateRequiredCollateral(new BigNumber(orderQuantity))
+        ).shiftedBy(-COLLATERAL_TOKEN_DECIMALS)
+          .dividedBy(CONTRACT_COLLATERAL_RATIO).toString());
+
+        const { currentBTCSpotPrice } = marketData;
+        const discountValue = (!isLiquid) ?
+          0 :
+          ((currentBTCSpotPrice - (newOrderValue / newExpectedAccrual)) / currentBTCSpotPrice) * 100
+
+        setIsLiquid(newIsLiquid);
+        setHashPrice(Number(result?.price?.dividedBy(CONTRACT_DURATION).toString()) || 0);
+        setOrderValue(newOrderValue);
+        setResultOrders(result?.resultOrders || undefined);
+        setTakerFillAmounts(result?.takerAssetFillAmounts || undefined);
+        setExpectedBTCAccrual(newExpectedAccrual);
+        !isNaN(discountValue) && setDiscountOnSpotPrice(discountValue);
+      } catch (error) {
+        console.log('Error getting the current liquidity')
+        console.log(error);
+        setIsLiquid(false);
+      }
+    }
+
+    if (buyType === BuyType.budget) {
+      getQuoteForBudget();
+    } else {
+      getQuoteForSize();
+    }
+  }, [budget, orderQuantity])
+
   // Set default quantity
   useEffect(() => {
     const startingBudget = Math.min(100, paymentTokenBalance);
@@ -388,7 +398,7 @@ const BuyContractPage: React.SFC = () => {
           <MRIDisplay />
         </Grid>
         <Grid item xs={8}>
-          <Typography style={{ fontWeight: 'bold' }}>Buy {CONTRACT_DURATION}-Day Mining Revenue Contract</Typography>
+          <Typography style={{ fontWeight: 'bold' }}>Buy {CONTRACT_DURATION}-Day Mining Revenue Contract <Info fontSize='small' onClick={() => { setShowAboutHoneylemonContractModal(true) }} /></Typography>
         </Grid>
         <Grid item xs={4} style={{ textAlign: 'end' }}>
           <Button
@@ -423,7 +433,7 @@ const BuyContractPage: React.SFC = () => {
                 }}
                 placeholder='0'
                 startAdornment={<InputAdornment position="start">$</InputAdornment>}
-                onChange={validateOrderValue}
+                onChange={validateBudget}
                 value={budget || ''}
                 type='number'
                 onBlur={e => {
@@ -435,10 +445,9 @@ const BuyContractPage: React.SFC = () => {
               <Typography style={{ fontWeight: 'bold' }} color='primary'>{PAYMENT_TOKEN_NAME}</Typography>
             </Grid>
             <Grid item xs={12}>
-              <Typography
-                onClick={() => { setShowBuyFinePrintModal(true) }}
-                variant='caption' style={{ cursor: 'pointer' }}>
-                Enter quantity you would like to buy as budget in {PAYMENT_TOKEN_NAME} to check the best market price below. <Info fontSize='small' />
+              <Typography variant='caption'>
+                Enter quantity you would like to buy as hash power to check the market price below.  Make sure you have 
+                sufficient {PAYMENT_TOKEN_NAME} to buy contract & ETH (for <Link href='https://docs.honeylemon.market/fees' target="_blank" rel='noopener'>fees<OpenInNew fontSize='small' /></Link>).
               </Typography>
             </Grid>
           </Grid>
@@ -467,24 +476,24 @@ const BuyContractPage: React.SFC = () => {
               <Typography style={{ fontWeight: 'bold' }} color='primary'>TH for {CONTRACT_DURATION} Days</Typography>
             </Grid>
             <Grid item xs={12}>
-              <Typography
-                onClick={() => { setShowBuyFinePrintModal(true) }}
-                variant='caption' style={{ cursor: 'pointer' }}>
-                Enter quantity you would like to buy as hash power in terahash (TH) to check the best market price below.<Info fontSize='small' />
+              <Typography variant='caption'>
+                Enter quantity you would like to buy as hash power in terahash (TH) to check the market price below. Make
+                sure you have sufficient USDT &amp; ETH (for <Link href='https://docs.honeylemon.market/fees' target="_blank" rel='noopener'>fees<OpenInNew fontSize='small' /></Link>).
               </Typography>
             </Grid>
           </Grid>
         </TabPanel>
         {errors.length > 0 &&
           <Grid item xs={12}>
-            <List className={classes.errorList}>
-              {errors.map((error: string, i) =>
-                <ListItem key={i} onClick={() => (error.includes('enough USDT')) ? setShowTokenInfoModal(true) : null} >
-                  <ListItemText>
-                    {error}{(error.includes('enough')) && <Info fontSize='small' />}
-                  </ListItemText>
-                </ListItem>)}
-            </List>
+            {errors.map((error: string, i) =>
+              <Typography
+                key={i}
+                variant='caption'
+                paragraph
+                color='secondary'
+                onClick={() => (error.includes('enough USDT')) ? setShowTokenInfoModal(true) : null} >
+              </Typography>
+            )}
           </Grid>
         }
         <Grid item xs={12} container>
@@ -508,12 +517,12 @@ const BuyContractPage: React.SFC = () => {
                 <TableBody>
                   <TableRow>
                     <TableCell>
-                      Price<br />
+                      <b>Market Price</b><br />
                       Quantity <br />
                       Duration
                     </TableCell>
                     <TableCell align='right'>
-                      <strong>${hashPrice.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}/TH/Day<br /></strong>
+                      <b>${hashPrice.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}/TH/Day<br /></b>
                       {`${orderQuantity.toLocaleString()}`} TH<br />
                       {`${CONTRACT_DURATION}`} Days
                     </TableCell>
@@ -522,24 +531,53 @@ const BuyContractPage: React.SFC = () => {
                     <TableCell>Contract Total</TableCell>
                     <TableCell align='right'>{`${(orderValue || 0).toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })} ${PAYMENT_TOKEN_NAME}`}</TableCell>
                   </TableRow>
+                  {orderValue && orderValue < 98 ?
+                    <TableRow>
+                      <TableCell colSpan={2}>
+                        <Typography variant='caption'>
+                          <i>
+                            Suggest to increase your contract total to above 100 {PAYMENT_TOKEN_NAME} due to recent high fees in ethereum network.
+                            See <Link href='https://docs.honeylemon.market/fees' target="_blank" rel='noopener'>fees.<OpenInNew fontSize='small' /></Link> for details.
+                          </i>
+                        </Typography>
+                      </TableCell>
+                    </TableRow> :
+                    null
+                  }
                   <TableRow>
                     <TableCell className={classes.orderSummaryEstimate}>
-                      {discountOnSpotPrice < 0 ? 'Premium' : 'Discount'} vs. Buy BTC * <br />
-                      Estimated Revenue * <br />
-                      Revenue Cap * <br />
-                      <br />
+                      Estimated Revenue
                     </TableCell>
                     <TableCell align='right' className={classes.orderSummaryEstimate}>
-                      {Math.abs(discountOnSpotPrice).toLocaleString(undefined, { maximumFractionDigits: 2 })}% <br />
-                      {`${(expectedBTCAccrual).toLocaleString(undefined, { maximumFractionDigits: 8 })} imBTC`} <br />
-                      {`${((expectedBTCAccrual || 0) * CONTRACT_COLLATERAL_RATIO).toLocaleString(undefined, { maximumFractionDigits: 8 })} ${COLLATERAL_TOKEN_NAME}`} <br />
-                      <Typography variant='caption'>{`${CONTRACT_COLLATERAL_RATIO * 100} % x MRI_BTC x 28`}</Typography>
+                      {`${(expectedBTCAccrual).toLocaleString(undefined, { maximumFractionDigits: 8 })} imBTC`}
                     </TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell colSpan={2} className={classes.orderSummaryEstimateFootnote}>
-                      * Assuming constant price and difficulty <br />
-                      * Revenue Cap is calculated as 125% of current MRI_BTC times 28 days.
+                    <TableCell className={classes.orderSummaryEstimate}>
+                      Revenue Cap
+                    </TableCell>
+                    <TableCell align='right' className={classes.orderSummaryEstimate}>
+                      {`${((expectedBTCAccrual || 0) * CONTRACT_COLLATERAL_RATIO).toLocaleString(undefined, { maximumFractionDigits: 8 })} ${COLLATERAL_TOKEN_NAME}`} <br />
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className={classes.orderSummaryEstimate}>
+                      Buy Contract vs. Buy BTC
+                    </TableCell>
+                    <TableCell align='right' className={classes.orderSummaryEstimate}>
+                      {`${Math.abs(discountOnSpotPrice).toLocaleString(undefined, { maximumFractionDigits: 2 })}% ${(discountOnSpotPrice < 0) ? 'premium' : 'discount'}`}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell colSpan={2} style={{ color: '#a9a9a9' }}>
+                      <Typography variant='caption'>
+                        <i>
+                          * <b>Estimated Revenue</b> is the amount of imBTC expected to receive when this contract settles, if BTC price &amp; difficulty stays constant over 28 days. <br />
+                          * <b>Revenue Cap</b> is the maximum amount of imBTC you can receive when this contract settles, calculated as 125% of current MRI_BTC times 28. <br />
+                          * <b>Buy Contract vs. Buy BTC</b> is the discount/premium of cost basis for this Mining Revenue Contract compared to buying BTC spot with USDT now, if BTC price &amp; difficulty stays constant over 28 days.<br/>
+                          * Small discrepancy between your Budget and Contract Total is due to available offers in orderbook, and minimum order increment of 1TH.
+                        </i>
+                      </Typography>
                     </TableCell>
                   </TableRow>
                   {!showOrderDetails ?
@@ -559,19 +597,11 @@ const BuyContractPage: React.SFC = () => {
                           Start <br />
                           Expiration<br />
                           Settlement
-                        </TableCell>
+                      </TableCell>
                         <TableCell align='right'>
                           {dayjs().utc().startOf('day').add(1, 'minute').format('DD-MMM-YY')}<br />
                           {dayjs().utc().startOf('day').add(1, 'minute').add(CONTRACT_DURATION, 'd').format('DD-MMM-YY')}<br />
                           {dayjs().utc().startOf('day').add(1, 'minute').add(CONTRACT_DURATION + 1, 'd').format('DD-MMM-YY')}
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell colSpan={2} style={{ color: '#a9a9a9' }}>
-                          * Fillable orders in orderbook and minimum order increment of 1 TH may result in discrepancy between your budget and price quote. <br />
-                          * Your order will be subject to additional Ethereum network transaction fee,
-                            and 0x Protocol fee, both denominated in ETH. Honeylemon does not charge&nbsp;
-                          <Link component={RouterLink} to="/stats" underline='always' >fees.<OpenInNew fontSize='small' /></Link>
                         </TableCell>
                       </TableRow>
                       <TableRow>
@@ -627,26 +657,15 @@ const BuyContractPage: React.SFC = () => {
           </Button>
         </Grid>
       </Grid>
-      <Dialog
-        open={showBuyFinePrintModal}
-        onClose={() => setShowBuyFinePrintModal(false)}
-        aria-labelledby="form-dialog-title">
-        <DialogTitle>Buy Order Details</DialogTitle>
-        <DialogContent>
-          <Typography>
-            • You need to have sufficient amount of {PAYMENT_TOKEN_NAME} to pay for the contract costs upfront and some ETH to pay for the ethereum network transaction fee (gas fee).<br /><br />
-            • We suggest your contract total value of above $100 to take into consideration the recent high gas cost. If you consider using Honeylemon more than once, we suggest you choose “Creating Honeylemon Vault”, which deploys DSProxy contract, to reduce gas costs and streamline user experience across multiple orders. <br /><br />
-            • You may view your current available {PAYMENT_TOKEN_NAME} and ETH balance on the sidebar menu.<br /><br />
-            • You will be prompted for ethereum network transaction fees (gas fees), and 0x protocol transaction fee. Honeylemon Alpha does not charge fees.&nbsp;<Link href='https://docs.honeylemon.market/fees'>Learn more about Fees.<OpenInNew fontSize='small' /></Link>
-          </Typography>
-        </DialogContent>
-      </Dialog>
+      <AboutHoneylemonContractModal open={showAboutHoneylemonContractModal} onClose={() => setShowAboutHoneylemonContractModal(false)} />
       <Dialog
         open={showBuyModal}
         onClose={handleCloseBuyDialog}
         aria-labelledby="form-dialog-title"
         disableBackdropClick
-        disableEscapeKeyDown>
+        disableEscapeKeyDown
+        maxWidth='sm'
+        fullWidth>
         <DialogTitle id="form-dialog-title">Buy Offer</DialogTitle>
         <DialogContent>
           <Stepper activeStep={activeStep} orientation="vertical">
