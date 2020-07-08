@@ -273,7 +273,7 @@ function AppWrapper(props: { children: ReactNode }) {
               </IconButton>
             </ListItemIcon>
             <ListItemText>
-              Manage My Wallet
+              Manage My Wallet <Info fontSize='small' color='secondary'/>
             </ListItemText>
           </ListItem>
           <ListItem>
@@ -399,7 +399,7 @@ function AppWrapper(props: { children: ReactNode }) {
                 onClick={handleDeployDSProxy}
                 disabled={txActive}
                 fullWidth>
-                Create honeylemon vault
+                Honeylemon Vault
               </Button>
             </ListItem>
           }

@@ -6,7 +6,7 @@ const useStyles = makeStyles(({ palette, spacing }) => ({
   button: {
     paddingTop: spacing(1),
     paddingBottom: spacing(1),
-    fontSize: 20,
+    fontWeight: 'bold'
   },
   connectSpacer: {
     paddingTop: `${spacing(8)}px !important`,

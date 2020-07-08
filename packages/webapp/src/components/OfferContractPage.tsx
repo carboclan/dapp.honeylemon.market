@@ -366,8 +366,8 @@ const OfferContractPage: React.SFC = () => {
         <Grid item xs={4} className={classes.rightAlign}>
           <Typography style={{ fontWeight: 'bold' }} color='primary'>TH</Typography>
         </Grid>
-        <Grid item>
-          <Typography variant='caption'>
+        <Grid item xs={12} style={{paddingTop: 4}}>
+          <Typography variant='caption' >
             Enter Price &amp; Quantity for your limit order. Make sure sufficient {COLLATERAL_TOKEN_NAME} (for collateral) &amp; ETH (for Ethereum gas fees) is in your wallet.
           </Typography>
         </Grid>
@@ -427,10 +427,8 @@ const OfferContractPage: React.SFC = () => {
                   <TableRow>
                     <TableCell colSpan={2}>
                       <Typography variant='caption' color='secondary'>
-                        <i>
                           Suggest to increase your contract total to above 100 {PAYMENT_TOKEN_NAME} due to recent high fees in ethereum network.
-                          See <Link href='https://docs.honeylemon.market/fees' target="_blank" rel='noopener'>fees.<OpenInNew fontSize='small' /></Link> for details.
-                        </i>
+                          See <Link href='https://docs.honeylemon.market/fees' target="_blank" rel='noopener' color='secondary'>fees.<OpenInNew fontSize='small' /></Link> for details.
                       </Typography>
                     </TableCell>
                   </TableRow> :
@@ -456,11 +454,9 @@ const OfferContractPage: React.SFC = () => {
                 <TableRow className={classes.offerSummaryEstimate}>
                   <TableCell colSpan={2} style={{ color: '#a9a9a9' }}>
                     <Typography variant='caption'>
-                      <i>
                         * <b>Contract Total</b>  is what you get upfront as soon as your offer is taken.<br />
                         * <b>Required Collateral</b>is estimated with current MRI_BTC, you need at least this much in wallet now to offer. Actual collateral will be based on MRI_BTC upon your offer being taken.<br />
                         * <b>Premium/Discount over MRI_BTC</b> is premium / discount of your price compared to current MRI_BTC.
-                      </i>
                     </Typography>
                   </TableCell>
                 </TableRow>
@@ -515,7 +511,7 @@ const OfferContractPage: React.SFC = () => {
                     </TableRow>
                     <TableRow>
                       <TableCell colSpan={2} align='center' onClick={handleOfferDetailsClick} style={{ cursor: 'pointer' }}>
-                        See less
+                        Show Less
                         <IconButton className={clsx(classes.expand, classes.expandOpen)}>
                           <ExpandMore />
                         </IconButton>
