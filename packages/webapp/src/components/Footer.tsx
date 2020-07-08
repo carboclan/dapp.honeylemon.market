@@ -51,7 +51,7 @@ const Footer: React.SFC<FooterProps> = (props: FooterProps) => {
           <FooterLink label='GITHUB' url='https://github.com/carboclan/dapp.honeylemon.market'>
             <GitHub />
           </FooterLink>
-          <FooterLink label='DOCS' url='https://github.com/carboclan/pm/blob/master/research/Honeylemon/HoneyLemonWhitepaper.md'>
+          <FooterLink label='DOCS' url='https://docs.honeylemon.market/'>
             <School />
           </FooterLink>
           <FooterLink label='TELEGRAM' url='https://t.me/joinchat/I9o0JBU3JKkxb-yRSkIFvA'>
