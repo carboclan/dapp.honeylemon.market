@@ -373,11 +373,15 @@ const OfferContractPage: React.SFC = () => {
           <Grid item xs={12}>
             <List className={classes.errorList}>
               {errors.map((error: string, i) =>
-                <ListItem key={i} onClick={() => (error.includes('imBTC')) ? setShowTokenInfoModal(true) : null} >
-                  <ListItemText>
-                    {error}{(error.includes('imBTC')) && <Info fontSize='small' />}
-                  </ListItemText>
-                </ListItem>)}
+                <Typography
+                  key={i}
+                  variant='caption'
+                  paragraph
+                  color='secondary'
+                  onClick={() => (error.includes('enough')) ? setShowTokenInfoModal(true) : null}>
+                  {error}
+                </Typography>
+              )}
             </List>
           </Grid>
         }
