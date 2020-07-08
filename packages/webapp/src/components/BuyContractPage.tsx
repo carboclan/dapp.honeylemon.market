@@ -147,6 +147,77 @@ const BuyContractPage: React.SFC = () => {
   const [activeStep, setActiveStep] = useState(0);
   const [errorMessage, setErrorMessage] = useState('');
 
+  useEffect(() => {
+    const getQuoteForBudget = async () => {
+      try {
+        const result = await honeylemonService.getQuoteForBudget(budget);
+        const newIsLiquid = !!(Number(result?.remainingTakerFillAmount?.toString() || -1) === 0)
+        const newOrderValue = Number(result?.totalTakerFillAmount?.shiftedBy(-PAYMENT_TOKEN_DECIMALS).toString()) || 0;
+        const collateralRequiredForPosition = await honeylemonService.calculateRequiredCollateral(new BigNumber(result.totalMakerFillAmount))
+        const newExpectedAccrual = Number(new BigNumber(collateralRequiredForPosition).shiftedBy(-COLLATERAL_TOKEN_DECIMALS)
+          .dividedBy(CONTRACT_COLLATERAL_RATIO).toString());
+        const { currentBTCSpotPrice } = marketData;
+        const discountValue = (!isLiquid) ?
+          0 :
+          ((currentBTCSpotPrice - (newOrderValue / newExpectedAccrual)) / currentBTCSpotPrice) * 100
+
+        setIsLiquid(newIsLiquid);
+        setHashPrice(Number(result?.price?.dividedBy(CONTRACT_DURATION).toString()) || 0);
+        setOrderQuantity(Number(result?.totalMakerFillAmount?.toString()) || 0);
+        setOrderValue(newOrderValue);
+        setResultOrders(result?.resultOrders || undefined);
+        setTakerFillAmounts(result?.takerAssetFillAmounts || undefined);
+        setExpectedBTCAccrual(newExpectedAccrual);
+        !isNaN(discountValue) && setDiscountOnSpotPrice(discountValue);
+      } catch (error) {
+        console.log('Error getting the current liquidity')
+        console.log(error);
+        setIsLiquid(false);
+      }
+    }
+
+    const getQuoteForSize = async () => {
+      try {
+        const result = await honeylemonService.getQuoteForSize(new BigNumber(orderQuantity))
+        const newIsLiquid = !!(Number(result?.remainingMakerFillAmount?.toString() || -1) === 0)
+        const newOrderValue = Number(result?.totalTakerFillAmount?.shiftedBy(-PAYMENT_TOKEN_DECIMALS).toString()) || 0;
+        const newExpectedAccrual = Number(new BigNumber(
+          await honeylemonService.calculateRequiredCollateral(new BigNumber(orderQuantity))
+        ).shiftedBy(-COLLATERAL_TOKEN_DECIMALS)
+          .dividedBy(CONTRACT_COLLATERAL_RATIO).toString());
+
+        const { currentBTCSpotPrice } = marketData;
+        const discountValue = (!isLiquid) ?
+          0 :
+          ((currentBTCSpotPrice - (newOrderValue / newExpectedAccrual)) / currentBTCSpotPrice) * 100
+
+        setIsLiquid(newIsLiquid);
+        setHashPrice(Number(result?.price?.dividedBy(CONTRACT_DURATION).toString()) || 0);
+        setOrderValue(newOrderValue);
+        setResultOrders(result?.resultOrders || undefined);
+        setTakerFillAmounts(result?.takerAssetFillAmounts || undefined);
+        setExpectedBTCAccrual(newExpectedAccrual);
+        !isNaN(discountValue) && setDiscountOnSpotPrice(discountValue);
+      } catch (error) {
+        console.log('Error getting the current liquidity')
+        console.log(error);
+        setIsLiquid(false);
+      }
+    }
+
+    if (buyType === BuyType.budget) {
+      getQuoteForBudget();
+    } else {
+      getQuoteForSize();
+    }
+  }, [budget, orderQuantity])
+
+  // Set default quantity
+  useEffect(() => {
+    const startingBudget = Math.min(100, paymentTokenBalance);
+    setBudget(startingBudget);
+  }, [])
+
   const handleChangeBuyType = (event: React.ChangeEvent<{}>, newValue: BuyType) => {
     setBuyType(newValue);
     setBudget(orderValue || 0);
@@ -320,77 +391,6 @@ const BuyContractPage: React.SFC = () => {
     setShowOrderDetails(!showOrderDetails);
   };
 
-  useEffect(() => {
-    const getQuoteForBudget = async () => {
-      try {
-        const result = await honeylemonService.getQuoteForBudget(budget);
-        const newIsLiquid = !!(Number(result?.remainingTakerFillAmount?.toString() || -1) === 0)
-        const newOrderValue = Number(result?.totalTakerFillAmount?.shiftedBy(-PAYMENT_TOKEN_DECIMALS).toString()) || 0;
-        const collateralRequiredForPosition = await honeylemonService.calculateRequiredCollateral(new BigNumber(result.totalMakerFillAmount))
-        const newExpectedAccrual = Number(new BigNumber(collateralRequiredForPosition).shiftedBy(-COLLATERAL_TOKEN_DECIMALS)
-          .dividedBy(CONTRACT_COLLATERAL_RATIO).toString());
-        const { currentBTCSpotPrice } = marketData;
-        const discountValue = (!isLiquid) ?
-          0 :
-          ((currentBTCSpotPrice - (newOrderValue / newExpectedAccrual)) / currentBTCSpotPrice) * 100
-
-        setIsLiquid(newIsLiquid);
-        setHashPrice(Number(result?.price?.dividedBy(CONTRACT_DURATION).toString()) || 0);
-        setOrderQuantity(Number(result?.totalMakerFillAmount?.toString()) || 0);
-        setOrderValue(newOrderValue);
-        setResultOrders(result?.resultOrders || undefined);
-        setTakerFillAmounts(result?.takerAssetFillAmounts || undefined);
-        setExpectedBTCAccrual(newExpectedAccrual);
-        !isNaN(discountValue) && setDiscountOnSpotPrice(discountValue);
-      } catch (error) {
-        console.log('Error getting the current liquidity')
-        console.log(error);
-        setIsLiquid(false);
-      }
-    }
-
-    const getQuoteForSize = async () => {
-      try {
-        const result = await honeylemonService.getQuoteForSize(new BigNumber(orderQuantity))
-        const newIsLiquid = !!(Number(result?.remainingMakerFillAmount?.toString() || -1) === 0)
-        const newOrderValue = Number(result?.totalTakerFillAmount?.shiftedBy(-PAYMENT_TOKEN_DECIMALS).toString()) || 0;
-        const newExpectedAccrual = Number(new BigNumber(
-          await honeylemonService.calculateRequiredCollateral(new BigNumber(orderQuantity))
-        ).shiftedBy(-COLLATERAL_TOKEN_DECIMALS)
-          .dividedBy(CONTRACT_COLLATERAL_RATIO).toString());
-
-        const { currentBTCSpotPrice } = marketData;
-        const discountValue = (!isLiquid) ?
-          0 :
-          ((currentBTCSpotPrice - (newOrderValue / newExpectedAccrual)) / currentBTCSpotPrice) * 100
-
-        setIsLiquid(newIsLiquid);
-        setHashPrice(Number(result?.price?.dividedBy(CONTRACT_DURATION).toString()) || 0);
-        setOrderValue(newOrderValue);
-        setResultOrders(result?.resultOrders || undefined);
-        setTakerFillAmounts(result?.takerAssetFillAmounts || undefined);
-        setExpectedBTCAccrual(newExpectedAccrual);
-        !isNaN(discountValue) && setDiscountOnSpotPrice(discountValue);
-      } catch (error) {
-        console.log('Error getting the current liquidity')
-        console.log(error);
-        setIsLiquid(false);
-      }
-    }
-
-    if (buyType === BuyType.budget) {
-      getQuoteForBudget();
-    } else {
-      getQuoteForSize();
-    }
-  }, [budget, orderQuantity])
-
-  // Set default quantity
-  useEffect(() => {
-    const startingBudget = Math.min(100, paymentTokenBalance);
-    setBudget(startingBudget);
-  }, [])
-
   return (
     <>
       <Grid container alignItems='center' justify='flex-start' spacing={2}>
@@ -447,7 +447,7 @@ const BuyContractPage: React.SFC = () => {
             <Grid item xs={12}>
               <Typography variant='caption'>
                 Enter quantity you would like to buy as hash power to check the market price below.  Make sure you have 
-                sufficient {PAYMENT_TOKEN_NAME} to buy contract & ETH (for <Link href='https://docs.honeylemon.market/fees' target="_blank" rel='noopener'>fees<OpenInNew fontSize='small' /></Link>).
+                sufficient {PAYMENT_TOKEN_NAME} to buy contract &amp; ETH (for <Link href='https://docs.honeylemon.market/fees' target="_blank" rel='noopener'>fees<OpenInNew fontSize='small' /></Link>).
               </Typography>
             </Grid>
           </Grid>
@@ -492,6 +492,7 @@ const BuyContractPage: React.SFC = () => {
                 paragraph
                 color='secondary'
                 onClick={() => (error.includes('enough USDT')) ? setShowTokenInfoModal(true) : null} >
+                {error}
               </Typography>
             )}
           </Grid>
