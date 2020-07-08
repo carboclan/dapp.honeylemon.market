@@ -546,7 +546,7 @@ const BuyContractPage: React.SFC = () => {
                   }
                   <TableRow>
                     <TableCell className={classes.orderSummaryEstimate}>
-                      Estimated Revenue *
+                      Estimated Revenue
                     </TableCell>
                     <TableCell align='right' className={classes.orderSummaryEstimate}>
                       {`${(expectedBTCAccrual).toLocaleString(undefined, { maximumFractionDigits: 8 })} imBTC`}
@@ -554,7 +554,7 @@ const BuyContractPage: React.SFC = () => {
                   </TableRow>
                   <TableRow>
                     <TableCell className={classes.orderSummaryEstimate}>
-                      Revenue <br/>Cap *
+                      Revenue Cap
                     </TableCell>
                     <TableCell align='right' className={classes.orderSummaryEstimate}>
                       {`${((expectedBTCAccrual || 0) * CONTRACT_COLLATERAL_RATIO).toLocaleString(undefined, { maximumFractionDigits: 8 })} ${COLLATERAL_TOKEN_NAME}`} <br />
@@ -562,10 +562,10 @@ const BuyContractPage: React.SFC = () => {
                   </TableRow>
                   <TableRow>
                     <TableCell className={classes.orderSummaryEstimate}>
-                      {discountOnSpotPrice < 0 ? 'Premium' : 'Discount'} vs. Buy BTC *
+                      Buy Contract vs. Buy BTC
                     </TableCell>
                     <TableCell align='right' className={classes.orderSummaryEstimate}>
-                      {`${(discountOnSpotPrice < 0) ? '-' : (discountOnSpotPrice > 0) ? '+' : ''}${Math.abs(discountOnSpotPrice).toLocaleString(undefined, { maximumFractionDigits: 2 })}`}%
+                      {`${Math.abs(discountOnSpotPrice).toLocaleString(undefined, { maximumFractionDigits: 2 })}% ${(discountOnSpotPrice < 0) ? 'premium' : 'discount'}`}
                     </TableCell>
                   </TableRow>
                   <TableRow>
@@ -574,7 +574,7 @@ const BuyContractPage: React.SFC = () => {
                         <i>
                           * <b>Estimated Revenue</b> is the amount of imBTC expected to receive when this contract settles, if BTC price &amp; difficulty stays constant over 28 days. <br />
                           * <b>Revenue Cap</b> is the maximum amount of imBTC you can receive when this contract settles, calculated as 125% of current MRI_BTC times 28. <br />
-                          * <b>Discount vs. Buy BTC</b> is the discount/premium of cost basis for this Mining Revenue Contract compared to buying BTC spot with USDT now, if BTC price &amp; difficulty stays constant over 28 days.<br/>
+                          * <b>Buy Contract vs. Buy BTC</b> is the discount/premium of cost basis for this Mining Revenue Contract compared to buying BTC spot with USDT now, if BTC price &amp; difficulty stays constant over 28 days.<br/>
                           * Small discrepancy between your Budget and Contract Total is due to available offers in orderbook, and minimum order increment of 1TH.
                         </i>
                       </Typography>
