@@ -77,10 +77,6 @@ const UnfilledOfferModal: React.SFC<UnfilledOfferModalProps> = ({ open, onClose,
         <Table>
           <TableBody>
             <TableRow>
-              <TableCell>Listing Date</TableCell>
-              <TableCell align='right'>{dayjs(offerData?.listingDate).format('DD-MMM-YY HH:mm')}</TableCell>
-            </TableRow>
-            <TableRow>
               <TableCell>
                 Limit Price
               </TableCell>
@@ -125,6 +121,10 @@ const UnfilledOfferModal: React.SFC<UnfilledOfferModalProps> = ({ open, onClose,
                     })
                 } {COLLATERAL_TOKEN_NAME}
               </TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell>Listing Date</TableCell>
+              <TableCell align='right'>{dayjs(offerData?.listingDate).format('DD-MMM-YY HH:mm')}</TableCell>
             </TableRow>
             <TableRow>
               <TableCell>Offer Valid Till</TableCell>

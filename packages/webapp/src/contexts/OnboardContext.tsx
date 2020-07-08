@@ -144,9 +144,7 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
   const refreshGasPrice = async () => {
     try {
       // const etherchainResponse = await (await fetch('https://www.etherchain.org/api/gasPriceOracle')).json();
-      // console.log(etherchainResponse);
       const ethGasStationResponse = await (await fetch(`https://ethgasstation.info/api/ethgasAPI.json?api-key=${process.env.REACT_APP_ETH_GAS_STATION_API_KEY}`)).json()
-      console.log(ethGasStationResponse.fastest);
       const newGasPrice = !isNaN(Number(ethGasStationResponse.fast)) ? Number(ethGasStationResponse.fast)/10 : 35;
       setGasPrice(newGasPrice);
     } catch (error) {

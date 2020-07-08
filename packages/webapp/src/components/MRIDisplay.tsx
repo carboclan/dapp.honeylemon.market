@@ -31,7 +31,7 @@ const MRIDisplay: React.SFC = () => {
           href='#' underline='always'
           onClick={() => setShowMRIInformationModal(true)}
           className={classes.mriModalLink}>
-          BTC Mining Revenue Index (MRI_BTC)
+          MRI_BTC: Daily Average Mining Revenue per TH
           <Info fontSize='small' />
         </Link>
         {currentMRI > 0 ?
