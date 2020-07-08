@@ -284,7 +284,7 @@ const BuyContractPage: React.SFC = () => {
       case 1:
         return `You are granting permission to Honeylemon smart contracts to access ${PAYMENT_TOKEN_NAME} in your wallet. You only need to do it once for your wallet then you are good to go. This step is necessary to enable payment with your USDT. You can turn OFF permission afterwards, simply open Side Menu (top-right) - Manage Your Wallet,  click on the switch knob next to ${PAYMENT_TOKEN_NAME}. Additional Ethereum gas fee applies.`;
       case 2:
-        return `You are paying a total contract cost of ${orderValue?.toLocaleString(undefined, {maximumFractionDigits: PAYMENT_TOKEN_DECIMALS})} ${PAYMENT_TOKEN_NAME}, and receive ${orderQuantity} long position tokens MRI-BTC-${CONTRACT_DURATION}D-${dayjs().utc().format('YYYYMMDD')}-long , each representing 1 TH of ${CONTRACT_DURATION}-Day Mining Revenue Contract in your Honeylemon Vault (if created) or your connect wallet. Additional Ethereum gas fee applies.`;
+        return `You are paying a total contract cost of ${PAYMENT_TOKEN_NAME} ${orderValue?.toLocaleString(undefined, {maximumFractionDigits: PAYMENT_TOKEN_DECIMALS})} , and receive ${orderQuantity} ERC-20 tokens MRI-BTC-${CONTRACT_DURATION}D-${dayjs().utc().format('YYYYMMDD')}-long, each representing a long position on 1 TH of ${CONTRACT_DURATION}-Day Mining Revenue Contract in your Honeylemon Vault (if created) or your connect wallet. Additional Ethereum gas fee and 0x transaction fee applies.`;
     }
   }
 

@@ -247,7 +247,7 @@ const OfferContractPage: React.SFC = () => {
       case 1:
         return `You are granting permission to Honeylemon smart contracts to access ${COLLATERAL_TOKEN_NAME} in your wallet. You only need to do it once for your wallet then you are good to go. This step is necessary to enable ${COLLATERAL_TOKEN_NAME} collateral will be auto-deposited when your offer is taken. You can turn OFF permission afterwards, simply open Side Menu (top-right) - Manage Your Wallet,  click on the switch knob next to ${COLLATERAL_TOKEN_NAME}. Additional Ethereum gas fee applies.`;
       case 2:
-        return `Complete Listing`;
+        return `You are offering ${hashAmount?.toLocaleString()} TH at a limit price of ${hashPrice.toLocaleString(undefined, { maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS })}/TH/Day , your listing will be valid for ${CONTRACT_DURATION} days and can be canceled any time. Upon your offer being taken, the actual collateral based on the MRI_BTC then will be auto-deposited from your wallet, you will receive ${totalContractPrice.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })} ${PAYMENT_TOKEN_NAME} in your connected wallet, and ${hashAmount?.toLocaleString()} tokens MRI-BTC-${CONTRACT_DURATION}D-${dayjs().utc().format('YYYYMMDD')}-short , each representing a short position on 1TH of ${CONTRACT_DURATION}-Day Mining Revenue Contract in your Honeylemon Vault (if created) or your connect wallet. Additional Ethereum gas fee applies.`;
     }
   }
 
@@ -276,7 +276,7 @@ const OfferContractPage: React.SFC = () => {
   const handleStartOffer = () => {
     setSkipDsProxy(false);
     setShowOfferModal(true);
-    activeStep === 2 && handleCreateOffer();
+    // activeStep === 2 && handleCreateOffer();
   }
 
   const handleOfferDetailsClick = () => {
@@ -453,7 +453,7 @@ const OfferContractPage: React.SFC = () => {
                     <Typography variant='caption'>
                       <i>
                         * <b>Contract Total</b> is the amount of USDT you will receive upfront upon your offer being taken. <br />
-                        * <b>Required Collateral</b> is an estimate based on current MRI_BTC; you need to have at least this much in wallet and approve Honeylemon access to your imBTC to complete your listing. Actual collateral (auto-deposited) will be based on MRI_BTC at the time your offer is taken.<br/>
+                        * <b>Required Collateral</b> is an estimate based on current MRI_BTC; you need to have at least this much in wallet and approve Honeylemon access to your imBTC to complete your listing. Actual collateral (auto-deposited) will be based on MRI_BTC at the time your offer is taken.<br />
                         * <b>Premium/Discount over MRI_BTC</b> is how much your price compare to the current MRI_BTC.
                       </i>
                     </Typography>
