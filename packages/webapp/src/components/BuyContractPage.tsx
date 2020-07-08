@@ -346,23 +346,23 @@ const BuyContractPage: React.SFC = () => {
     setActiveStep(step);
   }, [skipDsProxy, isDsProxyDeployed, tokenApprovalGranted])
 
-  const steps = ['Honeylemon Vault', `Approve ${PAYMENT_TOKEN_NAME} for Payment`, 'Execute Order'];
+  const steps = ['Honeylemon Vault (Optional)', `Approve ${PAYMENT_TOKEN_NAME} for Payment`, 'Complete Payment'];
 
   const getStepContent = (step: number) => {
     switch (step) {
       case 0:
-        return `If you may use Honeylemon more than once or may place multiple orders, Honeylemon Vault can reduce future Ethereum gas fee and streamline your experience by deploying a DSProxy contract. You only need to do it once for your wallet then you are good to go. This step will incur additional gas fee, and is optional.`;
+        return `If you place multiple orders or use it more than once, create Honeylemon Vault will deploy a DSProxy contract for your wallet, which reduces future gas fee and streamline your transactions. Additional Ethereum gas fee applies.`;
       case 1:
-        return `You are granting permission to Honeylemon smart contracts to access ${PAYMENT_TOKEN_NAME} in your wallet. You only need to do it once for your wallet then you are good to go. This step is necessary to enable payment with your USDT. You can turn OFF permission afterwards, simply open Side Menu (top-right) - Manage Your Wallet,  click on the switch knob next to ${PAYMENT_TOKEN_NAME}. Additional Ethereum gas fee applies.`;
+        return `You are granting permission for Honeylemon smart contracts to access ${PAYMENT_TOKEN_NAME} in your wallet, enabling order payment with your ${PAYMENT_TOKEN_NAME}. You can turn OFF permission in Side Menu (top-right) - Manage Your Wallet. Additional Ethereum gas fee applies.`;
       case 2:
-        return `You are paying a total contract cost of ${PAYMENT_TOKEN_NAME} ${orderValue?.toLocaleString(undefined, {maximumFractionDigits: PAYMENT_TOKEN_DECIMALS})} , and receive ${orderQuantity} ERC-20 tokens MRI-BTC-${CONTRACT_DURATION}D-${dayjs().utc().format('YYYYMMDD')}-long, each representing a long position on 1 TH of ${CONTRACT_DURATION}-Day Mining Revenue Contract in your Honeylemon Vault (if created) or your connect wallet. Additional Ethereum gas fee and 0x transaction fee applies.`;
+        return `You are paying ${PAYMENT_TOKEN_NAME} ${orderValue?.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })} for  ${orderQuantity} TH of ${CONTRACT_DURATION}-Day BTC Mining Revenue Contract at a market price of ${hashPrice.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}/TH/Day. Additional Ethereum gas fee and 0x transaction fee apply.`;
     }
   }
 
   const getStepButtonLabel = (step: number) => {
     switch (step) {
       case 0:
-        return `Deploy`;
+        return `Create`;
       case 1:
         return 'Approve';
       case 2:
@@ -444,10 +444,10 @@ const BuyContractPage: React.SFC = () => {
             <Grid item xs={3} className={classes.rightAlign}>
               <Typography style={{ fontWeight: 'bold' }} color='primary'>{PAYMENT_TOKEN_NAME}</Typography>
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={12} style={{ paddingTop: 4 }}>
               <Typography variant='caption'>
-                Enter quantity you would like to buy as hash power to check the market price below.  Make sure you have 
-                sufficient {PAYMENT_TOKEN_NAME} to buy contract &amp; ETH (for <Link href='https://docs.honeylemon.market/fees' target="_blank" rel='noopener'>fees<OpenInNew fontSize='small' /></Link>).
+                Enter quantity you would like to buy as budget to check the market price below. Make sure
+                sufficient {PAYMENT_TOKEN_NAME} &amp; ETH (for fees) is in your wallet.
               </Typography>
             </Grid>
           </Grid>
@@ -475,10 +475,10 @@ const BuyContractPage: React.SFC = () => {
             <Grid item xs={3} className={classes.rightAlign}>
               <Typography style={{ fontWeight: 'bold' }} color='primary'>TH for {CONTRACT_DURATION} Days</Typography>
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={12} style={{ paddingTop: 4 }}>
               <Typography variant='caption'>
-                Enter quantity you would like to buy as hash power in terahash (TH) to check the market price below. Make
-                sure you have sufficient USDT &amp; ETH (for <Link href='https://docs.honeylemon.market/fees' target="_blank" rel='noopener'>fees<OpenInNew fontSize='small' /></Link>).
+                Enter quantity you would like to buy as hash power to check the market price below. Make sure
+                sufficient {PAYMENT_TOKEN_NAME} & ETH (for fees) is in your wallet.
               </Typography>
             </Grid>
           </Grid>
@@ -535,11 +535,9 @@ const BuyContractPage: React.SFC = () => {
                   {orderValue && orderValue < 98 ?
                     <TableRow>
                       <TableCell colSpan={2}>
-                        <Typography variant='caption'>
-                          <i>
-                            Suggest to increase your contract total to above 100 {PAYMENT_TOKEN_NAME} due to recent high fees in ethereum network.
-                            See <Link href='https://docs.honeylemon.market/fees' target="_blank" rel='noopener'>fees.<OpenInNew fontSize='small' /></Link> for details.
-                          </i>
+                        <Typography variant='caption' color='secondary'>
+                          Suggest to increase your contract total to above 100 {PAYMENT_TOKEN_NAME} due to recent high fees in ethereum network.
+                            See <Link href='https://docs.honeylemon.market/fees' target="_blank" rel='noopener' color='secondary'>fees.<OpenInNew fontSize='small' /></Link> for details.
                         </Typography>
                       </TableCell>
                     </TableRow> :
@@ -566,25 +564,14 @@ const BuyContractPage: React.SFC = () => {
                       Buy Contract vs. Buy BTC
                     </TableCell>
                     <TableCell align='right' className={classes.orderSummaryEstimate}>
-                      {`${Math.abs(discountOnSpotPrice).toLocaleString(undefined, { maximumFractionDigits: 2 })}% ${(discountOnSpotPrice < 0) ? 'premium' : 'discount'}`}
+                      {`${Math.abs(discountOnSpotPrice).toLocaleString(undefined, { maximumFractionDigits: 2 })}% ${(discountOnSpotPrice < 0) ? 'Premium' : 'Discount'}`}
                     </TableCell>
                   </TableRow>
-                  <TableRow>
-                    <TableCell colSpan={2} style={{ color: '#a9a9a9' }}>
-                      <Typography variant='caption'>
-                        <i>
-                          * <b>Estimated Revenue</b> is the amount of imBTC expected to receive when this contract settles, if BTC price &amp; difficulty stays constant over 28 days. <br />
-                          * <b>Revenue Cap</b> is the maximum amount of imBTC you can receive when this contract settles, calculated as 125% of current MRI_BTC times 28. <br />
-                          * <b>Buy Contract vs. Buy BTC</b> is the discount/premium of cost basis for this Mining Revenue Contract compared to buying BTC spot with USDT now, if BTC price &amp; difficulty stays constant over 28 days.<br/>
-                          * Small discrepancy between your Budget and Contract Total is due to available offers in orderbook, and minimum order increment of 1TH.
-                        </i>
-                      </Typography>
-                    </TableCell>
-                  </TableRow>
+
                   {!showOrderDetails ?
                     <TableRow>
                       <TableCell colSpan={2} align='center' onClick={handleOrderDetailsClick} style={{ cursor: 'pointer' }}>
-                        Expand Details
+                        Find Out More
                       <IconButton
                           className={classes.expand}
                           aria-label="show more">
@@ -593,6 +580,16 @@ const BuyContractPage: React.SFC = () => {
                       </TableCell>
                     </TableRow> :
                     <>
+                      <TableRow>
+                        <TableCell colSpan={2} style={{ color: '#a9a9a9' }}>
+                          <Typography variant='caption'>
+                            * <b>Estimated Revenue</b> is the amount of imBTC expected to receive when this contract settles, if BTC price &amp; difficulty stays constant over 28 days. <br />
+                            * <b>Revenue Cap</b> is the maximum amount of imBTC you can receive when this contract settles, calculated as 125% of current MRI_BTC times 28. <br />
+                            * <b>Buy Contract vs. Buy BTC</b> is the discount/premium of cost basis for this Mining Revenue Contract compared to buying BTC spot with USDT now, if BTC price &amp; difficulty stays constant over 28 days.<br />
+                            * Small discrepancy between your Budget and Contract Total is due to available offers in orderbook, and minimum order increment of 1TH.
+                          </Typography>
+                        </TableCell>
+                      </TableRow>
                       <TableRow>
                         <TableCell>
                           Start <br />
@@ -633,7 +630,7 @@ const BuyContractPage: React.SFC = () => {
                       </TableRow>
                       <TableRow>
                         <TableCell colSpan={2} align='center' onClick={handleOrderDetailsClick} style={{ cursor: 'pointer' }}>
-                          Collapse Details
+                          Show Less
                           <IconButton className={clsx(classes.expand, classes.expandOpen)}>
                             <ExpandMore />
                           </IconButton>
