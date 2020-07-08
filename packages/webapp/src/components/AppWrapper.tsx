@@ -272,8 +272,8 @@ function AppWrapper(props: { children: ReactNode }) {
                 <Settings color='secondary' fontSize='large' />
               </IconButton>
             </ListItemIcon>
-            <ListItemText primaryTypographyProps={{ align: 'center' }}>
-              Manage My Wallet
+            <ListItemText>
+              Manage My Wallet <Info fontSize='small' color='secondary'/>
             </ListItemText>
           </ListItem>
           <ListItem>
@@ -343,7 +343,7 @@ function AppWrapper(props: { children: ReactNode }) {
           </ListItem>
           <ListItem>
             <ListItemText primaryTypographyProps={{
-              align: 'center'
+              align: 'right'
             }}>
               <Link href='https://tokenlon.im/' target="_blank" rel='noopener' underline='always'>Get More Tokens <OpenInNew fontSize='small' /></Link>
             </ListItemText>
@@ -399,7 +399,7 @@ function AppWrapper(props: { children: ReactNode }) {
                 onClick={handleDeployDSProxy}
                 disabled={txActive}
                 fullWidth>
-                Create honeylemon vault
+                Honeylemon Vault
               </Button>
             </ListItem>
           }
