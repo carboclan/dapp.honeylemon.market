@@ -203,7 +203,7 @@ function AppWrapper(props: { children: ReactNode }) {
             className={clsx(classes.title,
               { [classes.hide]: drawerOpen })}
             onClick={() => forwardTo('/')}>
-            honeylemon.market
+            Honeylemon
           </Typography>
           <IconButton
             aria-label="open drawer"

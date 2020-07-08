@@ -68,6 +68,7 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
                 walletName: "portis",
                 apiKey: process.env.REACT_APP_PORTIS_API_KEY,
               },
+              { walletName: "trust", rpcUrl: infuraRpc },
               { walletName: "dapper" },
               {
                 walletName: "walletConnect",
