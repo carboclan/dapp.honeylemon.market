@@ -272,7 +272,7 @@ function AppWrapper(props: { children: ReactNode }) {
                 <Settings color='secondary' fontSize='large' />
               </IconButton>
             </ListItemIcon>
-            <ListItemText primaryTypographyProps={{ align: 'center' }}>
+            <ListItemText>
               Manage My Wallet
             </ListItemText>
           </ListItem>
@@ -343,7 +343,7 @@ function AppWrapper(props: { children: ReactNode }) {
           </ListItem>
           <ListItem>
             <ListItemText primaryTypographyProps={{
-              align: 'center'
+              align: 'right'
             }}>
               <Link href='https://tokenlon.im/' target="_blank" rel='noopener' underline='always'>Get More Tokens <OpenInNew fontSize='small' /></Link>
             </ListItemText>

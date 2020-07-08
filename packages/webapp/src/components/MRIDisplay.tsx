@@ -31,9 +31,12 @@ const MRIDisplay: React.SFC = () => {
           href='#' underline='always'
           onClick={() => setShowMRIInformationModal(true)}
           className={classes.mriModalLink}>
-          MRI_BTC: Daily Average Mining Revenue per TH
+          <b>BTC Mining Revenue Index (MRI_BTC)</b>
           <Info fontSize='small' />
         </Link>
+        <Typography>
+          Daily Average Mining Revenue per Terahash (TH)
+        </Typography>
         {currentMRI > 0 ?
           <>
             <Typography align='center'>{`BTC ${currentMRI.toLocaleString(undefined, { maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS })}/TH/Day`}</Typography>
