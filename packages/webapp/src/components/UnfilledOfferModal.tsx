@@ -86,7 +86,7 @@ const UnfilledOfferModal: React.SFC<UnfilledOfferModalProps> = ({ open, onClose,
             </TableRow>
             <TableRow>
               <TableCell>
-                Duration
+                Contract Duration
               </TableCell>
               <TableCell align='right'>
                 {CONTRACT_DURATION} Days
