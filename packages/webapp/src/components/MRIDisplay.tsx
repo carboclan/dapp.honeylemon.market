@@ -26,7 +26,6 @@ const MRIDisplay: React.SFC = () => {
         <Link
           variant='body2'
           href='#' 
-          underline='always'
           onClick={() => setShowMRIInformationModal(true)}>
           <b>BTC Mining Revenue Index (MRI_BTC)</b>
           <Info fontSize='small' />

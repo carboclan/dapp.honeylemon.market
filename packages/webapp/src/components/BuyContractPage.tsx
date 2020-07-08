@@ -508,7 +508,7 @@ const BuyContractPage: React.SFC = () => {
                 </Grid>
                 <Grid item xs={6} style={{ textAlign: 'right' }}>
                   <Typography variant='caption'>
-                    <Link href='#' underline='always' onClick={() => setShowContractSpecificationModal(true)}>
+                    <Link href='#' onClick={() => setShowContractSpecificationModal(true)}>
                       Contract Specs <Info fontSize='small' />
                     </Link>
                   </Typography>
@@ -618,7 +618,7 @@ const BuyContractPage: React.SFC = () => {
                           </Typography>
                           <Typography variant='body2' style={{ color: '#a9a9a9' }}>
                             You will receive the network average BTC block reward & transaction fees per TH based on the average value of
-                            the <Link href='#' underline='always' onClick={() => setShowMRIInformationModal(true)}>Bitcoin Mining Revenue
+                            the <Link href='#' onClick={() => setShowMRIInformationModal(true)}>Bitcoin Mining Revenue
                             Index (MRI_BTC) <Info fontSize='small' /></Link> over {CONTRACT_DURATION} days starting today.
                           </Typography>
                           <Typography variant='body2' style={{ color: '#a9a9a9' }}>

@@ -395,7 +395,7 @@ const OfferContractPage: React.SFC = () => {
               </Grid>
               <Grid item xs={6} style={{ textAlign: 'right' }}>
                 <Typography variant='caption'>
-                  <Link href='#' underline='always' onClick={() => setShowContractSpecificationModal(true)}>
+                  <Link href='#' onClick={() => setShowContractSpecificationModal(true)}>
                     Contract Specs <Info fontSize='small' />
                   </Link>
                 </Typography>
@@ -428,7 +428,7 @@ const OfferContractPage: React.SFC = () => {
                     <TableCell colSpan={2}>
                       <Typography variant='caption' color='secondary'>
                           Suggest to increase your contract total to above 100 {PAYMENT_TOKEN_NAME} due to recent high fees in ethereum network.
-                          See <Link href='https://docs.honeylemon.market/fees' target="_blank" rel='noopener' color='secondary'>fees.<OpenInNew fontSize='small' /></Link> for details.
+                          See <Link href='https://docs.honeylemon.market/fees' target="_blank" rel='noopener' color='secondary'>fees for details.<OpenInNew fontSize='small' /></Link>
                       </Typography>
                     </TableCell>
                   </TableRow> :
@@ -445,7 +445,6 @@ const OfferContractPage: React.SFC = () => {
                 <TableRow>
                   <TableCell className={classes.offerSummaryEstimate}>
                     Price vs. MRI_BTC
-                    {} MRI_BTC
                   </TableCell>
                   <TableCell align='right' className={classes.offerSummaryEstimate}>
                     {`${Math.abs(premiumOverMRI).toLocaleString(undefined, { maximumFractionDigits: 2 })}% ${premiumOverMRI >= 0 ? 'Premium' : 'Discount'}`}
@@ -501,7 +500,7 @@ const OfferContractPage: React.SFC = () => {
                         </Typography>
                         <Typography variant='body2'>
                           At the end of <strong>{CONTRACT_DURATION} days</strong> your counterparty will receive the network average BTC block reward & transaction
-                          fees per TH based on the average value of the <Link href='#' underline='always' onClick={() => setShowMRIInformationModal(true)}>Bitcoin Mining Revenue
+                          fees per TH based on the average value of the <Link href='#' onClick={() => setShowMRIInformationModal(true)}>Bitcoin Mining Revenue
                           Index (MRI_BTC) <Info fontSize='small' /></Link> over {CONTRACT_DURATION} days up to a <strong>max capped by your collateral</strong>.
                         </Typography>
                         <Typography variant='body2'>
