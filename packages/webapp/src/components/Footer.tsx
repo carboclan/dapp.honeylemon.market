@@ -61,7 +61,7 @@ const Footer: React.SFC<FooterProps> = (props: FooterProps) => {
             <Divider className={classes.divider} light variant='fullWidth' />
           </Grid>
           <Grid item xs={12}>
-            <Typography>Copyright © 2020 honeylemon.market</Typography>
+            <Typography onClick={() => localStorage.clear()}>Copyright © 2020 honeylemon.market</Typography>
           </Grid>
         </Grid>
       </Container>
