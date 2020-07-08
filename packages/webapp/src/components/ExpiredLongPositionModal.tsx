@@ -1,8 +1,11 @@
 import React from 'react';
-import { Dialog, DialogTitle, DialogContent, TableRow, Table, TableCell, TableBody, Grid, Button, CircularProgress, makeStyles } from '@material-ui/core';
+import { Dialog, DialogTitle, DialogContent, TableRow, Table, TableCell, TableBody, Grid, Button, CircularProgress, makeStyles, Typography, Link } from '@material-ui/core';
 import { useHoneylemon, PositionStatus, PositionType } from '../contexts/HoneylemonContext';
 import { BigNumber } from '@0x/utils';
 import dayjs from 'dayjs';
+import { useOnboard } from '../contexts/OnboardContext';
+import { networkName } from '../helpers/ethereumNetworkUtils';
+import { displayAddress } from '../helpers/displayAddress';
 
 const useStyles = makeStyles(({ palette }) => ({
   loadingSpinner: {
@@ -29,6 +32,9 @@ interface ExpiredLongPositionModalProps {
 
 const ExpiredLongPositionModal: React.SFC<ExpiredLongPositionModalProps> = ({ open, onClose, position, isWithdrawing, withdrawPosition }) => {
   const { PAYMENT_TOKEN_DECIMALS, PAYMENT_TOKEN_NAME, COLLATERAL_TOKEN_NAME, COLLATERAL_TOKEN_DECIMALS, refreshPortfolio } = useHoneylemon();
+  const { network } = useOnboard();
+
+  const etherscanUrl = (network === 1) ? 'https://etherscan.io' : `https://${networkName(network)}.etherscan.io`
   const classes = useStyles();
 
   const handleWithdraw = async (
@@ -90,6 +96,14 @@ const ExpiredLongPositionModal: React.SFC<ExpiredLongPositionModalProps> = ({ op
             <TableRow>
               <TableCell>Status</TableCell>
               <TableCell align='right'>{position.status}</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell colSpan={2}>
+                <Typography>
+                  Your transaction was executed on Ethereum blockchain, check 
+                  on <Link href={`${etherscanUrl}/tx/${position.transaction.id}`} target="_blank" rel='noopener' underline='always'>Etherscan</Link>: {`${displayAddress(position.transaction.id, 20)}`}
+                </Typography>
+              </TableCell>
             </TableRow>
           </TableBody>
         </Table>
