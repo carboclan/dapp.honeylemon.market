@@ -18,6 +18,7 @@ import {
   ExpansionPanelDetails,
   CircularProgressProps,
   Box,
+  Badge,
 } from '@material-ui/core';
 import { ExpandMore, RadioButtonUnchecked, MoreVert } from '@material-ui/icons';
 import { useOnboard } from '../contexts/OnboardContext';
@@ -31,7 +32,7 @@ import ExpiredShortPositionModal from './ExpiredShortPositionModal';
 import UnfilledOfferModal from './UnfilledOfferModal';
 
 
-const useStyles = makeStyles(({ spacing, palette }) => ({
+const useStyles = makeStyles(({ spacing, palette, typography }) => ({
   icon: {
     marginLeft: spacing(1),
   },
@@ -63,7 +64,7 @@ const useStyles = makeStyles(({ spacing, palette }) => ({
   },
   sectionHeading: {
     justifyContent: 'space-between',
-  }
+  },
 }))
 
 const TimeRemaining = (
@@ -313,104 +314,18 @@ const PorfolioPage: React.SFC = () => {
           <div className={classes.tabContent}>
             {activeTab === 'active' ?
               <>
-                <ExpansionPanel expanded={showOpenOrders}>
-                  <ExpansionPanelSummary
-                    expandIcon={!isPortfolioRefreshing ? <ExpandMore /> : <CircularProgress className={classes.loadingSpinner} size={20} />}
-                    classes={{
-                      content: classes.sectionHeading
-                    }}
-                    IconButtonProps={{ onClick: handleToggleOpenOrdersPanel }}>
-                    <Typography variant='h6' className={classes.sectionHeadingText}>
-                      Your Open Offers (Unfilled Short Positions)
-                    </Typography>
-                  </ExpansionPanelSummary>
-                  <ExpansionPanelDetails>
-                    <Table>
-                      <TableHead>
-                        <TableRow>
-                          <TableCell>Price ($/TH/Day)</TableCell>
-                          <TableCell align='center'>Quantity (TH)</TableCell>
-                          <TableCell align='right'>Contract Total ({PAYMENT_TOKEN_NAME})</TableCell>
-                          <TableCell></TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {openOrdersMetadata && openOrdersMetadata?.map((order, i) =>
-                          <TableRow key={order.orderHash}>
-                            <TableCell>${Number(order?.price.dividedBy(CONTRACT_DURATION).toString()).toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}</TableCell>
-                            <TableCell align='center'>{Number(order?.remainingFillableMakerAssetAmount.toString()).toLocaleString(undefined, { maximumFractionDigits: 0 })}</TableCell>
-                            <TableCell align='right'>{Number(order.price.multipliedBy(order.remainingFillableMakerAssetAmount)).toLocaleString(undefined, { minimumFractionDigits: 2,maximumFractionDigits: 2 })}</TableCell>
-                            <TableCell align='right'>
-                              <MoreVert onClick={() => handleShowUnfilledOfferDetails(i)} style={{ cursor: 'pointer' }} />
-                            </TableCell>
-                          </TableRow>
-                        )}
-                        {!isPortfolioRefreshing && openOrdersMetadata.length === 0 &&
-                          <TableRow>
-                            <TableCell colSpan={3} align='center' className={classes.placeholderRow}>
-                              No Unfilled Positions (Open Orders)
-                            </TableCell>
-                          </TableRow>
-                        }
-                      </TableBody>
-                    </Table>
-                  </ExpansionPanelDetails>
-                </ExpansionPanel>
-                <Divider className={classes.sectionDivider} light variant='middle' />
-                <ExpansionPanel expanded={showActiveShortPositions}>
-                  <ExpansionPanelSummary
-                    expandIcon={!isPortfolioRefreshing ? <ExpandMore /> : <CircularProgress className={classes.loadingSpinner} size={20} />}
-                    classes={{
-                      content: classes.sectionHeading
-                    }}
-                    IconButtonProps={{ onClick: handleToggleActiveShortPositionsPanel }}>
-                    <Typography variant='h6' className={classes.sectionHeadingText}>
-                      Contracts Offered (Short Positions)
-                    </Typography>
-                  </ExpansionPanelSummary>
-                  <ExpansionPanelDetails>
-                    <Table>
-                      <TableHead>
-                        <TableRow>
-                          <TableCell align='center'>Days till Expiration</TableCell>
-                          <TableCell align='center'>Received ({PAYMENT_TOKEN_NAME})</TableCell>
-                          <TableCell align='center'>Collateral Locked ({COLLATERAL_TOKEN_NAME})</TableCell>
-                          <TableCell></TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {activeShortPositions && activeShortPositions?.map((position: any, i) =>
-                          <TableRow key={i}>
-                            <TableCell align='center'>
-                              <TimeRemaining totalDuration={CONTRACT_DURATION} remainingDuration={position.daysToExpiration} unitLabel='d' />
-                            </TableCell>
-                            <TableCell align='center'>{position.totalCost.toLocaleString(undefined, { minimumFractionDigits: 2,maximumFractionDigits: 2 })}</TableCell>
-                            <TableCell align='center'>{position.totalCollateralLocked.toLocaleString(undefined, { maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS })}</TableCell>
-                            <TableCell align='right'><MoreVert onClick={() => handleShowActiveShortPositionDetails(i)} style={{ cursor: 'pointer' }} /></TableCell>
-                          </TableRow>
-                        )}
-                        {!isPortfolioRefreshing && activeShortPositions.length === 0 &&
-                          <TableRow>
-                            <TableCell colSpan={5} align='center' className={classes.placeholderRow}>
-                              No Active Short Positions
-                            </TableCell>
-                          </TableRow>
-                        }
-                      </TableBody>
-                    </Table>
-                  </ExpansionPanelDetails>
-                </ExpansionPanel>
-                <Divider className={classes.sectionDivider} light variant='middle' />
                 <ExpansionPanel expanded={showActiveLongPositions}>
                   <ExpansionPanelSummary
-                    expandIcon={!isPortfolioRefreshing ? <ExpandMore /> : <CircularProgress className={classes.loadingSpinner} size={20} />}
+                    expandIcon={<ExpandMore />}
                     classes={{
                       content: classes.sectionHeading
                     }}
                     IconButtonProps={{ onClick: handleToggleActiveLongPositionsPanel }}>
-                    <Typography variant='h6' className={classes.sectionHeadingText}>
-                      Contracts Bought (Long Positions)
+                    <Typography variant='subtitle1' className={classes.sectionHeadingText}>
+                      <b>{activeLongPositions.length > 0 && `${activeLongPositions.length} `}Contracts Bought (Long)</b>
                     </Typography>
+                    {isPortfolioRefreshing &&
+                      <CircularProgress className={classes.loadingSpinner} size={20} />}
                   </ExpansionPanelSummary>
                   <ExpansionPanelDetails>
                     <Table>
@@ -428,7 +343,7 @@ const PorfolioPage: React.SFC = () => {
                             <TableCell align='center'>
                               <TimeRemaining totalDuration={CONTRACT_DURATION} remainingDuration={position.daysToExpiration} unitLabel='d' />
                             </TableCell>
-                            <TableCell align='center'>{position.totalCost.toLocaleString(undefined, { minimumFractionDigits: 2,maximumFractionDigits: 2 })}</TableCell>
+                            <TableCell align='center'>{position.totalCost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
                             <TableCell align='center'>{position.pendingReward.toLocaleString(undefined, { maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS })}</TableCell>
                             <TableCell align='right'><MoreVert onClick={() => handleShowActiveLongPositionDetails(i)} style={{ cursor: 'pointer' }} /></TableCell>
                           </TableRow>
@@ -437,6 +352,96 @@ const PorfolioPage: React.SFC = () => {
                           <TableRow>
                             <TableCell colSpan={5} align='center' className={classes.placeholderRow}>
                               No Active Long Positions
+                            </TableCell>
+                          </TableRow>
+                        }
+                      </TableBody>
+                    </Table>
+                  </ExpansionPanelDetails>
+                </ExpansionPanel>
+                <Divider className={classes.sectionDivider} light variant='middle' />
+                <ExpansionPanel expanded={showActiveShortPositions}>
+                  <ExpansionPanelSummary
+                    expandIcon={<ExpandMore />}
+                    classes={{
+                      content: classes.sectionHeading
+                    }}
+                    IconButtonProps={{ onClick: handleToggleActiveShortPositionsPanel }}>
+                    <Typography variant='subtitle1' className={classes.sectionHeadingText}>
+                      <b>{activeShortPositions.length > 0 && `${activeShortPositions.length} `}Contracts Offered (Short)</b>
+                    </Typography>
+                    {isPortfolioRefreshing &&
+                      <CircularProgress className={classes.loadingSpinner} size={20} />}
+                  </ExpansionPanelSummary>
+                  <ExpansionPanelDetails>
+                    <Table>
+                      <TableHead>
+                        <TableRow>
+                          <TableCell align='center'>Days till Expiration</TableCell>
+                          <TableCell align='center'>Received ({PAYMENT_TOKEN_NAME})</TableCell>
+                          <TableCell align='center'>Collateral Locked ({COLLATERAL_TOKEN_NAME})</TableCell>
+                          <TableCell></TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {activeShortPositions && activeShortPositions?.map((position: any, i) =>
+                          <TableRow key={i}>
+                            <TableCell align='center'>
+                              <TimeRemaining totalDuration={CONTRACT_DURATION} remainingDuration={position.daysToExpiration} unitLabel='d' />
+                            </TableCell>
+                            <TableCell align='center'>{position.totalCost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
+                            <TableCell align='center'>{position.totalCollateralLocked.toLocaleString(undefined, { maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS })}</TableCell>
+                            <TableCell align='right'><MoreVert onClick={() => handleShowActiveShortPositionDetails(i)} style={{ cursor: 'pointer' }} /></TableCell>
+                          </TableRow>
+                        )}
+                        {!isPortfolioRefreshing && activeShortPositions.length === 0 &&
+                          <TableRow>
+                            <TableCell colSpan={5} align='center' className={classes.placeholderRow}>
+                              No Active Short Positions
+                            </TableCell>
+                          </TableRow>
+                        }
+                      </TableBody>
+                    </Table>
+                  </ExpansionPanelDetails>
+                </ExpansionPanel>
+                <Divider className={classes.sectionDivider} light variant='middle' />
+                <ExpansionPanel expanded={showOpenOrders}>
+                  <ExpansionPanelSummary
+                    expandIcon={!isPortfolioRefreshing ? <ExpandMore /> : <CircularProgress className={classes.loadingSpinner} size={20} />}
+                    classes={{
+                      content: classes.sectionHeading
+                    }}
+                    IconButtonProps={{ onClick: handleToggleOpenOrdersPanel }}>
+                    <Typography variant='subtitle1' className={classes.sectionHeadingText}>
+                      <b>{openOrdersMetadata.length > 0 && `${openOrdersMetadata.length} `}Open Offers (Unfilled Short)</b>
+                    </Typography>
+                  </ExpansionPanelSummary>
+                  <ExpansionPanelDetails>
+                    <Table>
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>Price ($/TH/Day)</TableCell>
+                          <TableCell align='center'>Quantity (TH)</TableCell>
+                          <TableCell align='right'>Contract Total ({PAYMENT_TOKEN_NAME})</TableCell>
+                          <TableCell></TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {openOrdersMetadata && openOrdersMetadata?.map((order, i) =>
+                          <TableRow key={order.orderHash}>
+                            <TableCell>${Number(order?.price.dividedBy(CONTRACT_DURATION).toString()).toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}</TableCell>
+                            <TableCell align='center'>{Number(order?.remainingFillableMakerAssetAmount.toString()).toLocaleString(undefined, { maximumFractionDigits: 0 })}</TableCell>
+                            <TableCell align='right'>{Number(order.price.multipliedBy(order.remainingFillableMakerAssetAmount)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
+                            <TableCell align='right'>
+                              <MoreVert onClick={() => handleShowUnfilledOfferDetails(i)} style={{ cursor: 'pointer' }} />
+                            </TableCell>
+                          </TableRow>
+                        )}
+                        {!isPortfolioRefreshing && openOrdersMetadata.length === 0 &&
+                          <TableRow>
+                            <TableCell colSpan={3} align='center' className={classes.placeholderRow}>
+                              No Unfilled Positions (Open Orders)
                             </TableCell>
                           </TableRow>
                         }
@@ -515,14 +520,16 @@ const PorfolioPage: React.SFC = () => {
                 <>
                   <ExpansionPanel expanded={showExpiredShortPositions}>
                     <ExpansionPanelSummary
-                      expandIcon={!isPortfolioRefreshing ? <ExpandMore /> : <CircularProgress className={classes.loadingSpinner} size={20} />}
+                      expandIcon={<ExpandMore />}
                       classes={{
                         content: classes.sectionHeading
                       }}
                       IconButtonProps={{ onClick: handleToggleExpiredShortPositionsPanel }}>
-                      <Typography variant='h6' className={classes.sectionHeadingText}>
-                        Contracts Sold (Short Positions)
+                      <Typography variant='subtitle1' className={classes.sectionHeadingText}>
+                        <b>{expiredShortPositions.length > 0 && `${expiredShortPositions.length} `}Contracts Sold (Short)</b>
                       </Typography>
+                      {isPortfolioRefreshing &&
+                        <CircularProgress className={classes.loadingSpinner} size={20} />}
                     </ExpansionPanelSummary>
                     <ExpansionPanelDetails>
                       <Table>
@@ -537,7 +544,7 @@ const PorfolioPage: React.SFC = () => {
                         <TableBody>
                           {expiredShortPositions && expiredShortPositions?.map((position: any, i) =>
                             <TableRow key={i}>
-                              <TableCell align='center'>{position.totalCost.toLocaleString(undefined, { minimumFractionDigits: 2,maximumFractionDigits: 2 })}</TableCell>
+                              <TableCell align='center'>{position.totalCost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
                               <TableCell align='center'>{(position.totalCollateralLocked - position.finalReward).toLocaleString(undefined, { maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS })}</TableCell>
                               <TableCell align='center'>{position.status}</TableCell>
                               <TableCell align='right'><MoreVert onClick={() => handleShowExpiredShortPositionDetails(i)} style={{ cursor: 'pointer' }} /></TableCell>
@@ -556,14 +563,16 @@ const PorfolioPage: React.SFC = () => {
                   </ExpansionPanel>
                   <ExpansionPanel expanded={showExpiredLongPositions}>
                     <ExpansionPanelSummary
-                      expandIcon={!isPortfolioRefreshing ? <ExpandMore /> : <CircularProgress className={classes.loadingSpinner} size={20} />}
+                      expandIcon={<ExpandMore />}
                       classes={{
                         content: classes.sectionHeading
                       }}
                       IconButtonProps={{ onClick: handleToggleExpiredLongPositionsPanel }}>
-                      <Typography variant='h6' className={classes.sectionHeadingText}>
-                        Contracts Bought (Long Positions)
+                      <Typography variant='subtitle1' className={classes.sectionHeadingText}>
+                        <b>{expiredLongPositions.length > 0 && `${expiredLongPositions.length} `}Contracts Bought (Long)</b>
                       </Typography>
+                      {isPortfolioRefreshing &&
+                        <CircularProgress className={classes.loadingSpinner} size={20} />}
                     </ExpansionPanelSummary>
                     <ExpansionPanelDetails>
                       <Table>
@@ -578,7 +587,7 @@ const PorfolioPage: React.SFC = () => {
                         <TableBody>
                           {expiredLongPositions && expiredLongPositions?.map((position: any, i) =>
                             <TableRow key={i}>
-                              <TableCell align='center'>{position.totalCost.toLocaleString(undefined, { minimumFractionDigits: 2,maximumFractionDigits: 2 })}</TableCell>
+                              <TableCell align='center'>{position.totalCost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
                               <TableCell align='center'>{position.finalReward}</TableCell>
                               <TableCell align='center'>{position.status}</TableCell>
                               <TableCell align='right'><MoreVert onClick={() => handleShowExpiredLongPositionDetails(i)} style={{ cursor: 'pointer' }} /></TableCell>
@@ -595,7 +604,6 @@ const PorfolioPage: React.SFC = () => {
                       </Table>
                     </ExpansionPanelDetails>
                   </ExpansionPanel>
-                  <Divider className={classes.sectionDivider} light variant='middle' />
                 </>
             }
           </div>

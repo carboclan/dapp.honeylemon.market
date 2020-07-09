@@ -61,7 +61,7 @@ const ActiveLongPositionModal: React.SFC<ActiveLongPositionModalProps> = ({ open
             </TableRow>
             <TableRow>
               <TableCell colSpan={2}>
-                <Typography>
+                <Typography variant='caption'>
                   Your transaction was executed on Ethereum blockchain, check 
                   on <Link href={`${etherscanUrl}/tx/${position.transaction.id}`} target="_blank" rel='noopener' underline='always'>Etherscan</Link>: {`${displayAddress(position.transaction.id, 20)}`}
                 </Typography>
