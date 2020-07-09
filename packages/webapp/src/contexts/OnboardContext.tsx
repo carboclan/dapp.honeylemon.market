@@ -137,7 +137,7 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
     setIsReady(!!isReady);
     !!isReady && 
     Sentry.configureScope(function(scope) {
-      scope.setUser({"id": address});
+      scope.setUser({"id": address, "network": networkName(network)});
     });
     return !!isReady;
   }
