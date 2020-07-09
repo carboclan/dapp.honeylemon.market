@@ -135,6 +135,10 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
   const checkIsReady = async () => {
     const isReady = await onboard?.walletCheck();
     setIsReady(!!isReady);
+    !!isReady && 
+    Sentry.configureScope(function(scope) {
+      scope.setUser({"id": address});
+    });
     return !!isReady;
   }
 
