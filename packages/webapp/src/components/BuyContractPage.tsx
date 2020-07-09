@@ -98,6 +98,9 @@ const useStyles = makeStyles(({ spacing, palette, transitions }) => ({
     '&:hover': {
       backgroundColor: '#505050',
     },
+  },
+  subtotal: {
+    borderTop: '1.5px solid',
   }
 }))
 
@@ -333,7 +336,7 @@ const BuyContractPage: React.SFC = () => {
 
   !isDailyContractDeployed && errors.push('New contracts are not available right now');
   !sufficientPaymentTokens && errors.push(`You do not have enough ${PAYMENT_TOKEN_NAME} to proceed. Open Side Menu (top-right) to manage your wallet balance and get more.`);
-  !isLiquid && errors.push('There are not enough contracts available right now');
+  !isLiquid && errors.push('There are not enough contracts available right now.');
 
   const getActiveStep = () => {
     if (!skipDsProxy && !isDsProxyDeployed) return 0;
@@ -415,9 +418,9 @@ const BuyContractPage: React.SFC = () => {
             indicatorColor="secondary"
             variant="fullWidth"
             scrollButtons="auto" >
-            <Tab label="ENTER BUDGET" />
+            <Tab label="BUDGET" />
             <Tab label="or" disabled />
-            <Tab label="ENTER AMOUNT" />
+            <Tab label="AMOUNT" />
           </Tabs>
         </Grid>
         <TabPanel value={buyType} index={0}>
@@ -508,7 +511,7 @@ const BuyContractPage: React.SFC = () => {
                 </Grid>
                 <Grid item xs={6} style={{ textAlign: 'right' }}>
                   <Typography variant='caption'>
-                    <Link href='#' onClick={() => setShowContractSpecificationModal(true)}>
+                    <Link href='#' onClick={() => setShowContractSpecificationModal(true)} color='textPrimary'>
                       Contract Specs <Info fontSize='small' />
                     </Link>
                   </Typography>
@@ -517,27 +520,39 @@ const BuyContractPage: React.SFC = () => {
               <Table size='small'>
                 <TableBody>
                   <TableRow>
+                    <TableCell className={classes.orderSummaryEstimate}>
+                      Market Price
+                    </TableCell>
+                    <TableCell align='right' className={classes.orderSummaryEstimate}>
+                      ${hashPrice.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}/TH/Day
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
                     <TableCell>
-                      <b>Market Price</b><br />
-                      Quantity <br />
-                      Duration
+                      Your Quantity
                     </TableCell>
                     <TableCell align='right'>
-                      <b>${hashPrice.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}/TH/Day<br /></b>
-                      {`${orderQuantity.toLocaleString()}`} TH<br />
+                      {`${orderQuantity.toLocaleString()}`} TH
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>
+                      Contract Duration
+                    </TableCell>
+                    <TableCell align='right'>
                       {`${CONTRACT_DURATION}`} Days
                     </TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell>Contract Total</TableCell>
-                    <TableCell align='right'>{`${(orderValue || 0).toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })} ${PAYMENT_TOKEN_NAME}`}</TableCell>
+                    <TableCell className={classes.subtotal}>Contract Total</TableCell>
+                    <TableCell align='right' className={classes.subtotal}>{`${(orderValue || 0).toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })} ${PAYMENT_TOKEN_NAME}`}</TableCell>
                   </TableRow>
                   {orderValue && orderValue < 98 ?
                     <TableRow>
                       <TableCell colSpan={2}>
                         <Typography variant='caption' color='secondary'>
                           Suggest to increase your contract total to above 100 {PAYMENT_TOKEN_NAME} due to recent high fees in ethereum network.
-                            See <Link href='https://docs.honeylemon.market/fees' target="_blank" rel='noopener' color='secondary'>fees.<OpenInNew fontSize='small' /></Link> for details.
+                            See <Link href='https://docs.honeylemon.market/fees' target="_blank" rel='noopener' color='secondary'>fees for details.<OpenInNew fontSize='small' /></Link> 
                         </Typography>
                       </TableCell>
                     </TableRow> :
@@ -567,7 +582,6 @@ const BuyContractPage: React.SFC = () => {
                       {`${Math.abs(discountOnSpotPrice).toLocaleString(undefined, { maximumFractionDigits: 2 })}% ${(discountOnSpotPrice < 0) ? 'Premium' : 'Discount'}`}
                     </TableCell>
                   </TableRow>
-
                   {!showOrderDetails ?
                     <TableRow>
                       <TableCell colSpan={2} align='center' onClick={handleOrderDetailsClick} style={{ cursor: 'pointer' }}>
@@ -604,24 +618,24 @@ const BuyContractPage: React.SFC = () => {
                       </TableRow>
                       <TableRow>
                         <TableCell colSpan={2} >
-                          <Typography variant='subtitle1'>WHAT DOES IT MEAN?</Typography> <br />
-                          <Typography variant='body2' style={{ color: '#a9a9a9' }}>
+                          <Typography variant='subtitle1' style={{ paddingTop: 4 }}>WHAT DOES IT MEAN?</Typography> <br />
+                          <Typography variant='body2' style={{ color: '#a9a9a9' }} paragraph>
                             You will pay <strong>{(orderValue || 0).toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })} {PAYMENT_TOKEN_NAME}</strong> to
                             buy <strong>{`${orderQuantity.toLocaleString()}`} TH</strong> of {CONTRACT_DURATION}-Day Mining Revenue Contracts at&nbsp;
                             <strong>{PAYMENT_TOKEN_NAME} {hashPrice.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}/TH/Day</strong>.
                           </Typography>
-                          <Typography variant='body2' style={{ color: '#a9a9a9' }}>
+                          <Typography variant='body2' style={{ color: '#a9a9a9' }} paragraph>
                             At settlement, you will receive mining revenue (in {COLLATERAL_TOKEN_NAME}) over {CONTRACT_DURATION} days, which
                             is the network average BTC block reward & transaction fees (MRI_BTC) per TH over contract duration, up to a max
                             revenue of <strong>{`${(((expectedBTCAccrual) || 0) * CONTRACT_COLLATERAL_RATIO).toLocaleString(undefined, { maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS })} ${COLLATERAL_TOKEN_NAME}`}.</strong>&nbsp;
                             You can withdraw your mining revenue (in {COLLATERAL_TOKEN_NAME}) after settlement.
                           </Typography>
-                          <Typography variant='body2' style={{ color: '#a9a9a9' }}>
+                          <Typography variant='body2' style={{ color: '#a9a9a9' }} paragraph>
                             You will receive the network average BTC block reward & transaction fees per TH based on the average value of
                             the <Link href='#' onClick={() => setShowMRIInformationModal(true)}>Bitcoin Mining Revenue
                             Index (MRI_BTC) <Info fontSize='small' /></Link> over {CONTRACT_DURATION} days starting today.
                           </Typography>
-                          <Typography variant='body2' style={{ color: '#a9a9a9' }}>
+                          <Typography variant='body2' style={{ color: '#a9a9a9' }} paragraph>
                             You may check your PNL from your Portfolio once order is placed. You can withdraw your mining revenue
                             denominated in {COLLATERAL_TOKEN_NAME} after {dayjs().utc().startOf('day').add(1, 'minute')
                               .add(CONTRACT_DURATION + 1, 'd').format('YYYY/MM/DD HH:mm')} UTC.

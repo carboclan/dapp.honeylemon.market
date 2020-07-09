@@ -1,6 +1,6 @@
 {
   "name": "@honeylemon/webapp",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "dependencies": {
     "@0x/utils": "5.4.1",
