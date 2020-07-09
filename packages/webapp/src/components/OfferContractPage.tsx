@@ -9,9 +9,6 @@ import {
   InputAdornment,
   Paper,
   CircularProgress,
-  List,
-  ListItem,
-  ListItemText,
   Table,
   TableBody,
   TableRow,
@@ -37,6 +34,7 @@ import { Info, OpenInNew, ExpandMore } from '@material-ui/icons';
 import MRIInformationModal from './MRIInformationModal';
 import dayjs from 'dayjs';
 import AboutHoneylemonContractModal from './AboutHoneylemonContractModal';
+import * as Sentry from '@sentry/react';
 
 const useStyles = makeStyles(({ spacing, palette, transitions }) => ({
   rightAlign: {
@@ -158,6 +156,7 @@ const OfferContractPage: React.SFC = () => {
       } catch (error) {
         console.log('Something went wrong fetching required collateral amount')
         console.log(error);
+        Sentry.captureException(error);
       }
     };
     hashAmount && getCollateralForContract();
@@ -186,6 +185,7 @@ const OfferContractPage: React.SFC = () => {
     try {
       await deployDSProxyContract();
     } catch (error) {
+      Sentry.captureException(error);
       setErrorMessage('There was an error deploying the honeylemon vault. Please try again.');
     }
     setTxActive(false);
@@ -197,6 +197,7 @@ const OfferContractPage: React.SFC = () => {
     try {
       await approveToken(TokenType.CollateralToken)
     } catch (error) {
+      Sentry.captureException(error);
       setErrorMessage(error.toString())
     }
     setTxActive(false);
@@ -221,6 +222,7 @@ const OfferContractPage: React.SFC = () => {
       } catch (error) {
         console.log('Something went wrong creating the offer');
         console.log(error);
+        Sentry.captureException(error);
         setErrorMessage('There was an error creating the offer. Please try again later.')
       }
     }

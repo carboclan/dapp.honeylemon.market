@@ -9,6 +9,7 @@ import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import { BigNumber } from "@0x/utils";
 import { networkName } from "../helpers/ethereumNetworkUtils";
+import * as Sentry from '@sentry/react';
 
 dayjs.extend(utc);
 
@@ -154,6 +155,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
     } catch (error) {
       console.log('Something went wrong deploying the DS Proxy wallet');
       console.log(error);
+      Sentry.captureException(error);
       throw new Error('Something went wrong deploying the honeylemon vault. Please try again.')
     }
   }
@@ -179,6 +181,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
     } catch (error) {
       console.log('Something went wrong approving the tokens');
       console.log(error);
+      Sentry.captureException(error);
       const errorMessage = tokenType === TokenType.CollateralToken ?
         `${COLLATERAL_TOKEN_NAME} approval failed. Please try again later.` :
         `${PAYMENT_TOKEN_NAME} approval failed. Please try again later.`
@@ -258,6 +261,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
       const newExpiredShortPositions = allPositions.filter((p: any) => p.status !== PositionStatus.active && p.type === PositionType.Short)
       setExpiredShortPositions(newExpiredShortPositions);
     } catch (error) {
+      Sentry.captureException(error);
       console.log('There was an error getting the market data')
     } finally {
       setIsPortfolioRefreshing(false);
@@ -358,6 +362,7 @@ useEffect(() => {
       } catch (error) {
         console.log('There was an error getting the orderbook.')
         console.log(error);
+        Sentry.captureException(error);
       }
     }
   }
@@ -387,6 +392,7 @@ useEffect(() => {
       }
     } catch (error) {
       console.log('There was an error getting the market data')
+      Sentry.captureException(error);
     }
   }
 
@@ -431,6 +437,7 @@ useEffect(() => {
         setBtcDifficultyAdjustmentDate(date.toDate());
       }
     } catch (error) {
+      Sentry.captureException(error);
       console.log('Error getting next difficulty adjustment date');
     }
   }

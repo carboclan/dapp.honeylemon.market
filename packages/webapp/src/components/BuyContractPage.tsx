@@ -40,6 +40,7 @@ import AboutHoneylemonContractModal from './AboutHoneylemonContractModal';
 
 import OrderbookModal from './OrderbookModal';
 import { useEffect } from 'react';
+import * as Sentry from '@sentry/react';
 
 const useStyles = makeStyles(({ spacing, palette, transitions }) => ({
   rightAlign: {
@@ -175,6 +176,7 @@ const BuyContractPage: React.SFC = () => {
       } catch (error) {
         console.log('Error getting the current liquidity')
         console.log(error);
+        Sentry.captureException(error);
         setIsLiquid(false);
       }
     }
@@ -204,6 +206,7 @@ const BuyContractPage: React.SFC = () => {
       } catch (error) {
         console.log('Error getting the current liquidity')
         console.log(error);
+        Sentry.captureException(error);
         setIsLiquid(false);
       }
     }
@@ -257,6 +260,7 @@ const BuyContractPage: React.SFC = () => {
     try {
       await deployDSProxyContract();
     } catch (error) {
+      Sentry.captureException(error);
       setErrorMessage(error);
     }
     setTxActive(false);
@@ -269,6 +273,7 @@ const BuyContractPage: React.SFC = () => {
       await approveToken(TokenType.PaymentToken)
     } catch (error) {
       setErrorMessage(error.toString())
+      Sentry.captureException(error);
     }
     setTxActive(false);
   }
@@ -314,6 +319,7 @@ const BuyContractPage: React.SFC = () => {
     } catch (error) {
       console.log('Something went wrong buying this contract');
       console.log(error);
+      Sentry.captureException(error);
       setErrorMessage('There was an error creating the offer. Please try again later.')
     }
     setTxActive(false);

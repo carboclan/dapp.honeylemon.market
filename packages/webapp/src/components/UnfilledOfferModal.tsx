@@ -4,6 +4,7 @@ import { useHoneylemon } from '../contexts/HoneylemonContext';
 import dayjs from 'dayjs';
 import { useOnboard } from '../contexts/OnboardContext';
 import { COLLATERAL_TOKEN_DECIMALS } from '@honeylemon/honeylemonjs/lib/src';
+import * as Sentry from '@sentry/react';
 
 const useStyles = makeStyles(({ spacing, palette }) => ({
   loadingSpinner: {
@@ -55,12 +56,12 @@ const UnfilledOfferModal: React.SFC<UnfilledOfferModalProps> = ({ open, onClose,
 
     try {
       const cancelTx = honeylemonService.getCancelOrderTx(order)
-      const gas = cancelTx.estimateGasAsyc({ from: address })
-
+      const gas = await cancelTx.estimateGasAsync({ from: address })
+      const price = Number(`${gasPrice}e9`);
       await cancelTx.awaitTransactionSuccessAsync({
         from: address,
         gas,
-        gasPrice
+        gasPrice: price
       });
       await new Promise(resolve => {
         setTimeout(refreshPortfolio, 5000);
@@ -69,6 +70,7 @@ const UnfilledOfferModal: React.SFC<UnfilledOfferModalProps> = ({ open, onClose,
       onClose();
     } catch (error) {
       console.log(error)
+      Sentry.captureException(error);
     }
     setIsCancelling(false)
   }
