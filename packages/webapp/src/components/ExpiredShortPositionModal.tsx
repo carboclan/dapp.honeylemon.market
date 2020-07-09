@@ -6,6 +6,7 @@ import dayjs from 'dayjs';
 import { useOnboard } from '../contexts/OnboardContext';
 import { networkName } from '../helpers/ethereumNetworkUtils';
 import { displayAddress } from '../helpers/displayAddress';
+import * as Sentry from '@sentry/react';
 
 const useStyles = makeStyles(({ palette }) => ({
   loadingSpinner: {
@@ -47,6 +48,7 @@ const ExpiredShortPositionModal: React.SFC<ExpiredShortPositionModalProps> = ({ 
       await withdrawPosition(positionTokenAddress, marketContractAddress, amount, type);
       refreshPortfolio();
     } catch (error) {
+      Sentry.captureException(error);
       console.log('Error withdrawing');
     }
   }
