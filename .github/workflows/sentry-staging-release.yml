@@ -10,9 +10,9 @@ jobs:
    runs-on: ubuntu-18.04
    env:
      SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-     SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
-     SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
-     SENTRY_DEPLOY_ENVIRONMENT: ${{ secrets.SENTRY_DEPLOY_ENVIRONMENT }}
+     SENTRY_ORG: michael-yankelev
+     SENTRY_PROJECT: honeylemon-dapp
+     SENTRY_DEPLOY_ENVIRONMENT: staging-kovan-28d
 
    steps: 
     - uses: actions/checkout@v1.0.0
