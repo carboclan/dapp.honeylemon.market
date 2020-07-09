@@ -16,6 +16,7 @@ import { useOnClickOutside } from '../helpers/useOnClickOutside';
 import { networkName } from '../helpers/ethereumNetworkUtils';
 import { displayAddress } from '../helpers/displayAddress';
 import { useLocation } from 'react-router-dom';
+import * as Sentry from '@sentry/react';
 
 const drawerWidth = 300;
 const footerHeight = 150;
@@ -163,6 +164,7 @@ function AppWrapper(props: { children: ReactNode }) {
       }
     } catch (error) {
       console.log(error)
+      Sentry.captureException(error);
     }
     setTxActive(false);
   }
@@ -173,6 +175,7 @@ function AppWrapper(props: { children: ReactNode }) {
       await deployDSProxyContract();
     } catch (error) {
       console.log(error)
+      Sentry.captureException(error);
     }
     setTxActive(false);
   }

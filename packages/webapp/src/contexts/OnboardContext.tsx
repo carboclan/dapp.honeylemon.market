@@ -8,6 +8,7 @@ import { fromWei } from 'web3-utils';
 import FontFaceObserver from 'fontfaceobserver';
 
 import { networkName } from '../helpers/ethereumNetworkUtils';
+import * as Sentry from '@sentry/react';
 
 export type OnboardProviderProps = {
   dappId: string;
@@ -125,6 +126,7 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
       } catch (error) {
         console.log('Error initializing onboard');
         console.log(error);
+        Sentry.captureException(error);
       }
     }
     initializeOnboard();
@@ -149,6 +151,7 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
       const newGasPrice = !isNaN(Number(ethGasStationResponse.fast)) ? Number(ethGasStationResponse.fast)/10 : 35;
       setGasPrice(newGasPrice);
     } catch (error) {
+      Sentry.captureException(error);
       setGasPrice(35);
     }
   }

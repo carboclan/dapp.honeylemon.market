@@ -18,7 +18,6 @@ import {
   ExpansionPanelDetails,
   CircularProgressProps,
   Box,
-  Badge,
 } from '@material-ui/core';
 import { ExpandMore, RadioButtonUnchecked, MoreVert } from '@material-ui/icons';
 import { useOnboard } from '../contexts/OnboardContext';
@@ -30,6 +29,7 @@ import ActiveShortPositionModal from './ActiveShortPositionModal';
 import ExpiredLongPositionModal from './ExpiredLongPositionModal';
 import ExpiredShortPositionModal from './ExpiredShortPositionModal';
 import UnfilledOfferModal from './UnfilledOfferModal';
+import * as Sentry from '@sentry/react';
 
 
 const useStyles = makeStyles(({ spacing, palette, typography }) => ({
@@ -156,10 +156,14 @@ const PorfolioPage: React.SFC = () => {
     setIsWithdrawing(true);
     try {
       await honeylemonService.batchRedeem(address);
-      refreshPortfolio();
+      await new Promise(resolve => {
+        setTimeout(refreshPortfolio, 5000);
+        resolve();
+      })
     } catch (error) {
       console.log("Something went wrong during the withdrawl");
       console.log(error);
+      Sentry.captureException(error);
     }
     setIsWithdrawing(false);
   }
@@ -173,9 +177,14 @@ const PorfolioPage: React.SFC = () => {
     try {
       !!address &&
         await honeylemonService.redeemPosition(address, positionTokenAddress, marketContractAddress, amount, type)
+      await new Promise(resolve => {
+        setTimeout(refreshPortfolio, 5000);
+        resolve();
+      })
     } catch (error) {
       console.log("Something went wrong during the withdrawal");
       console.log(error);
+      Sentry.captureException(error);
     }
     setIsWithdrawing(false);
   }
@@ -408,7 +417,7 @@ const PorfolioPage: React.SFC = () => {
                 <Divider className={classes.sectionDivider} light variant='middle' />
                 <ExpansionPanel expanded={showOpenOrders}>
                   <ExpansionPanelSummary
-                    expandIcon={!isPortfolioRefreshing ? <ExpandMore /> : <CircularProgress className={classes.loadingSpinner} size={20} />}
+                    expandIcon={<ExpandMore />}
                     classes={{
                       content: classes.sectionHeading
                     }}
@@ -416,6 +425,7 @@ const PorfolioPage: React.SFC = () => {
                     <Typography variant='subtitle1' className={classes.sectionHeadingText}>
                       <b>{openOrdersMetadata.length > 0 && `${openOrdersMetadata.length} `}Open Offers (Unfilled Short)</b>
                     </Typography>
+                    {isPortfolioRefreshing && <CircularProgress className={classes.loadingSpinner} size={20} />}
                   </ExpansionPanelSummary>
                   <ExpansionPanelDetails>
                     <Table>
