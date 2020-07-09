@@ -200,6 +200,7 @@ function AppWrapper(props: { children: ReactNode }) {
         <Toolbar>
           <HoneyLemonLogo className={classes.logo} onClick={() => forwardTo('/')} />
           <Typography
+            align='center'
             className={clsx(classes.title,
               { [classes.hide]: drawerOpen })}
             onClick={() => forwardTo('/')}>

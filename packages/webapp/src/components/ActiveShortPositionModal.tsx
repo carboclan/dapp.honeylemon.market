@@ -58,10 +58,15 @@ const ActiveShortPositionModal: React.SFC<ActiveShortPositionModalProps> = ({ op
               <TableCell align='right'>{position.totalCost.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })} {PAYMENT_TOKEN_NAME}</TableCell>
             </TableRow>
             <TableRow>
+              <TableCell align='center' colSpan={2} style={{borderBottomWidth: 0}}>
+                Collateral
+              </TableCell>
+            </TableRow>
+            <TableRow>
               <TableCell>
-                Collateral Locked <br />
-                Collateral Payable <br />
-                Remaining Collateral <br />
+                Locked<br />
+                Payable<br />
+                Remaining<br />
               </TableCell>
               <TableCell align='right'>
                 {position.totalCollateralLocked.toLocaleString(undefined, { maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS })} {COLLATERAL_TOKEN_NAME} <br />
@@ -71,7 +76,7 @@ const ActiveShortPositionModal: React.SFC<ActiveShortPositionModalProps> = ({ op
             </TableRow>
             <TableRow>
               <TableCell colSpan={2}>
-                <Typography>
+                <Typography variant='caption'>
                   Your transaction was executed on Ethereum blockchain, check 
                   on <Link href={`${etherscanUrl}/tx/${position.transaction.id}`} target="_blank" rel='noopener' underline='always'>Etherscan</Link>: {`${displayAddress(position.transaction.id, 20)}`}
                 </Typography>
