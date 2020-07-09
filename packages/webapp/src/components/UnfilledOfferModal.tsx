@@ -39,7 +39,7 @@ const UnfilledOfferModal: React.SFC<UnfilledOfferModalProps> = ({ open, onClose,
       currentMRI
     }
   } = useHoneylemon();
-  const { address } = useOnboard();
+  const { address, gasPrice } = useOnboard();
   const classes = useStyles();
 
   const [isCancelling, setIsCancelling] = useState(false);
@@ -54,11 +54,14 @@ const UnfilledOfferModal: React.SFC<UnfilledOfferModalProps> = ({ open, onClose,
     setIsCancelling(true);
 
     try {
-      await honeylemonService.getCancelOrderTx(order)
-        .awaitTransactionSuccessAsync({
-          from: address,
-          gas: 1500000
-        });
+      const cancelTx = honeylemonService.getCancelOrderTx(order)
+      const gas = cancelTx.estimateGasAsyc({ from: address })
+
+      await cancelTx.awaitTransactionSuccessAsync({
+        from: address,
+        gas,
+        gasPrice
+      });
       await new Promise(resolve => {
         setTimeout(refreshPortfolio, 5000);
         resolve();
@@ -132,7 +135,7 @@ const UnfilledOfferModal: React.SFC<UnfilledOfferModalProps> = ({ open, onClose,
             </TableRow>
           </TableBody>
         </Table>
-        <Grid container justify='center' spacing={2} style={{padding: 16}}>
+        <Grid container justify='center' spacing={2} style={{ padding: 16 }}>
           <Grid item>
             <Button onClick={() => cancelOpenOrder(offer?.orderHash)} disabled={isCancelling} className={classes.cancelButton} fullWidth>
               Cancel Offer &nbsp;

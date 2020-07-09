@@ -192,63 +192,58 @@ const MiningStatsPage: React.SFC = () => {
             <TableBody>
               <TableRow>
                 <TableCell>
-                  <Typography>BTC Price</Typography>
-                  <Typography>24h Chg%</Typography>
+                  <Typography variant='caption'>BTC Price</Typography><br/>
+                  <Typography variant='caption'>24h Chg%</Typography>
                 </TableCell>
                 <TableCell align='right'>
-                  <Typography>$ {btcStats?.quote.price.toLocaleString(undefined, { maximumFractionDigits: 2 })}</Typography>
-                  <Typography className={clsx(
+                  <Typography variant='caption'>$ {btcStats?.quote.price.toLocaleString(undefined, { maximumFractionDigits: 2 })}</Typography><br/>
+                  <Typography variant='caption' className={clsx(
                     { [classes.decrease]: btcStats?.quote?.percentChange24h < 0 },
-                    { [classes.increase]: btcStats?.quote?.percentChange24h > 0 })}>{btcStats?.quote?.percentChange24h.toLocaleString(undefined, { maximumFractionDigits: 1 })}%
+                    { [classes.increase]: btcStats?.quote?.percentChange24h > 0 })}>
+                      {(btcStats?.quote?.percentChange24h > 0) ? '+' : ''} {btcStats?.quote?.percentChange24h.toLocaleString(undefined, { maximumFractionDigits: 1 })}%
                   </Typography>
                 </TableCell>
               </TableRow>
               <TableRow>
                 <TableCell>
-                  <Typography>Difficulty</Typography>
-                  <Typography>Last Adj Chg%</Typography>
+                  <Typography variant='caption'>Difficulty</Typography><br/>
+                  <Typography variant='caption'>Last Adj Chg%</Typography><br/>
+                  <Typography variant='caption'>Next Adj Date</Typography>
                 </TableCell>
                 <TableCell align='right'>
-                  <Typography>{btcStats?.difficulty?.current.toLocaleString(undefined, { maximumFractionDigits: 0 })}</Typography>
-                  <Typography className={clsx(
+                  <Typography variant='caption'>{btcStats?.difficulty?.current.toLocaleString(undefined, { maximumFractionDigits: 0 })}</Typography><br/>
+                  <Typography variant='caption' className={clsx(
                     { [classes.decrease]: difficultyChange < 0 },
                     { [classes.increase]: difficultyChange > 0 })}>
                     {`${(difficultyChange > 0) ? '+' : ''} ${difficultyChange.toLocaleString(undefined, { maximumFractionDigits: 1 })}`}%
-                  </Typography>
+                  </Typography><br/>
+                  <Typography variant='caption'>{dayjs(btcDifficultyAdjustmentDate).format('MMM DD, YYYY')}</Typography>
                 </TableCell>
               </TableRow>
               <TableRow>
-                <TableCell><Typography>Next Adj Date</Typography></TableCell>
+                <TableCell><Typography variant='caption'>24h Hashrate</Typography></TableCell>
                 <TableCell align='right'>
-                  <Typography>
-                    {dayjs(btcDifficultyAdjustmentDate).format('MMM DD, YYYY HH:mm')} UTC
-                  </Typography>
+                  <Typography variant='caption'>{(btcStats?.hashrate24h / 10 ** 9).toLocaleString(undefined, { maximumFractionDigits: 0 })} TH </Typography>
                 </TableCell>
               </TableRow>
               <TableRow>
-                <TableCell><Typography>24h Hashrate</Typography></TableCell>
+                <TableCell><Typography variant='caption'>24h Mining Revenue</Typography></TableCell>
                 <TableCell align='right'>
-                  <Typography>{(btcStats?.hashrate24h / 10 ** 9).toLocaleString(undefined, { maximumFractionDigits: 0 })} TH </Typography>
+                  <Typography variant='caption'>$ {btcStats?.reward24h?.total.toLocaleString(undefined, { maximumFractionDigits: 2 })}</Typography>
                 </TableCell>
               </TableRow>
               <TableRow>
-                <TableCell><Typography>24h Mining Revenue</Typography></TableCell>
+                <TableCell><Typography variant='caption'>% Block Rewards</Typography></TableCell>
                 <TableCell align='right'>
-                  <Typography>$ {btcStats?.reward24h?.total.toLocaleString(undefined, { maximumFractionDigits: 2 })}</Typography>
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell><Typography>% Block Rewards</Typography></TableCell>
-                <TableCell align='right'>
-                  <Typography>
+                  <Typography variant='caption'>
                     {(btcStats?.reward24h?.block / btcStats?.reward24h?.total * 100).toLocaleString(undefined, { maximumFractionDigits: 1 })} %
                     </Typography>
                 </TableCell>
               </TableRow>
               <TableRow>
-                <TableCell><Typography>% Transaction Fee</Typography></TableCell>
+                <TableCell><Typography variant='caption'>% Transaction Fee</Typography></TableCell>
                 <TableCell align='right'>
-                  <Typography>
+                  <Typography variant='caption'>
                     {(btcStats?.reward24h?.fees / btcStats?.reward24h?.total * 100).toLocaleString(undefined, { maximumFractionDigits: 1 })} %
                   </Typography>
                 </TableCell>
