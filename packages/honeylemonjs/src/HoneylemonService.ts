@@ -238,15 +238,17 @@ class HoneylemonService {
     takerAssetFillAmounts,
     takerAddress: string,
     gasPrice?: number) {
-    const signatures = signedOrders.map(o => o.signature);
-    const price = gasPrice ? Number(`${gasPrice}e9`) : 10e9; // Set to 10GWEI
-    const value = await this.get0xFeeForOrderBatch(price, signedOrders.length);
-
-    const gas = await this.contractWrappers.exchange
-      .batchFillOrKillOrders(signedOrders, takerAssetFillAmounts, signatures)
-      .estimateGasAsync({ from: takerAddress, value, gasPrice: price });
-
-    return gas;
+    try {
+      const signatures = signedOrders.map(o => o.signature);
+      const price = gasPrice ? `${gasPrice}` : `${10e9}`; // Set to 10GWEI
+      const value = await this.get0xFeeForOrderBatch(price, signedOrders.length);
+      const gas = await this.contractWrappers.exchange
+        .batchFillOrKillOrders(signedOrders, takerAssetFillAmounts, signatures)
+        .estimateGasAsync({ from: takerAddress, value });
+      return gas;
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   getFillOrdersTx(signedOrders, takerAssetFillAmounts) {
