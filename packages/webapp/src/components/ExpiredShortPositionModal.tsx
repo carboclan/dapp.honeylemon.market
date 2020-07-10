@@ -61,7 +61,7 @@ const ExpiredShortPositionModal: React.SFC<ExpiredShortPositionModalProps> = ({ 
           <TableBody>
             <TableRow>
               <TableCell>Contract Position</TableCell>
-              <TableCell>{position.contractName}</TableCell>
+              <TableCell align='right'>{position.contractName}</TableCell>
             </TableRow>
             <TableRow>
               <TableCell>
@@ -105,7 +105,7 @@ const ExpiredShortPositionModal: React.SFC<ExpiredShortPositionModalProps> = ({ 
             </TableRow>
             <TableRow>
               <TableCell colSpan={2}>
-                <Typography>
+                <Typography variant='caption'>
                   Your transaction was executed on Ethereum blockchain, check 
                   on <Link href={`${etherscanUrl}/tx/${position.transaction.id}`} target="_blank" rel='noopener' underline='always'>Etherscan</Link>: {`${displayAddress(position.transaction.id, 20)}`}
                 </Typography>
