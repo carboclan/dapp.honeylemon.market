@@ -306,11 +306,18 @@ const BuyContractPage: React.SFC = () => {
         orderGasPrice,
       );
 
-      const gas = Math.ceil(Number(new BigNumber(gasEstimate).multipliedBy(1.5).toString()));
+      const gasLimit = new BigNumber(gasEstimate).multipliedBy(1.5).decimalPlaces(0).toString();
 
+      // Hack to ensure imToken doesnt break
+      // @ts-ignore
+      (!!window.imToken) ?
       await tx.awaitTransactionSuccessAsync({
         from: address,
-        gas,
+        value
+      }) :  
+      await tx.awaitTransactionSuccessAsync({
+        from: address,
+        gas: gasLimit,
         gasPrice: orderGasPrice,
         value
       });
@@ -318,7 +325,6 @@ const BuyContractPage: React.SFC = () => {
       forwardTo('/portfolio')
     } catch (error) {
       console.log('Something went wrong buying this contract');
-      console.log(error);
       Sentry.captureException(error);
       setErrorMessage('There was an error creating the offer. Please try again later.')
     }
