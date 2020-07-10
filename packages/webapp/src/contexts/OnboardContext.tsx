@@ -135,10 +135,10 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
   const checkIsReady = async () => {
     const isReady = await onboard?.walletCheck();
     setIsReady(!!isReady);
-    !!isReady && 
-    Sentry.configureScope(function(scope) {
-      scope.setUser({"id": address, "network": networkName(network)});
-    });
+    !!isReady &&
+      Sentry.configureScope(function (scope) {
+        scope.setUser({ "id": address, "network": networkName(network) });
+      });
     return !!isReady;
   }
 
@@ -152,25 +152,35 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
     try {
       // const etherchainResponse = await (await fetch('https://www.etherchain.org/api/gasPriceOracle')).json();
       const ethGasStationResponse = await (await fetch(`https://ethgasstation.info/api/ethgasAPI.json?api-key=${process.env.REACT_APP_ETH_GAS_STATION_API_KEY}`)).json()
-      const newGasPrice = !isNaN(Number(ethGasStationResponse.fast)) ? Number(ethGasStationResponse.fast)/10 : 35;
+      const newGasPrice = !isNaN(Number(ethGasStationResponse.fast)) ? Number(ethGasStationResponse.fast) / 10 : 35;
+      console.log(`Settings new gas price ${newGasPrice} gwei`);
       setGasPrice(newGasPrice);
     } catch (error) {
       Sentry.captureException(error);
+      console.log(error);
+      console.log('Using 35 gwei as default')
       setGasPrice(35);
     }
   }
 
   // Gas Price poller
   useEffect(() => {
-    const getGasPrice = refreshGasPrice;
+    if (onboardProps.networkId === 1) {
+      console.log('Starting Gas Price Poller')
+      const getGasPrice = refreshGasPrice;
 
-    let poller: NodeJS.Timeout;
-    getGasPrice();
-    poller = setInterval(getGasPrice, 60000);
+      let poller: NodeJS.Timeout;
+      getGasPrice();
+      poller = setInterval(getGasPrice, 60000);
+      return () => {
+        clearInterval(poller);
+      }
+    } else {
+      console.log('You are not using mainnet. Defaulting to 10 gwei')
 
-    return () => {
-      clearInterval(poller);
-    }
+      setGasPrice(10);
+      
+    } 
   }, [])
 
   const onboardState = onboard?.getState();

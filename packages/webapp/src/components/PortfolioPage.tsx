@@ -501,6 +501,7 @@ const PorfolioPage: React.SFC = () => {
                       </TableHead>
                       <TableBody>
                         {expiredLongPositions.concat(expiredShortPositions)
+                          .filter(p => !p.canBeBatchRedeemed)
                           .sort((a, b) => a.settlementDate < b.settlementDate ? -1 : 1)
                           .map(p =>
                             <TableRow key={p.transaction.id}>

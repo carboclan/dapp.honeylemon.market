@@ -282,7 +282,7 @@ function AppWrapper(props: { children: ReactNode }) {
           </ListItem>
           <ListItem>
             <ListItemIcon>
-              <img src='eth.png' style={{ width: '40px' }} alt='eth logo' />
+              <img src='eth.png' style={{ width: '40px', height: '40px' }} alt='eth logo' />
             </ListItemIcon>
             <ListItemText
               primary={`${(ethBalance || 0).toLocaleString(undefined, {
@@ -300,7 +300,7 @@ function AppWrapper(props: { children: ReactNode }) {
           </ListItem>
           <ListItem>
             <ListItemIcon>
-              <img src='imBtc.png' style={{ width: '40px' }} alt='imbtc logo' />
+              <img src='imBtc.png' style={{ width: '40px', height: '40px' }}  alt='imbtc logo' />
             </ListItemIcon>
             <Switch
               color="primary"
@@ -323,7 +323,7 @@ function AppWrapper(props: { children: ReactNode }) {
           </ListItem>
           <ListItem>
             <ListItemIcon>
-              <img src='usdt.png' style={{ width: '40px' }} alt='usdt logo' />
+              <img src='usdt.png' style={{ width: '40px', height: '40px' }} alt='usdt logo' />
             </ListItemIcon>
             <Switch
               color="primary"
