@@ -23,6 +23,6 @@
   },
   "workspaces": {
     "packages": ["packages/*"],
-    "nohoist": ["**/truffle", "**/typechain"]
+    "nohoist": ["**/truffle", "**/typechain", "**/openzeppelin-solidity"]
   }
 }

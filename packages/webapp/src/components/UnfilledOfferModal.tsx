@@ -4,6 +4,7 @@ import { useHoneylemon } from '../contexts/HoneylemonContext';
 import dayjs from 'dayjs';
 import { useOnboard } from '../contexts/OnboardContext';
 import { COLLATERAL_TOKEN_DECIMALS } from '@honeylemon/honeylemonjs/lib/src';
+import * as Sentry from '@sentry/react';
 
 const useStyles = makeStyles(({ spacing, palette }) => ({
   loadingSpinner: {
@@ -39,7 +40,7 @@ const UnfilledOfferModal: React.SFC<UnfilledOfferModalProps> = ({ open, onClose,
       currentMRI
     }
   } = useHoneylemon();
-  const { address } = useOnboard();
+  const { address, gasPrice } = useOnboard();
   const classes = useStyles();
 
   const [isCancelling, setIsCancelling] = useState(false);
@@ -54,11 +55,14 @@ const UnfilledOfferModal: React.SFC<UnfilledOfferModalProps> = ({ open, onClose,
     setIsCancelling(true);
 
     try {
-      await honeylemonService.getCancelOrderTx(order)
-        .awaitTransactionSuccessAsync({
-          from: address,
-          gas: 1500000
-        });
+      const cancelTx = honeylemonService.getCancelOrderTx(order)
+      const gas = await cancelTx.estimateGasAsync({ from: address })
+      const price = Number(`${gasPrice}e9`);
+      await cancelTx.awaitTransactionSuccessAsync({
+        from: address,
+        gas,
+        gasPrice: price
+      });
       await new Promise(resolve => {
         setTimeout(refreshPortfolio, 5000);
         resolve();
@@ -66,6 +70,7 @@ const UnfilledOfferModal: React.SFC<UnfilledOfferModalProps> = ({ open, onClose,
       onClose();
     } catch (error) {
       console.log(error)
+      Sentry.captureException(error);
     }
     setIsCancelling(false)
   }
@@ -77,10 +82,6 @@ const UnfilledOfferModal: React.SFC<UnfilledOfferModalProps> = ({ open, onClose,
         <Table>
           <TableBody>
             <TableRow>
-              <TableCell>Listing Date</TableCell>
-              <TableCell align='right'>{dayjs(offerData?.listingDate).format('DD-MMM-YY HH:mm')}</TableCell>
-            </TableRow>
-            <TableRow>
               <TableCell>
                 Limit Price
               </TableCell>
@@ -90,7 +91,7 @@ const UnfilledOfferModal: React.SFC<UnfilledOfferModalProps> = ({ open, onClose,
             </TableRow>
             <TableRow>
               <TableCell>
-                Duration
+                Contract Duration
               </TableCell>
               <TableCell align='right'>
                 {CONTRACT_DURATION} Days
@@ -127,12 +128,16 @@ const UnfilledOfferModal: React.SFC<UnfilledOfferModalProps> = ({ open, onClose,
               </TableCell>
             </TableRow>
             <TableRow>
+              <TableCell>Listing Date</TableCell>
+              <TableCell align='right'>{dayjs(offerData?.listingDate).format('DD-MMM-YY HH:mm')}</TableCell>
+            </TableRow>
+            <TableRow>
               <TableCell>Offer Valid Till</TableCell>
               <TableCell align='right'>{dayjs(offerData?.expirationDate).format('DD-MMM-YY HH:mm')}</TableCell>
             </TableRow>
           </TableBody>
         </Table>
-        <Grid container justify='center' spacing={2} style={{padding: 16}}>
+        <Grid container justify='center' spacing={2} style={{ padding: 16 }}>
           <Grid item>
             <Button onClick={() => cancelOpenOrder(offer?.orderHash)} disabled={isCancelling} className={classes.cancelButton} fullWidth>
               Cancel Offer &nbsp;

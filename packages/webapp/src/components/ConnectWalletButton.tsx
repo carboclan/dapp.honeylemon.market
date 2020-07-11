@@ -6,7 +6,7 @@ const useStyles = makeStyles(({ palette, spacing }) => ({
   button: {
     paddingTop: spacing(1),
     paddingBottom: spacing(1),
-    fontSize: 20,
+    fontWeight: 'bold'
   },
   connectSpacer: {
     paddingTop: `${spacing(8)}px !important`,
@@ -46,7 +46,7 @@ const ConnectWalletButton: React.SFC = () => {
         className={classes.button}
         fullWidth
         disabled={!onboard || isConnecting}>
-        Connect wallet &nbsp;
+        CONNECT WALLET TO TRADE&nbsp;
         {isConnecting && <CircularProgress className={classes.loadingSpinner} size={20} />}
       </Button>
     )

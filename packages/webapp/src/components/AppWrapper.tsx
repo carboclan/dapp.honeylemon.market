@@ -1,19 +1,22 @@
-import React, { ReactNode, useRef } from 'react';
+import React, { ReactNode, useRef, useEffect, useState } from 'react';
 import clsx from 'clsx';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
 import { Drawer, AppBar, Toolbar, Divider, IconButton, Typography, ListItem, ListItemIcon, ListItemText, List, Avatar, Link, Button, Switch } from '@material-ui/core';
-import { Menu, ChevronLeft, ChevronRight, AccountBalance, Assessment, MonetizationOn, Whatshot, ExitToApp, Home } from '@material-ui/icons';
+import { Menu, ChevronLeft, ChevronRight, AccountBalance, Assessment, MonetizationOn, Whatshot, ExitToApp, Home, Info, OpenInNew, Settings } from '@material-ui/icons';
 import Blockies from 'react-blockies';
 
 import { forwardTo } from '../helpers/history';
 import { ReactComponent as HoneyLemonLogo } from '../images/honeylemon-logo.svg';
 import { useOnboard } from '../contexts/OnboardContext';
 import { useHoneylemon, TokenType } from '../contexts/HoneylemonContext';
+import TokenInfoModal from '../components/TokenInfoModal';
+
 import Footer from './Footer';
 import { useOnClickOutside } from '../helpers/useOnClickOutside';
 import { networkName } from '../helpers/ethereumNetworkUtils';
 import { displayAddress } from '../helpers/displayAddress';
 import { useLocation } from 'react-router-dom';
+import * as Sentry from '@sentry/react';
 
 const drawerWidth = 300;
 const footerHeight = 150;
@@ -82,17 +85,33 @@ const useStyles = makeStyles(({ transitions, palette, mixins, spacing }) => ({
   contentWrapper: {
     paddingBottom: footerHeight,
   },
+  deployWalletButton: {
+    borderColor: palette.primary.main,
+    borderWidth: 2,
+    borderStyle: 'solid',
+    color: palette.primary.main,
+    backgroundColor: '#424242',
+    '&:hover': {
+      backgroundColor: '#303030',
+    },
+  },
+  menuHeading: {
+    paddingTop: spacing(1),
+    color: palette.secondary.main,
+  }
 }));
 
 function AppWrapper(props: { children: ReactNode }) {
   const classes = useStyles();
   const theme = useTheme();
   const location = useLocation();
-  const [open, setOpen] = React.useState(false);
-  const { isReady, address, network, ethBalance, resetOnboard } = useOnboard();
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [txActive, setTxActive] = useState(false);
+
+  const { isReady, address, network, ethBalance, resetOnboard, isMobile } = useOnboard();
   const {
-    isDsProxyDeployed, 
-    dsProxyAddress, 
+    isDsProxyDeployed,
+    dsProxyAddress,
     deployDSProxyContract,
     collateralTokenBalance,
     collateralTokenAllowance,
@@ -102,51 +121,75 @@ function AppWrapper(props: { children: ReactNode }) {
     paymentTokenAllowance,
     PAYMENT_TOKEN_DECIMALS,
     PAYMENT_TOKEN_NAME,
-    approveToken
+    approveToken,
+    showTokenInfoModal,
+    setShowTokenInfoModal
   } = useHoneylemon();
 
   const handleLogout = () => {
     resetOnboard();
-    setOpen(false);
+    setDrawerOpen(false);
     forwardTo('/');
   }
 
   const handleDrawerOpen = () => {
-    setOpen(true);
+    setDrawerOpen(true);
   };
 
   const handleDrawerClose = () => {
-    setOpen(false);
+    setDrawerOpen(false);
   };
 
   const handleNavigate = (path: string) => {
     forwardTo(path);
-    setOpen(false);
+    isMobile && setDrawerOpen(false);
   }
 
-  const handleToggleTokenApproval = (tokenType: TokenType) => {
-    switch (tokenType) {
-      case TokenType.CollateralToken: {
-        (collateralTokenAllowance === 0) ? 
-          approveToken(TokenType.CollateralToken) :
-          approveToken(TokenType.CollateralToken, 0);
-        break;
+  const handleToggleTokenApproval = async (tokenType: TokenType) => {
+    setTxActive(true);
+    try {
+      switch (tokenType) {
+        case TokenType.CollateralToken: {
+          (collateralTokenAllowance === 0) ?
+            await approveToken(TokenType.CollateralToken) :
+            await approveToken(TokenType.CollateralToken, 0);
+          break;
+        }
+        case TokenType.PaymentToken: {
+          (paymentTokenAllowance === 0) ?
+            await approveToken(TokenType.PaymentToken) :
+            await approveToken(TokenType.PaymentToken, 0);
+          break;
+        }
       }
-      case TokenType.PaymentToken: {
-        (paymentTokenAllowance === 0) ? 
-          approveToken(TokenType.PaymentToken) :
-          approveToken(TokenType.PaymentToken, 0);
-        break;
-      }
-    }    
+    } catch (error) {
+      console.log(error)
+      Sentry.captureException(error);
+    }
+    setTxActive(false);
+  }
+
+  const handleDeployDSProxy = async () => {
+    setTxActive(true);
+    try {
+      await deployDSProxyContract();
+    } catch (error) {
+      console.log(error)
+      Sentry.captureException(error);
+    }
+    setTxActive(false);
   }
 
   const ref = useRef(null);
   useOnClickOutside(ref, () => {
-    if (open) {
-      setOpen(false)
+    if (drawerOpen && isMobile) {
+      setDrawerOpen(false)
     }
   })
+
+  useEffect(() => {
+    isReady && setDrawerOpen(!isMobile)
+  }, [isReady])
 
   const etherscanUrl = (network === 1) ? 'https://etherscan.io' : `https://${networkName(network)}.etherscan.io`
 
@@ -155,28 +198,29 @@ function AppWrapper(props: { children: ReactNode }) {
       <AppBar
         position="fixed"
         className={clsx(classes.appBar, {
-          [classes.appBarShift]: open,
+          [classes.appBarShift]: drawerOpen,
         })}>
         <Toolbar>
           <HoneyLemonLogo className={classes.logo} onClick={() => forwardTo('/')} />
           <Typography
+            align='center'
             className={clsx(classes.title,
-              { [classes.hide]: open })}
+              { [classes.hide]: drawerOpen })}
             onClick={() => forwardTo('/')}>
-            honeylemon.market
+            Honeylemon
           </Typography>
           <IconButton
             aria-label="open drawer"
             edge="end"
             onClick={handleDrawerOpen}
             className={clsx(classes.hamburger,
-              { [classes.hide]: open },
+              { [classes.hide]: drawerOpen },
               { [classes.hide]: !isReady })} >
             <Menu fontSize='large' />
           </IconButton>
         </Toolbar>
       </AppBar>
-      <main className={clsx(classes.content, { [classes.contentDrawerOpen]: open })}>
+      <main className={clsx(classes.content, { [classes.contentDrawerOpen]: drawerOpen })}>
         <div className={classes.contentWrapper}>
           {props.children}
         </div>
@@ -185,14 +229,14 @@ function AppWrapper(props: { children: ReactNode }) {
       <Drawer
         ref={ref}
         className={clsx(classes.drawer, {
-          [classes.drawerOpen]: open,
+          [classes.drawerOpen]: drawerOpen,
         })}
         variant="persistent"
         anchor="right"
-        open={open}
+        open={drawerOpen}
         classes={{
           paper: clsx(classes.drawerPaper, {
-            [classes.drawerOpen]: open
+            [classes.drawerOpen]: drawerOpen
           }),
         }}
       >
@@ -226,6 +270,91 @@ function AppWrapper(props: { children: ReactNode }) {
         </List>
         <Divider />
         <List>
+          <ListItem onClick={() => setShowTokenInfoModal(true)} className={classes.menuHeading}>
+            <ListItemIcon>
+              <IconButton style={{ padding: 2.5 }}>
+                <Settings color='secondary' fontSize='large' />
+              </IconButton>
+            </ListItemIcon>
+            <ListItemText>
+              Manage My Wallet <Info fontSize='small' color='secondary'/>
+            </ListItemText>
+          </ListItem>
+          <ListItem>
+            <ListItemIcon>
+              <img src='eth.png' style={{ width: '40px', height: '40px' }} alt='eth logo' />
+            </ListItemIcon>
+            <ListItemText
+              primary={`${(ethBalance || 0).toLocaleString(undefined, {
+                useGrouping: true,
+                maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS,
+              })}`}
+              secondary='ETH'
+              primaryTypographyProps={{
+                align: 'right',
+                noWrap: true,
+              }}
+              secondaryTypographyProps={{
+                align: 'right'
+              }} />
+          </ListItem>
+          <ListItem>
+            <ListItemIcon>
+              <img src='imBtc.png' style={{ width: '40px', height: '40px' }}  alt='imbtc logo' />
+            </ListItemIcon>
+            <Switch
+              color="primary"
+              checked={(collateralTokenAllowance > 0)}
+              onChange={() => handleToggleTokenApproval(TokenType.CollateralToken)}
+              disabled={txActive} />
+            <ListItemText
+              primary={`${collateralTokenBalance.toLocaleString(undefined, {
+                useGrouping: true,
+                maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS,
+              })}`}
+              secondary={COLLATERAL_TOKEN_NAME}
+              primaryTypographyProps={{
+                align: 'right',
+                noWrap: true,
+              }}
+              secondaryTypographyProps={{
+                align: 'right'
+              }} />
+          </ListItem>
+          <ListItem>
+            <ListItemIcon>
+              <img src='usdt.png' style={{ width: '40px', height: '40px' }} alt='usdt logo' />
+            </ListItemIcon>
+            <Switch
+              color="primary"
+              checked={(paymentTokenAllowance > 0)}
+              disabled={txActive}
+              onChange={() => handleToggleTokenApproval(TokenType.PaymentToken)} />
+            <ListItemText
+              primary={`${paymentTokenBalance.toLocaleString(undefined, {
+                useGrouping: true,
+                maximumFractionDigits: PAYMENT_TOKEN_DECIMALS,
+                minimumFractionDigits: 2,
+              })}`}
+              secondary={PAYMENT_TOKEN_NAME}
+              primaryTypographyProps={{
+                align: 'right',
+                noWrap: true,
+              }}
+              secondaryTypographyProps={{
+                align: 'right'
+              }} />
+          </ListItem>
+          <ListItem>
+            <ListItemText primaryTypographyProps={{
+              align: 'right'
+            }}>
+              <Link href='https://tokenlon.im/' target="_blank" rel='noopener' underline='always'>Get More Tokens <OpenInNew fontSize='small' /></Link>
+            </ListItemText>
+          </ListItem>
+        </List>
+        <Divider />
+        <List>
           <ListItem>
             <ListItemIcon>
               <Avatar>
@@ -237,11 +366,11 @@ function AppWrapper(props: { children: ReactNode }) {
                 align: 'right',
                 noWrap: true
               }}
-              secondary='Your Wallet'
+              secondary='Connected Wallet'
               secondaryTypographyProps={{
                 align: 'right'
               }}>
-              <Link href={`${etherscanUrl}/address/${address}`} target="_blank" rel='noopener' underline='always' >
+              <Link href={`${etherscanUrl}/address/${address}`} target="_blank" rel='noopener' underline='always'>
                 {displayAddress(address || '0x', 20)}
               </Link>
             </ListItemText>
@@ -268,90 +397,26 @@ function AppWrapper(props: { children: ReactNode }) {
               </ListItemText>
             </ListItem> :
             <ListItem>
-              <Button 
-                color='primary' 
+              <Button
                 variant='contained'
-                onClick={deployDSProxyContract} 
+                className={classes.deployWalletButton}
+                onClick={handleDeployDSProxy}
+                disabled={txActive}
                 fullWidth>
-                  Create honeylemon vault
+                Honeylemon Vault
               </Button>
             </ListItem>
           }
         </List>
         <Divider />
         <List>
-          <ListItem>
-            <ListItemIcon>
-              <img src='eth.png' style={{ width: '40px' }} alt='eth logo' />
-            </ListItemIcon>
-            <ListItemText
-              primary={`${(ethBalance || 0).toLocaleString(undefined, {
-                useGrouping: true,
-                maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS,
-              })}`}
-              secondary='ETH'
-              primaryTypographyProps={{
-                align: 'right',
-                noWrap: true,
-              }}
-              secondaryTypographyProps={{
-                align: 'right'
-              }} />
+          <ListItem button onClick={handleLogout}>
+            <ListItemIcon><ExitToApp /></ListItemIcon>
+            <ListItemText primary="Disconnect Wallet" />
           </ListItem>
-          <ListItem>
-            <ListItemIcon>
-              <img src='imBtc.png' style={{ width: '40px' }} alt='imbtc logo' />
-            </ListItemIcon>
-            <Switch 
-              color="primary" 
-              checked={(collateralTokenAllowance > 0)} 
-              onChange={() => handleToggleTokenApproval(TokenType.CollateralToken)} />
-            <ListItemText
-              primary={`${collateralTokenBalance.toLocaleString(undefined, {
-                useGrouping: true,
-                maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS,
-              })}`}
-              secondary={COLLATERAL_TOKEN_NAME}
-              primaryTypographyProps={{
-                align: 'right',
-                noWrap: true,
-              }}
-              secondaryTypographyProps={{
-                align: 'right'
-              }} />
-          </ListItem>
-          <ListItem>
-            <ListItemIcon>
-              <img src='usdt.png' style={{ width: '40px' }} alt='usdt logo' />
-            </ListItemIcon>
-            <Switch
-              color="primary"
-              checked={(paymentTokenAllowance > 0)} 
-              onChange={() => handleToggleTokenApproval(TokenType.PaymentToken)} />
-            <ListItemText
-              primary={`${paymentTokenBalance.toLocaleString(undefined, {
-                useGrouping: true,
-                maximumFractionDigits: PAYMENT_TOKEN_DECIMALS,
-                minimumFractionDigits: 2,
-              })}`}
-              secondary={PAYMENT_TOKEN_NAME}
-              primaryTypographyProps={{
-                align: 'right',
-                noWrap: true,
-              }}
-              secondaryTypographyProps={{
-                align: 'right'
-              }} />
-          </ListItem>
-          <Divider />
-          <List>
-            <ListItem button onClick={handleLogout}>
-              <ListItemIcon><ExitToApp /></ListItemIcon>
-              <ListItemText primary="Disconnect Wallet" />
-            </ListItem>
-          </List>
         </List>
       </Drawer>
+      <TokenInfoModal open={showTokenInfoModal} onClose={() => setShowTokenInfoModal(false)} />
     </div>
   );
 }

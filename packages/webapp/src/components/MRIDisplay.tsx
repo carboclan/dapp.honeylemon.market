@@ -9,9 +9,6 @@ const useStyles = makeStyles(({ spacing, palette }) => ({
     textAlign: 'center',
     padding: spacing(2),
   },
-  mriModalLink: {
-    color: palette.common.white,
-  }
 }))
 
 const MRIDisplay: React.SFC = () => {
@@ -27,19 +24,21 @@ const MRIDisplay: React.SFC = () => {
     <>
       <Paper className={classes.mriInfo}>
         <Link
-          variant='body1'
-          href='#' underline='always'
-          onClick={() => setShowMRIInformationModal(true)}
-          className={classes.mriModalLink}>
-          BTC Mining Revenue Index (MRI_BTC)
+          variant='body2'
+          href='#' 
+          onClick={() => setShowMRIInformationModal(true)}>
+          <b>BTC Mining Revenue Index (MRI_BTC)</b>
           <Info fontSize='small' />
         </Link>
+        <Typography variant='body2'>
+          Network Daily Average Mining Revenue
+        </Typography>
         {currentMRI > 0 ?
           <>
-            <Typography align='center'>{`BTC ${currentMRI.toLocaleString(undefined, { maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS })}/TH/Day`}</Typography>
-            <Typography align='center'>{`(~$${(currentMRI * currentBTCSpotPrice).toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}/TH/Day)`}</Typography>
+            <Typography align='center' variant='body2'>{`BTC ${currentMRI.toLocaleString(undefined, { maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS })}/TH/Day`}</Typography>
+            <Typography align='center' variant='body2'>{`(~$${(currentMRI * currentBTCSpotPrice).toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}/TH/Day)`}</Typography>
           </> :
-          <Typography>Loading...</Typography>
+          <Typography variant='body2'>Loading...</Typography>
         }
       </Paper>
       <MRIInformationModal open={showMRIInformationModal} onClose={() => setShowMRIInformationModal(false)} />

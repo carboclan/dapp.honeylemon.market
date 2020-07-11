@@ -21,7 +21,7 @@ import {
 } from '@material-ui/core';
 import { ExpandMore, RadioButtonUnchecked, MoreVert } from '@material-ui/icons';
 import { useOnboard } from '../contexts/OnboardContext';
-import { useHoneylemon, PositionStatus } from '../contexts/HoneylemonContext';
+import { useHoneylemon, PositionStatus, PositionType } from '../contexts/HoneylemonContext';
 import { usePrevious } from '../helpers/usePrevious';
 import dayjs from 'dayjs';
 import ActiveLongPositionModal from './ActiveLongPositionModal';
@@ -29,9 +29,10 @@ import ActiveShortPositionModal from './ActiveShortPositionModal';
 import ExpiredLongPositionModal from './ExpiredLongPositionModal';
 import ExpiredShortPositionModal from './ExpiredShortPositionModal';
 import UnfilledOfferModal from './UnfilledOfferModal';
+import * as Sentry from '@sentry/react';
 
 
-const useStyles = makeStyles(({ spacing, palette }) => ({
+const useStyles = makeStyles(({ spacing, palette, typography }) => ({
   icon: {
     marginLeft: spacing(1),
   },
@@ -63,7 +64,7 @@ const useStyles = makeStyles(({ spacing, palette }) => ({
   },
   sectionHeading: {
     justifyContent: 'space-between',
-  }
+  },
 }))
 
 const TimeRemaining = (
@@ -116,9 +117,12 @@ const PorfolioPage: React.SFC = () => {
     expiredShortPositions
   } = portfolioData;
 
-  const [activeTab, setActiveTab] = useState<'active' | 'expired'>('active')
-  const [longCollateralForWithdraw, setLongCollateralForWithdraw] = useState<number>(0);
-  const [shortCollateralForWithdraw, setShortCollateralForWithdraw] = useState<number>(0);
+  const [activeTab, setActiveTab] = useState<'active' | 'withdraw' | 'expired'>('active')
+  const [longCollateralForBatchWithdraw, setLongCollateralForBatchWithdraw] = useState<number>(0);
+  const [shortCollateralForBatchWithdraw, setShortCollateralForBatchWithdraw] = useState<number>(0);
+
+  const [longCollateralForIndividualWithdraw, setLongCollateralForIndividualWithdraw] = useState<number>(0);
+  const [shortCollateralForIndividualWithdraw, setShortCollateralForIndividualWithdraw] = useState<number>(0);
 
   const [isWithdrawing, setIsWithdrawing] = useState(false);
 
@@ -134,8 +138,6 @@ const PorfolioPage: React.SFC = () => {
   const [showActiveShortPositionModal, setShowActiveShortPositionModal] = useState(false);
   const [activeShortPositionModalIndex, setActiveShortPositionModalIndex] = useState(-1);
 
-  const [showPendingWithdraw, setShowPendingWithdraw] = useState(false);
-
   const [showExpiredLongPositions, setShowExpiredLongPositions] = useState(false);
   const [showExpiredLongPositionModal, setShowExpiredLongPositionModal] = useState(false);
   const [expiredLongPositionModalIndex, setExpiredLongPositionModalIndex] = useState(-1);
@@ -144,18 +146,43 @@ const PorfolioPage: React.SFC = () => {
   const [showExpiredShortPositionModal, setShowExpiredShortPositionModal] = useState(false);
   const [expiredShortPositionModalIndex, setExpiredShortPositionModalIndex] = useState(-1);
 
-  const handleSetActiveTab = (event: React.ChangeEvent<{}>, newValue: 'active' | 'expired') => {
+  const handleSetActiveTab = (event: React.ChangeEvent<{}>, newValue: "active" | "withdraw" | "expired") => {
     setActiveTab(newValue);
   };
 
-  const withdrawAllAvailable = async () => {
+  const batchWithdraw = async () => {
     setIsWithdrawing(true);
     try {
       await honeylemonService.batchRedeem(address);
-      refreshPortfolio();
+      await new Promise(resolve => {
+        setTimeout(refreshPortfolio, 5000);
+        resolve();
+      })
     } catch (error) {
       console.log("Something went wrong during the withdrawl");
       console.log(error);
+      Sentry.captureException(error);
+    }
+    setIsWithdrawing(false);
+  }
+
+  const withdrawPosition = async (
+    positionTokenAddress: string,
+    marketContractAddress: string,
+    amount: string,
+    type: PositionType) => {
+    setIsWithdrawing(true);
+    try {
+      !!address &&
+        await honeylemonService.redeemPosition(address, positionTokenAddress, marketContractAddress, amount, type)
+      await new Promise(resolve => {
+        setTimeout(refreshPortfolio, 5000);
+        resolve();
+      })
+    } catch (error) {
+      console.log("Something went wrong during the withdrawal");
+      console.log(error);
+      Sentry.captureException(error);
     }
     setIsWithdrawing(false);
   }
@@ -172,9 +199,6 @@ const PorfolioPage: React.SFC = () => {
     setShowActiveShortPositions(!showActiveShortPositions);
   }
 
-  const handleTogglePendingWithdrawPanel = () => {
-    setShowPendingWithdraw(!showPendingWithdraw);
-  }
   const handleToggleExpiredLongPositionsPanel = () => {
     setShowExpiredLongPositions(!showExpiredLongPositions);
   }
@@ -255,16 +279,28 @@ const PorfolioPage: React.SFC = () => {
   ])
 
   useEffect(() => {
-    const longCollateralAvailableToWithdraw = expiredLongPositions
-      .filter(p => p.status === PositionStatus.withdrawalPending)
+    const longCollateralForBatchWithdraw = expiredLongPositions
+      .filter(p => p.status === PositionStatus.withdrawalPending && p.canBeBatchRedeemed)
       .reduce((total: Number, position: any) => total += position?.finalReward, 0)
-    setLongCollateralForWithdraw(longCollateralAvailableToWithdraw);
+    setLongCollateralForBatchWithdraw(longCollateralForBatchWithdraw);
 
-    const shortCollateralAvailableToWithdraw = expiredShortPositions
-      .filter(p => p.status === PositionStatus.withdrawalPending)
+    const shortCollateralForBatchWithdraw = expiredShortPositions
+      .filter(p => p.status === PositionStatus.withdrawalPending && p.canBeBatchRedeemed)
       .reduce((total: Number, position: any) => total += position?.finalReward, 0);
-    setShortCollateralForWithdraw(shortCollateralAvailableToWithdraw);
+    setShortCollateralForBatchWithdraw(shortCollateralForBatchWithdraw);
+
+    const longCollateralForIndividualWithdraw = expiredLongPositions
+      .filter(p => p.status === PositionStatus.withdrawalPending && !p.canBeBatchRedeemed)
+      .reduce((total: Number, position: any) => total += position?.finalReward, 0)
+    setLongCollateralForIndividualWithdraw(longCollateralForIndividualWithdraw);
+
+    const shortCollateralForIndividualWithdraw = expiredShortPositions
+      .filter(p => p.status === PositionStatus.withdrawalPending && !p.canBeBatchRedeemed)
+      .reduce((total: Number, position: any) => total += position?.finalReward, 0);
+    setShortCollateralForIndividualWithdraw(shortCollateralForIndividualWithdraw);
   }, [expiredLongPositions, expiredShortPositions])
+
+  const showWithdrawTab = (longCollateralForBatchWithdraw + shortCollateralForBatchWithdraw + longCollateralForIndividualWithdraw + shortCollateralForIndividualWithdraw) > 0;
 
   return (
     <>
@@ -279,84 +315,43 @@ const PorfolioPage: React.SFC = () => {
             indicatorColor="secondary"
             variant='fullWidth'>
             <Tab label="Active" value='active' />
+            {showWithdrawTab && <Tab label="Withdraw" value='withdraw' />}
             <Tab label="Expired" value='expired' />
           </Tabs>
           <div className={classes.tabContent}>
             {activeTab === 'active' ?
               <>
-                <ExpansionPanel expanded={showOpenOrders}>
-                  <ExpansionPanelSummary
-                    expandIcon={!isPortfolioRefreshing ? <ExpandMore /> : <CircularProgress className={classes.loadingSpinner} size={20} />}
-                    classes={{
-                      content: classes.sectionHeading
-                    }}
-                    IconButtonProps={{ onClick: handleToggleOpenOrdersPanel }}>
-                    <Typography variant='h6' className={classes.sectionHeadingText}>
-                      Unfilled Positions (Open Offers)
-                    </Typography>
-                  </ExpansionPanelSummary>
-                  <ExpansionPanelDetails>
-                    <Table>
-                      <TableHead>
-                        <TableRow>
-                          <TableCell>Price ($/TH/Day)</TableCell>
-                          <TableCell align='center'>Quantity (TH)</TableCell>
-                          <TableCell></TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {openOrdersMetadata && openOrdersMetadata?.map((order, i) =>
-                          <TableRow key={order.orderHash}>
-                            <TableCell>${Number(order?.price.dividedBy(CONTRACT_DURATION).toString()).toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}</TableCell>
-                            <TableCell align='center'>{order?.remainingFillableMakerAssetAmount.toLocaleString(undefined, { maximumFractionDigits: 0 })}</TableCell>
-                            <TableCell align='right'>
-                              <MoreVert onClick={() => handleShowUnfilledOfferDetails(i)} style={{ cursor: 'pointer' }} />
-                            </TableCell>
-                          </TableRow>
-                        )}
-                        {!isPortfolioRefreshing && openOrdersMetadata.length === 0 &&
-                          <TableRow>
-                            <TableCell colSpan={3} align='center' className={classes.placeholderRow}>
-                              No Unfilled Positions (Open Orders)
-                            </TableCell>
-                          </TableRow>
-                        }
-                      </TableBody>
-                    </Table>
-                  </ExpansionPanelDetails>
-                </ExpansionPanel>
-                <Divider className={classes.sectionDivider} light variant='middle' />
                 <ExpansionPanel expanded={showActiveLongPositions}>
                   <ExpansionPanelSummary
-                    expandIcon={!isPortfolioRefreshing ? <ExpandMore /> : <CircularProgress className={classes.loadingSpinner} size={20} />}
+                    expandIcon={<ExpandMore />}
                     classes={{
                       content: classes.sectionHeading
                     }}
                     IconButtonProps={{ onClick: handleToggleActiveLongPositionsPanel }}>
-                    <Typography variant='h6' className={classes.sectionHeadingText}>
-                      Long Positions (Contracts Bought)
+                    <Typography variant='subtitle1' className={classes.sectionHeadingText}>
+                      <b>{activeLongPositions.length > 0 && `${activeLongPositions.length} `}Contracts Bought (Long)</b>
                     </Typography>
+                    {isPortfolioRefreshing &&
+                      <CircularProgress className={classes.loadingSpinner} size={20} />}
                   </ExpansionPanelSummary>
                   <ExpansionPanelDetails>
                     <Table>
                       <TableHead>
                         <TableRow>
-                          <TableCell>Settlement Date</TableCell>
                           <TableCell align='center'>Days till Expiration</TableCell>
                           <TableCell align='center'>Cost ({PAYMENT_TOKEN_NAME})</TableCell>
-                          <TableCell align='center'>Receivable ({COLLATERAL_TOKEN_NAME})</TableCell>
+                          <TableCell align='center'>Revenue Accrued ({COLLATERAL_TOKEN_NAME})</TableCell>
                           <TableCell></TableCell>
                         </TableRow>
                       </TableHead>
                       <TableBody>
                         {activeLongPositions && activeLongPositions?.map((position: any, i) =>
                           <TableRow key={i}>
-                            <TableCell>{dayjs(position.settlementDate).format('DD-MMM-YY')}</TableCell>
                             <TableCell align='center'>
                               <TimeRemaining totalDuration={CONTRACT_DURATION} remainingDuration={position.daysToExpiration} unitLabel='d' />
                             </TableCell>
-                            <TableCell align='center'>{position.totalCost.toLocaleString(undefined, { maximumFractionDigits: 2 })}</TableCell>
-                            <TableCell align='center'>{position.pendingReward.toLocaleString(undefined, { maximumFractionDigits: 2 })}</TableCell>
+                            <TableCell align='center'>{position.totalCost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
+                            <TableCell align='center'>{position.pendingReward.toLocaleString(undefined, { maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS })}</TableCell>
                             <TableCell align='right'><MoreVert onClick={() => handleShowActiveLongPositionDetails(i)} style={{ cursor: 'pointer' }} /></TableCell>
                           </TableRow>
                         )}
@@ -374,20 +369,21 @@ const PorfolioPage: React.SFC = () => {
                 <Divider className={classes.sectionDivider} light variant='middle' />
                 <ExpansionPanel expanded={showActiveShortPositions}>
                   <ExpansionPanelSummary
-                    expandIcon={!isPortfolioRefreshing ? <ExpandMore /> : <CircularProgress className={classes.loadingSpinner} size={20} />}
+                    expandIcon={<ExpandMore />}
                     classes={{
                       content: classes.sectionHeading
                     }}
                     IconButtonProps={{ onClick: handleToggleActiveShortPositionsPanel }}>
-                    <Typography variant='h6' className={classes.sectionHeadingText}>
-                      Short Positions (Contracts Offered)
+                    <Typography variant='subtitle1' className={classes.sectionHeadingText}>
+                      <b>{activeShortPositions.length > 0 && `${activeShortPositions.length} `}Contracts Offered (Short)</b>
                     </Typography>
+                    {isPortfolioRefreshing &&
+                      <CircularProgress className={classes.loadingSpinner} size={20} />}
                   </ExpansionPanelSummary>
                   <ExpansionPanelDetails>
                     <Table>
                       <TableHead>
                         <TableRow>
-                          <TableCell>Settlement Date</TableCell>
                           <TableCell align='center'>Days till Expiration</TableCell>
                           <TableCell align='center'>Received ({PAYMENT_TOKEN_NAME})</TableCell>
                           <TableCell align='center'>Collateral Locked ({COLLATERAL_TOKEN_NAME})</TableCell>
@@ -397,11 +393,10 @@ const PorfolioPage: React.SFC = () => {
                       <TableBody>
                         {activeShortPositions && activeShortPositions?.map((position: any, i) =>
                           <TableRow key={i}>
-                            <TableCell>{dayjs(position.settlementDate).format('DD-MMM-YY')}</TableCell>
                             <TableCell align='center'>
                               <TimeRemaining totalDuration={CONTRACT_DURATION} remainingDuration={position.daysToExpiration} unitLabel='d' />
                             </TableCell>
-                            <TableCell align='center'>{position.totalCost.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}</TableCell>
+                            <TableCell align='center'>{position.totalCost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
                             <TableCell align='center'>{position.totalCollateralLocked.toLocaleString(undefined, { maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS })}</TableCell>
                             <TableCell align='right'><MoreVert onClick={() => handleShowActiveShortPositionDetails(i)} style={{ cursor: 'pointer' }} /></TableCell>
                           </TableRow>
@@ -409,8 +404,53 @@ const PorfolioPage: React.SFC = () => {
                         {!isPortfolioRefreshing && activeShortPositions.length === 0 &&
                           <TableRow>
                             <TableCell colSpan={5} align='center' className={classes.placeholderRow}>
-                              No Active Long Positions
-                          </TableCell>
+                              No Active Short Positions
+                            </TableCell>
+                          </TableRow>
+                        }
+                      </TableBody>
+                    </Table>
+                  </ExpansionPanelDetails>
+                </ExpansionPanel>
+                <Divider className={classes.sectionDivider} light variant='middle' />
+                <ExpansionPanel expanded={showOpenOrders}>
+                  <ExpansionPanelSummary
+                    expandIcon={<ExpandMore />}
+                    classes={{
+                      content: classes.sectionHeading
+                    }}
+                    IconButtonProps={{ onClick: handleToggleOpenOrdersPanel }}>
+                    <Typography variant='subtitle1' className={classes.sectionHeadingText}>
+                      <b>{openOrdersMetadata.length > 0 && `${openOrdersMetadata.length} `}Open Offers (Unfilled Short)</b>
+                    </Typography>
+                    {isPortfolioRefreshing && <CircularProgress className={classes.loadingSpinner} size={20} />}
+                  </ExpansionPanelSummary>
+                  <ExpansionPanelDetails>
+                    <Table>
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>Price ($/TH/Day)</TableCell>
+                          <TableCell align='center'>Quantity (TH)</TableCell>
+                          <TableCell align='right'>Contract Total ({PAYMENT_TOKEN_NAME})</TableCell>
+                          <TableCell></TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {openOrdersMetadata && openOrdersMetadata?.map((order, i) =>
+                          <TableRow key={order.orderHash}>
+                            <TableCell>${Number(order?.price.dividedBy(CONTRACT_DURATION).toString()).toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}</TableCell>
+                            <TableCell align='center'>{Number(order?.remainingFillableMakerAssetAmount.toString()).toLocaleString(undefined, { maximumFractionDigits: 0 })}</TableCell>
+                            <TableCell align='right'>{Number(order.price.multipliedBy(order.remainingFillableMakerAssetAmount)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
+                            <TableCell align='right'>
+                              <MoreVert onClick={() => handleShowUnfilledOfferDetails(i)} style={{ cursor: 'pointer' }} />
+                            </TableCell>
+                          </TableRow>
+                        )}
+                        {!isPortfolioRefreshing && openOrdersMetadata.length === 0 &&
+                          <TableRow>
+                            <TableCell colSpan={3} align='center' className={classes.placeholderRow}>
+                              No Unfilled Positions (Open Orders)
+                            </TableCell>
                           </TableRow>
                         }
                       </TableBody>
@@ -418,134 +458,162 @@ const PorfolioPage: React.SFC = () => {
                   </ExpansionPanelDetails>
                 </ExpansionPanel>
               </> :
-              <>
-                <ExpansionPanel expanded={showPendingWithdraw}>
-                  <ExpansionPanelSummary
-                    expandIcon={!isPortfolioRefreshing ? <ExpandMore /> : <CircularProgress className={classes.loadingSpinner} size={20} />}
-                    classes={{
-                      content: classes.sectionHeading
-                    }}
-                    IconButtonProps={{ onClick: handleTogglePendingWithdrawPanel }}>
-                    <Typography variant='h6' className={classes.sectionHeadingText}>
-                      Pending Withdrawal
-                    </Typography>
-                  </ExpansionPanelSummary>
-                  <ExpansionPanelDetails>
-                    <Grid container>
+              (activeTab === 'withdraw') ?
+                <>
+                  <Typography variant='h6' className={classes.sectionHeadingText}>
+                    Pending Withdrawal
+                  </Typography>
+                  <Grid container>
+                    <Typography variant='subtitle1'>Batch Withdrawal</Typography>
+                    <Table>
+                      <TableBody>
+                        <TableRow>
+                          <TableCell>Long Positions (Earnings)</TableCell>
+                          <TableCell align='right'>{longCollateralForBatchWithdraw.toLocaleString(undefined, { maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS })} {COLLATERAL_TOKEN_NAME}</TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell>Short Positions (Remaining Collateral)</TableCell>
+                          <TableCell align='right'>{shortCollateralForBatchWithdraw.toLocaleString(undefined, { maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS })} {COLLATERAL_TOKEN_NAME}</TableCell>
+                        </TableRow>
+                      </TableBody>
+                    </Table>
+                    <Grid item xs={12} style={{ paddingTop: 8, paddingBottom: 8 }}>
+                      <Button fullWidth disabled={(longCollateralForBatchWithdraw + shortCollateralForBatchWithdraw) === 0} onClick={batchWithdraw}>
+                        {(!isWithdrawing) ?
+                          ((longCollateralForBatchWithdraw + shortCollateralForBatchWithdraw) > 0) ?
+                            `WITHDRAW ALL (${(longCollateralForBatchWithdraw + shortCollateralForBatchWithdraw).toLocaleString()} ${COLLATERAL_TOKEN_NAME})` :
+                            <>WITHDRAW ALL <RadioButtonUnchecked className={classes.icon} /></> :
+                          <>WITHDRAW ALL <CircularProgress className={classes.loadingSpinner} size={20} /></>
+                        }
+                      </Button>
+                    </Grid>
+                    <Typography variant='subtitle1'>Individual Withdrawal</Typography>
+                    <Table>
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>Settlement Date</TableCell>
+                          <TableCell align='center'>Type</TableCell>
+                          <TableCell align='center'>Amount ({COLLATERAL_TOKEN_NAME})</TableCell>
+                          <TableCell></TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {expiredLongPositions.concat(expiredShortPositions)
+                          .filter(p => !p.canBeBatchRedeemed)
+                          .sort((a, b) => a.settlementDate < b.settlementDate ? -1 : 1)
+                          .map(p =>
+                            <TableRow key={p.transaction.id}>
+                              <TableCell>{dayjs(p.settlementDate).format('DD-MMM-YY')}</TableCell>
+                              <TableCell align='center'>{p.type}</TableCell>
+                              <TableCell align='center'>{p.finalReward.toLocaleString(undefined, { maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS })}</TableCell>
+                              <TableCell>
+                                <Button
+                                  variant='contained'
+                                  color='primary'
+                                  onClick={() =>
+                                    withdrawPosition(
+                                      (p.type === PositionType.Long) ? p.longTokenAddress : p.shortTokenAddress,
+                                      p.contract.id,
+                                      p.qtyToMint,
+                                      p.type
+                                    )}>
+                                  Withdraw
+                                </Button>
+                              </TableCell>
+                            </TableRow>
+                          )}
+                      </TableBody>
+                    </Table>
+                  </Grid>
+                </> :
+                <>
+                  <ExpansionPanel expanded={showExpiredShortPositions}>
+                    <ExpansionPanelSummary
+                      expandIcon={<ExpandMore />}
+                      classes={{
+                        content: classes.sectionHeading
+                      }}
+                      IconButtonProps={{ onClick: handleToggleExpiredShortPositionsPanel }}>
+                      <Typography variant='subtitle1' className={classes.sectionHeadingText}>
+                        <b>{expiredShortPositions.length > 0 && `${expiredShortPositions.length} `}Contracts Sold (Short)</b>
+                      </Typography>
+                      {isPortfolioRefreshing &&
+                        <CircularProgress className={classes.loadingSpinner} size={20} />}
+                    </ExpansionPanelSummary>
+                    <ExpansionPanelDetails>
                       <Table>
+                        <TableHead>
+                          <TableRow>
+                            <TableCell align='center'>Received ({PAYMENT_TOKEN_NAME})</TableCell>
+                            <TableCell align='center'>Paid ({COLLATERAL_TOKEN_NAME})</TableCell>
+                            <TableCell align='center'>Status</TableCell>
+                            <TableCell></TableCell>
+                          </TableRow>
+                        </TableHead>
                         <TableBody>
-                          <TableRow>
-                            <TableCell>Long Positions (Earnings)</TableCell>
-                            <TableCell align='right'>{longCollateralForWithdraw.toLocaleString(undefined, { maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS })} {COLLATERAL_TOKEN_NAME}</TableCell>
-                          </TableRow>
-                          <TableRow>
-                            <TableCell>Short Positions (Remaining Collateral)</TableCell>
-                            <TableCell align='right'>{shortCollateralForWithdraw.toLocaleString(undefined, { maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS })} {COLLATERAL_TOKEN_NAME}</TableCell>
-                          </TableRow>
+                          {expiredShortPositions && expiredShortPositions?.map((position: any, i) =>
+                            <TableRow key={i}>
+                              <TableCell align='center'>{position.totalCost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
+                              <TableCell align='center'>{(position.totalCollateralLocked - position.finalReward).toLocaleString(undefined, { maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS })}</TableCell>
+                              <TableCell align='center'>{position.status}</TableCell>
+                              <TableCell align='right'><MoreVert onClick={() => handleShowExpiredShortPositionDetails(i)} style={{ cursor: 'pointer' }} /></TableCell>
+                            </TableRow>
+                          )}
+                          {!isPortfolioRefreshing && expiredShortPositions.length === 0 &&
+                            <TableRow>
+                              <TableCell colSpan={6} align='center' className={classes.placeholderRow}>
+                                No Expired Short Positions
+                              </TableCell>
+                            </TableRow>
+                          }
                         </TableBody>
                       </Table>
-                      <Grid item xs={12} style={{ paddingTop: 8 }}>
-                        <Button fullWidth disabled={(longCollateralForWithdraw + shortCollateralForWithdraw) === 0} onClick={withdrawAllAvailable}>
-                          {(!isWithdrawing) ?
-                            ((longCollateralForWithdraw + shortCollateralForWithdraw) > 0) ?
-                              `WITHDRAW ALL (${(longCollateralForWithdraw + shortCollateralForWithdraw).toLocaleString()} ${COLLATERAL_TOKEN_NAME})` :
-                              <>WITHDRAW ALL <RadioButtonUnchecked className={classes.icon} /></> :
-                            <>WITHDRAW ALL <CircularProgress className={classes.loadingSpinner} size={20} /></>
-                          }
-                        </Button>
-                      </Grid>
-                    </Grid>
-                  </ExpansionPanelDetails>
-                </ExpansionPanel>
-                <Divider className={classes.sectionDivider} light variant='middle' />
-                <ExpansionPanel expanded={showExpiredLongPositions}>
-                  <ExpansionPanelSummary
-                    expandIcon={!isPortfolioRefreshing ? <ExpandMore /> : <CircularProgress className={classes.loadingSpinner} size={20} />}
-                    classes={{
-                      content: classes.sectionHeading
-                    }}
-                    IconButtonProps={{ onClick: handleToggleExpiredLongPositionsPanel }}>
-                    <Typography variant='h6' className={classes.sectionHeadingText}>
-                      Long Positions (Contracts Bought)
-                    </Typography>
-                  </ExpansionPanelSummary>
-                  <ExpansionPanelDetails>
-                    <Table>
-                      <TableHead>
-                        <TableRow>
-                          <TableCell>Settlement Date</TableCell>
-                          <TableCell align='center'>Cost ({PAYMENT_TOKEN_NAME})</TableCell>
-                          <TableCell align='center'>Received ({COLLATERAL_TOKEN_NAME})</TableCell>
-                          <TableCell align='right'>Status</TableCell>
-                          <TableCell></TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {expiredLongPositions && expiredLongPositions?.map((position: any, i) =>
-                          <TableRow key={i}>
-                            <TableCell>{dayjs(position.settlementDate).format('DD-MMM-YY')}</TableCell>
-                            <TableCell align='center'>{position.totalCost.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}</TableCell>
-                            <TableCell align='center'>{position.finalReward}</TableCell>
-                            <TableCell align='center'>{position.status}</TableCell>
-                            <TableCell align='right'><MoreVert onClick={() => handleShowExpiredLongPositionDetails(i)} style={{ cursor: 'pointer' }} /></TableCell>
-                          </TableRow>
-                        )}
-                        {!isPortfolioRefreshing && expiredLongPositions.length === 0 &&
+                    </ExpansionPanelDetails>
+                  </ExpansionPanel>
+                  <ExpansionPanel expanded={showExpiredLongPositions}>
+                    <ExpansionPanelSummary
+                      expandIcon={<ExpandMore />}
+                      classes={{
+                        content: classes.sectionHeading
+                      }}
+                      IconButtonProps={{ onClick: handleToggleExpiredLongPositionsPanel }}>
+                      <Typography variant='subtitle1' className={classes.sectionHeadingText}>
+                        <b>{expiredLongPositions.length > 0 && `${expiredLongPositions.length} `}Contracts Bought (Long)</b>
+                      </Typography>
+                      {isPortfolioRefreshing &&
+                        <CircularProgress className={classes.loadingSpinner} size={20} />}
+                    </ExpansionPanelSummary>
+                    <ExpansionPanelDetails>
+                      <Table>
+                        <TableHead>
                           <TableRow>
-                            <TableCell colSpan={5} align='center' className={classes.placeholderRow}>
-                              No Expired Long Positions
-                          </TableCell>
+                            <TableCell align='center'>Cost ({PAYMENT_TOKEN_NAME})</TableCell>
+                            <TableCell align='center'>Received ({COLLATERAL_TOKEN_NAME})</TableCell>
+                            <TableCell align='right'>Status</TableCell>
+                            <TableCell></TableCell>
                           </TableRow>
-                        }
-                      </TableBody>
-                    </Table>
-                  </ExpansionPanelDetails>
-                </ExpansionPanel>
-                <Divider className={classes.sectionDivider} light variant='middle' />
-                <ExpansionPanel expanded={showExpiredShortPositions}>
-                  <ExpansionPanelSummary
-                    expandIcon={!isPortfolioRefreshing ? <ExpandMore /> : <CircularProgress className={classes.loadingSpinner} size={20} />}
-                    classes={{
-                      content: classes.sectionHeading
-                    }}
-                    IconButtonProps={{ onClick: handleToggleExpiredShortPositionsPanel }}>
-                    <Typography variant='h6' className={classes.sectionHeadingText}>
-                      Short Positions (Contracts Offered)
-                    </Typography>
-                  </ExpansionPanelSummary>
-                  <ExpansionPanelDetails>
-                    <Table>
-                      <TableHead>
-                        <TableRow>
-                          <TableCell>Settlement Date</TableCell>
-                          <TableCell align='center'>Received ({PAYMENT_TOKEN_NAME}</TableCell>
-                          <TableCell align='center'>Paid ({COLLATERAL_TOKEN_NAME})</TableCell>
-                          <TableCell align='center'>Status</TableCell>
-                          <TableCell></TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {expiredShortPositions && expiredShortPositions?.map((position: any, i) =>
-                          <TableRow key={i}>
-                            <TableCell>{dayjs(position.settlementDate).format('DD-MMM-YY')}</TableCell>
-                            <TableCell align='center'>{position.totalCost.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}</TableCell>
-                            <TableCell align='center'>{(position.totalCollateralLocked - position.finalReward).toLocaleString(undefined, { maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS })}</TableCell>
-                            <TableCell align='center'>{position.status}</TableCell>
-                            <TableCell align='right'><MoreVert onClick={() => handleShowExpiredShortPositionDetails(i)} style={{ cursor: 'pointer' }} /></TableCell>
-                          </TableRow>
-                        )}
-                        {!isPortfolioRefreshing && activeShortPositions.length === 0 &&
-                          <TableRow>
-                            <TableCell colSpan={6} align='center' className={classes.placeholderRow}>
-                              No Expired Short Positions
+                        </TableHead>
+                        <TableBody>
+                          {expiredLongPositions && expiredLongPositions?.map((position: any, i) =>
+                            <TableRow key={i}>
+                              <TableCell align='center'>{position.totalCost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
+                              <TableCell align='center'>{position.finalReward}</TableCell>
+                              <TableCell align='center'>{position.status}</TableCell>
+                              <TableCell align='right'><MoreVert onClick={() => handleShowExpiredLongPositionDetails(i)} style={{ cursor: 'pointer' }} /></TableCell>
+                            </TableRow>
+                          )}
+                          {!isPortfolioRefreshing && expiredLongPositions.length === 0 &&
+                            <TableRow>
+                              <TableCell colSpan={5} align='center' className={classes.placeholderRow}>
+                                No Expired Long Positions
                               </TableCell>
-                          </TableRow>
-                        }
-                      </TableBody>
-                    </Table>
-                  </ExpansionPanelDetails>
-                </ExpansionPanel>
-              </>
+                            </TableRow>
+                          }
+                        </TableBody>
+                      </Table>
+                    </ExpansionPanelDetails>
+                  </ExpansionPanel>
+                </>
             }
           </div>
         </Grid>
@@ -566,13 +634,17 @@ const PorfolioPage: React.SFC = () => {
         <ExpiredLongPositionModal
           open={showExpiredLongPositionModal}
           onClose={() => setShowExpiredLongPositionModal(false)}
-          position={expiredLongPositions[expiredLongPositionModalIndex]} />
+          position={expiredLongPositions[expiredLongPositionModalIndex]}
+          withdrawPosition={withdrawPosition}
+          isWithdrawing />
       }
       {expiredShortPositionModalIndex > -1 && expiredShortPositions[expiredShortPositionModalIndex] &&
         <ExpiredShortPositionModal
           open={showExpiredShortPositionModal}
           onClose={() => setShowExpiredShortPositionModal(false)}
-          position={expiredShortPositions[expiredShortPositionModalIndex]} />
+          position={expiredShortPositions[expiredShortPositionModalIndex]}
+          withdrawPosition={withdrawPosition}
+          isWithdrawing />
       }
       {unfilledOfferModalIndex > -1 && openOrdersMetadata[unfilledOfferModalIndex] &&
         <UnfilledOfferModal

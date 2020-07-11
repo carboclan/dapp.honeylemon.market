@@ -2,7 +2,17 @@ import { Web3Wrapper } from "@0x/web3-wrapper";
 
 const { GraphQLClient } = require('graphql-request');
 const { HttpClient, OrderbookRequest } = require('@0x/connect');
-const { MinterBridge, MarketContractProxy, MarketContractMPX, CollateralToken, PaymentToken, DSProxy, TetherERC20 } = require('@honeylemon/contracts');
+import {
+  MinterBridge,
+  MarketContractProxy,
+  MarketContractMPX,
+  CollateralToken,
+  PaymentToken,
+  DSProxy,
+  TetherERC20,
+  PositionToken,
+  MarketCollateralPool,
+} from '@honeylemon/contracts';
 
 const {
   marketUtils,
@@ -11,8 +21,9 @@ const {
   assetDataUtils,
   orderCalculationUtils
 } = require('@0x/order-utils');
+
 const { ContractWrappers, ERC20TokenContract } = require('@0x/contract-wrappers');
-const { BigNumber } = require('@0x/utils');
+import { BigNumber } from '@0x/utils';
 const Web3 = require('web3');
 const web3 = new Web3(null); // This is just for encoding, etc.
 
@@ -222,16 +233,22 @@ class HoneylemonService {
       .multipliedBy(batchSize);
   }
 
-  async estimateGas(signedOrders, takerAssetFillAmounts, takerAddress) {
-    const signatures = signedOrders.map(o => o.signature);
-    const gasPrice = 10e9; // Set to 10GWEI
-    const value = await this.get0xFeeForOrderBatch(gasPrice, signedOrders.length);
-
-    const gas = await this.contractWrappers.exchange
-      .batchFillOrKillOrders(signedOrders, takerAssetFillAmounts, signatures)
-      .estimateGasAsync({ from: takerAddress, value, gasPrice });
-
-    return gas;
+  async estimateGas(
+    signedOrders,
+    takerAssetFillAmounts,
+    takerAddress: string,
+    gasPrice?: number) {
+    try {
+      const signatures = signedOrders.map(o => o.signature);
+      const price = gasPrice ? `${gasPrice}` : `${10e9}`; // Set to 10GWEI
+      const value = await this.get0xFeeForOrderBatch(price, signedOrders.length);
+      const gas = await this.contractWrappers.exchange
+        .batchFillOrKillOrders(signedOrders, takerAssetFillAmounts, signatures)
+        .estimateGasAsync({ from: takerAddress, value });
+      return gas;
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   getFillOrdersTx(signedOrders, takerAssetFillAmounts) {
@@ -298,7 +315,7 @@ class HoneylemonService {
   async checkCollateralTokenApproval(ownerAddress, amount) {
     amount = amount || new BigNumber(2).pow(256).minus(1);
 
-    const allowance = BigNumber(
+    const allowance = new BigNumber(
       await this.collateralToken
         .allowance(this.minterBridgeAddress, ownerAddress)
         .callAsync()
@@ -307,19 +324,17 @@ class HoneylemonService {
     return !!allowance.isGreaterThanOrEqualTo(amount);
   }
 
-  async approveCollateralToken(makerAddress, amount: Number) {
+  async approveCollateralToken(makerAddress: string, amount: number, gasPrice?: number) {
     const approvalAmount = amount === 0 ? new BigNumber(0) : new BigNumber(2).pow(256).minus(1);
-    return await this.collateralToken
-      .approve(this.minterBridgeAddress, approvalAmount)
-      .awaitTransactionSuccessAsync({
-        from: makerAddress
-      });
+    const price = gasPrice ? Number(`${gasPrice}e9`) : undefined;
+    const approveTx = this.collateralToken.approve(this.minterBridgeAddress, approvalAmount)
+    return await approveTx.awaitTransactionSuccessAsync({ from: makerAddress, gasPrice: price });
   }
 
   async checkPaymentTokenApproval(ownerAddress, amount) {
     amount = amount || new BigNumber(2).pow(256).minus(1);
 
-    const allowance = BigNumber(
+    const allowance = new BigNumber(
       await this.paymentToken
         .allowance(this.minterBridgeAddress, ownerAddress)
         .callAsync()
@@ -328,8 +343,10 @@ class HoneylemonService {
     return !!allowance.isGreaterThanOrEqualTo(amount);
   }
 
-  async approvePaymentToken(takerAddress, amount) {
+  async approvePaymentToken(takerAddress: number, amount: number, gasPrice?: number) {
     const approvalAmount = amount === 0 ? new BigNumber(0) : new BigNumber(2).pow(256).minus(1);
+    const price = gasPrice ? Number(`${gasPrice}e9`) : undefined;
+
     if (this.paymentTokenAddress.toLowerCase() == USDT_ADDRESS.toLowerCase()) {
       // Hack for Tether approval not being compliant with ERC20
       const usdt = new web3.eth.Contract(
@@ -337,16 +354,16 @@ class HoneylemonService {
         this.paymentTokenAddress
       );
       usdt.setProvider(this.provider);
-      const result = await usdt.methods.approve(this.contractWrappers.contractAddresses.erc20Proxy, approvalAmount.toString())
-        .send({ from: takerAddress });
       const web3Wrapper: Web3Wrapper = new Web3Wrapper(this.provider);
-      return await web3Wrapper.awaitTransactionSuccessAsync(result.transactionHash);
+
+      const approveTx = await usdt.methods.approve(this.contractWrappers.contractAddresses.erc20Proxy, approvalAmount.toString())
+      const gas = await approveTx.estimateGas({ from: takerAddress });
+      const approveResult = await approveTx.send({ from: takerAddress, gas, gasPrice: price });
+
+      return await web3Wrapper.awaitTransactionSuccessAsync(approveResult.transactionHash)
     } else {
-      return await this.paymentToken
-      .approve(this.contractWrappers.contractAddresses.erc20Proxy, approvalAmount)
-      .awaitTransactionSuccessAsync({
-        from: takerAddress
-      });
+      const approveTx = this.paymentToken.approve(this.contractWrappers.contractAddresses.erc20Proxy, approvalAmount)
+      return await approveTx.awaitTransactionSuccessAsync({ from: takerAddress, gasPrice: price });
     }
   }
 
@@ -382,14 +399,16 @@ class HoneylemonService {
       .call();
   }
 
-  async deployDSProxyContract(deployer) {
-    const address = await this.marketContractProxy.methods
-      .createDSProxyWallet()
-      .call({ from: deployer });
-    await this.marketContractProxy.methods.createDSProxyWallet().send({
-      from: deployer,
-      gas: 9000000
-    });
+  async deployDSProxyContract(deployer: string, gasPrice?: number) {
+    const address = await this.marketContractProxy.methods.createDSProxyWallet().call({ from: deployer });
+    const price = gasPrice ? Number(`${gasPrice}e9`) : undefined;
+    const deployDSProxyTx = this.marketContractProxy.methods.createDSProxyWallet();
+
+    const gas = await deployDSProxyTx.estimateGas({ from: deployer });
+    const deployResult = await deployDSProxyTx.send({ from: deployer, gas, gasPrice: price });
+    const web3Wrapper: Web3Wrapper = new Web3Wrapper(this.provider);
+    await web3Wrapper.awaitTransactionSuccessAsync(deployResult.transactionHash)
+
     return address;
   }
 
@@ -407,6 +426,42 @@ class HoneylemonService {
       .call({ from: address });
     // if the address is not the same as the DSProxy address then the user has a DSProxy
     return DSProxyAddress.toLowerCase() != address.toLowerCase();
+  }
+
+  async redeemPosition(
+    recipientAddress: string,
+    positionTokenAddress: string,
+    marketContractAddress: string,
+    amount: string,
+    positionType: 'Long' | 'Short') {
+    const positionToken = new web3.eth.Contract(PositionToken.abi, positionTokenAddress);
+    positionToken.setProvider(this.provider);
+    const web3Wrapper: Web3Wrapper = new Web3Wrapper(this.provider);
+    const allowance = new BigNumber(await positionToken.methods.allowance(recipientAddress, marketContractAddress).call())
+    const isApprovalRequired = !allowance.isGreaterThanOrEqualTo(amount);
+
+    if (isApprovalRequired) {
+      const approvalResult = await positionToken.methods.approve(marketContractAddress, amount)
+        .send({
+          from: recipientAddress
+        });
+      await web3Wrapper.awaitTransactionSuccessAsync(approvalResult.transactionHash);
+    }
+
+    const marketCollateralPoolAddress = await this.marketContractProxy.methods
+      .getCollateralPool(marketContractAddress).call();
+    console.log(marketCollateralPoolAddress);
+    const marketCollateralPool = new web3.eth.Contract(MarketCollateralPool.abi, marketCollateralPoolAddress);
+    marketCollateralPool.setProvider(this.provider);
+
+    const redeemTx = positionType === 'Long' ?
+      marketCollateralPool.methods.settleAndClose(marketContractAddress, amount, 0) :
+      marketCollateralPool.methods.settleAndClose(marketContractAddress, 0, amount)
+
+    const gas = await redeemTx.estimateGas({ from: recipientAddress });
+    const redeemResult = await redeemTx.send({ from: recipientAddress, gas });
+
+    await web3Wrapper.awaitTransactionSuccessAsync(redeemResult.transactionHash)
   }
 
   async batchRedeem(recipientAddress) {
@@ -622,9 +677,9 @@ class HoneylemonService {
         : position.longTokenDSProxy;
 
       position.isRedeemed =
-      (await positionToken.balanceOf(dsProxyAddress).callAsync()).toString() == '0'
-        ? true
-        : false;
+        (await positionToken.balanceOf(dsProxyAddress).callAsync()).toString() == '0'
+          ? true
+          : false;
 
       // position.tokensToRedeem = (x
       //   await positionToken.balanceOf(dsProxyAddress).callAsync()

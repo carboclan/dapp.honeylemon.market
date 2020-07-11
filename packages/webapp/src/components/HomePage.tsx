@@ -14,7 +14,7 @@ const useStyles = makeStyles(({ palette, spacing }) => ({
   button: {
     paddingTop: spacing(1),
     paddingBottom: spacing(1),
-    fontSize: 20,
+    fontWeight: 'bold'
   },
   divider: {
     margin: spacing(2),
@@ -119,7 +119,7 @@ const HomePage: React.SFC = () => {
             <span>Secs</span>
           </Grid>
           <Grid item xs={12}>
-            <Typography style={{ fontWeight: 'bold' }}>Estimate: {dayjs(btcDifficultyAdjustmentDate).format('MMM DD, YYYY HH:mm')} GMT</Typography>
+            <Typography style={{ fontWeight: 'bold' }}>Estimate: {dayjs(btcDifficultyAdjustmentDate).format('MMM DD, YYYY HH:mm')} UTC</Typography>
           </Grid>
         </Grid>
         <Grid item xs={12} style={{textAlign: 'center'}}>

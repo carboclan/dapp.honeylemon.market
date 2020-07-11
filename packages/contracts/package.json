@@ -12,7 +12,8 @@
     "migrate": "tsc -p ./tsconfig.migrate.json --outDir ./migrations && truffle migrate",
     "test": "truffle test test/honeylemon/*",
     "lint": "prettier-eslint --write \"$(pwd)/**/*.js\" \"$(pwd)/**/*.sol\" --ignore './node_modules/**'",
-    "postinstall": "yarn build"
+    "postinstall": "yarn build",
+    "remixd": "remixd -s . --remix-ide https://remix.ethereum.org"
   },
   "author": "@carboclan",
   "license": "Apache-2.0",
