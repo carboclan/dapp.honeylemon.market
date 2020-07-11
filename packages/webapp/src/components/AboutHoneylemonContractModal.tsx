@@ -1,5 +1,5 @@
 import React from 'react';
-import { Dialog, DialogContent, makeStyles, Typography, Link, DialogTitle } from '@material-ui/core';
+import { Dialog, DialogContent, Typography, Link, DialogTitle } from '@material-ui/core';
 import { OpenInNew } from '@material-ui/icons';
 
 interface AboutHoneylemonContractModalProps {
