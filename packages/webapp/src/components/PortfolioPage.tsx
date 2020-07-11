@@ -138,8 +138,6 @@ const PorfolioPage: React.SFC = () => {
   const [showActiveShortPositionModal, setShowActiveShortPositionModal] = useState(false);
   const [activeShortPositionModalIndex, setActiveShortPositionModalIndex] = useState(-1);
 
-  const [showPendingWithdraw, setShowPendingWithdraw] = useState(false);
-
   const [showExpiredLongPositions, setShowExpiredLongPositions] = useState(false);
   const [showExpiredLongPositionModal, setShowExpiredLongPositionModal] = useState(false);
   const [expiredLongPositionModalIndex, setExpiredLongPositionModalIndex] = useState(-1);
