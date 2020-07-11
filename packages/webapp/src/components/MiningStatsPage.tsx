@@ -229,7 +229,7 @@ const MiningStatsPage: React.SFC = () => {
               <TableRow>
                 <TableCell><Typography variant='caption'>24h Mining Revenue</Typography></TableCell>
                 <TableCell align='right'>
-                  <Typography variant='caption'>$ {btcStats?.reward24h?.total.toLocaleString(undefined, { maximumFractionDigits: 2 })}</Typography>
+                  <Typography variant='caption'>$ {((btcStats?.reward24h?.total) / (10 ** 8) * currentBTCSpotPrice).toLocaleString(undefined, { maximumFractionDigits: 2 })}</Typography>
                 </TableCell>
               </TableRow>
               <TableRow>
