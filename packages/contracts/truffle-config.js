@@ -1,7 +1,7 @@
 require('dotenv').config();
 const HDWalletProvider = require('@truffle/hdwallet-provider');
 const infuraApikey = '9542ce9f96be4ae08225dcde36ff1638';
-let mnemonic = ''; //require('./mnemonic');
+let mnemonic = require('./mnemonic');
 
 module.exports = {
   contracts_directory: "./contracts",
@@ -47,23 +47,28 @@ module.exports = {
         );
       },
       network_id: 1,
-      gas: 6500000, // default = 4712388
-      gasPrice: 30000000000 // default = 30 gwei
+      gas: 5500000, // default = 4712388
+      gasPrice: 20000000000 // default = 30 gwei
     }
   },
   compilers: {
     solc: {
       version: '0.5.2',
-      optimizer: {
-        enabled: true,
-        runs: 200
+      settings: {
+        optimizer: {
+          enabled: true,
+          runs: 200
+        }
       }
     }
   },
-  plugins: ['@chainsafe/truffle-plugin-abigen'],
+  plugins: ['@chainsafe/truffle-plugin-abigen', 'truffle-plugin-verify'],
   mocha: {
     enableTimeouts: false,
     before_timeout: 120000,
     after_timeout: 120000
+  },
+  api_keys: {
+    etherscan: process.env.ETHERSCAN_API_KEY
   }
 };
