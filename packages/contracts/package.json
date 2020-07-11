@@ -18,6 +18,7 @@
   "author": "@carboclan",
   "license": "Apache-2.0",
   "dependencies": {
+    "@chainsafe/truffle-plugin-abigen": "0.0.1",
     "@openzeppelin/test-helpers": "^0.5.6",
     "@truffle/hdwallet-provider": "^1.0.35",
     "@typechain/ethers-v4": "1.0.0",
@@ -39,6 +40,7 @@
     "solium": "^1.0.5",
     "truffle": "5.1.18",
     "truffle-assertions": "0.9.0",
+    "truffle-plugin-verify": "^0.3.11",
     "truffle-typings": "1.0.8",
     "typechain": "^2.0.0",
     "typescript": "3.9.5",
