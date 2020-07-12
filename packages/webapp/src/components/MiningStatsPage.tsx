@@ -9,6 +9,7 @@ import dayjs from 'dayjs';
 import MRIDisplay from './MRIDisplay';
 import { OpenInNew } from '@material-ui/icons';
 import clsx from 'clsx';
+import { forwardTo } from '../helpers/history';
 
 SL(Highcharts);
 
@@ -20,6 +21,7 @@ const useStyles = makeStyles(({ palette }) => ({
   winner: {
     width: 20,
     height: 20,
+    cursor: 'pointer',
   },
   honeylemonCell: {
     color: palette.primary.main,
@@ -295,7 +297,7 @@ const MiningStatsPage: React.SFC = () => {
               <TableCell className={classes.honeylemonCell}><b>28-Day Honeylemon</b></TableCell>
               <TableCell className={classes.honeylemonCell}><b>$ {bestHoneylemonPrice.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}</b></TableCell>
               <TableCell style={{ width: 50 }} align="right">
-                <HoneyLemonLogo className={classes.winner} />
+                <HoneyLemonLogo className={classes.winner} onClick={() => { forwardTo('/buy') }} />
               </TableCell>
             </TableRow>
             {miningContracts.filter(mc => mc.duration > 0 && contractDurations.includes(mc.duration))

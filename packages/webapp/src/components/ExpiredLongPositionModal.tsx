@@ -101,33 +101,14 @@ const ExpiredLongPositionModal: React.SFC<ExpiredLongPositionModalProps> = ({ op
             </TableRow>
             <TableRow>
               <TableCell colSpan={2}>
-                <Typography>
-                  Your transaction was executed on Ethereum blockchain, check 
+                <Typography variant='caption'>
+                  Your transaction was executed on Ethereum blockchain, check
                   on <Link href={`${etherscanUrl}/tx/${position.transaction.id}`} target="_blank" rel='noopener' underline='always'>Etherscan</Link>: {`${displayAddress(position.transaction.id, 20)}`}
                 </Typography>
               </TableCell>
             </TableRow>
           </TableBody>
         </Table>
-        {position.status === PositionStatus.withdrawalPending && !position.canBeBatchRedeemed &&
-          <Grid container justify='center' spacing={2} style={{ padding: 16 }}>
-            <Grid item>
-              <Button
-                variant='contained'
-                color='primary'
-                onClick={() =>
-                  handleWithdraw(
-                    position.longTokenAddress,
-                    position.contract.id,
-                    position.qtyToMint,
-                    position.type
-                  )}
-                disabled={isWithdrawing} className={classes.withdrawButton} fullWidth>
-                Withdraw&nbsp;
-                  {isWithdrawing && <CircularProgress className={classes.loadingSpinner} size={20} />}
-              </Button>
-            </Grid>
-          </Grid>}
       </DialogContent >
     </Dialog >
   )
