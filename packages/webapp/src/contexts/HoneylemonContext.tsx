@@ -33,6 +33,7 @@ export enum PositionStatus {
 const COLLATERAL_TOKEN_NAME = process.env.REACT_APP_COLLATERAL_TOKEN_NAME || 'imBTC';
 const PAYMENT_TOKEN_NAME = process.env.REACT_APP_PAYMENT_TOKEN_NAME || 'USDT';
 const CONTRACT_COLLATERAL_RATIO = Number(process.env.REACT_APP_CONTRACT_COLLATERAL_RATIO) || 1.25;
+const MAINTENANCE_MODE = Boolean(process.env.REACT_APP_MAINTENANCE_MODE) || false;
 
 type OrderSummary = {
   price: number,
@@ -74,6 +75,7 @@ export type HoneylemonContext = {
   orderbook: Array<OrderSummary>;
   btcStats: any,
   isPortfolioRefreshing: boolean;
+  isInMaintencanceMode: boolean;
   deployDSProxyContract(): Promise<void>;
   approveToken(tokenType: TokenType, amount?: number): Promise<void>;
   refreshPortfolio(): Promise<void>;
@@ -215,6 +217,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
   const getPorfolio = async () => {
     try {
       setIsPortfolioRefreshing(true);
+      
       const openOrdersRes = await honeylemonService.getOpenOrders(address);
       setOpenOrdersMetadata(openOrdersRes.records.map((openOrder: any) => openOrder.metaData))
       setOpenOrders(Object.fromEntries(
@@ -224,6 +227,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
           listingDate: dayjs(openOrder.order.expirationTimeSeconds.toNumber() * 1000).subtract(10, 'd').toDate()
         }]))
       ));
+
       const positions = await honeylemonService.getPositions(address);
       const allPositions = positions.longPositions.map((lp: any) => ({
         ...lp,
@@ -539,6 +543,7 @@ return (
       isPortfolioRefreshing,
       showTokenInfoModal,
       setShowTokenInfoModal,
+      isInMaintencanceMode: MAINTENANCE_MODE
     }}>
     {children}
   </HoneylemonContext.Provider>
