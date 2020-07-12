@@ -96,7 +96,7 @@ const TimeRemaining = (
 };
 
 const PorfolioPage: React.SFC = () => {
-  const { address } = useOnboard();
+  const { address, gasPrice } = useOnboard();
   const {
     honeylemonService,
     CONTRACT_DURATION,
@@ -174,7 +174,7 @@ const PorfolioPage: React.SFC = () => {
     setIsWithdrawing(true);
     try {
       !!address &&
-        await honeylemonService.redeemPosition(address, positionTokenAddress, marketContractAddress, amount, type)
+        await honeylemonService.redeemPosition(address, positionTokenAddress, marketContractAddress, amount, type, gasPrice)
       await new Promise(resolve => {
         setTimeout(refreshPortfolio, 5000);
         resolve();
@@ -301,6 +301,9 @@ const PorfolioPage: React.SFC = () => {
   }, [expiredLongPositions, expiredShortPositions])
 
   const showWithdrawTab = (longCollateralForBatchWithdraw + shortCollateralForBatchWithdraw + longCollateralForIndividualWithdraw + shortCollateralForIndividualWithdraw) > 0;
+  if (activeTab === 'withdraw' && !showWithdrawTab) {
+    setActiveTab('active');
+  }
 
   return (
     <>
@@ -458,74 +461,7 @@ const PorfolioPage: React.SFC = () => {
                   </ExpansionPanelDetails>
                 </ExpansionPanel>
               </> :
-              (activeTab === 'withdraw') ?
-                <>
-                  <Typography variant='h6' className={classes.sectionHeadingText}>
-                    Pending Withdrawal
-                  </Typography>
-                  <Grid container>
-                    <Typography variant='subtitle1'>Batch Withdrawal</Typography>
-                    <Table>
-                      <TableBody>
-                        <TableRow>
-                          <TableCell>Long Positions (Earnings)</TableCell>
-                          <TableCell align='right'>{longCollateralForBatchWithdraw.toLocaleString(undefined, { maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS })} {COLLATERAL_TOKEN_NAME}</TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell>Short Positions (Remaining Collateral)</TableCell>
-                          <TableCell align='right'>{shortCollateralForBatchWithdraw.toLocaleString(undefined, { maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS })} {COLLATERAL_TOKEN_NAME}</TableCell>
-                        </TableRow>
-                      </TableBody>
-                    </Table>
-                    <Grid item xs={12} style={{ paddingTop: 8, paddingBottom: 8 }}>
-                      <Button fullWidth disabled={(longCollateralForBatchWithdraw + shortCollateralForBatchWithdraw) === 0} onClick={batchWithdraw}>
-                        {(!isWithdrawing) ?
-                          ((longCollateralForBatchWithdraw + shortCollateralForBatchWithdraw) > 0) ?
-                            `WITHDRAW ALL (${(longCollateralForBatchWithdraw + shortCollateralForBatchWithdraw).toLocaleString()} ${COLLATERAL_TOKEN_NAME})` :
-                            <>WITHDRAW ALL <RadioButtonUnchecked className={classes.icon} /></> :
-                          <>WITHDRAW ALL <CircularProgress className={classes.loadingSpinner} size={20} /></>
-                        }
-                      </Button>
-                    </Grid>
-                    <Typography variant='subtitle1'>Individual Withdrawal</Typography>
-                    <Table>
-                      <TableHead>
-                        <TableRow>
-                          <TableCell>Settlement Date</TableCell>
-                          <TableCell align='center'>Type</TableCell>
-                          <TableCell align='center'>Amount ({COLLATERAL_TOKEN_NAME})</TableCell>
-                          <TableCell></TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {expiredLongPositions.concat(expiredShortPositions)
-                          .filter(p => !p.canBeBatchRedeemed)
-                          .sort((a, b) => a.settlementDate < b.settlementDate ? -1 : 1)
-                          .map(p =>
-                            <TableRow key={p.transaction.id}>
-                              <TableCell>{dayjs(p.settlementDate).format('DD-MMM-YY')}</TableCell>
-                              <TableCell align='center'>{p.type}</TableCell>
-                              <TableCell align='center'>{p.finalReward.toLocaleString(undefined, { maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS })}</TableCell>
-                              <TableCell>
-                                <Button
-                                  variant='contained'
-                                  color='primary'
-                                  onClick={() =>
-                                    withdrawPosition(
-                                      (p.type === PositionType.Long) ? p.longTokenAddress : p.shortTokenAddress,
-                                      p.contract.id,
-                                      p.qtyToMint,
-                                      p.type
-                                    )}>
-                                  Withdraw
-                                </Button>
-                              </TableCell>
-                            </TableRow>
-                          )}
-                      </TableBody>
-                    </Table>
-                  </Grid>
-                </> :
+              (activeTab === 'expired') ?
                 <>
                   <ExpansionPanel expanded={showExpiredShortPositions}>
                     <ExpansionPanelSummary
@@ -613,6 +549,73 @@ const PorfolioPage: React.SFC = () => {
                       </Table>
                     </ExpansionPanelDetails>
                   </ExpansionPanel>
+                </> :
+                <>
+                  <Typography variant='h6' className={classes.sectionHeadingText}>
+                    Pending Withdrawal
+                  </Typography>
+                  <Grid container>
+                    <Typography variant='subtitle1'>Batch Withdrawal</Typography>
+                    <Table>
+                      <TableBody>
+                        <TableRow>
+                          <TableCell>Long Positions (Earnings)</TableCell>
+                          <TableCell align='right'>{longCollateralForBatchWithdraw.toLocaleString(undefined, { maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS })} {COLLATERAL_TOKEN_NAME}</TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell>Short Positions (Remaining Collateral)</TableCell>
+                          <TableCell align='right'>{shortCollateralForBatchWithdraw.toLocaleString(undefined, { maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS })} {COLLATERAL_TOKEN_NAME}</TableCell>
+                        </TableRow>
+                      </TableBody>
+                    </Table>
+                    <Grid item xs={12} style={{ paddingTop: 8, paddingBottom: 8 }}>
+                      <Button fullWidth disabled={(longCollateralForBatchWithdraw + shortCollateralForBatchWithdraw) === 0} onClick={batchWithdraw}>
+                        {(!isWithdrawing) ?
+                          ((longCollateralForBatchWithdraw + shortCollateralForBatchWithdraw) > 0) ?
+                            `WITHDRAW ALL (${(longCollateralForBatchWithdraw + shortCollateralForBatchWithdraw).toLocaleString(undefined, { maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS })} ${COLLATERAL_TOKEN_NAME})` :
+                            <>WITHDRAW ALL <RadioButtonUnchecked className={classes.icon} /></> :
+                          <>WITHDRAW ALL <CircularProgress className={classes.loadingSpinner} size={20} /></>
+                        }
+                      </Button>
+                    </Grid>
+                    <Typography variant='subtitle1'>Individual Withdrawal</Typography>
+                    <Table>
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>Settlement Date</TableCell>
+                          <TableCell align='center'>Type</TableCell>
+                          <TableCell align='center'>Amount ({COLLATERAL_TOKEN_NAME})</TableCell>
+                          <TableCell></TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {expiredLongPositions.concat(expiredShortPositions)
+                          .filter(p => !p.canBeBatchRedeemed)
+                          .sort((a, b) => a.settlementDate < b.settlementDate ? -1 : 1)
+                          .map(p =>
+                            <TableRow key={p.transaction.id}>
+                              <TableCell>{dayjs(p.settlementDate).format('DD-MMM-YY')}</TableCell>
+                              <TableCell align='center'>{p.type}</TableCell>
+                              <TableCell align='center'>{p.finalReward.toLocaleString(undefined, { maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS })}</TableCell>
+                              <TableCell>
+                                <Button
+                                  variant='contained'
+                                  color='primary'
+                                  onClick={() =>
+                                    withdrawPosition(
+                                      (p.type === PositionType.Long) ? p.longTokenAddress : p.shortTokenAddress,
+                                      p.contract.id,
+                                      p.qtyToMint,
+                                      p.type
+                                    )}>
+                                  Withdraw
+                                </Button>
+                              </TableCell>
+                            </TableRow>
+                          )}
+                      </TableBody>
+                    </Table>
+                  </Grid>
                 </>
             }
           </div>

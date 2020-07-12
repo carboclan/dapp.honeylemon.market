@@ -113,25 +113,6 @@ const ExpiredShortPositionModal: React.SFC<ExpiredShortPositionModalProps> = ({ 
             </TableRow>
           </TableBody>
         </Table>
-        {position.status === PositionStatus.withdrawalPending && !position.canBeBatchRedeemed &&
-          <Grid container justify='center' spacing={2} style={{ padding: 16 }}>
-            <Grid item>
-              <Button
-                variant='contained'
-                color='primary'
-                onClick={() =>
-                handleWithdraw(
-                  position.longTokenAddress,
-                  position.contract.id,
-                  position.qtyToMint,
-                  position.type
-                )}
-                disabled={isWithdrawing} className={classes.withdrawButton} fullWidth>
-                Withdraw&nbsp;
-                {isWithdrawing && <CircularProgress className={classes.loadingSpinner} size={20} />}
-              </Button>
-            </Grid>
-          </Grid>}
       </DialogContent >
     </Dialog >
   )
