@@ -318,8 +318,8 @@ const PorfolioPage: React.SFC = () => {
             indicatorColor="secondary"
             variant='fullWidth'>
             <Tab label="Active" value='active' />
-            {showWithdrawTab && <Tab label="Withdraw" value='withdraw' />}
             <Tab label="Expired" value='expired' />
+            {showWithdrawTab && <Tab label="Withdraw" value='withdraw' />}
           </Tabs>
           <div className={classes.tabContent}>
             {activeTab === 'active' ?
@@ -569,7 +569,11 @@ const PorfolioPage: React.SFC = () => {
                       </TableBody>
                     </Table>
                     <Grid item xs={12} style={{ paddingTop: 8, paddingBottom: 8 }}>
-                      <Button fullWidth disabled={(longCollateralForBatchWithdraw + shortCollateralForBatchWithdraw) === 0} onClick={batchWithdraw}>
+                      <Button  
+                        disabled={(longCollateralForBatchWithdraw + shortCollateralForBatchWithdraw) === 0} 
+                        onClick={batchWithdraw}
+                        variant='contained'
+                        color='primary'>
                         {(!isWithdrawing) ?
                           ((longCollateralForBatchWithdraw + shortCollateralForBatchWithdraw) > 0) ?
                             `WITHDRAW ALL (${(longCollateralForBatchWithdraw + shortCollateralForBatchWithdraw).toLocaleString(undefined, { maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS })} ${COLLATERAL_TOKEN_NAME})` :
@@ -590,7 +594,7 @@ const PorfolioPage: React.SFC = () => {
                       </TableHead>
                       <TableBody>
                         {expiredLongPositions.concat(expiredShortPositions)
-                          .filter(p => !p.canBeBatchRedeemed)
+                          .filter(p => p.status === PositionStatus.withdrawalPending && !p.canBeBatchRedeemed)
                           .sort((a, b) => a.settlementDate < b.settlementDate ? -1 : 1)
                           .map(p =>
                             <TableRow key={p.transaction.id}>
