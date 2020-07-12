@@ -433,24 +433,27 @@ class HoneylemonService {
     positionTokenAddress: string,
     marketContractAddress: string,
     amount: string,
-    positionType: 'Long' | 'Short') {
+    positionType: 'Long' | 'Short',
+    gasPrice?: number
+    ) {
     const positionToken = new web3.eth.Contract(PositionToken.abi, positionTokenAddress);
     positionToken.setProvider(this.provider);
     const web3Wrapper: Web3Wrapper = new Web3Wrapper(this.provider);
     const allowance = new BigNumber(await positionToken.methods.allowance(recipientAddress, marketContractAddress).call())
     const isApprovalRequired = !allowance.isGreaterThanOrEqualTo(amount);
+    const price = gasPrice ? Number(`${gasPrice}e9`) : undefined;
 
     if (isApprovalRequired) {
       const approvalResult = await positionToken.methods.approve(marketContractAddress, amount)
         .send({
-          from: recipientAddress
+          from: recipientAddress,
+          gasPrice: price,
         });
       await web3Wrapper.awaitTransactionSuccessAsync(approvalResult.transactionHash);
     }
 
     const marketCollateralPoolAddress = await this.marketContractProxy.methods
       .getCollateralPool(marketContractAddress).call();
-    console.log(marketCollateralPoolAddress);
     const marketCollateralPool = new web3.eth.Contract(MarketCollateralPool.abi, marketCollateralPoolAddress);
     marketCollateralPool.setProvider(this.provider);
 
@@ -459,12 +462,13 @@ class HoneylemonService {
       marketCollateralPool.methods.settleAndClose(marketContractAddress, 0, amount)
 
     const gas = await redeemTx.estimateGas({ from: recipientAddress });
-    const redeemResult = await redeemTx.send({ from: recipientAddress, gas });
+    const redeemResult = await redeemTx.send({ from: recipientAddress, gas, gasPrice: price });
 
-    await web3Wrapper.awaitTransactionSuccessAsync(redeemResult.transactionHash)
+    return await web3Wrapper.awaitTransactionSuccessAsync(redeemResult.transactionHash)
   }
 
-  async batchRedeem(recipientAddress) {
+  async batchRedeem(recipientAddress, gasPrice?: number) {
+    const price = gasPrice ? Number(`${gasPrice}e9`) : undefined;
     const dsProxyAddress = await this.marketContractProxy.methods
       .getUserAddressOrDSProxy(recipientAddress)
       .call();
@@ -524,7 +528,7 @@ class HoneylemonService {
         batchRedemptionLongTx
       );
       const gas = await method.estimateGas({ from: recipientAddress, gas: 9000000 });
-      redemptionTxLong = await method.send({ from: recipientAddress, gas });
+      redemptionTxLong = await method.send({ from: recipientAddress, gas, gasPrice: price });
     }
 
     if (shortPositions.length > 0) {
@@ -561,7 +565,7 @@ class HoneylemonService {
       const gas = await method.estimateGas({ from: recipientAddress, gas: 9000000 });
       redemptionTxShort = method.send({ from: recipientAddress, gas });
     }
-    return { redemptionTxLong, redemptionTxShort };
+    return Promise.all([redemptionTxLong, redemptionTxShort]);
   }
 
   async getPositions(address) {

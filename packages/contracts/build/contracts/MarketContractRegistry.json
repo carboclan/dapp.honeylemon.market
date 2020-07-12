@@ -5429,8 +5429,8 @@
         }
       },
       "links": {},
-      "address": "0x9aE517f05e749266Be1EBd5177CcF5C6972Ba123",
-      "transactionHash": "0x9d69090a53e2509806ed2201a9a8c101e611fbfc5c5024135227b8f6c4e25dab"
+      "address": "0x82dA487eD134cdaE637345363482c6C826c729D6",
+      "transactionHash": "0x720c12a4b714a523efa82640ae3e27c95b347a4122b9bcf664dfbe4d563c67c1"
     },
     "42": {
       "events": {
@@ -5578,7 +5578,7 @@
     }
   },
   "schemaVersion": "3.2.0",
-  "updatedAt": "2020-07-02T03:29:27.529Z",
+  "updatedAt": "2020-07-11T22:54:27.116Z",
   "networkType": "ethereum",
   "devdoc": {
     "author": "Phil Elsasser <phil@marketprotocol.io>",
