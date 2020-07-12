@@ -124,7 +124,7 @@ function AppWrapper(props: { children: ReactNode }) {
     approveToken,
     showTokenInfoModal,
     setShowTokenInfoModal,
-    isInMaintencanceMode
+    isInMaintenanceMode
   } = useHoneylemon();
 
   const handleLogout = () => {
@@ -256,11 +256,11 @@ function AppWrapper(props: { children: ReactNode }) {
             <ListItemIcon><Whatshot /></ListItemIcon>
             <ListItemText primary="Live Market Stats" />
           </ListItem>
-          <ListItem button onClick={() => handleNavigate('/buy')} selected={location.pathname === '/buy'} disabled={isInMaintencanceMode}>
+          <ListItem button onClick={() => handleNavigate('/buy')} selected={location.pathname === '/buy'} disabled={isInMaintenanceMode}>
             <ListItemIcon><MonetizationOn /></ListItemIcon>
             <ListItemText primary="Buy Contract" />
           </ListItem>
-          <ListItem button onClick={() => handleNavigate('/offer')} selected={location.pathname === '/offer'} disabled={isInMaintencanceMode}>
+          <ListItem button onClick={() => handleNavigate('/offer')} selected={location.pathname === '/offer'} disabled={isInMaintenanceMode}>
             <ListItemIcon><Assessment /></ListItemIcon>
             <ListItemText primary="Offer Contract" />
           </ListItem>
