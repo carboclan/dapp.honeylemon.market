@@ -435,7 +435,7 @@ class HoneylemonService {
     amount: string,
     positionType: 'Long' | 'Short',
     gasPrice?: number
-    ) {
+  ) {
     const positionToken = new web3.eth.Contract(PositionToken.abi, positionTokenAddress);
     positionToken.setProvider(this.provider);
     const web3Wrapper: Web3Wrapper = new Web3Wrapper(this.provider);
@@ -517,18 +517,22 @@ class HoneylemonService {
           }
         }
       }
-      // encode the function call to send to DSProxy
-      const batchRedemptionLongTx = this.marketContractProxy.methods
-        .batchRedeem(longParams.tokenAddresses, longParams.numTokens)
-        .encodeABI();
 
-      // Execute function call on DSProxy
-      const method = traderDSProxy.methods.execute(
-        this.marketContractProxyAddress,
-        batchRedemptionLongTx
-      );
-      const gas = await method.estimateGas({ from: recipientAddress, gas: 9000000 });
-      redemptionTxLong = await method.send({ from: recipientAddress, gas, gasPrice: price });
+      if (longParams.tokenAddresses.length > 0 && longParams.numTokens.length > 0) {
+        // encode the function call to send to DSProxy
+        const batchRedemptionLongTx = this.marketContractProxy.methods
+          .batchRedeem(longParams.tokenAddresses, longParams.numTokens)
+          .encodeABI();
+
+        // Execute function call on DSProxy
+        const method = traderDSProxy.methods.execute(
+          this.marketContractProxyAddress,
+          batchRedemptionLongTx
+        );
+
+        const gas = await method.estimateGas({ from: recipientAddress, gas: 9000000 });
+        redemptionTxLong = await method.send({ from: recipientAddress, gas, gasPrice: price });
+      }
     }
 
     if (shortPositions.length > 0) {
@@ -554,17 +558,21 @@ class HoneylemonService {
         }
       }
 
-      const batchRedemptionShortTx = this.marketContractProxy.methods
-        .batchRedeem(shortParams.tokenAddresses, shortParams.numTokens)
-        .encodeABI();
+      if (shortParams.tokenAddresses.length > 0 && shortParams.numTokens.length > 0) {
+        const batchRedemptionShortTx = this.marketContractProxy.methods
+          .batchRedeem(shortParams.tokenAddresses, shortParams.numTokens)
+          .encodeABI();
 
-      const method = traderDSProxy.methods.execute(
-        this.marketContractProxyAddress,
-        batchRedemptionShortTx
-      );
-      const gas = await method.estimateGas({ from: recipientAddress, gas: 9000000 });
-      redemptionTxShort = method.send({ from: recipientAddress, gas });
+        // Execute function call on DSProxy
+        const method = traderDSProxy.methods.execute(
+          this.marketContractProxyAddress,
+          batchRedemptionShortTx
+        );
+        const gas = await method.estimateGas({ from: recipientAddress, gas: 9000000 });
+        redemptionTxShort = method.send({ from: recipientAddress, gas });
+      }
     }
+
     return Promise.all([redemptionTxLong, redemptionTxShort]);
   }
 
