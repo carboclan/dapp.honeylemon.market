@@ -281,48 +281,53 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
     setContractDuration(Number(process.env.REACT_APP_CONTRACT_DURATION));
     if (isReady && wallet && network && validNetworks.includes(network) && address) {
       const initHoneylemonService = async () => {
-        let wrappedSubprovider;
-        const web3 = new Web3(wallet.provider)
-        switch (wallet.name) {
-          case 'MetaMask':
-            wrappedSubprovider = new MetamaskSubprovider(web3.currentProvider as Web3JsProvider);
-            break;
-          default:
-            wrappedSubprovider = new MetamaskSubprovider(web3.currentProvider as Web3JsProvider);
-        }
+        try {
+          let wrappedSubprovider;
+          const web3 = new Web3(wallet.provider)
+          switch (wallet.name) {
+            case 'MetaMask':
+              wrappedSubprovider = new MetamaskSubprovider(web3.currentProvider as Web3JsProvider);
+              break;
+            default:
+              wrappedSubprovider = new MetamaskSubprovider(web3.currentProvider as Web3JsProvider);
+          }
 
-        const honeylemonService = new HoneylemonService(
-          config[network].apiUrl,
-          config[network].subgraphUrl,
-          wrappedSubprovider,
-          network,
-          config[network].minterBridgeAddress,
-          config[network].marketContractProxy,
-          config[network].collateralTokenAddress,
-          config[network].paymentTokenAddress,
-          contractDuration,
-        );
-        setHoneylemonService(honeylemonService);
-        const collateral = await honeylemonService.getCollateralTokenAmounts(address);
-        setCollateralTokenAllowance(Number(collateral.allowance.shiftedBy(-8).toString()));
-        setCollateralTokenBalance(Number(collateral.balance.shiftedBy(-8).toString()));
-        const payment = await honeylemonService.getPaymentTokenAmounts(address);
-        setPaymentTokenAllowance(Number(payment.allowance.shiftedBy(-6).toString()));
-        setPaymentTokenBalance(Number(payment.balance.shiftedBy(-6).toString()));
-        const proxyDeployed: boolean = await honeylemonService.addressHasDSProxy(address)
-        setIsDsProxyDeployed(proxyDeployed);
-        if (proxyDeployed) {
-          const proxyAddress = await honeylemonService.getDSProxyAddress(address);
-          setDsProxyAddress(proxyAddress);
-        }
-        const isContractDeployed = await honeylemonService.isDailyContractDeployed();
-        setIsDailyContractDeployed(isContractDeployed);
-        if (address && notify) {
-          const { emitter } = notify.account(address);
-          const etherscanUrl = (network === 1) ? 'https://etherscan.io' : `https://${networkName(network)}.etherscan.io`
-          emitter.on('all', tx => ({
-            onclick: () => window.open(`${etherscanUrl}/tx/${tx.hash}`) // TODO: update this to work on other networks
-          }))
+          const honeylemonService = new HoneylemonService(
+            config[network].apiUrl,
+            config[network].subgraphUrl,
+            wrappedSubprovider,
+            network,
+            config[network].minterBridgeAddress,
+            config[network].marketContractProxy,
+            config[network].collateralTokenAddress,
+            config[network].paymentTokenAddress,
+            contractDuration,
+          );
+          setHoneylemonService(honeylemonService);
+          const collateral = await honeylemonService.getCollateralTokenAmounts(address);
+          setCollateralTokenAllowance(Number(collateral.allowance.shiftedBy(-8).toString()));
+          setCollateralTokenBalance(Number(collateral.balance.shiftedBy(-8).toString()));
+          const payment = await honeylemonService.getPaymentTokenAmounts(address);
+          setPaymentTokenAllowance(Number(payment.allowance.shiftedBy(-6).toString()));
+          setPaymentTokenBalance(Number(payment.balance.shiftedBy(-6).toString()));
+          const proxyDeployed: boolean = await honeylemonService.addressHasDSProxy(address)
+          setIsDsProxyDeployed(proxyDeployed);
+          if (proxyDeployed) {
+            const proxyAddress = await honeylemonService.getDSProxyAddress(address);
+            setDsProxyAddress(proxyAddress);
+          }
+          const isContractDeployed = await honeylemonService.isDailyContractDeployed();
+          setIsDailyContractDeployed(isContractDeployed);
+          if (address && notify) {
+            const { emitter } = notify.account(address);
+            const etherscanUrl = (network === 1) ? 'https://etherscan.io' : `https://${networkName(network)}.etherscan.io`
+            emitter.on('all', tx => ({
+              onclick: () => window.open(`${etherscanUrl}/tx/${tx.hash}`) // TODO: update this to work on other networks
+            }))
+          }
+        } catch (error) {
+          console.log('Error initializing Honeylemon context');
+          Sentry.captureEvent(error);
         }
       };
       initHoneylemonService();

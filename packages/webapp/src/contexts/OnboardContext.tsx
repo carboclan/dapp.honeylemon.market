@@ -63,8 +63,8 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
               { walletName: 'metamask', preferred: true },
               {
                 walletName: 'imToken',
-                rpcUrl: ((!!network && network === 1) || (validNetworks[0] === 1)) ? 
-                  'https://mainnet-eth.token.im' : 
+                rpcUrl: ((!!network && network === 1) || (validNetworks[0] === 1)) ?
+                  'https://mainnet-eth.token.im' :
                   'https://eth-testnet.tokenlon.im',
                 preferred: true,
               },
@@ -102,10 +102,12 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
             address: setAddress,
             network: (network) => {
               if (validNetworks.includes(network)) {
-                onboard.config({networkId: network})
+                onboard.config({ networkId: network })
               }
               setNetwork(network)
-              onboard.walletCheck();
+              if (isReady) {
+                onboard.walletCheck();
+              }
             },
             balance: (balance) => {
               (balance)
@@ -187,7 +189,7 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
       }
     } else {
       console.log('You are not using mainnet. Defaulting to 10 gwei')
-      setGasPrice(10);      
+      setGasPrice(10);
     }
   }, [])
 
