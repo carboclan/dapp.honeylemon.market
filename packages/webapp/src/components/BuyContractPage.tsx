@@ -407,7 +407,7 @@ const BuyContractPage: React.SFC = () => {
   const handleStartBuy = () => {
     setSkipDsProxy(false);
     setShowBuyModal(true);
-    activeStep === 2 && handleBuyOffer();
+    // activeStep === 2 && handleBuyOffer();
   }
 
   const handleOrderDetailsClick = () => {
