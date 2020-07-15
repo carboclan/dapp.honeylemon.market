@@ -1,6 +1,7 @@
 import React from 'react';
 import { Typography, Dialog, DialogTitle, DialogContent, Link } from '@material-ui/core';
 import { OpenInNew } from '@material-ui/icons';
+import { useHoneylemon } from '../contexts/HoneylemonContext';
 
 interface ContractSpecificationModalProps {
   open: boolean,
@@ -9,7 +10,7 @@ interface ContractSpecificationModalProps {
 
 const ContractSpecificationModal: React.SFC<ContractSpecificationModalProps> =
   ({ open, onClose }: ContractSpecificationModalProps) => {
-
+    const {COLLATERAL_TOKEN_NAME, PAYMENT_TOKEN_NAME} = useHoneylemon();
     return (
       <Dialog open={open} onClose={onClose} aria-labelledby="dialog-title" maxWidth='sm' fullWidth>
         <DialogTitle id="dialog-title">Contract Specification</DialogTitle>
@@ -22,37 +23,37 @@ const ContractSpecificationModal: React.SFC<ContractSpecificationModalProps> =
 
           <Typography variant='h6'>Trading Currency</Typography>
           <Typography variant='body2' paragraph>
-            BTC Mining Revenue Contracts are bought and sold in USDT.
+            BTC Mining Revenue Contracts are bought and sold in {PAYMENT_TOKEN_NAME}.
           </Typography>
 
           <Typography variant='h6'>Settlement Currency</Typography>
           <Typography variant='body2' paragraph>
             The BTC Mining Revenue Index (MRI_BTC) is denominated in BTC. The contract is collateralized
-            and settled in imBTC. The BTC/imBTC precision is 1 satoshi or 1e-8.
+            and settled in {COLLATERAL_TOKEN_NAME}. The BTC/{COLLATERAL_TOKEN_NAME} precision is 1 satoshi or 1e-8.
           </Typography>
 
           <Typography variant='h6'>Tick Size</Typography>
-          <Typography variant='body2' paragraph>1e-6 USDT is the minimum price movement.</Typography>
+          <Typography variant='body2' paragraph>1e-6 {PAYMENT_TOKEN_NAME} is the minimum price movement.</Typography>
 
           <Typography variant='h6'>Contract Size</Typography>
           <Typography variant='body2' paragraph>1 TH (per day for 28 days) is the minimum increment of contract size.</Typography>
 
           <Typography variant='h6'>Cap Price</Typography>
           <Typography variant='body2' paragraph>
-            125% of the last updated MRI_BTC when a contract offer is taken, denominated in imBTC. <br />
+            125% of the last updated MRI_BTC when a contract offer is taken, denominated in {COLLATERAL_TOKEN_NAME}. <br />
           Cap price determines the collateral requirement for issuance of short positions, and caps
           the maximum settlement value for long positions.
           </Typography>
 
           <Typography variant='h6'>Collateral Requirement</Typography>
           <Typography variant='body2' paragraph>
-            Long position collateral: a buyer pays USDT upfront without the need for actual collateral. <br />
-            The upfront cost in USDT = entry price *quantity.<br /><br />
+            Long position collateral: a buyer pays {PAYMENT_TOKEN_NAME} upfront without the need for actual collateral. <br />
+            The upfront cost in {PAYMENT_TOKEN_NAME} = entry price * quantity.<br /><br />
 
-            Short position collateral: a seller is required to set aside a certain amount of imBTC
+            Short position collateral: a seller is required to set aside a certain amount of {COLLATERAL_TOKEN_NAME}
             as collateral in the smart contract until the position is closed or when the MRI_BTC
             contract is settled.<br />
-            The collateral required in imBTC = cap price * quantity.<br /><br />
+            The collateral required in {COLLATERAL_TOKEN_NAME} = cap price * quantity.<br /><br />
 
             There is NO margin call or forced liquidation.
           </Typography>
@@ -70,7 +71,7 @@ const ContractSpecificationModal: React.SFC<ContractSpecificationModalProps> =
           <Typography variant='h6'>Settlement Value</Typography>
           <Typography variant='body2' paragraph>
             Long settlement value = MAX(MRI_BTC_28 at contract expiration, cap price) * 28 days.<br />
-            Short settlement value = (cap price - MRI__BTC_28 at contract expiration) * 28 days.<br />
+            Short settlement value = (cap price - MRI_BTC_28 at contract expiration) * 28 days.<br />
             The earlier time of the two:<br />
             • 24-hours after contract expiration;<br />
             • The unlikely event of a cap price breach before expiration.<br />
