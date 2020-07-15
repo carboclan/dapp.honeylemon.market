@@ -32,7 +32,7 @@ export enum PositionStatus {
   withdrawn = 'Withdrawn'
 }
 
-const COLLATERAL_TOKEN_NAME = process.env.REACT_APP_COLLATERAL_TOKEN_NAME || 'imBTC';
+const COLLATERAL_TOKEN_NAME = process.env.REACT_APP_COLLATERAL_TOKEN_NAME || 'wBTC';
 const PAYMENT_TOKEN_NAME = process.env.REACT_APP_PAYMENT_TOKEN_NAME || 'USDT';
 const CONTRACT_COLLATERAL_RATIO = Number(process.env.REACT_APP_CONTRACT_COLLATERAL_RATIO) || 1.25;
 const MAINTENANCE_MODE = (process.env.REACT_APP_MAINTENANCE_MODE === 'true');

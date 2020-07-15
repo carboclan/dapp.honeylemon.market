@@ -1,30 +1,33 @@
 import React from 'react';
 import { Dialog, DialogContent, Typography, Link, DialogTitle } from '@material-ui/core';
 import { OpenInNew } from '@material-ui/icons';
+import { useHoneylemon } from '../contexts/HoneylemonContext';
 
 interface TokenInfoModalProps {
   open: boolean,
   onClose(): void,
 };
 
-const TokenInfoModal: React.SFC<TokenInfoModalProps> = ({ open, onClose }: TokenInfoModalProps) => (
+const TokenInfoModal: React.SFC<TokenInfoModalProps> = ({ open, onClose }: TokenInfoModalProps) => {
+  const { COLLATERAL_TOKEN_NAME, PAYMENT_TOKEN_NAME} = useHoneylemon();
+  return (
   <Dialog open={open} onClose={onClose} aria-labelledby="dialog-title" maxWidth='sm' fullWidth>
     <DialogTitle>
       Manage My Wallet
     </DialogTitle>
     <DialogContent>
       <Typography variant='body2'>
-        Honeylemon Mining Revenue Contracts are traded in USDT, settled in imBTC, and requires ETH for <Link href='https://docs.honeylemon.market/fees'>fees.<OpenInNew fontSize='small' /></Link>
+        Honeylemon Mining Revenue Contracts are traded in {PAYMENT_TOKEN_NAME}, settled in {COLLATERAL_TOKEN_NAME}, and requires ETH for <Link href='https://docs.honeylemon.market/fees'>fees.<OpenInNew fontSize='small' /></Link>
         Honeylemon plans to support more BTC &amp; stable coins, and more contracts in the future. <br />
-        • <b>USDT</b> is a ERC-20 token representation of US Dollar on Ethereum, issued by Tether.<br />
-        • <b>imBTC</b> is a ERC-20 token representation of BTC on Ethereum, issued by imToken.<br />
+        • <b>{PAYMENT_TOKEN_NAME}</b> is a ERC-20 token representation of US Dollar on Ethereum, issued by Tether.<br />
+        • <b>{COLLATERAL_TOKEN_NAME}</b> is a ERC-20 token representation of BTC on Ethereum, issued by imToken.<br />
       </Typography>
       <br /><br />
       <Typography variant='subtitle2'>
         <b>Ways to Get More Tokens</b>
       </Typography>
       <Typography variant='subtitle2'>
-        <b>BUY CONTRACT</b> - Get USDT &amp; ETH:
+        <b>BUY CONTRACT</b> - Get {PAYMENT_TOKEN_NAME} &amp; ETH:
       </Typography>
       <Typography variant='body2'>
         • Decentralized exchanges of your choice:<br />
@@ -34,27 +37,27 @@ const TokenInfoModal: React.SFC<TokenInfoModalProps> = ({ open, onClose }: Token
       </Typography>
       <br />
       <Typography variant='subtitle2'>
-        <b>OFFER CONTRACT</b> - Get imBTC and ETH:
+        <b>OFFER CONTRACT</b> - Get {COLLATERAL_TOKEN_NAME} and ETH:
       </Typography>
       <Typography variant='body2'>
         • Visit <Link href='https://tokenlon.im/' target="_blank" rel='noopener' underline='always'>tokenlon.im<OpenInNew fontSize='small' /></Link>, or use Tokenlon directly from your <Link href='https://www.token.im/' target="_blank" rel='noopener' underline='always'>imToken wallet app<OpenInNew fontSize='small' /></Link>, go to “Market” tab<br />
-        • Mint imBTC directly with your BTC on <Link href='https://www.token.im/' target="_blank" rel='noopener' underline='always'>imToken wallet app<OpenInNew fontSize='small' /></Link>, go to “Browser” tab, open <b>imBTC dApp.</b>
+        • Mint {COLLATERAL_TOKEN_NAME} directly with your BTC on <Link href='https://www.token.im/' target="_blank" rel='noopener' underline='always'>imToken wallet app<OpenInNew fontSize='small' /></Link>, go to “Browser” tab, open <b>imBTC dApp.</b>
       </Typography>
       <br />
       <Typography variant='subtitle2'>
-        <b>MINT imBTC from BTC or REDEEM BTC from imBTC:</b>
+        <b>MINT {COLLATERAL_TOKEN_NAME} from BTC or REDEEM BTC from {COLLATERAL_TOKEN_NAME}:</b>
       </Typography>
       <Typography variant='body2'>
-        • Mint imBTC directly with your BTC on <Link href='https://www.token.im/' target="_blank" rel='noopener' underline='always'>imToken wallet app<OpenInNew fontSize='small' /></Link>, go to “Browser” tab, open <b>imBTC dApp.</b> <br/>
-        • Minting and redeeming imBTC may take up to 24 hours.
+        • Mint {COLLATERAL_TOKEN_NAME} directly with your BTC on <Link href='https://www.token.im/' target="_blank" rel='noopener' underline='always'>imToken wallet app<OpenInNew fontSize='small' /></Link>, go to “Browser” tab, open <b>imBTC dApp.</b> <br/>
+        • Minting and redeeming {COLLATERAL_TOKEN_NAME} may take up to 24 hours.
       </Typography>
       <br />
       <Typography variant='subtitle2'>
-        <b>ETH, imBTC &amp; USDT Token Balance &amp; Permission</b>
+        <b>ETH, {COLLATERAL_TOKEN_NAME} &amp; {PAYMENT_TOKEN_NAME} Token Balance &amp; Permission</b>
       </Typography>
       <Typography variant='body2'>
-        • Your current balance for ETH, imBTC and USDT of your connected wallet is displayed on the Side Menu.<br />
-        • “Approve” imBTC and/or USDT when you place an order means you have granted permission to Honeylemon smart contracts to access your tokens.<br />
+        • Your current balance for ETH, {COLLATERAL_TOKEN_NAME} and {PAYMENT_TOKEN_NAME} of your connected wallet is displayed on the Side Menu.<br />
+        • “Approve” {COLLATERAL_TOKEN_NAME} and/or {PAYMENT_TOKEN_NAME} when you place an order means you have granted permission to Honeylemon smart contracts to access your tokens.<br />
         • Permission to access your ETH is by default set to ON due to Ethereum transaction fee (gas) consideration.<br />
         • To manually turn ON/OFF permission, simply click on the switch knob. Changing permissions will cost additional gas (in ETH).
       </Typography>
@@ -68,6 +71,6 @@ const TokenInfoModal: React.SFC<TokenInfoModalProps> = ({ open, onClose }: Token
       </Typography>
     </DialogContent>
   </Dialog>
-)
+)}
 
 export default TokenInfoModal;
