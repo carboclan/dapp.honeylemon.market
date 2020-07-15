@@ -324,8 +324,13 @@ class HoneylemonService {
     return !!allowance.isGreaterThanOrEqualTo(amount);
   }
 
-  async approveCollateralToken(makerAddress: string, amount: number, gasPrice?: number) {
-    const approvalAmount = amount === 0 ? new BigNumber(0) : new BigNumber(2).pow(256).minus(1);
+  async approveCollateralToken(makerAddress: string, amount?: number, gasPrice?: number) {
+    const approvalAmount = 
+      amount === 0 ? 
+        new BigNumber(0) : 
+        amount === undefined ? 
+          new BigNumber(2).pow(256).minus(1) : 
+          new BigNumber(amount);
     const price = gasPrice ? Number(`${gasPrice}e9`) : undefined;
     const approveTx = this.collateralToken.approve(this.minterBridgeAddress, approvalAmount)
     return await approveTx.awaitTransactionSuccessAsync({ from: makerAddress, gasPrice: price });
@@ -336,15 +341,20 @@ class HoneylemonService {
 
     const allowance = new BigNumber(
       await this.paymentToken
-        .allowance(this.minterBridgeAddress, ownerAddress)
+        .allowance(ownerAddress, this.contractWrappers.contractAddresses.erc20Proxy)
         .callAsync()
     );
 
     return !!allowance.isGreaterThanOrEqualTo(amount);
   }
 
-  async approvePaymentToken(takerAddress: number, amount: number, gasPrice?: number) {
-    const approvalAmount = amount === 0 ? new BigNumber(0) : new BigNumber(2).pow(256).minus(1);
+  async approvePaymentToken(takerAddress: string, amount?: number, gasPrice?: number) {
+    const approvalAmount = 
+    amount === 0 ? 
+      new BigNumber(0) : 
+      amount === undefined ? 
+        new BigNumber(2).pow(256).minus(1) : 
+        new BigNumber(amount);
     const price = gasPrice ? Number(`${gasPrice}e9`) : undefined;
 
     if (this.paymentTokenAddress.toLowerCase() == USDT_ADDRESS.toLowerCase()) {

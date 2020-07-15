@@ -43,8 +43,8 @@ type OrderSummary = {
 };
 
 export type HoneylemonContext = {
-  honeylemonService: HoneylemonService;
-  orderbookService: OrderbookService;
+  honeylemonService?: HoneylemonService;
+  orderbookService?: OrderbookService;
   collateralTokenBalance: number;
   collateralTokenAllowance: number;
   COLLATERAL_TOKEN_DECIMALS: number;
@@ -126,8 +126,8 @@ const HoneylemonContext = React.createContext<HoneylemonContext | undefined>(und
 const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
   const { wallet, network, isReady, address, notify, gasPrice } = useOnboard();
 
-  const [honeylemonService, setHoneylemonService] = useState<any | undefined>(undefined);
-  const [orderbookService, setOrderbookService] = useState<any | undefined>(undefined);
+  const [honeylemonService, setHoneylemonService] = useState<HoneylemonService | undefined>(undefined);
+  const [orderbookService, setOrderbookService] = useState<OrderbookService | undefined>(undefined);
   const [collateralTokenBalance, setCollateralTokenBalance] = useState<number>(0);
   const [collateralTokenAllowance, setCollateralTokenAllowance] = useState<number>(0);
   const [paymentTokenBalance, setPaymentTokenBalance] = useState<number>(0);
@@ -152,6 +152,10 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
   const [showTokenInfoModal, setShowTokenInfoModal] = useState(false);
 
   const deployDSProxyContract = async () => {
+    if (!honeylemonService || !address) { 
+      console.log('Please connect a wallet to deploy a DSProxy Contract')
+      return; 
+    }
     try {
       const dsProxyAddress = await honeylemonService.deployDSProxyContract(address, gasPrice);
       setIsDsProxyDeployed(true);
@@ -165,6 +169,10 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
   }
 
   const approveToken = async (tokenType: TokenType, amount?: number): Promise<void> => {
+    if (!honeylemonService || !address) { 
+      console.log('Please connect a wallet to deploy a DSProxy Contract')
+      return; 
+    }
     try {
       switch (tokenType) {
         case TokenType.CollateralToken:
@@ -217,6 +225,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
   }
 
   const getPorfolio = async () => {
+    if (!honeylemonService) return;
     try {
       setIsPortfolioRefreshing(true);
 
@@ -461,6 +470,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
   // Transfer & Approval event listeners for Payment & Collateral Tokens
   useEffect(() => {
     const checkBalancesAndApprovals = async () => {
+      if (!honeylemonService) return;
       const collateral = await honeylemonService.getCollateralTokenAmounts(address);
       setCollateralTokenAllowance(Number(collateral.allowance.shiftedBy(-8).toString()));
       setCollateralTokenBalance(Number(collateral.balance.shiftedBy(-8).toString()));
