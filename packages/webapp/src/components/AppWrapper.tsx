@@ -301,7 +301,7 @@ function AppWrapper(props: { children: ReactNode }) {
           </ListItem>
           <ListItem>
             <ListItemIcon>
-              <img src='imBtc.png' style={{ width: '40px', height: '40px' }}  alt='imbtc logo' />
+              <img src='wbtc.png' style={{ width: '40px', height: '40px' }}  alt='wbtc logo' />
             </ListItemIcon>
             <Switch
               color="primary"

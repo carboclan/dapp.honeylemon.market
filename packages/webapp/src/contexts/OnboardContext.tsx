@@ -77,7 +77,7 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
               { walletName: "dapper" },
               {
                 walletName: "walletConnect",
-                rpc: { [!!network && network || validNetworks[0]]: infuraRpc },
+                rpc: { [network || validNetworks[0]]: infuraRpc },
               },
               { walletName: "walletLink", rpcUrl: infuraRpc },
               { walletName: "opera" },
