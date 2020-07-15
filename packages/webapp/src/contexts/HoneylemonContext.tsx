@@ -348,11 +348,12 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
   // Instantiate Orderbook service
   useEffect(() => {
     const initOrderbookService = async () => {
+      const activeNetwork = network || validNetworks[0];
       const orderbookServiceInstance = new OrderbookService(
-        process.env.REACT_APP_SRA_URL,
-        process.env.REACT_APP_MINTER_BRIDGE_ADDRESS,
-        process.env.REACT_APP_MARKET_CONTRACT_PROXY_ADDRESS,
-        process.env.REACT_APP_PAYMENT_TOKEN_ADDRESS,
+        config[activeNetwork].apiUrl,
+        config[activeNetwork].minterBridgeAddress,
+        config[activeNetwork].marketContractProxy,
+        config[activeNetwork].paymentTokenAddress,
       );
       setOrderbookService(orderbookServiceInstance);
     }
