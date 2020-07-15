@@ -48,7 +48,7 @@ const UnfilledOfferModal: React.SFC<UnfilledOfferModalProps> = ({ open, onClose,
 
   const cancelOpenOrder = async (orderHash: string) => {
     const order = openOrders?.[orderHash];
-    if (!order) {
+    if (!order || !honeylemonService) {
       console.log('This order does not exist.')
       return;
     }

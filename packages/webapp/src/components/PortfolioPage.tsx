@@ -152,6 +152,7 @@ const PorfolioPage: React.SFC = () => {
 
   const batchWithdraw = async () => {
     setIsWithdrawing(true);
+    if (!honeylemonService) return;
     try {
       await honeylemonService.batchRedeem(address);
       await new Promise(resolve => {
@@ -171,6 +172,7 @@ const PorfolioPage: React.SFC = () => {
     marketContractAddress: string,
     amount: string,
     type: PositionType) => {
+    if (!honeylemonService) return;
     setIsWithdrawing(true);
     try {
       !!address &&
