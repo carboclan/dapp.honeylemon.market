@@ -153,6 +153,10 @@ const BuyContractPage: React.SFC = () => {
 
   useEffect(() => {
     const getQuoteForBudget = async () => {
+      if (!honeylemonService) { 
+        console.log('Please connect a wallet to deploy a DSProxy Contract')
+        return; 
+      }
       try {
         const result = await honeylemonService.getQuoteForBudget(budget);
         const newIsLiquid = !!(Number(result?.remainingTakerFillAmount?.toString() || -1) === 0)
@@ -182,6 +186,10 @@ const BuyContractPage: React.SFC = () => {
     }
 
     const getQuoteForSize = async () => {
+      if (!honeylemonService) { 
+        console.log('Please connect a wallet to deploy a DSProxy Contract')
+        return; 
+      }
       try {
         const result = await honeylemonService.getQuoteForSize(new BigNumber(orderQuantity))
         const newIsLiquid = !!(Number(result?.remainingMakerFillAmount?.toString() || -1) === 0)
@@ -279,7 +287,7 @@ const BuyContractPage: React.SFC = () => {
   }
 
   const handleBuyOffer = async () => {
-    if (!address) {
+    if (!address || !honeylemonService) {
       console.log("Wallet is not connected. Unable to start buy");
       return;
     }
