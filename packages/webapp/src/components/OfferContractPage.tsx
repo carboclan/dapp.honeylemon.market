@@ -148,6 +148,7 @@ const OfferContractPage: React.SFC = () => {
   useEffect(() => {
     let cancelled = false;
     const getCollateralForContract = async () => {
+      if (!honeylemonService) return;
       try {
         const result = await honeylemonService.getCollateralForContract(hashAmount)
         if (!cancelled) {
@@ -206,6 +207,7 @@ const OfferContractPage: React.SFC = () => {
   const handleCreateOffer = async () => {
     setTxActive(true);
     setErrorMessage('')
+    if (!honeylemonService) return;
     if (hashAmount) {
       try {
         const order = honeylemonService.createOrder(
