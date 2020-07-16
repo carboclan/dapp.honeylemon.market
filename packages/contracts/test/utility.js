@@ -1,14 +1,14 @@
-const BN = require('bn.js');
-const MarketContractMPX = artifacts.require('MarketContractMPX');
-const Utils = require('web3-utils');
+const BN = require("bn.js");
+const MarketContractMPX = artifacts.require("MarketContractMPX");
+const Utils = require("web3-utils");
 
-const { AbstractWeb3Module } = require('web3-core');
+const { AbstractWeb3Module } = require("web3-core");
 const {
   AbstractMethodFactory,
   GetBlockByNumberMethod,
   AbstractMethod
-} = require('web3-core-method');
-const { formatters } = require('web3-core-helpers');
+} = require("web3-core-method");
+const { formatters } = require("web3-core-helpers");
 
 class EVMManipulator extends AbstractWeb3Module {
   /**
@@ -26,7 +26,7 @@ class EVMManipulator extends AbstractWeb3Module {
    * @returns {Promise<string>} evm snapshot Id
    */
   createSnapshot() {
-    const method = new AbstractMethod('evm_snapshot', 0, Utils, formatters, this);
+    const method = new AbstractMethod("evm_snapshot", 0, Utils, formatters, this);
     method.setArguments(arguments);
 
     return method.execute();
@@ -38,7 +38,7 @@ class EVMManipulator extends AbstractWeb3Module {
    * @param {string} snapshotId
    */
   restoreSnapshot(snapshotId) {
-    const method = new AbstractMethod('evm_revert', 1, Utils, formatters, this);
+    const method = new AbstractMethod("evm_revert", 1, Utils, formatters, this);
     method.setArguments([snapshotId]);
 
     return method.execute();
@@ -46,7 +46,7 @@ class EVMManipulator extends AbstractWeb3Module {
 
   increase(duration) {
     const increaseTimeMethod = new AbstractMethod(
-      'evm_increaseTime',
+      "evm_increaseTime",
       1,
       Utils,
       formatters,
@@ -55,7 +55,7 @@ class EVMManipulator extends AbstractWeb3Module {
     increaseTimeMethod.setArguments([duration]);
 
     return increaseTimeMethod.execute().then(() => {
-      const mineMethod = new AbstractMethod('evm_mine', 0, Utils, formatters, this);
+      const mineMethod = new AbstractMethod("evm_mine", 0, Utils, formatters, this);
       mineMethod.setArguments([]);
 
       return mineMethod.execute();
@@ -124,8 +124,8 @@ module.exports = {
     contractSpecs
   ) {
     const expiration = Math.round(new Date().getTime() / 1000 + 60 * 50); // order expires 50 minutes from now.
-    const oracleURL = 'api.coincap.io/v2/rates/bitcoin';
-    const oracleStatistic = 'rateUSD';
+    const oracleURL = "api.coincap.io/v2/rates/bitcoin";
+    const oracleStatistic = "rateUSD";
 
     if (!oracleHubAddress) {
       oracleHubAddress = userAddress;
@@ -135,9 +135,9 @@ module.exports = {
       contractSpecs = [0, 150, 2, 2, 100, 50, expiration];
     }
     const contractNames = [
-      web3.utils.asciiToHex('BTC', 32),
-      web3.utils.asciiToHex('LBTC', 32),
-      web3.utils.asciiToHex('SBTC', 32)
+      web3.utils.asciiToHex("BTC", 32),
+      web3.utils.asciiToHex("LBTC", 32),
+      web3.utils.asciiToHex("SBTC", 32)
     ];
 
     return MarketContractMPX.new(

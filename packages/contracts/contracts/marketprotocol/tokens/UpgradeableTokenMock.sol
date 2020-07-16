@@ -16,8 +16,8 @@
 
 pragma solidity 0.5.2;
 
-import './UpgradeableTarget.sol';
-import './UpgradableToken.sol';
+import "./UpgradeableTarget.sol";
+import "./UpgradableToken.sol";
 
 
 /// @title Upgradeable Token Mock for testing only.
@@ -36,7 +36,7 @@ contract UpgradeableTokenMock is UpgradeableToken, UpgradeableTarget {
     function upgradeFrom(address from, uint256 value) external {
         require(
             msg.sender == PREVIOUS_TOKEN_ADDRESS,
-            'Can only be called by PREVIOUS_TOKEN_ADDRESS'
+            "Can only be called by PREVIOUS_TOKEN_ADDRESS"
         ); // this can only be called from the  previous token!
         _mint(from, value);
     }

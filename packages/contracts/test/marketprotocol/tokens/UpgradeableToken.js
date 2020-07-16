@@ -1,8 +1,8 @@
-const UpgradeableTokenMock = artifacts.require('UpgradeableTokenMock');
-const MarketToken = artifacts.require('MarketToken');
+const UpgradeableTokenMock = artifacts.require("UpgradeableTokenMock");
+const MarketToken = artifacts.require("MarketToken");
 
 // basic tests to ensure collateral token works and is set up to allow trading
-contract('UpgradeableToken', function(accounts) {
+contract("UpgradeableToken", function(accounts) {
   let marketToken;
   let upgradeableToken;
   let initBalance;
@@ -14,29 +14,29 @@ contract('UpgradeableToken', function(accounts) {
     upgradeableToken = await UpgradeableTokenMock.new(marketToken.address);
   });
 
-  it('Initial supply should be 6e+26', async function() {
+  it("Initial supply should be 6e+26", async function() {
     initBalance = await marketToken.INITIAL_SUPPLY();
-    assert.equal(initBalance, 6e26, 'Initial balance not as expected');
+    assert.equal(initBalance, 6e26, "Initial balance not as expected");
   });
 
-  it('Main account should have entire balance', async function() {
+  it("Main account should have entire balance", async function() {
     const mainAcctBalance = await marketToken.balanceOf.call(accountOwner);
     assert.isTrue(
       mainAcctBalance.eq(initBalance),
-      'Entire token balance should be in primary account'
+      "Entire token balance should be in primary account"
     );
   });
 
-  it('Upgradeable token should have the MKT token as the previous token', async function() {
+  it("Upgradeable token should have the MKT token as the previous token", async function() {
     const tokenAddress = await upgradeableToken.PREVIOUS_TOKEN_ADDRESS();
     assert.equal(
       tokenAddress,
       marketToken.address,
-      'Upgrade token should point back at the original MKT token'
+      "Upgrade token should point back at the original MKT token"
     );
   });
 
-  it('Only owner can set upgradeable target', async function() {
+  it("Only owner can set upgradeable target", async function() {
     error = null;
     try {
       await marketToken.setUpgradeableTarget(upgradeableToken.address, {
@@ -58,11 +58,11 @@ contract('UpgradeableToken', function(accounts) {
     assert.equal(
       upgradeableTarget,
       upgradeableToken.address,
-      'Upgrade target should point at new token'
+      "Upgrade target should point at new token"
     );
   });
 
-  it('Can only burn owned tokens', async function() {
+  it("Can only burn owned tokens", async function() {
     const initialBalance = 50000000;
 
     await marketToken.transfer(accountUser, initialBalance, { from: accounts[0] });
@@ -71,7 +71,7 @@ contract('UpgradeableToken', function(accounts) {
     assert.equal(
       initialBalance,
       currentBalance,
-      'user account should have correct balance'
+      "user account should have correct balance"
     );
 
     error = null;
@@ -92,7 +92,7 @@ contract('UpgradeableToken', function(accounts) {
     assert.equal(
       initialBalance - amountToBurn,
       currentBalance,
-      'user account should have correct balance after burn'
+      "user account should have correct balance after burn"
     );
 
     const initialSupply = await marketToken.INITIAL_SUPPLY.call();
@@ -105,7 +105,7 @@ contract('UpgradeableToken', function(accounts) {
     );
   });
 
-  it('Can only upgrade owned tokens', async function() {
+  it("Can only upgrade owned tokens", async function() {
     const initialBalance = await marketToken.balanceOf.call(accountUser);
     await marketToken.setUpgradeableTarget(upgradeableToken.address, {
       from: accountOwner
@@ -115,7 +115,7 @@ contract('UpgradeableToken', function(accounts) {
     assert.equal(
       upgradeableTarget,
       upgradeableToken.address,
-      'Upgrade target should point at new token'
+      "Upgrade target should point at new token"
     );
 
     error = null;
@@ -135,26 +135,26 @@ contract('UpgradeableToken', function(accounts) {
     assert.equal(
       upgradeableTarget,
       upgradeableToken.address,
-      'Upgrade target should point at new token'
+      "Upgrade target should point at new token"
     );
 
     const balanceAfterUpgrade = await marketToken.balanceOf.call(accountUser);
     assert.equal(
       initialBalance - amountToUpgrade,
       balanceAfterUpgrade,
-      'user account should have correct balance after upgrade'
+      "user account should have correct balance after upgrade"
     );
 
     const totalUpgradeTokenBalance = await upgradeableToken.balanceOf.call(accountUser);
     assert.equal(
       amountToUpgrade,
       totalUpgradeTokenBalance,
-      'user account should have correct balance after upgrade in new token'
+      "user account should have correct balance after upgrade in new token"
     );
   });
 
-  it('Cannot upgrade without a target', async function() {
-    await marketToken.setUpgradeableTarget('0x0000000000000000000000000000000000000000'); // set target to null address
+  it("Cannot upgrade without a target", async function() {
+    await marketToken.setUpgradeableTarget("0x0000000000000000000000000000000000000000"); // set target to null address
 
     error = null;
     try {

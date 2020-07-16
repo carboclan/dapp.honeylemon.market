@@ -16,11 +16,11 @@
 
 pragma solidity 0.5.2;
 
-import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
+import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
-import '../libraries/MathLib.sol';
-import '../libraries/StringLib.sol';
-import './tokens/PositionToken.sol';
+import "../libraries/MathLib.sol";
+import "../libraries/StringLib.sol";
+import "./tokens/PositionToken.sol";
 
 
 /// @title MarketContract base contract implement all needed functionality for trading.
@@ -33,27 +33,27 @@ contract MarketContract is Ownable {
     string public CONTRACT_NAME;
     address public COLLATERAL_TOKEN_ADDRESS;
     address public COLLATERAL_POOL_ADDRESS;
-    uint public PRICE_CAP;
-    uint public PRICE_FLOOR;
-    uint public PRICE_DECIMAL_PLACES; // how to convert the pricing from decimal format (if valid) to integer
-    uint public QTY_MULTIPLIER; // multiplier corresponding to the value of 1 increment in price to token base units
-    uint public COLLATERAL_PER_UNIT; // required collateral amount for the full range of outcome tokens
-    uint public COLLATERAL_TOKEN_FEE_PER_UNIT;
-    uint public MKT_TOKEN_FEE_PER_UNIT;
-    uint public EXPIRATION;
-    uint public SETTLEMENT_DELAY = 1 days;
+    uint256 public PRICE_CAP;
+    uint256 public PRICE_FLOOR;
+    uint256 public PRICE_DECIMAL_PLACES; // how to convert the pricing from decimal format (if valid) to integer
+    uint256 public QTY_MULTIPLIER; // multiplier corresponding to the value of 1 increment in price to token base units
+    uint256 public COLLATERAL_PER_UNIT; // required collateral amount for the full range of outcome tokens
+    uint256 public COLLATERAL_TOKEN_FEE_PER_UNIT;
+    uint256 public MKT_TOKEN_FEE_PER_UNIT;
+    uint256 public EXPIRATION;
+    uint256 public SETTLEMENT_DELAY = 1 days;
     address public LONG_POSITION_TOKEN;
     address public SHORT_POSITION_TOKEN;
 
     // state variables
-    uint public lastPrice;
-    uint public settlementPrice;
-    uint public settlementTimeStamp;
+    uint256 public lastPrice;
+    uint256 public settlementPrice;
+    uint256 public settlementTimeStamp;
     bool public isSettled = false;
 
     // events
     event UpdatedLastPrice(uint256 price);
-    event ContractSettled(uint settlePrice);
+    event ContractSettled(uint256 settlePrice);
 
     /// @param contractNames bytes32 array of names
     ///     contractName            name of the market contract
@@ -75,17 +75,17 @@ contract MarketContract is Ownable {
     constructor(
         bytes32[3] memory contractNames,
         address[3] memory baseAddresses,
-        uint[7] memory contractSpecs
+        uint256[7] memory contractSpecs
     ) public {
         PRICE_FLOOR = contractSpecs[0];
         PRICE_CAP = contractSpecs[1];
-        require(PRICE_CAP > PRICE_FLOOR, 'PRICE_CAP must be greater than PRICE_FLOOR');
+        require(PRICE_CAP > PRICE_FLOOR, "PRICE_CAP must be greater than PRICE_FLOOR");
 
         PRICE_DECIMAL_PLACES = contractSpecs[2];
         QTY_MULTIPLIER = contractSpecs[3];
         EXPIRATION = contractSpecs[6];
-        require(EXPIRATION > now, 'EXPIRATION must be in the future');
-        require(QTY_MULTIPLIER != 0, 'QTY_MULTIPLIER cannot be 0');
+        require(EXPIRATION > now, "EXPIRATION must be in the future");
+        require(QTY_MULTIPLIER != 0, "QTY_MULTIPLIER cannot be 0");
 
         COLLATERAL_TOKEN_ADDRESS = baseAddresses[1];
         COLLATERAL_POOL_ADDRESS = baseAddresses[2];
@@ -110,12 +110,12 @@ contract MarketContract is Ownable {
         // create long and short tokens
         CONTRACT_NAME = contractNames[0].bytes32ToString();
         PositionToken longPosToken = new PositionToken(
-            'MARKET Protocol Long Position Token',
+            "MARKET Protocol Long Position Token",
             contractNames[1].bytes32ToString(),
             uint8(PositionToken.MarketSide.Long)
         );
         PositionToken shortPosToken = new PositionToken(
-            'MARKET Protocol Short Position Token',
+            "MARKET Protocol Short Position Token",
             contractNames[2].bytes32ToString(),
             uint8(PositionToken.MarketSide.Short)
         );
@@ -180,9 +180,9 @@ contract MarketContract is Ownable {
     /// @dev checks our last query price to see if our contract should enter settlement due to it being past our
     //  expiration date or outside of our tradeable ranges.
     function checkSettlement() internal {
-        require(!isSettled, 'Contract is already settled'); // already settled.
+        require(!isSettled, "Contract is already settled"); // already settled.
 
-        uint newSettlementPrice;
+        uint256 newSettlementPrice;
         if (now > EXPIRATION) {
             // note: miners can cheat this by small increments of time (minutes, not hours)
             isSettled = true; // time based expiration has occurred.
@@ -204,7 +204,7 @@ contract MarketContract is Ownable {
 
     /// @dev records our final settlement price and fires needed events.
     /// @param finalSettlementPrice final query price at time of settlement
-    function settleContract(uint finalSettlementPrice) internal {
+    function settleContract(uint256 finalSettlementPrice) internal {
         settlementTimeStamp = now;
         settlementPrice = finalSettlementPrice;
         emit ContractSettled(finalSettlementPrice);
@@ -215,7 +215,7 @@ contract MarketContract is Ownable {
     modifier onlyCollateralPool {
         require(
             msg.sender == COLLATERAL_POOL_ADDRESS,
-            'Only callable from the collateral pool'
+            "Only callable from the collateral pool"
         );
         _;
     }
