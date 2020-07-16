@@ -16,7 +16,7 @@ import "./MarketContractProxy.sol";
 contract MinterBridge is ReentrancyGuard, Ownable {
     using MathLib for uint256;
     using MathLib for int256;
-    using SafeERC20 for ERC20
+    using SafeERC20 for ERC20;
 
     MarketContractProxy public marketContractProxy;
 
