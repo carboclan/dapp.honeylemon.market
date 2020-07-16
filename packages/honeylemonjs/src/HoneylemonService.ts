@@ -1,7 +1,7 @@
 import { Web3Wrapper } from "@0x/web3-wrapper";
 
-const { GraphQLClient } = require('graphql-request');
-const { HttpClient, OrderbookRequest } = require('@0x/connect');
+const { GraphQLClient } = require("graphql-request");
+const { HttpClient, OrderbookRequest } = require("@0x/connect");
 import {
   MinterBridge,
   MarketContractProxy,
@@ -11,8 +11,8 @@ import {
   DSProxy,
   TetherERC20,
   PositionToken,
-  MarketCollateralPool,
-} from '@honeylemon/contracts';
+  MarketCollateralPool
+} from "@honeylemon/contracts";
 
 const {
   marketUtils,
@@ -20,20 +20,20 @@ const {
   signatureUtils,
   assetDataUtils,
   orderCalculationUtils
-} = require('@0x/order-utils');
+} = require("@0x/order-utils");
 
-const { ContractWrappers, ERC20TokenContract } = require('@0x/contract-wrappers');
-import { BigNumber } from '@0x/utils';
-const Web3 = require('web3');
+const { ContractWrappers, ERC20TokenContract } = require("@0x/contract-wrappers");
+import { BigNumber } from "@0x/utils";
+const Web3 = require("web3");
 const web3 = new Web3(null); // This is just for encoding, etc.
 
-const NULL_ADDRESS = '0x0000000000000000000000000000000000000000';
+const NULL_ADDRESS = "0x0000000000000000000000000000000000000000";
 const ORDER_FILL_GAS = 150000;
 const TH_DECIMALS = 0; // TH has 6 decimals
 const PAYMENT_TOKEN_DECIMALS = 6; // USDT has 6 decimals
-const COLLATERAL_TOKEN_DECIMALS = 8; // imBTC has 8 decimals
+const COLLATERAL_TOKEN_DECIMALS = 8; // wBTC has 8 decimals
 const SHIFT_PRICE_BY = TH_DECIMALS - PAYMENT_TOKEN_DECIMALS;
-const USDT_ADDRESS = '0xdAC17F958D2ee523a2206206994597C13D831ec7';
+const USDT_ADDRESS = "0xdAC17F958D2ee523a2206206994597C13D831ec7";
 
 class HoneylemonService {
   subgraphClient: any;
@@ -67,8 +67,10 @@ class HoneylemonService {
       minterBridgeAddress || MinterBridge.networks[chainId].address;
     this.marketContractProxyAddress =
       marketContractProxyAddress || MarketContractProxy.networks[chainId].address;
-    this.collateralTokenAddress = collateralTokenAddress || CollateralToken.networks[chainId].address;
-    this.paymentTokenAddress = paymentTokenAddress || PaymentToken.networks[chainId].address;
+    this.collateralTokenAddress =
+      collateralTokenAddress || CollateralToken.networks[chainId].address;
+    this.paymentTokenAddress =
+      paymentTokenAddress || PaymentToken.networks[chainId].address;
     this.provider = provider;
     this.chainId = chainId;
     this.contractDuration = contractDuration;
@@ -78,7 +80,7 @@ class HoneylemonService {
     this.makerAssetData = assetDataUtils.encodeERC20BridgeAssetData(
       this.marketContractProxyAddress,
       this.minterBridgeAddress,
-      '0x0000'
+      "0x0000"
     );
     this.takerAssetData = assetDataUtils.encodeERC20AssetData(this.paymentTokenAddress);
 
@@ -103,7 +105,7 @@ class HoneylemonService {
     );
     this.marketContractProxy.setProvider(this.provider);
 
-    console.log('Honeylemon service initiated!');
+    console.log("Honeylemon service initiated!");
   }
 
   async getCollateralForContract(sizeTh) {
@@ -237,7 +239,8 @@ class HoneylemonService {
     signedOrders,
     takerAssetFillAmounts,
     takerAddress: string,
-    gasPrice?: number) {
+    gasPrice?: number
+  ) {
     try {
       const signatures = signedOrders.map(o => o.signature);
       const price = gasPrice ? `${gasPrice}` : `${10e9}`; // Set to 10GWEI
@@ -290,8 +293,8 @@ class HoneylemonService {
       makerAssetData: this.makerAssetData,
       takerAssetData: this.takerAssetData,
       exchangeAddress,
-      makerFeeAssetData: '0x',
-      takerFeeAssetData: '0x',
+      makerFeeAssetData: "0x",
+      takerFeeAssetData: "0x",
       chainId: this.chainId
     };
 
@@ -325,15 +328,21 @@ class HoneylemonService {
   }
 
   async approveCollateralToken(makerAddress: string, amount?: number, gasPrice?: number) {
-    const approvalAmount = 
-      amount === 0 ? 
-        new BigNumber(0) : 
-        amount === undefined ? 
-          new BigNumber(2).pow(256).minus(1) : 
-          new BigNumber(amount);
+    const approvalAmount =
+      amount === 0
+        ? new BigNumber(0)
+        : amount === undefined
+        ? new BigNumber(2).pow(256).minus(1)
+        : new BigNumber(amount);
     const price = gasPrice ? Number(`${gasPrice}e9`) : undefined;
-    const approveTx = this.collateralToken.approve(this.minterBridgeAddress, approvalAmount)
-    return await approveTx.awaitTransactionSuccessAsync({ from: makerAddress, gasPrice: price });
+    const approveTx = this.collateralToken.approve(
+      this.minterBridgeAddress,
+      approvalAmount
+    );
+    return await approveTx.awaitTransactionSuccessAsync({
+      from: makerAddress,
+      gasPrice: price
+    });
   }
 
   async checkPaymentTokenApproval(ownerAddress, amount) {
@@ -349,31 +358,43 @@ class HoneylemonService {
   }
 
   async approvePaymentToken(takerAddress: string, amount?: number, gasPrice?: number) {
-    const approvalAmount = 
-    amount === 0 ? 
-      new BigNumber(0) : 
-      amount === undefined ? 
-        new BigNumber(2).pow(256).minus(1) : 
-        new BigNumber(amount);
+    const approvalAmount =
+      amount === 0
+        ? new BigNumber(0)
+        : amount === undefined
+        ? new BigNumber(2).pow(256).minus(1)
+        : new BigNumber(amount);
     const price = gasPrice ? Number(`${gasPrice}e9`) : undefined;
 
     if (this.paymentTokenAddress.toLowerCase() == USDT_ADDRESS.toLowerCase()) {
       // Hack for Tether approval not being compliant with ERC20
-      const usdt = new web3.eth.Contract(
-        TetherERC20.abi,
-        this.paymentTokenAddress
-      );
+      const usdt = new web3.eth.Contract(TetherERC20.abi, this.paymentTokenAddress);
       usdt.setProvider(this.provider);
       const web3Wrapper: Web3Wrapper = new Web3Wrapper(this.provider);
 
-      const approveTx = await usdt.methods.approve(this.contractWrappers.contractAddresses.erc20Proxy, approvalAmount.toString())
+      const approveTx = await usdt.methods.approve(
+        this.contractWrappers.contractAddresses.erc20Proxy,
+        approvalAmount.toString()
+      );
       const gas = await approveTx.estimateGas({ from: takerAddress });
-      const approveResult = await approveTx.send({ from: takerAddress, gas, gasPrice: price });
+      const approveResult = await approveTx.send({
+        from: takerAddress,
+        gas,
+        gasPrice: price
+      });
 
-      return await web3Wrapper.awaitTransactionSuccessAsync(approveResult.transactionHash)
+      return await web3Wrapper.awaitTransactionSuccessAsync(
+        approveResult.transactionHash
+      );
     } else {
-      const approveTx = this.paymentToken.approve(this.contractWrappers.contractAddresses.erc20Proxy, approvalAmount)
-      return await approveTx.awaitTransactionSuccessAsync({ from: takerAddress, gasPrice: price });
+      const approveTx = this.paymentToken.approve(
+        this.contractWrappers.contractAddresses.erc20Proxy,
+        approvalAmount
+      );
+      return await approveTx.awaitTransactionSuccessAsync({
+        from: takerAddress,
+        gasPrice: price
+      });
     }
   }
 
@@ -410,14 +431,20 @@ class HoneylemonService {
   }
 
   async deployDSProxyContract(deployer: string, gasPrice?: number) {
-    const address = await this.marketContractProxy.methods.createDSProxyWallet().call({ from: deployer });
+    const address = await this.marketContractProxy.methods
+      .createDSProxyWallet()
+      .call({ from: deployer });
     const price = gasPrice ? Number(`${gasPrice}e9`) : undefined;
     const deployDSProxyTx = this.marketContractProxy.methods.createDSProxyWallet();
 
     const gas = await deployDSProxyTx.estimateGas({ from: deployer });
-    const deployResult = await deployDSProxyTx.send({ from: deployer, gas, gasPrice: price });
+    const deployResult = await deployDSProxyTx.send({
+      from: deployer,
+      gas,
+      gasPrice: price
+    });
     const web3Wrapper: Web3Wrapper = new Web3Wrapper(this.provider);
-    await web3Wrapper.awaitTransactionSuccessAsync(deployResult.transactionHash)
+    await web3Wrapper.awaitTransactionSuccessAsync(deployResult.transactionHash);
 
     return address;
   }
@@ -443,38 +470,52 @@ class HoneylemonService {
     positionTokenAddress: string,
     marketContractAddress: string,
     amount: string,
-    positionType: 'Long' | 'Short',
+    positionType: "Long" | "Short",
     gasPrice?: number
   ) {
     const positionToken = new web3.eth.Contract(PositionToken.abi, positionTokenAddress);
     positionToken.setProvider(this.provider);
     const web3Wrapper: Web3Wrapper = new Web3Wrapper(this.provider);
-    const allowance = new BigNumber(await positionToken.methods.allowance(recipientAddress, marketContractAddress).call())
+    const allowance = new BigNumber(
+      await positionToken.methods
+        .allowance(recipientAddress, marketContractAddress)
+        .call()
+    );
     const isApprovalRequired = !allowance.isGreaterThanOrEqualTo(amount);
     const price = gasPrice ? Number(`${gasPrice}e9`) : undefined;
 
     if (isApprovalRequired) {
-      const approvalResult = await positionToken.methods.approve(marketContractAddress, amount)
+      const approvalResult = await positionToken.methods
+        .approve(marketContractAddress, amount)
         .send({
           from: recipientAddress,
-          gasPrice: price,
+          gasPrice: price
         });
       await web3Wrapper.awaitTransactionSuccessAsync(approvalResult.transactionHash);
     }
 
     const marketCollateralPoolAddress = await this.marketContractProxy.methods
-      .getCollateralPool(marketContractAddress).call();
-    const marketCollateralPool = new web3.eth.Contract(MarketCollateralPool.abi, marketCollateralPoolAddress);
+      .getCollateralPool(marketContractAddress)
+      .call();
+    const marketCollateralPool = new web3.eth.Contract(
+      MarketCollateralPool.abi,
+      marketCollateralPoolAddress
+    );
     marketCollateralPool.setProvider(this.provider);
 
-    const redeemTx = positionType === 'Long' ?
-      marketCollateralPool.methods.settleAndClose(marketContractAddress, amount, 0) :
-      marketCollateralPool.methods.settleAndClose(marketContractAddress, 0, amount)
+    const redeemTx =
+      positionType === "Long"
+        ? marketCollateralPool.methods.settleAndClose(marketContractAddress, amount, 0)
+        : marketCollateralPool.methods.settleAndClose(marketContractAddress, 0, amount);
 
     const gas = await redeemTx.estimateGas({ from: recipientAddress });
-    const redeemResult = await redeemTx.send({ from: recipientAddress, gas, gasPrice: price });
+    const redeemResult = await redeemTx.send({
+      from: recipientAddress,
+      gas,
+      gasPrice: price
+    });
 
-    return await web3Wrapper.awaitTransactionSuccessAsync(redeemResult.transactionHash)
+    return await web3Wrapper.awaitTransactionSuccessAsync(redeemResult.transactionHash);
   }
 
   async batchRedeem(recipientAddress, gasPrice?: number) {
@@ -484,7 +525,7 @@ class HoneylemonService {
       .call();
 
     if (dsProxyAddress == recipientAddress) {
-      console.error('User does not have DSProxy wallet');
+      console.error("User does not have DSProxy wallet");
       return null;
     }
 
@@ -541,7 +582,11 @@ class HoneylemonService {
         );
 
         const gas = await method.estimateGas({ from: recipientAddress, gas: 9000000 });
-        redemptionTxLong = await method.send({ from: recipientAddress, gas, gasPrice: price });
+        redemptionTxLong = await method.send({
+          from: recipientAddress,
+          gas,
+          gasPrice: price
+        });
       }
     }
 
@@ -699,7 +744,7 @@ class HoneylemonService {
         : position.longTokenDSProxy;
 
       position.isRedeemed =
-        (await positionToken.balanceOf(dsProxyAddress).callAsync()).toString() == '0'
+        (await positionToken.balanceOf(dsProxyAddress).callAsync()).toString() == "0"
           ? true
           : false;
 
@@ -751,7 +796,7 @@ class OrderbookService {
     this.makerAssetData = assetDataUtils.encodeERC20BridgeAssetData(
       marketContractProxyAddress,
       minterBridgeAddress,
-      '0x0000'
+      "0x0000"
     );
     this.takerAssetData = assetDataUtils.encodeERC20AssetData(paymentTokenAddress);
   }
@@ -866,5 +911,5 @@ export {
   PAYMENT_TOKEN_DECIMALS,
   COLLATERAL_TOKEN_DECIMALS,
   POSITIONS_QUERY,
-  CONTRACTS_QUERY,
+  CONTRACTS_QUERY
 };

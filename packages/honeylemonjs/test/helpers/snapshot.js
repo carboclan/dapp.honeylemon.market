@@ -2,8 +2,8 @@ takeSnapshot = () => {
   return new Promise((resolve, reject) => {
     web3.currentProvider.send(
       {
-        jsonrpc: '2.0',
-        method: 'evm_snapshot',
+        jsonrpc: "2.0",
+        method: "evm_snapshot",
         id: new Date().getTime()
       },
       (err, snapshotId) => {
@@ -20,8 +20,8 @@ revertToSnapShot = id => {
   return new Promise((resolve, reject) => {
     web3.currentProvider.send(
       {
-        jsonrpc: '2.0',
-        method: 'evm_revert',
+        jsonrpc: "2.0",
+        method: "evm_revert",
         params: [id],
         id: new Date().getTime()
       },

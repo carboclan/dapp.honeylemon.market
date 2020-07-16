@@ -18,7 +18,7 @@ contract DSNote {
         address indexed guy,
         bytes32 indexed foo,
         bytes32 bar,
-        uint wad,
+        uint256 wad,
         bytes fax
     );
 
@@ -105,7 +105,7 @@ contract DSProxy is DSAuth, DSNote {
         note
         returns (bytes memory response)
     {
-        require(_target != address(0), 'ds-proxy-target-address-required');
+        require(_target != address(0), "ds-proxy-target-address-required");
 
         // call contract in current context
         assembly {
@@ -149,7 +149,7 @@ contract DSProxyFactory {
     modifier onlyMarketContractProxy() {
         require(
             msg.sender == marketContractProxy,
-            'Only callable by MarketContractProxy'
+            "Only callable by MarketContractProxy"
         );
         _;
     }

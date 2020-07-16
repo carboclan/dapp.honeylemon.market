@@ -76,8 +76,8 @@ truffle migrate --network kovan
 
 When MarketContractProxy address changes it needs to be updated in the following places:
 
-* docker/docker-compose-local.yml \(look for `HONEYLEMON_MARKET_CONTARCT_PROXY_ADDRESS`\)
-* subgraph/subgraph.yml \(in the MarketContractProxy source `address` field\)
+- docker/docker-compose-local.yml \(look for `HONEYLEMON_MARKET_CONTARCT_PROXY_ADDRESS`\)
+- subgraph/subgraph.yml \(in the MarketContractProxy source `address` field\)
 
 ### Running The Linter 🧽
 
