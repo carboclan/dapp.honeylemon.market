@@ -25,7 +25,7 @@ const assert = require("assert").strict;
 const pc = new PayoutCalculator();
 
 // Token mocks
-const CollateralToken = artifacts.require("CollateralToken"); // IMBTC
+const CollateralToken = artifacts.require("CollateralToken"); // wBTC
 const PaymentToken = artifacts.require("PaymentToken"); // USDC
 const PositionToken = artifacts.require("PositionToken"); // To create the Long & Short tokens
 
@@ -40,7 +40,7 @@ const MarketCollateralPool = artifacts.require("MarketCollateralPool");
 
 // Calculation constants
 const necessaryCollateralRatio = 0.25; // for 125% collateralization
-const collateralDecimals = 1e8; // scaling for imBTC (8 decimal points)
+const collateralDecimals = 1e8; // scaling for wBTC (8 decimal points)
 const paymentDecimals = 1e6; // scaling for USDT or USDC (6 decimals)
 
 // simulation inputs
@@ -150,8 +150,8 @@ async function runExport() {
    *********************/
   console.log("2. Generating 0x order...");
 
-  // Taker token is imBTC sent to collateralize the contractWe use CollateralToken.
-  // This is imBTC sent from the investor to the Market protocol contract
+  // Taker token is wBTC sent to collateralize the contractWe use CollateralToken.
+  // This is wBTC sent from the investor to the Market protocol contract
   const takerToken = { address: paymentToken.address };
 
   // 0x sees the marketContractProxy as the maker token. This has a `balanceOf` method to get 0x
@@ -186,11 +186,11 @@ async function runExport() {
       Amount: (mriInput * (1 + necessaryCollateralRatio)).toFixed(8),
       Description: "Maximum MRI value that can be achieved in market"
     },
-    "Taker expected long(imBTC)": {
+    "Taker expected long(wBTC)": {
       Amount: (mriInput * 28 * makerAmountToMint).toFixed(8),
       Description: "Long value in BTC if current MRI continues over contract duration"
     },
-    "Maker required collateral(imBTC)": {
+    "Maker required collateral(wBTC)": {
       Amount: contractSpecs[1].toNumber() * makerAmountToMint,
       Description: "Satoshi the position will cost in collateral for the miner"
     }

@@ -4,7 +4,7 @@
 
 The Honeylemon Mining Revenue Contract is the first of a series of Mining Revenue Contracts designed to replicate payoff of existing cloud mining.
 
-The Honeylemon 28-Day BTC Mining Revenue Contract is a forward-like product that settles to the market-wide block reward and fees per Terahash over 28 days as published in the BTC Mining Revenue Index \(BTC\_MRI\), with a 125% max revenue cap for the buyer. The buyer pays a fixed price in stable coin \(USDT\) upfront and later receives the mining output in ERC-20 representation of BTC \(imBTC\) upon contract settlement. Honeylemon contracts are built upon Market Protocol and 0x Protocol v3. 
+The Honeylemon 28-Day BTC Mining Revenue Contract is a forward-like product that settles to the market-wide block reward and fees per Terahash over 28 days as published in the BTC Mining Revenue Index \(BTC\_MRI\), with a 125% max revenue cap for the buyer. The buyer pays a fixed price in stable coin \(USDT\) upfront and later receives the mining output in ERC-20 representation of BTC \(wBTC\) upon contract settlement. Honeylemon contracts are built upon Market Protocol and 0x Protocol v3. 
 
 Honeylemon dApp provides a simple mobile-first trading interface and a one-sided orderbook, allowing miners or traders in general to be short both network difficulty and BTC price. This allows miners to receive cash upfront and hedge mining risks, and gives buyers the opportunity to receive mining payoff without the hassle of mining operations.
 
@@ -56,11 +56,11 @@ Currently the oracle is centralized and operated by Honeylemon admin. The oracle
 Description | A BTC Mining Revenue Contract represents the amount of Bitcoin earned with 1 terahash (TH) of hashpower per day for 28 days.
 :------|:-----
 Trading Currency | BTC Mining Revenue Contracts are bought and sold in USDT.
-Settlement Currency | The BTC Mining Revenue Index (MRI_BTC) is denominated in BTC. The contract is collateralized and settled in imBTC. The BTC/imBTC precision is 1 satoshi or 1e-8. 
+Settlement Currency | The BTC Mining Revenue Index (MRI_BTC) is denominated in BTC. The contract is collateralized and settled in wBTC. The BTC/wBTC precision is 1 satoshi or 1e-8. 
 Tick Size | 1e-6 USDT is the minimum price movement.
 Contract Size | 1 TH (per day for 28 days) is the minimum increment of contract size.
-Cap Price | 125% of the last updated MRI_BTC when a contract offer is taken, denominated in imBTC. Cap price determines the collateral requirement for issuance of short positions, and caps the maximum settlement value for long positions.
-Collateral Requirement | Long position collateral: a buyer pays USDT upfront without the need for actual collateral. The upfront cost in USDT = entry price * quantity. Short position collateral: a seller is required to set aside a certain amount of imBTC as collateral in the smart contract until the position is closed or when the MRI_BTC contract is settled. The collateral required in imBTC = cap price * quantity. There is NO margin call or forced liquidation.
+Cap Price | 125% of the last updated MRI_BTC when a contract offer is taken, denominated in wBTC. Cap price determines the collateral requirement for issuance of short positions, and caps the maximum settlement value for long positions.
+Collateral Requirement | Long position collateral: a buyer pays USDT upfront without the need for actual collateral. The upfront cost in USDT = entry price * quantity. Short position collateral: a seller is required to set aside a certain amount of wBTC as collateral in the smart contract until the position is closed or when the MRI_BTC contract is settled. The collateral required in wBTC = cap price * quantity. There is NO margin call or forced liquidation.
 Contract Start | The timestamp the contract starts to trade (i.e. UTC 00:01 of the contract issue date).
 Contract Expiration | The timestamp the contract stops trading (i.e. UTC 00:01 of the expiration date).
 Settlement Value | Long settlement value = MAX(MRI_BTC_28 at contract expiration, cap price) * 28 days. Short settlement value = (cap price - MRI__BTC_28 at contract expiration) * 28 days.
@@ -81,11 +81,11 @@ Protocols | Market Protocol + 0x Protocol
 
 Here is an example of the life span of a MRI_BTC_28 contract.
 
-Bob places an offer of 1,000 TH of the current day MRI_BTC_28 contract at the price of 0.08 USDT / TH / Day. In order for Bob to place this offer, he needs to allocate a collateral in the amount of his maximum possible pay to his counterparty in imBTC upon contract expiration. 
+Bob places an offer of 1,000 TH of the current day MRI_BTC_28 contract at the price of 0.08 USDT / TH / Day. In order for Bob to place this offer, he needs to allocate a collateral in the amount of his maximum possible pay to his counterparty in wBTC upon contract expiration. 
 
 Assuming the MRI_BTC_1 is 0.00000833 / TH / Day, then in this case the collateral deposit Bob needs is:
 
-0.00000833 / TH / Day * 28 Days * 125% * 1,000 TH =  0.29155 imBTC
+0.00000833 / TH / Day * 28 Days * 125% * 1,000 TH =  0.29155 wBTC
  
 Alice, on the other hand would like to to buy 1,000 TH of hashpower and finds the price 0.08 USDT/TH/Day acceptable. In order for Alice to buy 1,000 TH of hashpower, she needs to pay: 
 
@@ -93,9 +93,9 @@ Alice, on the other hand would like to to buy 1,000 TH of hashpower and finds th
 
 Once Alice confirms her purchase on-chain, the smart contract then matches Bob’s offer with Alice’s purchase. Then an equal number of long and short position tokens are created representing the corresponding positions held by the two parties. 
 
-Bob receives the 2240 USDT immediately upon transaction completion and his 0.29155 imBTC is designated as collateral.
+Bob receives the 2240 USDT immediately upon transaction completion and his 0.29155 wBTC is designated as collateral.
 
-The payoff for Alice is expected to happen upon settlement of the contract 1 day after expiration, or 29 days after today. The payoff will be deducted directly from the 0.29155 imBTC collateral set aside by Bob. 
+The payoff for Alice is expected to happen upon settlement of the contract 1 day after expiration, or 29 days after today. The payoff will be deducted directly from the 0.29155 wBTC collateral set aside by Bob. 
 
 Since the payoff is capped by the collateral, no forced liquidation would happen during the 28-day lifetime of the contract. 
 
@@ -111,7 +111,7 @@ The long and short side of an MRI_BTC contract is asymmetrical. The buyer pays i
 
 
 ## **Position Tokens**
-Position Tokens are ERC-20 tokens that can be traded on any exchange that supports the ERC-20 token standard. When they are created (through a process called “minting”), imBTC collateral is locked in the Market Protocol smart contract in return for long and short position tokens.
+Position Tokens are ERC-20 tokens that can be traded on any exchange that supports the ERC-20 token standard. When they are created (through a process called “minting”), wBTC collateral is locked in the Market Protocol smart contract in return for long and short position tokens.
 When an order is filled, a long position token and a short position token is created to represent the two sides of the contract. Position tokens are fungible within the same MRI_BTC contract with each position token representing 1TH/day for the duration of the contract.
  
 

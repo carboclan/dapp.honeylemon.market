@@ -3,7 +3,7 @@ const { expectRevert, ether, time } = require("@openzeppelin/test-helpers");
 
 const MinterBridge = artifacts.require("MinterBridge");
 const MarketContractProxy = artifacts.require("MarketContractProxy");
-const CollateralToken = artifacts.require("CollateralToken"); // IMBTC
+const CollateralToken = artifacts.require("CollateralToken"); // wBTC
 const PaymentToken = artifacts.require("PaymentToken"); // USDC
 const MarketContractFactoryMPX = artifacts.require("MarketContractFactoryMPX");
 const MarketContractMPX = artifacts.require("MarketContractMPX");
@@ -80,11 +80,11 @@ contract(
     honeyMultisig,
     random
   ]) => {
-    let minterBridge, marketContractProxy, imbtc, usdc, pc, _currentMri, _expiration;
+    let minterBridge, marketContractProxy, wBTC, usdc, pc, _currentMri, _expiration;
 
     before(async () => {
       // get deployed collateral token
-      imbtc = await CollateralToken.deployed();
+      wBTC = await CollateralToken.deployed();
       // get deployed payment token
       usdc = await PaymentToken.deployed();
       // get deployed MarketContractFactoryMPX
@@ -119,7 +119,7 @@ contract(
       it("check collateral token address", async () => {
         assert.equal(
           await marketContractProxy.COLLATERAL_TOKEN_ADDRESS(),
-          imbtc.address,
+          wBTC.address,
           "Collateral token address mismatch"
         );
       });
@@ -309,10 +309,10 @@ contract(
         neededCollateral = await marketContractProxy.calculateRequiredCollateral(
           amount.toString()
         );
-        await imbtc.transfer(_0xBridgeProxy, neededCollateral.toString());
+        await wBTC.transfer(_0xBridgeProxy, neededCollateral.toString());
 
         // approve token transfer from makerAddress
-        await imbtc.approve(
+        await wBTC.approve(
           marketContractProxy.address,
           new BigNumber(2).pow(256).minus(1),
           { from: _0xBridgeProxy }
@@ -397,14 +397,14 @@ contract(
           "Investor short token balance mismatch"
         );
         assert.equal(
-          (await imbtc.balanceOf(marketCollateralPool.address)).toString(),
+          (await wBTC.balanceOf(marketCollateralPool.address)).toString(),
           neededCollateral.toString(),
           "Market collateral pool balance mismatch"
         );
       });
       it("should revert minting positions tokens if no daily contract is deployed", async () => {
         // Fund the 0x Bridge to enable another contract creation
-        await imbtc.transfer(_0xBridgeProxy, neededCollateral.toString());
+        await wBTC.transfer(_0xBridgeProxy, neededCollateral.toString());
 
         assert.equal(
           await marketContractProxy.isDailyContractDeployed(),
@@ -470,10 +470,10 @@ contract(
           neededCollateral = await marketContractProxy.calculateRequiredCollateral(
             amount.toString()
           );
-          await imbtc.transfer(_0xBridgeProxy, neededCollateral.toString());
+          await wBTC.transfer(_0xBridgeProxy, neededCollateral.toString());
 
           // approve token transfer from makerAddress
-          await imbtc.approve(
+          await wBTC.approve(
             marketContractProxy.address,
             new BigNumber(2).pow(256).minus(1),
             { from: _0xBridgeProxy }
@@ -579,11 +579,11 @@ contract(
             from: makerAddress
           });
 
-          let makerImbtcBalanceBefore = new BigNumber(
-            (await imbtc.balanceOf(makerAddress)).toString()
+          let makerwBTCBalanceBefore = new BigNumber(
+            (await wBTC.balanceOf(makerAddress)).toString()
           );
-          let takerImbtcBalanceBefore = new BigNumber(
-            (await imbtc.balanceOf(takerAddress)).toString()
+          let takerwBTCBalanceBefore = new BigNumber(
+            (await wBTC.balanceOf(takerAddress)).toString()
           );
 
           // advance time after settlement delay
@@ -599,11 +599,11 @@ contract(
             from: makerAddress
           });
 
-          let makerImbtcBalanceAfter = new BigNumber(
-            (await imbtc.balanceOf(makerAddress)).toString()
+          let makerwBTCBalanceAfter = new BigNumber(
+            (await wBTC.balanceOf(makerAddress)).toString()
           );
-          let takerImbtcBalanceAfter = new BigNumber(
-            (await imbtc.balanceOf(takerAddress)).toString()
+          let takerwBTCBalanceAfter = new BigNumber(
+            (await wBTC.balanceOf(takerAddress)).toString()
           );
           let expectedMakerReturnedCollateral = calculateExpectedCollateralToReturn(
             new BigNumber((await marketContractMpx.PRICE_FLOOR()).toString()),
@@ -623,12 +623,12 @@ contract(
           );
 
           assert.equal(
-            makerImbtcBalanceAfter.minus(makerImbtcBalanceBefore).toString(),
+            makerwBTCBalanceAfter.minus(makerwBTCBalanceBefore).toString(),
             expectedMakerReturnedCollateral.toString(),
             "maker returned collateral mismatch"
           );
           assert.equal(
-            takerImbtcBalanceAfter.minus(takerImbtcBalanceBefore).toString(),
+            takerwBTCBalanceAfter.minus(takerwBTCBalanceBefore).toString(),
             expectedTakerReturnedCollateral.toString(),
             "taker returned collateral mismatch"
           );
@@ -734,9 +734,9 @@ contract(
           neededCollateral = await marketContractProxy.calculateRequiredCollateral(
             amount.toString()
           );
-          await imbtc.transfer(_0xBridgeProxy, neededCollateral.toString());
+          await wBTC.transfer(_0xBridgeProxy, neededCollateral.toString());
           // approve token transfer from makerAddress
-          await imbtc.approve(
+          await wBTC.approve(
             marketContractProxy.address,
             new BigNumber(2).pow(256).minus(1),
             { from: _0xBridgeProxy }
@@ -774,11 +774,11 @@ contract(
         });
 
         it("arbitrate settlement value", async () => {
-          let makerImbtcBalanceBefore = new BigNumber(
-            (await imbtc.balanceOf(makerAddress)).toString()
+          let makerwBTCBalanceBefore = new BigNumber(
+            (await wBTC.balanceOf(makerAddress)).toString()
           );
-          let takerImbtcBalanceBefore = new BigNumber(
-            (await imbtc.balanceOf(takerAddress)).toString()
+          let takerwBTCBalanceBefore = new BigNumber(
+            (await wBTC.balanceOf(takerAddress)).toString()
           );
 
           let _mri = new BigNumber(pc.getMRIDataForDay(32)).multipliedBy(
@@ -839,20 +839,20 @@ contract(
             from: makerAddress
           });
 
-          let makerImbtcBalanceAfter = new BigNumber(
-            (await imbtc.balanceOf(makerAddress)).toString()
+          let makerwBTCBalanceAfter = new BigNumber(
+            (await wBTC.balanceOf(makerAddress)).toString()
           );
-          let takerImbtcBalanceAfter = new BigNumber(
-            (await imbtc.balanceOf(takerAddress)).toString()
+          let takerwBTCBalanceAfter = new BigNumber(
+            (await wBTC.balanceOf(takerAddress)).toString()
           );
 
           assert.equal(
-            makerImbtcBalanceAfter.minus(makerImbtcBalanceBefore).toString(),
+            makerwBTCBalanceAfter.minus(makerwBTCBalanceBefore).toString(),
             makerReturnedCollateralAfterArbitrate.toString(),
             "maker returned collateral mismatch"
           );
           assert.equal(
-            takerImbtcBalanceAfter.minus(takerImbtcBalanceBefore).toString(),
+            takerwBTCBalanceAfter.minus(takerwBTCBalanceBefore).toString(),
             takerrReturnedCollateralAfterArbitrate.toString(),
             "taker returned collateral mismatch"
           );
@@ -942,9 +942,9 @@ contract(
           neededCollateral = await marketContractProxy.calculateRequiredCollateral(
             amount.toString()
           );
-          await imbtc.transfer(_0xBridgeProxy, neededCollateral.toString());
+          await wBTC.transfer(_0xBridgeProxy, neededCollateral.toString());
           // approve token transfer from makerAddress
-          await imbtc.approve(
+          await wBTC.approve(
             marketContractProxy.address,
             new BigNumber(2).pow(256).minus(1),
             { from: _0xBridgeProxy }
@@ -1015,11 +1015,11 @@ contract(
           }
         }
 
-        let makerImbtcBalanceBefore = new BigNumber(
-          (await imbtc.balanceOf(makerAddress)).toString()
+        let makerwBTCBalanceBefore = new BigNumber(
+          (await wBTC.balanceOf(makerAddress)).toString()
         );
-        let takerImbtcBalanceBefore = new BigNumber(
-          (await imbtc.balanceOf(takerAddress)).toString()
+        let takerwBTCBalanceBefore = new BigNumber(
+          (await wBTC.balanceOf(takerAddress)).toString()
         );
 
         // batch redeem call for long token
@@ -1048,20 +1048,20 @@ contract(
         });
 
         // maker & taker collateral token balance after redeeming
-        let makerImbtcBalanceAfter = new BigNumber(
-          (await imbtc.balanceOf(makerAddress)).toString()
+        let makerwBTCBalanceAfter = new BigNumber(
+          (await wBTC.balanceOf(makerAddress)).toString()
         );
-        let takerImbtcBalanceAfter = new BigNumber(
-          (await imbtc.balanceOf(takerAddress)).toString()
+        let takerwBTCBalanceAfter = new BigNumber(
+          (await wBTC.balanceOf(takerAddress)).toString()
         );
 
         assert.equal(
-          makerImbtcBalanceAfter.minus(makerImbtcBalanceBefore).toString(),
+          makerwBTCBalanceAfter.minus(makerwBTCBalanceBefore).toString(),
           expectedMakerReturnedCollateral.toString(),
           "maker returned collateral mismatch"
         );
         assert.equal(
-          takerImbtcBalanceAfter.minus(takerImbtcBalanceBefore).toString(),
+          takerwBTCBalanceAfter.minus(takerwBTCBalanceBefore).toString(),
           expectedTakerReturnedCollateral.toString(),
           "taker returned collateral mismatch"
         );

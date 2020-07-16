@@ -4,7 +4,7 @@ const { getContractAddressesForChainOrThrow } = require("@0x/contract-addresses"
 
 const MinterBridge = artifacts.require("MinterBridge");
 const MarketContractProxy = artifacts.require("MarketContractProxy");
-const CollateralToken = artifacts.require("CollateralToken"); // IMBTC
+const CollateralToken = artifacts.require("CollateralToken"); // wBTC
 
 // Helper libraries
 const {
