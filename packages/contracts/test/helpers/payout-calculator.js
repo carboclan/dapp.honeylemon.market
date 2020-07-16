@@ -1,1 +1,1 @@
-../../../../intergration-tests/helpers/payout-calculator.js
+../../../../integration-tests/helpers/payout-calculator.js

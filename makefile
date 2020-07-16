@@ -1,5 +1,4 @@
 # useful commands for Honeylemon
-#
 
 # default target
 default:
@@ -15,7 +14,7 @@ local-docker:
 	docker-compose -f ./docker/docker-compose-local.yml up -d
 
 local-subgraph-deploy:
-	cd packages/subgraph; npm run prepare:local && npm run build && npm run create:local; npm run deploy:local
+	cd packages/subgraph && npm run prepare:local && npm run build && npm run create:local && npm run deploy:local
 
 local-start: local-docker local-ganache-wait migrate local-subgraph-deploy
 
@@ -28,10 +27,10 @@ local-clean: local-stop
 local-reset: local-clean local-start
 
 compile:
-	cd ./packages/contracts && truffle compile
+	cd ./packages/contracts && npx truffle compile
 
 migrate:
-	cd packages/contracts; truffle migrate --reset
+	cd packages/contracts; npx truffle migrate --reset
 
 deploy-daily-contract:
-	cd packages/contracts; truffle exec scripts/deploy-daily-contract.js
+	cd packages/contracts; npx truffle exec scripts/deploy-daily-contract.js

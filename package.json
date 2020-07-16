@@ -3,26 +3,32 @@
   "version": "3.0.0",
   "description": "Decentralized Synthetic cloud mining contracts built on Ethereum",
   "private": true,
-  "dependencies": {
+  "dependencies": {},
+  "engines": {
+    "node": ">=0.10.3 <0.12"
   },
-  "engines" : { "node" : ">=0.10.3 <0.12" } ,
   "devDependencies": {
     "chalk": "^2.0.1",
     "wsrun": "^3.6.5",
     "typescript": "3.9.5"
   },
   "scripts": {
-    "build": "yarn wsrun --stages --exclude @honeylemon/graph -c build",
     "build:contracts": "yarn wsrun -p @honeylemon/contracts -c build",
     "build:honeylemonjs": "yarn wsrun -p @honeylemon/honeylemonjs -c build",
     "build:subgraph": "yarn wsrun -p @honeylemon/graph -c build",
     "build:webapp": "yarn wsrun -p @honeylemon/webapp -c build",
     "start:webapp": "yarn wsrun -p @honeylemon/webapp -c start",
     "test:contracts": "yarn wsrun -p @honeylemon/contracts -c test",
+    "test:integration": "make local-reset && yarn wsrun -p @honeylemon/contracts -c integration-proxy-redemption && make local-reset && yarn wsrun -p @honeylemon/contracts -c integration-order-redemption && make local-reset && yarn wsrun -p @honeylemon/contracts -c integration-trade-lifecycle",
     "clean": "rm -rf ./node_modules && rm -rf ./*/node_modules"
   },
   "workspaces": {
-    "packages": ["packages/*"],
-    "nohoist": ["**/truffle", "**/typechain"]
+    "packages": [
+      "packages/*"
+    ],
+    "nohoist": [
+      "**/truffle",
+      "**/typechain"
+    ]
   }
 }

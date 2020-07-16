@@ -51,9 +51,18 @@ Next, you can run the tests. There are three main tests kinds of tests: 1\) Smar
 TODO: UPDATE with actual commands.
 
 ```text
-yarn run contract-tests
-yarn run honeylemon-service-tests
-yarn run integration tests
+yarn run test:contracts #Smart contract tests. Used throughout the stack.
+yarn run test:integration #Note that this will start the docker environment to execute test logic.
+yarn run test:service #Honey lemon.js service tests. Used in front end.
+```
+
+## Building packages 🛠
+You can build each of the packages within the repo by executing the following.
+```text
+yarn build:contracts
+yarn build:honeylemonjs
+yarn build:subgraph
+yarn build: webapp
 ```
 
 ### React Front End 🖥
@@ -61,7 +70,7 @@ yarn run integration tests
 Running the front end can be done by executing:
 
 ```text
-yarn start
+yarn start:webapp
 ```
 
 ### Deploying Smart Contracts 🧨
