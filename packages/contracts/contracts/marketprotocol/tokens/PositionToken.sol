@@ -41,7 +41,7 @@ contract PositionToken is ERC20, Ownable {
     ) public {
         name = tokenName;
         symbol = tokenSymbol;
-        decimals = 5;
+        decimals = 0;
         MARKET_SIDE = MarketSide(marketSide);
     }
 

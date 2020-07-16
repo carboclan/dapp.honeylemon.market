@@ -23,6 +23,7 @@
     "clean": "rm -rf ./node_modules && rm -rf ./*/node_modules"
   },
   "workspaces": {
+<<<<<<< HEAD
     "packages": [
       "packages/*"
     ],
@@ -30,5 +31,9 @@
       "**/truffle",
       "**/typechain"
     ]
+=======
+    "packages": ["packages/*"],
+    "nohoist": ["**/truffle", "**/typechain", "**/openzeppelin-solidity"]
+>>>>>>> master
   }
 }

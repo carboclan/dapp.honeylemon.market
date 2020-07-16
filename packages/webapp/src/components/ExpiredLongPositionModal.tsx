@@ -1,17 +1,58 @@
 import React from 'react';
-import { Dialog, DialogTitle, DialogContent, TableRow, Table, TableCell, TableBody } from '@material-ui/core';
-import { useHoneylemon, PositionStatus } from '../contexts/HoneylemonContext';
+import { Dialog, DialogTitle, DialogContent, TableRow, Table, TableCell, TableBody, Grid, Button, CircularProgress, makeStyles, Typography, Link } from '@material-ui/core';
+import { useHoneylemon, PositionStatus, PositionType } from '../contexts/HoneylemonContext';
 import { BigNumber } from '@0x/utils';
 import dayjs from 'dayjs';
+import { useOnboard } from '../contexts/OnboardContext';
+import { networkName } from '../helpers/ethereumNetworkUtils';
+import { displayAddress } from '../helpers/displayAddress';
+import * as Sentry from '@sentry/react'
+
+const useStyles = makeStyles(({ palette }) => ({
+  loadingSpinner: {
+    width: 20,
+    flexBasis: 'end',
+    flexGrow: 0,
+  },
+  withdrawButton: {
+    alignSelf: "center",
+  }
+}))
 
 interface ExpiredLongPositionModalProps {
   open: boolean,
   onClose(): void,
+  withdrawPosition(
+    positionTokenAddress: string,
+    marketContractAddress: string,
+    amount: string,
+    type: PositionType): Promise<void>,
+  isWithdrawing: boolean
   position: any,
 };
 
-const ExpiredLongPositionModal: React.SFC<ExpiredLongPositionModalProps> = ({ open, onClose, position }) => {
-  const { PAYMENT_TOKEN_DECIMALS, PAYMENT_TOKEN_NAME, COLLATERAL_TOKEN_NAME, COLLATERAL_TOKEN_DECIMALS } = useHoneylemon();
+const ExpiredLongPositionModal: React.SFC<ExpiredLongPositionModalProps> = ({ open, onClose, position, isWithdrawing, withdrawPosition }) => {
+  const { PAYMENT_TOKEN_DECIMALS, PAYMENT_TOKEN_NAME, COLLATERAL_TOKEN_NAME, COLLATERAL_TOKEN_DECIMALS, refreshPortfolio } = useHoneylemon();
+  const { network } = useOnboard();
+
+  const etherscanUrl = (network === 1) ? 'https://etherscan.io' : `https://${networkName(network)}.etherscan.io`
+  const classes = useStyles();
+
+  const handleWithdraw = async (
+    positionTokenAddress: string,
+    marketContractAddress: string,
+    amount: string,
+    type: PositionType
+  ) => {
+    try {
+      await withdrawPosition(positionTokenAddress, marketContractAddress, amount, type);
+      refreshPortfolio();
+    } catch (error) {
+      Sentry.captureException(error);
+      console.log('Error withdrawing');
+    }
+  }
+
   return (
     <Dialog open={open} onClose={onClose} aria-labelledby="dialog-title" maxWidth='sm' fullWidth>
       <DialogTitle id="dialog-title">Expired Long Position Details</DialogTitle>
@@ -32,7 +73,7 @@ const ExpiredLongPositionModal: React.SFC<ExpiredLongPositionModalProps> = ({ op
               <TableCell align='right'>
                 {dayjs(position.startDate).format('DD-MMM-YY')} <br />
                 {dayjs(position.expirationDate).format('DD-MMM-YY')} <br />
-                {position.status === PositionStatus.expiredAwaitingSettlement && <>{Math.ceil(dayjs().utc().diff(dayjs(position.settlementDate), 'h', true))} <br /></>}
+                {position.status === PositionStatus.expiredAwaitingSettlement && <>{Math.ceil(dayjs(position.settlementDate).diff(dayjs(), 'h', true))} hour(s)<br /></>}
                 {dayjs(position.settlementDate).format('DD-MMM-YY')} <br />
               </TableCell>
             </TableRow>
@@ -57,6 +98,14 @@ const ExpiredLongPositionModal: React.SFC<ExpiredLongPositionModalProps> = ({ op
             <TableRow>
               <TableCell>Status</TableCell>
               <TableCell align='right'>{position.status}</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell colSpan={2}>
+                <Typography variant='caption'>
+                  Your transaction was executed on Ethereum blockchain, check
+                  on <Link href={`${etherscanUrl}/tx/${position.transaction.id}`} target="_blank" rel='noopener' underline='always'>Etherscan</Link>: {`${displayAddress(position.transaction.id, 20)}`}
+                </Typography>
+              </TableCell>
             </TableRow>
           </TableBody>
         </Table>

@@ -14,27 +14,16 @@ const MRIInformationModal: React.SFC<MRIInformationModalProps> = ({ open, onClos
       <DialogTitle id="dialog-title">BTC Mining Revenue Index (MRI_BTC_d)</DialogTitle>
       <DialogContent>
         <Typography variant='caption'>
-        The d-day BTC Mining Revenue Index (MRI_BTC_d) represents the network daily average block rewards plus
-        fees earned in BTC per 1 terahash (TH) of hash power in the past d days, that is, the total reward over 
-        the past d days divided by d.
+          •  The BTC Mining Revenue Index (<i>MRI_BTC_d</i>) represents the Bitcoin network daily average block rewards plus fees (in BTC) per 1 terahash (TH) of hash power in the past d days.<br/>
+          •  For example, <i>MRI_BTC_1</i> represents “1-day BTC Mining Revenue Index” (abbreviated as MRI_BTC). <i>MRI_BTC_28</i> represents the “28-day BTC Mining Revenue Index”.<br/>
+          •  <i>MRI_BTC_d</i> follows the mining industry convention of Full Pay-Per-Share (FPPS) approach.<br/>
         </Typography>
         <br />
         <br />
-        <img src="HistoricMRIGraph.jpg" style={{ width: '100%' }} alt='Historic MRI'/>
+        <img src="HistoricMRIGraph.jpg" style={{ width: '100%' }} alt='Historic MRI' />
         <br />
         <br />
-        <Typography variant='subtitle1'>Design Considerations</Typography>
-        <Typography variant='caption'>
-        • The index MUST have a clear physical meaning.<br />
-        • The index SHOULD closely replicate miners’ revenue in reality.<br /> 
-        • The index SHOULD make the contract easy for miners to trade in order to hedge the risk
-          exposure of mining practice over some certain period of time.<br />
-        • The index SHOULD be consistent with the mining industry conventional practices. MRI follows 
-          the mining industry convention of Full Pay-Per-Share (FPPS) approach.
-        </Typography>
-        <br />
-        <br />
-        <Link href='https://docs.honeylemon.market/btc-mining-revenue-contract-1#index' target="_blank" rel='noopener' underline='always'>For mathematical definition of MRI_BTC see the docs.<OpenInNew fontSize='small'/></Link>
+        <Link href='https://docs.honeylemon.market/btc-mining-revenue-contract-1#index' target="_blank" rel='noopener' underline='always'>For mathematical definition of MRI_BTC see the docs.<OpenInNew fontSize='small' /></Link>
       </DialogContent>
     </Dialog>
   )

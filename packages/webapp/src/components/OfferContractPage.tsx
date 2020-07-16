@@ -9,9 +9,6 @@ import {
   InputAdornment,
   Paper,
   CircularProgress,
-  List,
-  ListItem,
-  ListItemText,
   Table,
   TableBody,
   TableRow,
@@ -34,9 +31,10 @@ import ContractSpecificationModal from './ContractSpecificationModal';
 import OrderbookModal from './OrderbookModal';
 import MRIDisplay from './MRIDisplay';
 import { Info, OpenInNew, ExpandMore } from '@material-ui/icons';
-import { Link as RouterLink } from 'react-router-dom';
 import MRIInformationModal from './MRIInformationModal';
 import dayjs from 'dayjs';
+import AboutHoneylemonContractModal from './AboutHoneylemonContractModal';
+import * as Sentry from '@sentry/react';
 
 const useStyles = makeStyles(({ spacing, palette, transitions }) => ({
   rightAlign: {
@@ -91,6 +89,13 @@ const useStyles = makeStyles(({ spacing, palette, transitions }) => ({
     '&:hover': {
       backgroundColor: '#505050',
     },
+  },
+  offerSummaryEstimate: {
+    color: palette.primary.main,
+  },
+  subtotal: {
+    borderTop: '1.5px solid',
+    borderTopColor: palette.common.white
   }
 }))
 
@@ -110,6 +115,7 @@ const OfferContractPage: React.SFC = () => {
     PAYMENT_TOKEN_DECIMALS,
     deployDSProxyContract,
     approveToken,
+    setShowTokenInfoModal
   } = useHoneylemon();
   const { address = '0x' } = useOnboard();
   const classes = useStyles();
@@ -118,10 +124,11 @@ const OfferContractPage: React.SFC = () => {
     Number(
       (btcStats.mri * marketData.currentBTCSpotPrice)
         .toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })));
-  const [hashAmount, setHashAmount] = useState<number | undefined>(10000);
+  const [hashAmount, setHashAmount] = useState<number | undefined>(0);
   const [totalContractPrice, setTotalContractPrice] = useState(0);
   const [collateralAmount, setCollateralAmount] = useState(0);
   const [showOfferModal, setShowOfferModal] = useState(false);
+  const [showAboutHoneylemonContractModal, setShowAboutHoneylemonContractModal] = useState(false);
   const [txActive, setTxActive] = useState(false);
   const [showContractSpecificationModal, setShowContractSpecificationModal] = useState(false);
   const [showOfferDetails, setShowOfferDetails] = useState(false);
@@ -131,9 +138,17 @@ const OfferContractPage: React.SFC = () => {
   const [activeStep, setActiveStep] = useState(0);
   const [errorMessage, setErrorMessage] = useState('');
 
+  // Set default quantity
+  useEffect(() => {
+    const maxQuanityCollateralized = Math.floor(collateralTokenBalance / CONTRACT_COLLATERAL_RATIO / marketData.currentMRI / CONTRACT_DURATION)
+    const startingQuantity = Math.min(1000, maxQuanityCollateralized);
+    setHashAmount(startingQuantity);
+  }, [])
+
   useEffect(() => {
     let cancelled = false;
     const getCollateralForContract = async () => {
+      if (!honeylemonService) return;
       try {
         const result = await honeylemonService.getCollateralForContract(hashAmount)
         if (!cancelled) {
@@ -142,6 +157,7 @@ const OfferContractPage: React.SFC = () => {
       } catch (error) {
         console.log('Something went wrong fetching required collateral amount')
         console.log(error);
+        Sentry.captureException(error);
       }
     };
     hashAmount && getCollateralForContract();
@@ -157,8 +173,8 @@ const OfferContractPage: React.SFC = () => {
   const sufficientCollateral = collateralTokenBalance >= collateralAmount;
 
   const errors = [];
-  !sufficientCollateral && errors.push(`You do not have enough ${COLLATERAL_TOKEN_NAME} to proceed`);
-  totalContractPrice && totalContractPrice < 100 && errors.push('Suggest to increase your contract total to above 100 USDT due to recent high fees in ethereum network. See Fees for details.')
+  !sufficientCollateral && errors.push(`You need at least ${collateralAmount.toLocaleString(undefined, { maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS })} ${COLLATERAL_TOKEN_NAME} to proceed. Open Side Menu (top-right) to manage your wallet balance and get more.`);
+  // totalContractPrice && totalContractPrice < 99 && errors.push('')
 
   const handleCloseOfferDialog = () => {
     setErrorMessage('');
@@ -170,6 +186,7 @@ const OfferContractPage: React.SFC = () => {
     try {
       await deployDSProxyContract();
     } catch (error) {
+      Sentry.captureException(error);
       setErrorMessage('There was an error deploying the honeylemon vault. Please try again.');
     }
     setTxActive(false);
@@ -181,6 +198,7 @@ const OfferContractPage: React.SFC = () => {
     try {
       await approveToken(TokenType.CollateralToken)
     } catch (error) {
+      Sentry.captureException(error);
       setErrorMessage(error.toString())
     }
     setTxActive(false);
@@ -189,6 +207,7 @@ const OfferContractPage: React.SFC = () => {
   const handleCreateOffer = async () => {
     setTxActive(true);
     setErrorMessage('')
+    if (!honeylemonService) return;
     if (hashAmount) {
       try {
         const order = honeylemonService.createOrder(
@@ -205,6 +224,7 @@ const OfferContractPage: React.SFC = () => {
       } catch (error) {
         console.log('Something went wrong creating the offer');
         console.log(error);
+        Sentry.captureException(error);
         setErrorMessage('There was an error creating the offer. Please try again later.')
       }
     }
@@ -226,23 +246,25 @@ const OfferContractPage: React.SFC = () => {
     setActiveStep(step);
   }, [skipDsProxy, isDsProxyDeployed, tokenApprovalGranted])
 
-  const steps = ['Create honeylemon vault', `Approve ${COLLATERAL_TOKEN_NAME} collateral`, 'Offer Contract'];
+  const steps = ['Honeylemon Vault  (Optional)', `Approve ${COLLATERAL_TOKEN_NAME} for Collateral`, 'Offer Contract'];
 
   const getStepContent = (step: number) => {
     switch (step) {
       case 0:
-        return `Create a honeylemon vault. The honeylemon vault will reduce the transaction fees paid when redeeming in future. This step is optional. This is a once-off operation.`;
+        return `If you place multiple orders or use it more than once, create Honeylemon Vault will deploy a DSProxy contract for your wallet, which reduces future gas fee and streamline your transactions. Additional Ethereum gas fee applies.`;
       case 1:
-        return `Approve Honeylemon smart contract access to your wallet’s ${COLLATERAL_TOKEN_NAME} allowance. Your ${COLLATERAL_TOKEN_NAME} collateral will be auto-deposited into smart contract based on the MRI value at the time of your order being filled.`;
+        return `
+        You are granting permission for Honeylemon smart contracts to access ${COLLATERAL_TOKEN_NAME} in your wallet, enabling actual collateral to be auto-deposited upon offer being taken. You can turn OFF permission in Side Menu (top-right) - Manage Your Wallet. Additional Ethereum gas fee applies.`;
       case 2:
-        return `Finalize Offer`;
+        return `
+        You are offering ${hashAmount?.toLocaleString()} TH of ${CONTRACT_DURATION}-Day BTC Mining Revenue Contract at a limit price of ${hashPrice.toLocaleString(undefined, { maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS })}/TH/Day. Your offer will be valid for 10 days and can be canceled (for free) anytime in Portfolio. Additional Ethereum gas fee applies.`;
     }
   }
 
   const getStepButtonLabel = (step: number) => {
     switch (step) {
       case 0:
-        return `Deploy`;
+        return `Create`;
       case 1:
         return 'Approve';
       case 2:
@@ -264,12 +286,14 @@ const OfferContractPage: React.SFC = () => {
   const handleStartOffer = () => {
     setSkipDsProxy(false);
     setShowOfferModal(true);
-    activeStep === 2 && handleCreateOffer();
+    // activeStep === 2 && handleCreateOffer();
   }
 
   const handleOfferDetailsClick = () => {
     setShowOfferDetails(!showOfferDetails);
   };
+
+  const premiumOverMRI = (hashPrice - (btcStats.mri * marketData.currentBTCSpotPrice)) / (btcStats.mri * marketData.currentBTCSpotPrice) * 100
 
   return (
     <>
@@ -278,7 +302,7 @@ const OfferContractPage: React.SFC = () => {
           <MRIDisplay />
         </Grid>
         <Grid item xs={8}>
-          <Typography style={{ fontWeight: 'bold' }}>Offer a {CONTRACT_DURATION}-day Mining Revenue Contract</Typography>
+          <Typography style={{ fontWeight: 'bold' }}>Offer a {CONTRACT_DURATION}-day Mining Revenue Contract<Info fontSize='small' onClick={() => { setShowAboutHoneylemonContractModal(true) }} /></Typography>
         </Grid>
         <Grid item xs={4} style={{ textAlign: 'end' }}>
           <Button
@@ -350,6 +374,25 @@ const OfferContractPage: React.SFC = () => {
         <Grid item xs={4} className={classes.rightAlign}>
           <Typography style={{ fontWeight: 'bold' }} color='primary'>TH</Typography>
         </Grid>
+        <Grid item xs={12} style={{ paddingTop: 4 }}>
+          <Typography variant='caption' >
+            Enter your limit order. Make sure sufficient {COLLATERAL_TOKEN_NAME} (for collateral) &amp; ETH (for Ethereum gas fees) is in your wallet.
+          </Typography>
+        </Grid>
+        {errors.length > 0 &&
+          <Grid item xs={12}>
+            {errors.map((error: string, i) =>
+              <Typography
+                key={i}
+                variant='caption'
+                paragraph
+                color='secondary'
+                onClick={() => (error.includes('enough')) ? setShowTokenInfoModal(true) : null}>
+                {error}
+              </Typography>
+            )}
+          </Grid>
+        }
         <Grid item xs={12} container>
           <Paper className={clsx(classes.offerSummary, {
             [classes.offerSummaryBlur]: !sufficientCollateral,
@@ -360,7 +403,7 @@ const OfferContractPage: React.SFC = () => {
               </Grid>
               <Grid item xs={6} style={{ textAlign: 'right' }}>
                 <Typography variant='caption'>
-                  <Link href='#' underline='always' onClick={() => setShowContractSpecificationModal(true)}>
+                  <Link href='#' onClick={() => setShowContractSpecificationModal(true)} color='textPrimary'>
                     Contract Specs <Info fontSize='small' />
                   </Link>
                 </Typography>
@@ -370,32 +413,72 @@ const OfferContractPage: React.SFC = () => {
               <TableBody>
                 <TableRow>
                   <TableCell>
-                    Price <br />
-                    Quantity <br />
-                    Duration <br />
+                    Your Price
                   </TableCell>
                   <TableCell align='right'>
-                    {PAYMENT_TOKEN_NAME} {hashPrice.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}/Th/Day <br />
-                    {hashAmount} TH <br />
-                    {CONTRACT_DURATION} Days
+                    ${hashPrice.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}/Th/Day
                   </TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell>
-                    Contract Total <br />
-                    Estimated Collateral<br />
-                    <br />
+                    Your Quantity<br />
                   </TableCell>
                   <TableCell align='right'>
-                    {`${totalContractPrice.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })} ${PAYMENT_TOKEN_NAME}`} <br />
+                    {hashAmount?.toLocaleString()} TH <br />
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>
+                    Contract Duration<br />
+                  </TableCell>
+                  <TableCell align='right'>
+                    {CONTRACT_DURATION} Days
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className={clsx(classes.offerSummaryEstimate, classes.subtotal)}>
+                    Contract Total
+                  </TableCell>
+                  <TableCell align='right' className={clsx(classes.offerSummaryEstimate, classes.subtotal)}>
+                    {`${totalContractPrice.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS - 2 })} ${PAYMENT_TOKEN_NAME}`}<br />
+                  </TableCell>
+                </TableRow>
+                {totalContractPrice && totalContractPrice < 100 ?
+                  <TableRow>
+                    <TableCell colSpan={2}>
+                      <Typography variant='caption' color='secondary'>
+                        Suggest to increase your contract total to above 100 {PAYMENT_TOKEN_NAME} due to recent high fees in ethereum network.
+                          See <Link href='https://docs.honeylemon.market/fees' target="_blank" rel='noopener' color='secondary'>fees for details.<OpenInNew fontSize='small' /></Link>
+                      </Typography>
+                    </TableCell>
+                  </TableRow> :
+                  null
+                }
+                <TableRow>
+                  <TableCell className={classes.offerSummaryEstimate}>
+                    Estimated Collateral (125%)
+                  </TableCell>
+                  <TableCell align='right' className={classes.offerSummaryEstimate}>
                     {`${collateralAmount.toLocaleString(undefined, { maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS })} ${COLLATERAL_TOKEN_NAME}`} <br />
-                    {`(${CONTRACT_COLLATERAL_RATIO * 100} % MRI)`}
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className={classes.offerSummaryEstimate}>
+                    Price vs. MRI_BTC
+                  </TableCell>
+                  <TableCell align='right' className={classes.offerSummaryEstimate}>
+                    {`${Math.abs(premiumOverMRI).toLocaleString(undefined, { maximumFractionDigits: 2 })}% ${premiumOverMRI >= 0 ? 'Premium' : 'Discount'}`}
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell colSpan={2}>
+                    <Typography variant='caption'>{`* Your price is ${Math.abs(premiumOverMRI).toLocaleString(undefined, { maximumFractionDigits: 2 })}% ${premiumOverMRI >= 0 ? 'higher' : 'lower'} than the network daily average mining revenue.`}</Typography>
                   </TableCell>
                 </TableRow>
                 {!showOfferDetails ?
                   <TableRow>
                     <TableCell colSpan={2} align='center' onClick={handleOfferDetailsClick} style={{ cursor: 'pointer' }}>
-                      Expand Details
+                      Find Out More
                       <IconButton
                         className={classes.expand}
                         aria-label="show more">
@@ -405,58 +488,49 @@ const OfferContractPage: React.SFC = () => {
                   </TableRow> :
                   <>
                     <TableRow>
+                      <TableCell>Start</TableCell>
+                      <TableCell align='right'>Order-fill Date UTC 00:01</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell>Expiration</TableCell>
+                      <TableCell align='right'>{`${CONTRACT_DURATION} Days After Start`}</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell>Settlement</TableCell>
+                      <TableCell align='right'>24 Hours After Exp</TableCell>
+                    </TableRow>
+                    <TableRow>
                       <TableCell>
-                        Start <br />
-                        Expiration <br />
-                        Settlement <br />
                         Offer Valid Till
                       </TableCell>
-                      <TableCell align='right'>
-                        Order-fill Date UTC 00:01 <br />
-                        {`${CONTRACT_DURATION} Days After Start`} <br />
-                        24 Hours After Expiration <br />
-                        {`${dayjs().add(10, 'd').format('DD-MMM-YY')}`}
-                      </TableCell>
+                      <TableCell align='right'>{`${dayjs().add(10, 'd').format('DD-MMM-YY')}`}</TableCell>
                     </TableRow>
                     <TableRow>
                       <TableCell colSpan={2} style={{ color: '#a9a9a9' }}>
-                        * Estimated collateral is calcuated based on current MRI value; actual collateral
-                          deposited will be based on the actual MRI value at at the time your order being filled. <br />
-                        * If you do not have sufficient {COLLATERAL_TOKEN_NAME} in your wallet as collateral when your offer is being taken,
-                          a portion of the order will still be filled based on your available {COLLATERAL_TOKEN_NAME} balance at the time.<br />
-                        * Your limit order may be partially filled. <br />
-                        * Your offer will be valid for 10 days. Any unfilled portion of your limit order can be cancelled in your portfolio.<br />
-                        * Your order will be subject to additional Ethereum network transaction fee,
-                          and 0x Protocol fee, both denominated in ETH. Honeylemon does not charge&nbsp;
-                        <Link component={RouterLink} to="/stats" underline='always' >fees.<OpenInNew fontSize='small' /></Link>
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell colSpan={2} style={{ color: '#a9a9a9' }}>
-                        <Typography variant='subtitle1'>WHAT DOES IT MEAN?</Typography> <br />
-                        <Typography variant='body2'>
+                        <Typography variant='subtitle1' style={{ paddingTop: 4 }}>WHAT DOES IT MEAN?</Typography> <br />
+                        <Typography variant='body2' paragraph>
                           You are offering <strong>{hashAmount} TH</strong> of {CONTRACT_DURATION}-Day Mining Revenue Contract at&nbsp;
                           <strong>{PAYMENT_TOKEN_NAME} {hashPrice.toLocaleString(undefined, { maximumFractionDigits: PAYMENT_TOKEN_DECIMALS })}/TH/Day</strong>.
                         </Typography>
-                        <Typography variant='body2'>
+                        <Typography variant='body2' paragraph>
                           You need to have at least <strong>{collateralAmount.toLocaleString(undefined, { maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS })} {COLLATERAL_TOKEN_NAME}</strong> in
                           your wallet balance now, and approve Honeylemon smart contract to access your {COLLATERAL_TOKEN_NAME} in your wallet as collateral to list your offer.
                           You may cancel your offer from your Portfolio anytime prior to it being filled. As soon as your order is filled, your approved collateral will be
                           automatically deposited, you will receive payment in {PAYMENT_TOKEN_NAME} immediately and the contract will start.
                         </Typography>
-                        <Typography variant='body2'>
+                        <Typography variant='body2' paragraph>
                           At the end of <strong>{CONTRACT_DURATION} days</strong> your counterparty will receive the network average BTC block reward & transaction
-                          fees per TH based on the average value of the <Link href='#' underline='always' onClick={() => setShowMRIInformationModal(true)}>Bitcoin Mining Revenue
+                          fees per TH based on the average value of the <Link href='#' onClick={() => setShowMRIInformationModal(true)}>Bitcoin Mining Revenue
                           Index (MRI_BTC) <Info fontSize='small' /></Link> over {CONTRACT_DURATION} days up to a <strong>max capped by your collateral</strong>.
                         </Typography>
-                        <Typography variant='body2'>
+                        <Typography variant='body2' paragraph>
                           The payoff will be directly deducted from your collateral, and you can withdraw the remainder of your collateral after settlement.
                         </Typography>
                       </TableCell>
                     </TableRow>
                     <TableRow>
                       <TableCell colSpan={2} align='center' onClick={handleOfferDetailsClick} style={{ cursor: 'pointer' }}>
-                        Collapse Details
+                        Show Less
                         <IconButton className={clsx(classes.expand, classes.expandOpen)}>
                           <ExpandMore />
                         </IconButton>
@@ -468,16 +542,6 @@ const OfferContractPage: React.SFC = () => {
             </Table>
           </Paper>
         </Grid>
-        {errors.length > 0 &&
-          <Grid item xs={12}>
-            <List className={classes.errorList}>
-              {errors.map((error, i) =>
-                <ListItem key={i}>
-                  <ListItemText>{error}</ListItemText>
-                </ListItem>)}
-            </List>
-          </Grid>
-        }
         <Grid item xs={12}>
           <Button
             fullWidth
@@ -490,12 +554,15 @@ const OfferContractPage: React.SFC = () => {
           </Button>
         </Grid>
       </Grid>
+      <AboutHoneylemonContractModal open={showAboutHoneylemonContractModal} onClose={() => setShowAboutHoneylemonContractModal(false)} />
       <Dialog
         open={showOfferModal}
         onClose={handleCloseOfferDialog}
         aria-labelledby="form-dialog-title"
         disableBackdropClick
-        disableEscapeKeyDown>
+        disableEscapeKeyDown
+        maxWidth='sm'
+        fullWidth>
         <DialogTitle id="form-dialog-title">Create Offer</DialogTitle>
         <DialogContent>
           <Stepper activeStep={activeStep} orientation="vertical">
@@ -503,7 +570,7 @@ const OfferContractPage: React.SFC = () => {
               <Step key={label}>
                 <StepLabel>{label}</StepLabel>
                 <StepContent>
-                <Typography paragraph>{getStepContent(index)}</Typography>
+                  <Typography paragraph>{getStepContent(index)}</Typography>
                   {errorMessage && <Typography color='error'>{errorMessage}</Typography>}
                   <div className={classes.actionsContainer}>
                     <Button

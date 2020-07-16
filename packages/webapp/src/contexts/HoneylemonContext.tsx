@@ -1,6 +1,6 @@
 import * as React from "react";
 import Web3 from 'web3'
-import { useState, useEffect } from "react";
+import { useState, useEffect, Dispatch, SetStateAction } from "react";
 import { MetamaskSubprovider, Web3JsProvider } from '@0x/subproviders';
 import { HoneylemonService, OrderbookService, COLLATERAL_TOKEN_DECIMALS, PAYMENT_TOKEN_DECIMALS } from "@honeylemon/honeylemonjs/lib/src";
 import { useOnboard } from "./OnboardContext";
@@ -8,7 +8,10 @@ import { ethers } from 'ethers';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import { BigNumber } from "@0x/utils";
+import * as Sentry from '@sentry/react';
+
 import { networkName } from "../helpers/ethereumNetworkUtils";
+import config from './HoneylemonConfig';
 
 dayjs.extend(utc);
 
@@ -17,7 +20,7 @@ enum TokenType {
   PaymentToken
 }
 
-enum PositionType {
+export enum PositionType {
   Long = 'Long',
   Short = 'Short'
 }
@@ -29,9 +32,10 @@ export enum PositionStatus {
   withdrawn = 'Withdrawn'
 }
 
-const COLLATERAL_TOKEN_NAME = process.env.REACT_APP_COLLATERAL_TOKEN_NAME || 'imBTC';
+const COLLATERAL_TOKEN_NAME = process.env.REACT_APP_COLLATERAL_TOKEN_NAME || 'wBTC';
 const PAYMENT_TOKEN_NAME = process.env.REACT_APP_PAYMENT_TOKEN_NAME || 'USDT';
 const CONTRACT_COLLATERAL_RATIO = Number(process.env.REACT_APP_CONTRACT_COLLATERAL_RATIO) || 1.25;
+const MAINTENANCE_MODE = (process.env.REACT_APP_MAINTENANCE_MODE === 'true');
 
 type OrderSummary = {
   price: number,
@@ -39,8 +43,8 @@ type OrderSummary = {
 };
 
 export type HoneylemonContext = {
-  honeylemonService: HoneylemonService;
-  orderbookService: OrderbookService;
+  honeylemonService?: HoneylemonService;
+  orderbookService?: OrderbookService;
   collateralTokenBalance: number;
   collateralTokenAllowance: number;
   COLLATERAL_TOKEN_DECIMALS: number;
@@ -54,6 +58,8 @@ export type HoneylemonContext = {
   dsProxyAddress: string;
   CONTRACT_COLLATERAL_RATIO: number;
   isDailyContractDeployed: boolean;
+  showTokenInfoModal: boolean;
+  setShowTokenInfoModal: Dispatch<SetStateAction<boolean>>;
   marketData: {
     miningContracts: Array<any>;
     currentMRI: number;
@@ -71,6 +77,7 @@ export type HoneylemonContext = {
   orderbook: Array<OrderSummary>;
   btcStats: any,
   isPortfolioRefreshing: boolean;
+  isInMaintenanceMode: boolean;
   deployDSProxyContract(): Promise<void>;
   approveToken(tokenType: TokenType, amount?: number): Promise<void>;
   refreshPortfolio(): Promise<void>;
@@ -112,16 +119,15 @@ export type ContractDetails = {
   startDate: Date,
   expirationDate: Date,
   settlementDate: Date,
-  type: PositionType,
 }
 
 const HoneylemonContext = React.createContext<HoneylemonContext | undefined>(undefined);
 
 const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
-  const { wallet, network, isReady, address, notify } = useOnboard();
+  const { wallet, network, isReady, address, notify, gasPrice } = useOnboard();
 
-  const [honeylemonService, setHoneylemonService] = useState<any | undefined>(undefined);
-  const [orderbookService, setOrderbookService] = useState<any | undefined>(undefined);
+  const [honeylemonService, setHoneylemonService] = useState<HoneylemonService | undefined>(undefined);
+  const [orderbookService, setOrderbookService] = useState<OrderbookService | undefined>(undefined);
   const [collateralTokenBalance, setCollateralTokenBalance] = useState<number>(0);
   const [collateralTokenAllowance, setCollateralTokenAllowance] = useState<number>(0);
   const [paymentTokenBalance, setPaymentTokenBalance] = useState<number>(0);
@@ -143,30 +149,40 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
   const [isDailyContractDeployed, setIsDailyContractDeployed] = useState(false);
   const [orderbook, setOrderbook] = useState([]);
   const [contractDuration, setContractDuration] = useState(0);
+  const [showTokenInfoModal, setShowTokenInfoModal] = useState(false);
 
   const deployDSProxyContract = async () => {
+    if (!honeylemonService || !address) { 
+      console.log('Please connect a wallet to deploy a DSProxy Contract')
+      return; 
+    }
     try {
-      const dsProxyAddress = await honeylemonService.deployDSProxyContract(address);
+      const dsProxyAddress = await honeylemonService.deployDSProxyContract(address, gasPrice);
       setIsDsProxyDeployed(true);
       setDsProxyAddress(dsProxyAddress);
     } catch (error) {
       console.log('Something went wrong deploying the DS Proxy wallet');
       console.log(error);
+      Sentry.captureException(error);
       throw new Error('Something went wrong deploying the honeylemon vault. Please try again.')
     }
   }
 
   const approveToken = async (tokenType: TokenType, amount?: number): Promise<void> => {
+    if (!honeylemonService || !address) { 
+      console.log('Please connect a wallet to deploy a DSProxy Contract')
+      return; 
+    }
     try {
       switch (tokenType) {
         case TokenType.CollateralToken:
-          await honeylemonService.approveCollateralToken(address, amount);
+          await honeylemonService.approveCollateralToken(address, amount, gasPrice);
           const collateral = await honeylemonService.getCollateralTokenAmounts(address);
           setCollateralTokenAllowance(Number(collateral.allowance.shiftedBy(-COLLATERAL_TOKEN_DECIMALS).toString()));
           setCollateralTokenBalance(Number(collateral.balance.shiftedBy(-COLLATERAL_TOKEN_DECIMALS).toString()));
           break;
         case TokenType.PaymentToken:
-          await honeylemonService.approvePaymentToken(address, amount);
+          await honeylemonService.approvePaymentToken(address, amount, gasPrice);
           const payment = await honeylemonService.getPaymentTokenAmounts(address);
           setCollateralTokenAllowance(Number(payment.allowance.shiftedBy(-PAYMENT_TOKEN_DECIMALS).toString()));
           setCollateralTokenBalance(Number(payment.balance.shiftedBy(-PAYMENT_TOKEN_DECIMALS).toString()));
@@ -177,6 +193,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
     } catch (error) {
       console.log('Something went wrong approving the tokens');
       console.log(error);
+      Sentry.captureException(error);
       const errorMessage = tokenType === TokenType.CollateralToken ?
         `${COLLATERAL_TOKEN_NAME} approval failed. Please try again later.` :
         `${PAYMENT_TOKEN_NAME} approval failed. Please try again later.`
@@ -186,14 +203,13 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
   }
 
   const parseContractName = (contractName: string): ContractDetails => {
-    const [indexType, collateralInstrument, durationString, startDate, position] = contractName.split('-');
+    const [indexType, collateralInstrument, durationString, startDate] = contractName.split('-');
     const duration = Number(durationString.replace('D', ''));
     return {
       instrumentName: `${indexType}-${collateralInstrument}`,
-      type: (position === 'long') ? PositionType.Long : PositionType.Short,
-      startDate: dayjs(startDate).startOf('day').utc().toDate(), //This will always be UTC 00:00 the date the contract was concluded
-      expirationDate: dayjs(startDate).startOf('day').utc().add(duration, 'd').toDate(),
-      settlementDate: dayjs(startDate).startOf('day').utc().add(duration + 1, 'd').toDate(),
+      startDate: dayjs(startDate, { utc: true }).startOf('day').toDate(), //This will always be UTC 00:00 the date the contract was concluded
+      expirationDate: dayjs(startDate, { utc: true }).startOf('day').add(duration, 'd').toDate(),
+      settlementDate: dayjs(startDate, { utc: true }).startOf('day').add(duration + 1, 'd').toDate(),
       duration,
     }
   }
@@ -209,8 +225,10 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
   }
 
   const getPorfolio = async () => {
+    if (!honeylemonService) return;
     try {
       setIsPortfolioRefreshing(true);
+
       const openOrdersRes = await honeylemonService.getOpenOrders(address);
       setOpenOrdersMetadata(openOrdersRes.records.map((openOrder: any) => openOrder.metaData))
       setOpenOrders(Object.fromEntries(
@@ -220,13 +238,16 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
           listingDate: dayjs(openOrder.order.expirationTimeSeconds.toNumber() * 1000).subtract(10, 'd').toDate()
         }]))
       ));
+
       const positions = await honeylemonService.getPositions(address);
       const allPositions = positions.longPositions.map((lp: any) => ({
         ...lp,
         contractName: lp.contractName + '-long',
+        type: PositionType.Long
       })).concat(positions.shortPositions.map((sp: any) => ({
         ...sp,
         contractName: sp.contractName + '-short',
+        type: PositionType.Short
       }))).map((p: any) => {
         return {
           ...p,
@@ -235,6 +256,9 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
           finalReward: Number(p.finalReward?.shiftedBy(-COLLATERAL_TOKEN_DECIMALS).toString()) || 0,
           totalCost: Number(new BigNumber(p.price).multipliedBy(p.qtyToMint).toString()),
           totalCollateralLocked: Number(new BigNumber(p.contract.collateralPerUnit).multipliedBy(p.qtyToMint).shiftedBy(-COLLATERAL_TOKEN_DECIMALS).toString()),
+          canBeBatchRedeemed: (p.type === PositionType.Long) ?
+            (p.longTokenDSProxy !== p.longTokenRecipient.id) :
+            (p.shortTokenDSProxy !== p.shortTokenRecipient.id),
           ...parseContractName(p.contractName),
           status: getPositionStatus(p),
         }
@@ -252,59 +276,67 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
       const newExpiredShortPositions = allPositions.filter((p: any) => p.status !== PositionStatus.active && p.type === PositionType.Short)
       setExpiredShortPositions(newExpiredShortPositions);
     } catch (error) {
+      Sentry.captureException(error);
       console.log('There was an error getting the market data')
     } finally {
       setIsPortfolioRefreshing(false);
     }
   }
 
+  const validNetworks = Object.keys(config).map(network => Number(network))
+
   // Instantiate honeylemon service and get all initial user data
   useEffect(() => {
-    if (isReady && wallet && network && address) {
+    setContractDuration(Number(process.env.REACT_APP_CONTRACT_DURATION));
+    if (isReady && wallet && network && validNetworks.includes(network) && address) {
       const initHoneylemonService = async () => {
-        let wrappedSubprovider;
-        const web3 = new Web3(wallet.provider)
-        switch (wallet.name) {
-          case 'MetaMask':
-            wrappedSubprovider = new MetamaskSubprovider(web3.currentProvider as Web3JsProvider);
-            break;
-          default:
-            wrappedSubprovider = new MetamaskSubprovider(web3.currentProvider as Web3JsProvider);
-        }
+        try {
+          let wrappedSubprovider;
+          const web3 = new Web3(wallet.provider)
+          switch (wallet.name) {
+            case 'MetaMask':
+              wrappedSubprovider = new MetamaskSubprovider(web3.currentProvider as Web3JsProvider);
+              break;
+            default:
+              wrappedSubprovider = new MetamaskSubprovider(web3.currentProvider as Web3JsProvider);
+          }
 
-        const honeylemonService = new HoneylemonService(
-          process.env.REACT_APP_SRA_URL,
-          process.env.REACT_APP_SUBGRAPH_URL,
-          wrappedSubprovider,
-          network,
-          process.env.REACT_APP_MINTER_BRIDGE_ADDRESS,
-          process.env.REACT_APP_MARKET_CONTRACT_PROXY_ADDRESS,
-          process.env.REACT_APP_COLLATERAL_TOKEN_ADDRESS,
-          process.env.REACT_APP_PAYMENT_TOKEN_ADDRESS,
-          Number(process.env.REACT_APP_CONTRACT_DURATION),
-        );
-        setHoneylemonService(honeylemonService);
-        setContractDuration(honeylemonService.contractDuration);
-        const collateral = await honeylemonService.getCollateralTokenAmounts(address);
-        setCollateralTokenAllowance(Number(collateral.allowance.shiftedBy(-8).toString()));
-        setCollateralTokenBalance(Number(collateral.balance.shiftedBy(-8).toString()));
-        const payment = await honeylemonService.getPaymentTokenAmounts(address);
-        setPaymentTokenAllowance(Number(payment.allowance.shiftedBy(-6).toString()));
-        setPaymentTokenBalance(Number(payment.balance.shiftedBy(-6).toString()));
-        const proxyDeployed: boolean = await honeylemonService.addressHasDSProxy(address)
-        setIsDsProxyDeployed(proxyDeployed);
-        if (proxyDeployed) {
-          const proxyAddress = await honeylemonService.getDSProxyAddress(address);
-          setDsProxyAddress(proxyAddress);
-        }
-        const isContractDeployed = await honeylemonService.isDailyContractDeployed();
-        setIsDailyContractDeployed(isContractDeployed);
-        if (address && notify) {
-          const { emitter } = notify.account(address);
-          const etherscanUrl = (network === 1) ? 'https://etherscan.io' : `https://${networkName(network)}.etherscan.io`
-          emitter.on('all', tx => ({
-            onclick: () => window.open(`${etherscanUrl}/tx/${tx.hash}`) // TODO: update this to work on other networks
-          }))
+          const honeylemonService = new HoneylemonService(
+            config[network].apiUrl,
+            config[network].subgraphUrl,
+            wrappedSubprovider,
+            network,
+            config[network].minterBridgeAddress,
+            config[network].marketContractProxy,
+            config[network].collateralTokenAddress,
+            config[network].paymentTokenAddress,
+            contractDuration,
+          );
+          setHoneylemonService(honeylemonService);
+          const collateral = await honeylemonService.getCollateralTokenAmounts(address);
+          setCollateralTokenAllowance(Number(collateral.allowance.shiftedBy(-8).toString()));
+          setCollateralTokenBalance(Number(collateral.balance.shiftedBy(-8).toString()));
+          const payment = await honeylemonService.getPaymentTokenAmounts(address);
+          setPaymentTokenAllowance(Number(payment.allowance.shiftedBy(-6).toString()));
+          setPaymentTokenBalance(Number(payment.balance.shiftedBy(-6).toString()));
+          const proxyDeployed: boolean = await honeylemonService.addressHasDSProxy(address)
+          setIsDsProxyDeployed(proxyDeployed);
+          if (proxyDeployed) {
+            const proxyAddress = await honeylemonService.getDSProxyAddress(address);
+            setDsProxyAddress(proxyAddress);
+          }
+          const isContractDeployed = await honeylemonService.isDailyContractDeployed();
+          setIsDailyContractDeployed(isContractDeployed);
+          if (address && notify) {
+            const { emitter } = notify.account(address);
+            const etherscanUrl = (network === 1) ? 'https://etherscan.io' : `https://${networkName(network)}.etherscan.io`
+            emitter.on('all', tx => ({
+              onclick: () => window.open(`${etherscanUrl}/tx/${tx.hash}`) // TODO: update this to work on other networks
+            }))
+          }
+        } catch (error) {
+          console.log('Error initializing Honeylemon context');
+          Sentry.captureEvent(error);
         }
       };
       initHoneylemonService();
@@ -325,11 +357,12 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
   // Instantiate Orderbook service
   useEffect(() => {
     const initOrderbookService = async () => {
+      const activeNetwork = network || validNetworks[0];
       const orderbookServiceInstance = new OrderbookService(
-        process.env.REACT_APP_SRA_URL,
-        process.env.REACT_APP_MINTER_BRIDGE_ADDRESS,
-        process.env.REACT_APP_MARKET_CONTRACT_PROXY_ADDRESS,
-        process.env.REACT_APP_PAYMENT_TOKEN_ADDRESS,
+        config[activeNetwork].apiUrl,
+        config[activeNetwork].minterBridgeAddress,
+        config[activeNetwork].marketContractProxy,
+        config[activeNetwork].paymentTokenAddress,
       );
       setOrderbookService(orderbookServiceInstance);
     }
@@ -352,6 +385,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
         } catch (error) {
           console.log('There was an error getting the orderbook.')
           console.log(error);
+          Sentry.captureException(error);
         }
       }
     }
@@ -381,6 +415,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
         }
       } catch (error) {
         console.log('There was an error getting the market data')
+        Sentry.captureException(error);
       }
     }
 
@@ -421,10 +456,11 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
           const { currentBlockHeight, avgBlockTime } = await (await fetch(btcStatsUrl)).json()
           const currentEpochBlocks = currentBlockHeight % 2016;
           const remainingEpochTime = (2016 - currentEpochBlocks) * avgBlockTime;
-          const date = dayjs().add(remainingEpochTime, 's');
+          const date = dayjs().utc().add(remainingEpochTime, 's');
           setBtcDifficultyAdjustmentDate(date.toDate());
         }
       } catch (error) {
+        Sentry.captureException(error);
         console.log('Error getting next difficulty adjustment date');
       }
     }
@@ -434,6 +470,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
   // Transfer & Approval event listeners for Payment & Collateral Tokens
   useEffect(() => {
     const checkBalancesAndApprovals = async () => {
+      if (!honeylemonService) return;
       const collateral = await honeylemonService.getCollateralTokenAmounts(address);
       setCollateralTokenAllowance(Number(collateral.allowance.shiftedBy(-8).toString()));
       setCollateralTokenBalance(Number(collateral.balance.shiftedBy(-8).toString()));
@@ -524,6 +561,9 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
         approveToken,
         refreshPortfolio: getPorfolio,
         isPortfolioRefreshing,
+        showTokenInfoModal,
+        setShowTokenInfoModal,
+        isInMaintenanceMode: MAINTENANCE_MODE
       }}>
       {children}
     </HoneylemonContext.Provider>

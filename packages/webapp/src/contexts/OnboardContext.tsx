@@ -6,12 +6,13 @@ import { API as OnboardApi, Wallet } from 'bnc-onboard/dist/src/interfaces';
 import { API as NotifyApi } from 'bnc-notify/dist/src/interfaces';
 import { fromWei } from 'web3-utils';
 import FontFaceObserver from 'fontfaceobserver';
+import * as Sentry from '@sentry/react';
 
 import { networkName } from '../helpers/ethereumNetworkUtils';
+import config from './HoneylemonConfig';
 
 export type OnboardProviderProps = {
   dappId: string;
-  networkId: number;
   children: React.ReactNode;
 }
 
@@ -27,6 +28,7 @@ export type OnboardContext = {
   resetOnboard(): void,
   gasPrice: number,
   refreshGasPrice(): Promise<void>,
+  isMobile: boolean,
 }
 
 const OnboardContext = React.createContext<OnboardContext | undefined>(undefined);
@@ -41,8 +43,10 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
   const [notify, setNotify] = useState<NotifyApi | undefined>(undefined)
   const [gasPrice, setGasPrice] = useState(0);
 
+  const validNetworks = Object.keys(config).map(network => Number(network))
+
   const infuraId = process.env.REACT_APP_INFURA_ID
-  const infuraRpc = `https://${networkName(network)}.infura.io/v3/${infuraId}`
+  const infuraRpc = `https://${networkName(network || validNetworks[0])}.infura.io/v3/${infuraId}`
 
   useEffect(() => {
     const initializeOnboard = async () => {
@@ -52,14 +56,16 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
 
         const onboard = Onboard({
           dappId: onboardProps.dappId,
-          networkId: onboardProps.networkId,
+          networkId: validNetworks[0],
           darkMode: true,
           walletSelect: {
             wallets: [
               { walletName: 'metamask', preferred: true },
               {
                 walletName: 'imToken',
-                rpcUrl: onboardProps.networkId === 1 ? 'https://mainnet-eth.token.im' : 'https://eth-testnet.tokenlon.im',
+                rpcUrl: ((!!network && network === 1) || (validNetworks[0] === 1)) ?
+                  'https://mainnet-eth.token.im' :
+                  'https://eth-testnet.tokenlon.im',
                 preferred: true,
               },
               { walletName: "coinbase", preferred: true },
@@ -67,10 +73,11 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
                 walletName: "portis",
                 apiKey: process.env.REACT_APP_PORTIS_API_KEY,
               },
+              { walletName: "trust", rpcUrl: infuraRpc },
               { walletName: "dapper" },
               {
                 walletName: "walletConnect",
-                infuraKey: infuraId
+                rpc: { [network || validNetworks[0]]: infuraRpc },
               },
               { walletName: "walletLink", rpcUrl: infuraRpc },
               { walletName: "opera" },
@@ -78,7 +85,7 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
               { walletName: "torus" },
               { walletName: "status" },
               { walletName: "unilogin" },
-              { walletName: "authereum"},
+              { walletName: "authereum" },
               {
                 walletName: 'ledger',
                 rpcUrl: infuraRpc
@@ -93,8 +100,16 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
           ],
           subscriptions: {
             address: setAddress,
-            network: setNetwork,
-            balance: (balance: string) => {
+            network: (network) => {
+              if (validNetworks.includes(network)) {
+                onboard.config({ networkId: network })
+              }
+              setNetwork(network)
+              if (isReady) {
+                onboard.walletCheck();
+              }
+            },
+            balance: (balance) => {
               (balance)
                 ? setEthBalance(Number(fromWei(balance, 'ether')))
                 : setEthBalance(0);
@@ -117,20 +132,25 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
 
         setNotify(Notify({
           dappId: onboardProps.dappId,
-          networkId: onboardProps.networkId,
+          networkId: network || validNetworks[0],
           darkMode: true,
         }));
       } catch (error) {
         console.log('Error initializing onboard');
         console.log(error);
+        Sentry.captureException(error);
       }
     }
     initializeOnboard();
-  }, [onboardProps.dappId, onboardProps.networkId])
+  }, [onboardProps.dappId])
 
   const checkIsReady = async () => {
     const isReady = await onboard?.walletCheck();
     setIsReady(!!isReady);
+    !!isReady &&
+      Sentry.configureScope(function (scope) {
+        scope.setUser({ "id": address, "network": networkName(network) });
+      });
     return !!isReady;
   }
 
@@ -142,26 +162,38 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
 
   const refreshGasPrice = async () => {
     try {
-      const response = await (await fetch('https://www.etherchain.org/api/gasPriceOracle')).json();
-      const newGasPrice = !isNaN(Number(response.standard)) ? Number(response.standard) : 35;
+      // const etherchainResponse = await (await fetch('https://www.etherchain.org/api/gasPriceOracle')).json();
+      const ethGasStationResponse = await (await fetch(`https://ethgasstation.info/api/ethgasAPI.json?api-key=${process.env.REACT_APP_ETH_GAS_STATION_API_KEY}`)).json()
+      const newGasPrice = !isNaN(Number(ethGasStationResponse.fast)) ? Number(ethGasStationResponse.fast) / 10 : 35;
+      console.log(`Settings new gas price ${newGasPrice} gwei`);
       setGasPrice(newGasPrice);
     } catch (error) {
+      Sentry.captureException(error);
+      console.log(error);
+      console.log('Using 35 gwei as default')
       setGasPrice(35);
     }
   }
 
   // Gas Price poller
   useEffect(() => {
-    const getGasPrice = refreshGasPrice;
-   
-    let poller: NodeJS.Timeout;
-    getGasPrice();
-    poller = setInterval(getGasPrice, 60000);
+    if (network || validNetworks[0] === 1) {
+      console.log('Starting Gas Price Poller')
+      const getGasPrice = refreshGasPrice;
 
-    return () => {
-      clearInterval(poller);
+      let poller: NodeJS.Timeout;
+      getGasPrice();
+      poller = setInterval(getGasPrice, 60000);
+      return () => {
+        clearInterval(poller);
+      }
+    } else {
+      console.log('You are not using mainnet. Defaulting to 10 gwei')
+      setGasPrice(10);
     }
   }, [])
+
+  const onboardState = onboard?.getState();
 
   return (
     <OnboardContext.Provider value={{
@@ -176,6 +208,7 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
       resetOnboard,
       gasPrice,
       refreshGasPrice,
+      isMobile: !!onboardState?.mobileDevice
     }}>
       {children}
     </OnboardContext.Provider>
