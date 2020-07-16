@@ -228,21 +228,13 @@ export class MarketContractProxy extends ethereum.SmartContract {
   }
 
   CONTRACT_DURATION(): BigInt {
-    let result = super.call(
-      "CONTRACT_DURATION",
-      "CONTRACT_DURATION():(uint256)",
-      []
-    );
+    let result = super.call("CONTRACT_DURATION", "CONTRACT_DURATION():(uint256)", []);
 
     return result[0].toBigInt();
   }
 
   try_CONTRACT_DURATION(): ethereum.CallResult<BigInt> {
-    let result = super.tryCall(
-      "CONTRACT_DURATION",
-      "CONTRACT_DURATION():(uint256)",
-      []
-    );
+    let result = super.tryCall("CONTRACT_DURATION", "CONTRACT_DURATION():(uint256)", []);
     if (result.reverted) {
       return new ethereum.CallResult();
     }
@@ -274,21 +266,17 @@ export class MarketContractProxy extends ethereum.SmartContract {
   }
 
   marketContracts(param0: BigInt): Address {
-    let result = super.call(
-      "marketContracts",
-      "marketContracts(uint256):(address)",
-      [ethereum.Value.fromUnsignedBigInt(param0)]
-    );
+    let result = super.call("marketContracts", "marketContracts(uint256):(address)", [
+      ethereum.Value.fromUnsignedBigInt(param0)
+    ]);
 
     return result[0].toAddress();
   }
 
   try_marketContracts(param0: BigInt): ethereum.CallResult<Address> {
-    let result = super.tryCall(
-      "marketContracts",
-      "marketContracts(uint256):(address)",
-      [ethereum.Value.fromUnsignedBigInt(param0)]
-    );
+    let result = super.tryCall("marketContracts", "marketContracts(uint256):(address)", [
+      ethereum.Value.fromUnsignedBigInt(param0)
+    ]);
     if (result.reverted) {
       return new ethereum.CallResult();
     }
@@ -350,11 +338,9 @@ export class MarketContractProxy extends ethereum.SmartContract {
   }
 
   dSProxyToAddress(param0: Address): Address {
-    let result = super.call(
-      "dSProxyToAddress",
-      "dSProxyToAddress(address):(address)",
-      [ethereum.Value.fromAddress(param0)]
-    );
+    let result = super.call("dSProxyToAddress", "dSProxyToAddress(address):(address)", [
+      ethereum.Value.fromAddress(param0)
+    ]);
 
     return result[0].toAddress();
   }
@@ -442,11 +428,9 @@ export class MarketContractProxy extends ethereum.SmartContract {
   }
 
   addressToDSProxy(param0: Address): Address {
-    let result = super.call(
-      "addressToDSProxy",
-      "addressToDSProxy(address):(address)",
-      [ethereum.Value.fromAddress(param0)]
-    );
+    let result = super.call("addressToDSProxy", "addressToDSProxy(address):(address)", [
+      ethereum.Value.fromAddress(param0)
+    ]);
 
     return result[0].toAddress();
   }
@@ -528,11 +512,9 @@ export class MarketContractProxy extends ethereum.SmartContract {
   }
 
   getFillableAmount(makerAddress: Address): BigInt {
-    let result = super.call(
-      "getFillableAmount",
-      "getFillableAmount(address):(uint256)",
-      [ethereum.Value.fromAddress(makerAddress)]
-    );
+    let result = super.call("getFillableAmount", "getFillableAmount(address):(uint256)", [
+      ethereum.Value.fromAddress(makerAddress)
+    ]);
 
     return result[0].toBigInt();
   }
@@ -597,11 +579,9 @@ export class MarketContractProxy extends ethereum.SmartContract {
   }
 
   getCollateralPool(market: Address): Address {
-    let result = super.call(
-      "getCollateralPool",
-      "getCollateralPool(address):(address)",
-      [ethereum.Value.fromAddress(market)]
-    );
+    let result = super.call("getCollateralPool", "getCollateralPool(address):(address)", [
+      ethereum.Value.fromAddress(market)
+    ]);
 
     return result[0].toAddress();
   }
@@ -741,9 +721,7 @@ export class MarketContractProxy extends ethereum.SmartContract {
     return result[0].toAddress();
   }
 
-  try_getUserAddressOrDSProxy(
-    inputAddress: Address
-  ): ethereum.CallResult<Address> {
+  try_getUserAddressOrDSProxy(inputAddress: Address): ethereum.CallResult<Address> {
     let result = super.tryCall(
       "getUserAddressOrDSProxy",
       "getUserAddressOrDSProxy(address):(address)",
@@ -780,11 +758,7 @@ export class MarketContractProxy extends ethereum.SmartContract {
   }
 
   createDSProxyWallet(): Address {
-    let result = super.call(
-      "createDSProxyWallet",
-      "createDSProxyWallet():(address)",
-      []
-    );
+    let result = super.call("createDSProxyWallet", "createDSProxyWallet():(address)", []);
 
     return result[0].toAddress();
   }
@@ -888,7 +862,7 @@ export class ConstructorCall__Inputs {
     return this._call.inputValues[2].value.toAddress();
   }
 
-  get _imBTCTokenAddress(): Address {
+  get _wBTCTokenAddress(): Address {
     return this._call.inputValues[3].value.toAddress();
   }
 }

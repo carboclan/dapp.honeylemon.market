@@ -8,29 +8,29 @@
 // $truffle migrate --reset && truffle exec ./honeylemon-intergration-tests/full-trade-lifecycle-test.js
 
 // Helper libraries
-const { PayoutCalculator } = require('./helpers/payout-calculator');
+const { PayoutCalculator } = require("./helpers/payout-calculator");
 
-const { ContractWrappers } = require('@0x/contract-wrappers');
-const { Web3Wrapper } = require('@0x/web3-wrapper');
-const { BigNumber } = require('@0x/utils');
+const { ContractWrappers } = require("@0x/contract-wrappers");
+const { Web3Wrapper } = require("@0x/web3-wrapper");
+const { BigNumber } = require("@0x/utils");
 
 // Helpers
-const { time } = require('@openzeppelin/test-helpers');
-const assert = require('assert').strict;
+const { time } = require("@openzeppelin/test-helpers");
+const assert = require("assert").strict;
 
 // Data store with historic MRI values
 const pc = new PayoutCalculator();
 
 // Token mocks
-const CollateralToken = artifacts.require('CollateralToken'); // IMBTC
-const PaymentToken = artifacts.require('PaymentToken'); // USDC
+const CollateralToken = artifacts.require("CollateralToken"); // wBTC
+const PaymentToken = artifacts.require("PaymentToken"); // USDC
 
 // Honey Lemon contracts
-const MinterBridge = artifacts.require('MinterBridge');
-const MarketContractProxy = artifacts.require('MarketContractProxy');
+const MinterBridge = artifacts.require("MinterBridge");
+const MarketContractProxy = artifacts.require("MarketContractProxy");
 
 async function runExport() {
-  console.log('🔥🔥🔥STARTING LIFECYCLE SCRIPT🔥🔥🔥');
+  console.log("🔥🔥🔥STARTING LIFECYCLE SCRIPT🔥🔥🔥");
   let balanceTracker = {};
 
   // params to init 0x setup
@@ -58,7 +58,7 @@ async function runExport() {
    * Life cycle loop test over a number of markets *
    *************************************************/
 
-  console.log('1. Iterative lifecycle test');
+  console.log("1. Iterative lifecycle test");
   // Create, mint and settle 60 days worth of tokens. Note that this call assumes we start again from zero deployed con
   // of the previous contract
   for (let i = 0; i < 60; i++) {
@@ -68,10 +68,10 @@ async function runExport() {
     expirationTime = currentContractTime + contractDuration;
 
     const scaledMRI = new BigNumber(pc.getMRIDataForDay(i)).multipliedBy(
-      new BigNumber('100000000')
+      new BigNumber("100000000")
     );
     const lookbackScaledMRI = new BigNumber(pc.getMRILookBackDataForDay(i)).multipliedBy(
-      new BigNumber('100000000')
+      new BigNumber("100000000")
     );
     const tokenName = pc.getTokenNameFor(i);
 
@@ -81,28 +81,28 @@ async function runExport() {
       scaledMRI,
       [
         web3.utils.utf8ToHex(tokenName),
-        web3.utils.utf8ToHex(tokenName + '-Long'),
-        web3.utils.utf8ToHex(tokenName + '-short')
+        web3.utils.utf8ToHex(tokenName + "-Long"),
+        web3.utils.utf8ToHex(tokenName + "-short")
       ],
       expirationTime.toString()
     );
 
     const latestMarketProtocolContract = await marketContractProxy.getLatestMarketContract();
     console.log(
-      '\t-> ',
-      'tokenName',
+      "\t-> ",
+      "tokenName",
       tokenName,
-      'scaledMRI',
+      "scaledMRI",
       scaledMRI,
-      'lookbackScaledMRI',
+      "lookbackScaledMRI",
       lookbackScaledMRI
     );
 
     console.log(
       i,
-      '-> MarketContract deployed @',
+      "-> MarketContract deployed @",
       latestMarketProtocolContract,
-      'Contract name:',
+      "Contract name:",
       tokenName
     );
 
