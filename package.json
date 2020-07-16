@@ -4,6 +4,9 @@
   "description": "Decentralized Synthetic cloud mining contracts built on Ethereum",
   "private": true,
   "dependencies": {
+    "prettier": "1.19.1",
+    "prettier-plugin-solidity": "1.0.0-alpha.49",
+    "pretty-quick": "^2.0.1"
   },
   "devDependencies": {
     "chalk": "^2.0.1",
@@ -17,10 +20,23 @@
     "build:subgraph": "yarn wsrun -p @honeylemon/graph -c build",
     "build:webapp": "yarn wsrun -p @honeylemon/webapp -c build",
     "start:webapp": "yarn wsrun -p @honeylemon/webapp -c start",
-    "clean": "rm -rf ./node_modules && rm -rf ./*/node_modules"
+    "clean": "rm -rf ./node_modules && rm -rf ./*/node_modules",
+    "lint": "npm run prettier -- --write",
+    "prettier": "prettier './**/*.js' './**/*.sol' './**/*.md'"
   },
   "workspaces": {
-    "packages": ["packages/*"],
-    "nohoist": ["**/truffle", "**/typechain", "**/openzeppelin-solidity"]
+    "packages": [
+      "packages/*"
+    ],
+    "nohoist": [
+      "**/truffle",
+      "**/typechain",
+      "**/openzeppelin-solidity"
+    ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "pretty-quick --staged"
+    }
   }
 }

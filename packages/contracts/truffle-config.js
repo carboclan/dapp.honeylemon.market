@@ -1,32 +1,32 @@
-require('dotenv').config();
-const HDWalletProvider = require('@truffle/hdwallet-provider');
-const infuraApikey = '9542ce9f96be4ae08225dcde36ff1638';
-let mnemonic = ''; // require('./mnemonic');
+require("dotenv").config();
+const HDWalletProvider = require("@truffle/hdwallet-provider");
+const infuraApikey = "9542ce9f96be4ae08225dcde36ff1638";
+let mnemonic = ""; // require('./mnemonic');
 
 module.exports = {
   contracts_directory: "./contracts",
   networks: {
     development: {
-      host: process.env.TRUFFLE_DEVELOP_HOST || 'localhost',
+      host: process.env.TRUFFLE_DEVELOP_HOST || "localhost",
       port: process.env.TRUFFLE_DEVELOP_PORT || 8545,
-      network_id: '*' // Match any network id
+      network_id: "*" // Match any network id
     },
-    'skip-migrations': {
-      host: process.env.TRUFFLE_DEVELOP_HOST || 'localhost',
+    "skip-migrations": {
+      host: process.env.TRUFFLE_DEVELOP_HOST || "localhost",
       port: process.env.TRUFFLE_DEVELOP_PORT || 8545,
-      network_id: '*' // Match any network id
+      network_id: "*" // Match any network id
     },
     coverage: {
-      host: 'localhost',
-      network_id: '*', // eslint-disable-line camelcase
+      host: "localhost",
+      network_id: "*", // eslint-disable-line camelcase
       port: 8555,
       gas: 0xfffffffffff,
       gasPrice: 0x01
     },
     ganache: {
-      host: 'localhost',
+      host: "localhost",
       port: 9545,
-      network_id: '*' // Match any network id
+      network_id: "*" // Match any network id
     },
     kovan: {
       provider: function() {
@@ -53,7 +53,7 @@ module.exports = {
   },
   compilers: {
     solc: {
-      version: '0.5.2',
+      version: "0.5.2",
       settings: {
         optimizer: {
           enabled: true,
@@ -62,7 +62,7 @@ module.exports = {
       }
     }
   },
-  plugins: ['@chainsafe/truffle-plugin-abigen', 'truffle-plugin-verify'],
+  plugins: ["@chainsafe/truffle-plugin-abigen", "truffle-plugin-verify"],
   mocha: {
     enableTimeouts: false,
     before_timeout: 120000,

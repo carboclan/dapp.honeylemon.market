@@ -1,25 +1,25 @@
-const MinterBridge = artifacts.require('MinterBridge');
-const MarketContractProxy = artifacts.require('MarketContractProxy');
-const MarketCollateralPool = artifacts.require('MarketCollateralPool');
-const MarketContractRegistry = artifacts.require('MarketContractRegistry');
-const CollateralToken = artifacts.require('CollateralToken');
-const MarketContractFactoryMPX = artifacts.require('MarketContractFactoryMPX');
+const MinterBridge = artifacts.require("MinterBridge");
+const MarketContractProxy = artifacts.require("MarketContractProxy");
+const MarketCollateralPool = artifacts.require("MarketCollateralPool");
+const MarketContractRegistry = artifacts.require("MarketContractRegistry");
+const CollateralToken = artifacts.require("CollateralToken");
+const MarketContractFactoryMPX = artifacts.require("MarketContractFactoryMPX");
 
 module.exports = async function(deployer, network, accounts) {
-  if (network == 'skip-migrations') return;
+  if (network == "skip-migrations") return;
 
   //TODO: update migrations to pull the address of this token from the respective network.
   // Deploy imBTC token
 
   let collateralTokenAddress = process.env.COLLATERAL_TOKEN_ADDRESS;
-  if (network != 'mainnet' && network != 'mainnet-fork') {
-    await deployer.deploy(CollateralToken, 'Mock imBTC', 'imBTC', 1000000000000000, 8);
+  if (network != "mainnet" && network != "mainnet-fork") {
+    await deployer.deploy(CollateralToken, "Mock imBTC", "imBTC", 1000000000000000, 8);
     // Give some collateral token to miner
     const collateralToken = await CollateralToken.deployed();
     collateralToken.transfer(accounts[1], 1000000000000000);
     collateralTokenAddress = collateralToken.address;
 
-    console.log('🕺 Deployed Mock Collateral token');
+    console.log("🕺 Deployed Mock Collateral token");
   }
 
   let registry = await MarketContractRegistry.deployed();
@@ -35,7 +35,7 @@ module.exports = async function(deployer, network, accounts) {
     collateralTokenAddress
   );
 
-  console.log('👉 Deployed Market Contract Proxy');
+  console.log("👉 Deployed Market Contract Proxy");
 
   await marketContractProxy.transferOwnership(
     process.env.HONEYLEMON_MULTISIG || accounts[8]
@@ -67,5 +67,5 @@ module.exports = async function(deployer, network, accounts) {
     process.env.HONEYLEMON_MULTISIG || accounts[8]
   );
 
-  console.log('🙇‍♂️ Transferred permissions to proxy');
+  console.log("🙇‍♂️ Transferred permissions to proxy");
 };

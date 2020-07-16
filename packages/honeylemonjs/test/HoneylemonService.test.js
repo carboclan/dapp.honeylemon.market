@@ -1,29 +1,29 @@
 // Helpers
-const { BigNumber } = require('@0x/utils');
-const { Web3Wrapper } = require('@0x/web3-wrapper');
-const { orderHashUtils } = require('@0x/order-utils');
-const sinon = require('sinon');
-const contractStub = require('./stubs/contract');
-const positionStub = require('./stubs/position');
-const { time } = require('@openzeppelin/test-helpers');
+const { BigNumber } = require("@0x/utils");
+const { Web3Wrapper } = require("@0x/web3-wrapper");
+const { orderHashUtils } = require("@0x/order-utils");
+const sinon = require("sinon");
+const contractStub = require("./stubs/contract");
+const positionStub = require("./stubs/position");
+const { time } = require("@openzeppelin/test-helpers");
 
-const MinterBridge = artifacts.require('MinterBridge');
-const MarketContractProxy = artifacts.require('MarketContractProxy');
-const CollateralToken = artifacts.require('CollateralToken'); // IMBTC
-const PaymentToken = artifacts.require('PaymentToken'); // USDC
-const MarketContractMPX = artifacts.require('MarketContractMPX');
-const PositionToken = artifacts.require('PositionToken'); // Long & Short tokens
-const MarketCollateralPool = artifacts.require('MarketCollateralPool');
+const MinterBridge = artifacts.require("MinterBridge");
+const MarketContractProxy = artifacts.require("MarketContractProxy");
+const CollateralToken = artifacts.require("CollateralToken"); // IMBTC
+const PaymentToken = artifacts.require("PaymentToken"); // USDC
+const MarketContractMPX = artifacts.require("MarketContractMPX");
+const PositionToken = artifacts.require("PositionToken"); // Long & Short tokens
+const MarketCollateralPool = artifacts.require("MarketCollateralPool");
 
 const {
   HoneylemonService,
   POSITIONS_QUERY,
   CONTRACTS_QUERY,
   PAYMENT_TOKEN_DECIMALS
-} = require('../lib/src/HoneylemonService');
-const { revertToSnapShot, takeSnapshot } = require('./helpers/snapshot');
-const { resetSubgraph } = require('./helpers/subgraph');
-const delay = require('./helpers/delay');
+} = require("../lib/src/HoneylemonService");
+const { revertToSnapShot, takeSnapshot } = require("./helpers/snapshot");
+const { resetSubgraph } = require("./helpers/subgraph");
+const delay = require("./helpers/delay");
 
 const web3Wrapper = new Web3Wrapper(web3.currentProvider);
 
@@ -136,7 +136,7 @@ const resetState = async () => {
   initialSnapshotId = _initialSnapshotId;
   await resetSubgraph();
   await delay(5000); // wait for subgraph to recover
-  console.log('Reset state');
+  console.log("Reset state");
 };
 
 const stubOrders = async () => {
@@ -169,7 +169,7 @@ const stubOrders = async () => {
       remainingFillableTakerAssetAmount: o.takerAssetAmount
     }
   }));
-  sinon.stub(honeylemonService.orderbookService.apiClient, 'getOrderbookAsync').returns({
+  sinon.stub(honeylemonService.orderbookService.apiClient, "getOrderbookAsync").returns({
     bids: {
       total: 0,
       page: 1,
@@ -183,7 +183,7 @@ const stubOrders = async () => {
       records
     }
   });
-  sinon.stub(honeylemonService.orderbookService.apiClient, 'getOrdersAsync').returns({
+  sinon.stub(honeylemonService.orderbookService.apiClient, "getOrdersAsync").returns({
     total: 3,
     page: 1,
     perPage: 20,
@@ -210,8 +210,8 @@ const stubContracts = (subgraphStub, contracts, last = CONTRACT_DURATION) => {
   return subgraphStub;
 };
 
-contract('HoneylemonService', () => {
-  it('should give correct quote for size', async () => {
+contract("HoneylemonService", () => {
+  it("should give correct quote for size", async () => {
     const {
       price,
       resultOrders,
@@ -236,7 +236,7 @@ contract('HoneylemonService', () => {
     expect(remainingMakerFillAmount).to.eql(new BigNumber(0));
   });
 
-  it('should give correct quote for budget', async () => {
+  it("should give correct quote for budget", async () => {
     const {
       price,
       resultOrders,
@@ -248,7 +248,7 @@ contract('HoneylemonService', () => {
       totalTakerFillAmount
     } = await honeylemonService.getQuoteForBudget(new BigNumber(10000));
 
-    expect(price.sd(5)).to.eql(new BigNumber('3.7001'));
+    expect(price.sd(5)).to.eql(new BigNumber("3.7001"));
     expect(makerAssetFillAmounts).to.eql([
       new BigNumber(1000),
       new BigNumber(1200),
@@ -266,7 +266,7 @@ contract('HoneylemonService', () => {
     expect(remainingTakerFillAmount).to.eql(new BigNumber(0));
   });
 
-  it('should create and sign order', async () => {
+  it("should create and sign order", async () => {
     const sizeTh = new BigNumber(2),
       pricePerTh = new BigNumber(100);
     const order = honeylemonService.createOrder(makerAddress, sizeTh, pricePerTh);
@@ -279,7 +279,7 @@ contract('HoneylemonService', () => {
     expect(signedOrder.signature).to.not.be.empty;
   });
 
-  it('should report correct collateral token amounts', async () => {
+  it("should report correct collateral token amounts", async () => {
     // First approve
     await honeylemonService.approveCollateralToken(makerAddress);
 
@@ -288,12 +288,12 @@ contract('HoneylemonService', () => {
     );
     expect(allowance).to.eql(
       new BigNumber(
-        '115792089237316195423570985008687907853269984665640564039457584007913129639935'
+        "115792089237316195423570985008687907853269984665640564039457584007913129639935"
       )
     );
   });
 
-  it('should report correct payment token amounts', async () => {
+  it("should report correct payment token amounts", async () => {
     // First approve
     await honeylemonService.approvePaymentToken(takerAddress);
 
@@ -302,26 +302,26 @@ contract('HoneylemonService', () => {
     );
     expect(allowance).to.eql(
       new BigNumber(
-        '115792089237316195423570985008687907853269984665640564039457584007913129639935'
+        "115792089237316195423570985008687907853269984665640564039457584007913129639935"
       )
     );
   });
 
-  it.skip('should submit order', async () => {
+  it.skip("should submit order", async () => {
     const sizeTh = new BigNumber(2),
       pricePerTh = new BigNumber(100);
     const order = honeylemonService.createOrder(makerAddress, sizeTh, pricePerTh);
     const signedOrder = await honeylemonService.signOrder(order);
-    console.log('signedOrder', JSON.stringify(signedOrder, 4));
+    console.log("signedOrder", JSON.stringify(signedOrder, 4));
     const result = await honeylemonService.submitOrder(signedOrder);
   });
 
-  it('estimates 0x fees', async () => {
+  it("estimates 0x fees", async () => {
     const protocolFee = await honeylemonService.get0xFeeForOrderBatch(10e9, 2);
     expect(protocolFee).to.eql(new BigNumber(2 * 150000 * 10e9));
   });
 
-  it('gets fill orders gas estimate', async () => {
+  it("gets fill orders gas estimate", async () => {
     const {
       resultOrders,
       takerAssetFillAmounts
@@ -338,7 +338,7 @@ contract('HoneylemonService', () => {
     expect(gas).to.be.within(500000, 700000);
   });
 
-  it('fills orders', async () => {
+  it("fills orders", async () => {
     const fillSize = new BigNumber(1);
     const {
       resultOrders,
@@ -379,7 +379,7 @@ contract('HoneylemonService', () => {
     expect(shortBalance.toString()).to.eql(fillSize.toString());
   });
 
-  it('cancels order', async () => {
+  it("cancels order", async () => {
     const { asks } = await honeylemonService.getOrderbook();
     const orders = asks.records.map(r => r.order);
     const txHash = await honeylemonService
@@ -392,7 +392,7 @@ contract('HoneylemonService', () => {
     expect(txHash).to.not.be.null;
   });
 
-  it('Calculate required Collateral', async () => {
+  it("Calculate required Collateral", async () => {
     const amount = new BigNumber(1000);
     // Expected collateral requirement is defined by the CFD cap price (found by the currentMRI),
     // the contract duration and the collateral requirement %. This defines the market protocol's
@@ -420,7 +420,7 @@ contract('HoneylemonService', () => {
     assert.equal(absoluteDriftError.lt(new BigNumber(0.001)), true);
   });
 
-  it('Retrieve open positions', async () => {
+  it("Retrieve open positions", async () => {
     // reset state in case it is polluted
     // await resetState();
 
@@ -505,47 +505,73 @@ contract('HoneylemonService', () => {
     }
   });
 
-  it.only('merges related positions', async () => {
+  it.only("merges related positions", async () => {
     // Stub subgraph
-    subgraphStub = sinon.stub(honeylemonService.subgraphClient, 'request');
+    subgraphStub = sinon.stub(honeylemonService.subgraphClient, "request");
 
     // stub positions;
     const tx1 = {
-      id: 'tx1',
+      id: "tx1",
       fills: [
-        { makerAssetFilledAmount: '10', takerAssetFilledAmount: '10000' },
-        { makerAssetFilledAmount: '7', takerAssetFilledAmount: '8000' }
+        { makerAssetFilledAmount: "10", takerAssetFilledAmount: "10000" },
+        { makerAssetFilledAmount: "7", takerAssetFilledAmount: "8000" }
       ]
     };
     const tx2 = {
-      id: 'tx2',
+      id: "tx2",
       fills: [
-        { makerAssetFilledAmount: '5', takerAssetFilledAmount: '6000' },
-        { makerAssetFilledAmount: '6', takerAssetFilledAmount: '6000' }
+        { makerAssetFilledAmount: "5", takerAssetFilledAmount: "6000" },
+        { makerAssetFilledAmount: "6", takerAssetFilledAmount: "6000" }
       ]
     };
     const tx3 = {
-      id: 'tx3',
-      fills: [
-        { makerAssetFilledAmount: '9', takerAssetFilledAmount: '9500' }
-      ]
+      id: "tx3",
+      fills: [{ makerAssetFilledAmount: "9", takerAssetFilledAmount: "9500" }]
     };
     const tx4 = {
-      id: 'tx4',
-      fills: [
-        { makerAssetFilledAmount: '12', takerAssetFilledAmount: '9000' }
-      ]
+      id: "tx4",
+      fills: [{ makerAssetFilledAmount: "12", takerAssetFilledAmount: "9000" }]
     };
-    const dsProxy1 = '0xaaaa';
-    const dsProxy2 = '0xbbbb';
-    const dsProxy3 = '0xcccc';
+    const dsProxy1 = "0xaaaa";
+    const dsProxy2 = "0xbbbb";
+    const dsProxy3 = "0xcccc";
     const positions = [
-      positionStub({ marketId: '0', qtyToMint: '10', transaction: tx1, shortTokenDSProxy: dsProxy1 }),
-      positionStub({ marketId: '0', qtyToMint: '7', transaction: tx1, shortTokenDSProxy: dsProxy1 }),
-      positionStub({ marketId: '1', qtyToMint: '5', transaction: tx2, shortTokenDSProxy: dsProxy2 }),
-      positionStub({ marketId: '1', qtyToMint: '6', transaction: tx2, shortTokenDSProxy: dsProxy2 }),
-      positionStub({ marketId: '1', qtyToMint: '9', transaction: tx3, shortTokenDSProxy: dsProxy2 }),
-      positionStub({ marketId: '1', qtyToMint: '12', transaction: tx4, shortTokenDSProxy: dsProxy3 })
+      positionStub({
+        marketId: "0",
+        qtyToMint: "10",
+        transaction: tx1,
+        shortTokenDSProxy: dsProxy1
+      }),
+      positionStub({
+        marketId: "0",
+        qtyToMint: "7",
+        transaction: tx1,
+        shortTokenDSProxy: dsProxy1
+      }),
+      positionStub({
+        marketId: "1",
+        qtyToMint: "5",
+        transaction: tx2,
+        shortTokenDSProxy: dsProxy2
+      }),
+      positionStub({
+        marketId: "1",
+        qtyToMint: "6",
+        transaction: tx2,
+        shortTokenDSProxy: dsProxy2
+      }),
+      positionStub({
+        marketId: "1",
+        qtyToMint: "9",
+        transaction: tx3,
+        shortTokenDSProxy: dsProxy2
+      }),
+      positionStub({
+        marketId: "1",
+        qtyToMint: "12",
+        transaction: tx4,
+        shortTokenDSProxy: dsProxy3
+      })
     ];
     stubPositions(subgraphStub, positions, [], makerAddress);
     stubContracts(subgraphStub, []);
@@ -556,19 +582,31 @@ contract('HoneylemonService', () => {
 
     expect(shortPositions.length).to.eq(3);
     const [p1, p2, p3] = shortPositions;
-    expect(p1.qtyToMint.toString()).to.eq('17');
-    expect(p2.qtyToMint.toString()).to.eq('20');
-    expect(p3.qtyToMint.toString()).to.eq('12');
+    expect(p1.qtyToMint.toString()).to.eq("17");
+    expect(p2.qtyToMint.toString()).to.eq("20");
+    expect(p3.qtyToMint.toString()).to.eq("12");
     // price
-    expect(p1.price).to.eql(BigNumber(10000 + 8000).dividedBy(10 + 7).shiftedBy(-6));
-    expect(p2.price).to.eql(BigNumber(6000 + 6000 + 9500).dividedBy(5 + 6 + 9).shiftedBy(-6));
-    expect(p3.price).to.eql(BigNumber(9000).dividedBy(12).shiftedBy(-6));
+    expect(p1.price).to.eql(
+      BigNumber(10000 + 8000)
+        .dividedBy(10 + 7)
+        .shiftedBy(-6)
+    );
+    expect(p2.price).to.eql(
+      BigNumber(6000 + 6000 + 9500)
+        .dividedBy(5 + 6 + 9)
+        .shiftedBy(-6)
+    );
+    expect(p3.price).to.eql(
+      BigNumber(9000)
+        .dividedBy(12)
+        .shiftedBy(-6)
+    );
 
     // clean up stubs
     subgraphStub.restore();
   });
 
-  it('retrieve open orders', async () => {
+  it("retrieve open orders", async () => {
     const ordersResponse = await honeylemonService.getOpenOrders(makerAddress);
     const record = ordersResponse.records[0];
     expect(record.metaData.price).to.eql(new BigNumber(3.6));
@@ -576,7 +614,7 @@ contract('HoneylemonService', () => {
   });
 
   // This test only works with '.only' - no idea exactly why
-  it.skip('Batch Redemption', async () => {
+  it.skip("Batch Redemption", async () => {
     // reset state in case it is polluted
     // await resetState();
 
@@ -661,7 +699,7 @@ contract('HoneylemonService', () => {
     }
   });
 
-  it('retrieve open orders', async () => {
+  it("retrieve open orders", async () => {
     const ordersResponse = await honeylemonService.getOpenOrders(makerAddress);
     const record = ordersResponse.records[0];
     expect(record.metaData.price).to.eql(new BigNumber(3.6));
@@ -725,8 +763,8 @@ async function createNewMarketProtocolContract(lookbackIndex, mriInput, marketNa
     currentMRIScaled.toString(), // current index value
     [
       web3.utils.utf8ToHex(marketName),
-      web3.utils.utf8ToHex(marketName + '-Long'),
-      web3.utils.utf8ToHex(marketName + '-Short')
+      web3.utils.utf8ToHex(marketName + "-Long"),
+      web3.utils.utf8ToHex(marketName + "-Short")
     ], // new market name
     expirationTime.toString(), // new market expiration
     {

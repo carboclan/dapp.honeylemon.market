@@ -8,8 +8,16 @@
       "files": "*.sol",
       "options": {
         "tabWidth": 4,
+        "useTabs": false,
+        "singleQuote": false,
+        "explicitTypes": "always"
+      }
+    },
+    {
+      "files": "*.md",
+      "options": {
+        "semi": false
       }
     }
   ]
 }
-

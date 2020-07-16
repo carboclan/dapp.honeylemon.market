@@ -16,9 +16,9 @@
 
 pragma solidity 0.5.2;
 
-import 'truffle/Assert.sol';
-import '../../../contracts/marketprotocol/tokens/MarketToken.sol';
-import '../../../contracts/marketprotocol/tokens/UpgradeableTokenMock.sol';
+import "truffle/Assert.sol";
+import "../../../contracts/marketprotocol/tokens/MarketToken.sol";
+import "../../../contracts/marketprotocol/tokens/UpgradeableTokenMock.sol";
 
 
 /// @title TestMarketToken
@@ -29,7 +29,7 @@ contract TestMarketToken {
         Assert.equal(
             marketToken.balanceOf(address(this)),
             marketToken.INITIAL_SUPPLY(),
-            'init supply allocated to creator'
+            "init supply allocated to creator"
         );
     }
 
@@ -39,13 +39,13 @@ contract TestMarketToken {
         Assert.equal(
             marketToken.balanceOf(address(this)),
             marketToken.INITIAL_SUPPLY(),
-            'Unexpected initial supply allocation'
+            "Unexpected initial supply allocation"
         );
 
         Assert.equal(
             marketToken.totalSupply(),
             marketToken.INITIAL_SUPPLY(),
-            'Unexpected initial supply allocation'
+            "Unexpected initial supply allocation"
         );
 
         marketToken.burn(marketToken.INITIAL_SUPPLY() / 2);
@@ -53,7 +53,7 @@ contract TestMarketToken {
         Assert.equal(
             marketToken.totalSupply(),
             marketToken.INITIAL_SUPPLY() / 2,
-            'Unexpected supply after burn'
+            "Unexpected supply after burn"
         );
     }
 }

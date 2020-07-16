@@ -1,5 +1,6 @@
 pragma solidity 0.5.2;
 
+
 /**
  * @dev Tether's approve method does not conform with the ERC20 interface
  */
@@ -46,7 +47,7 @@ interface TetherERC20 {
      *
      * Emits an {Approval} event.
      */
-    function approve(address _spender, uint _value) external;
+    function approve(address _spender, uint256 _value) external;
 
     /**
      * @dev Moves `amount` tokens from `sender` to `recipient` using the
@@ -57,7 +58,11 @@ interface TetherERC20 {
      *
      * Emits a {Transfer} event.
      */
-    function transferFrom(address sender, address recipient, uint256 amount) external returns (bool);
+    function transferFrom(
+        address sender,
+        address recipient,
+        uint256 amount
+    ) external returns (bool);
 
     /**
      * @dev Emitted when `value` tokens are moved from one account (`from`) to

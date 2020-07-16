@@ -1,7 +1,7 @@
 # Honeylemon subgraph
 
 Subgraph endpoints:
-Queries (HTTP):     https://api.thegraph.com/subgraphs/name/dekz/zeroex
+Queries (HTTP): https://api.thegraph.com/subgraphs/name/dekz/zeroex
 Subscriptions (WS): wss://api.thegraph.com/subgraphs/name/dekz/zeroex
 
 Example:
@@ -28,8 +28,6 @@ Example:
       makerAssetData
       takerAssetData
     }
-
   }
 }
-
 ```
