@@ -123,7 +123,8 @@ function AppWrapper(props: { children: ReactNode }) {
     PAYMENT_TOKEN_NAME,
     approveToken,
     showTokenInfoModal,
-    setShowTokenInfoModal
+    setShowTokenInfoModal,
+    isInMaintenanceMode
   } = useHoneylemon();
 
   const handleLogout = () => {
@@ -255,11 +256,11 @@ function AppWrapper(props: { children: ReactNode }) {
             <ListItemIcon><Whatshot /></ListItemIcon>
             <ListItemText primary="Live Market Stats" />
           </ListItem>
-          <ListItem button onClick={() => handleNavigate('/buy')} selected={location.pathname === '/buy'}>
+          <ListItem button onClick={() => handleNavigate('/buy')} selected={location.pathname === '/buy'} disabled={isInMaintenanceMode}>
             <ListItemIcon><MonetizationOn /></ListItemIcon>
             <ListItemText primary="Buy Contract" />
           </ListItem>
-          <ListItem button onClick={() => handleNavigate('/offer')} selected={location.pathname === '/offer'}>
+          <ListItem button onClick={() => handleNavigate('/offer')} selected={location.pathname === '/offer'} disabled={isInMaintenanceMode}>
             <ListItemIcon><Assessment /></ListItemIcon>
             <ListItemText primary="Offer Contract" />
           </ListItem>
@@ -300,7 +301,7 @@ function AppWrapper(props: { children: ReactNode }) {
           </ListItem>
           <ListItem>
             <ListItemIcon>
-              <img src='imBtc.png' style={{ width: '40px', height: '40px' }}  alt='imbtc logo' />
+              <img src='wbtc.png' style={{ width: '40px', height: '40px' }}  alt='wbtc logo' />
             </ListItemIcon>
             <Switch
               color="primary"

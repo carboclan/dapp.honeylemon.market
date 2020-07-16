@@ -324,8 +324,13 @@ class HoneylemonService {
     return !!allowance.isGreaterThanOrEqualTo(amount);
   }
 
-  async approveCollateralToken(makerAddress: string, amount: number, gasPrice?: number) {
-    const approvalAmount = amount === 0 ? new BigNumber(0) : new BigNumber(2).pow(256).minus(1);
+  async approveCollateralToken(makerAddress: string, amount?: number, gasPrice?: number) {
+    const approvalAmount = 
+      amount === 0 ? 
+        new BigNumber(0) : 
+        amount === undefined ? 
+          new BigNumber(2).pow(256).minus(1) : 
+          new BigNumber(amount);
     const price = gasPrice ? Number(`${gasPrice}e9`) : undefined;
     const approveTx = this.collateralToken.approve(this.minterBridgeAddress, approvalAmount)
     return await approveTx.awaitTransactionSuccessAsync({ from: makerAddress, gasPrice: price });
@@ -336,15 +341,20 @@ class HoneylemonService {
 
     const allowance = new BigNumber(
       await this.paymentToken
-        .allowance(this.minterBridgeAddress, ownerAddress)
+        .allowance(ownerAddress, this.contractWrappers.contractAddresses.erc20Proxy)
         .callAsync()
     );
 
     return !!allowance.isGreaterThanOrEqualTo(amount);
   }
 
-  async approvePaymentToken(takerAddress: number, amount: number, gasPrice?: number) {
-    const approvalAmount = amount === 0 ? new BigNumber(0) : new BigNumber(2).pow(256).minus(1);
+  async approvePaymentToken(takerAddress: string, amount?: number, gasPrice?: number) {
+    const approvalAmount = 
+    amount === 0 ? 
+      new BigNumber(0) : 
+      amount === undefined ? 
+        new BigNumber(2).pow(256).minus(1) : 
+        new BigNumber(amount);
     const price = gasPrice ? Number(`${gasPrice}e9`) : undefined;
 
     if (this.paymentTokenAddress.toLowerCase() == USDT_ADDRESS.toLowerCase()) {
@@ -433,24 +443,27 @@ class HoneylemonService {
     positionTokenAddress: string,
     marketContractAddress: string,
     amount: string,
-    positionType: 'Long' | 'Short') {
+    positionType: 'Long' | 'Short',
+    gasPrice?: number
+  ) {
     const positionToken = new web3.eth.Contract(PositionToken.abi, positionTokenAddress);
     positionToken.setProvider(this.provider);
     const web3Wrapper: Web3Wrapper = new Web3Wrapper(this.provider);
     const allowance = new BigNumber(await positionToken.methods.allowance(recipientAddress, marketContractAddress).call())
     const isApprovalRequired = !allowance.isGreaterThanOrEqualTo(amount);
+    const price = gasPrice ? Number(`${gasPrice}e9`) : undefined;
 
     if (isApprovalRequired) {
       const approvalResult = await positionToken.methods.approve(marketContractAddress, amount)
         .send({
-          from: recipientAddress
+          from: recipientAddress,
+          gasPrice: price,
         });
       await web3Wrapper.awaitTransactionSuccessAsync(approvalResult.transactionHash);
     }
 
     const marketCollateralPoolAddress = await this.marketContractProxy.methods
       .getCollateralPool(marketContractAddress).call();
-    console.log(marketCollateralPoolAddress);
     const marketCollateralPool = new web3.eth.Contract(MarketCollateralPool.abi, marketCollateralPoolAddress);
     marketCollateralPool.setProvider(this.provider);
 
@@ -459,12 +472,13 @@ class HoneylemonService {
       marketCollateralPool.methods.settleAndClose(marketContractAddress, 0, amount)
 
     const gas = await redeemTx.estimateGas({ from: recipientAddress });
-    const redeemResult = await redeemTx.send({ from: recipientAddress, gas });
+    const redeemResult = await redeemTx.send({ from: recipientAddress, gas, gasPrice: price });
 
-    await web3Wrapper.awaitTransactionSuccessAsync(redeemResult.transactionHash)
+    return await web3Wrapper.awaitTransactionSuccessAsync(redeemResult.transactionHash)
   }
 
-  async batchRedeem(recipientAddress) {
+  async batchRedeem(recipientAddress, gasPrice?: number) {
+    const price = gasPrice ? Number(`${gasPrice}e9`) : undefined;
     const dsProxyAddress = await this.marketContractProxy.methods
       .getUserAddressOrDSProxy(recipientAddress)
       .call();
@@ -513,18 +527,22 @@ class HoneylemonService {
           }
         }
       }
-      // encode the function call to send to DSProxy
-      const batchRedemptionLongTx = this.marketContractProxy.methods
-        .batchRedeem(longParams.tokenAddresses, longParams.numTokens)
-        .encodeABI();
 
-      // Execute function call on DSProxy
-      const method = traderDSProxy.methods.execute(
-        this.marketContractProxyAddress,
-        batchRedemptionLongTx
-      );
-      const gas = await method.estimateGas({ from: recipientAddress, gas: 9000000 });
-      redemptionTxLong = await method.send({ from: recipientAddress, gas });
+      if (longParams.tokenAddresses.length > 0 && longParams.numTokens.length > 0) {
+        // encode the function call to send to DSProxy
+        const batchRedemptionLongTx = this.marketContractProxy.methods
+          .batchRedeem(longParams.tokenAddresses, longParams.numTokens)
+          .encodeABI();
+
+        // Execute function call on DSProxy
+        const method = traderDSProxy.methods.execute(
+          this.marketContractProxyAddress,
+          batchRedemptionLongTx
+        );
+
+        const gas = await method.estimateGas({ from: recipientAddress, gas: 9000000 });
+        redemptionTxLong = await method.send({ from: recipientAddress, gas, gasPrice: price });
+      }
     }
 
     if (shortPositions.length > 0) {
@@ -550,18 +568,22 @@ class HoneylemonService {
         }
       }
 
-      const batchRedemptionShortTx = this.marketContractProxy.methods
-        .batchRedeem(shortParams.tokenAddresses, shortParams.numTokens)
-        .encodeABI();
+      if (shortParams.tokenAddresses.length > 0 && shortParams.numTokens.length > 0) {
+        const batchRedemptionShortTx = this.marketContractProxy.methods
+          .batchRedeem(shortParams.tokenAddresses, shortParams.numTokens)
+          .encodeABI();
 
-      const method = traderDSProxy.methods.execute(
-        this.marketContractProxyAddress,
-        batchRedemptionShortTx
-      );
-      const gas = await method.estimateGas({ from: recipientAddress, gas: 9000000 });
-      redemptionTxShort = method.send({ from: recipientAddress, gas });
+        // Execute function call on DSProxy
+        const method = traderDSProxy.methods.execute(
+          this.marketContractProxyAddress,
+          batchRedemptionShortTx
+        );
+        const gas = await method.estimateGas({ from: recipientAddress, gas: 9000000 });
+        redemptionTxShort = method.send({ from: recipientAddress, gas });
+      }
     }
-    return { redemptionTxLong, redemptionTxShort };
+
+    return Promise.all([redemptionTxLong, redemptionTxShort]);
   }
 
   async getPositions(address) {

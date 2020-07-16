@@ -153,6 +153,10 @@ const BuyContractPage: React.SFC = () => {
 
   useEffect(() => {
     const getQuoteForBudget = async () => {
+      if (!honeylemonService) { 
+        console.log('Please connect a wallet to deploy a DSProxy Contract')
+        return; 
+      }
       try {
         const result = await honeylemonService.getQuoteForBudget(budget);
         const newIsLiquid = !!(Number(result?.remainingTakerFillAmount?.toString() || -1) === 0)
@@ -182,6 +186,10 @@ const BuyContractPage: React.SFC = () => {
     }
 
     const getQuoteForSize = async () => {
+      if (!honeylemonService) { 
+        console.log('Please connect a wallet to deploy a DSProxy Contract')
+        return; 
+      }
       try {
         const result = await honeylemonService.getQuoteForSize(new BigNumber(orderQuantity))
         const newIsLiquid = !!(Number(result?.remainingMakerFillAmount?.toString() || -1) === 0)
@@ -279,7 +287,7 @@ const BuyContractPage: React.SFC = () => {
   }
 
   const handleBuyOffer = async () => {
-    if (!address) {
+    if (!address || !honeylemonService) {
       console.log("Wallet is not connected. Unable to start buy");
       return;
     }
@@ -399,7 +407,7 @@ const BuyContractPage: React.SFC = () => {
   const handleStartBuy = () => {
     setSkipDsProxy(false);
     setShowBuyModal(true);
-    activeStep === 2 && handleBuyOffer();
+    // activeStep === 2 && handleBuyOffer();
   }
 
   const handleOrderDetailsClick = () => {
@@ -506,7 +514,7 @@ const BuyContractPage: React.SFC = () => {
                 variant='caption'
                 paragraph
                 color='secondary'
-                onClick={() => (error.includes('enough USDT')) ? setShowTokenInfoModal(true) : null} >
+                onClick={() => (error.includes(`enough ${PAYMENT_TOKEN_NAME}`)) ? setShowTokenInfoModal(true) : null} >
                 {error}
               </Typography>
             )}
@@ -575,7 +583,7 @@ const BuyContractPage: React.SFC = () => {
                       Estimated Revenue
                     </TableCell>
                     <TableCell align='right' className={classes.orderSummaryEstimate}>
-                      {`${(expectedBTCAccrual).toLocaleString(undefined, { maximumFractionDigits: 8 })} imBTC`}
+                      {`${(expectedBTCAccrual).toLocaleString(undefined, { maximumFractionDigits: 8 })} ${COLLATERAL_TOKEN_NAME}`}
                     </TableCell>
                   </TableRow>
                   <TableRow>
@@ -609,9 +617,9 @@ const BuyContractPage: React.SFC = () => {
                       <TableRow>
                         <TableCell colSpan={2} style={{ color: '#a9a9a9' }}>
                           <Typography variant='caption'>
-                            * <b>Estimated Revenue</b> is the amount of imBTC expected to receive when this contract settles, if BTC price &amp; difficulty stays constant over 28 days. <br />
-                            * <b>Revenue Cap</b> is the maximum amount of imBTC you can receive when this contract settles, calculated as 125% of current MRI_BTC times 28. <br />
-                            * <b>Buy Contract vs. Buy BTC</b> is the discount/premium of cost basis for this Mining Revenue Contract compared to buying BTC spot with USDT now, if BTC price &amp; difficulty stays constant over 28 days.<br />
+                            * <b>Estimated Revenue</b> is the amount of {COLLATERAL_TOKEN_NAME} expected to receive when this contract settles, if BTC price &amp; difficulty stays constant over 28 days. <br />
+                            * <b>Revenue Cap</b> is the maximum amount of {COLLATERAL_TOKEN_NAME} you can receive when this contract settles, calculated as 125% of current MRI_BTC times 28. <br />
+                            * <b>Buy Contract vs. Buy BTC</b> is the discount/premium of cost basis for this Mining Revenue Contract compared to buying BTC spot with {PAYMENT_TOKEN_NAME} now, if BTC price &amp; difficulty stays constant over 28 days.<br />
                             * Small discrepancy between your Budget and Contract Total is due to available offers in orderbook, and minimum order increment of 1TH.
                           </Typography>
                         </TableCell>
