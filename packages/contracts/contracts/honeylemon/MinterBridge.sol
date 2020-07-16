@@ -97,7 +97,7 @@ contract MinterBridge is ReentrancyGuard, Ownable {
         // has minted long and short tokens and sent them to the the investor and miner.
         require(tokenAddress == MARKET_CONTRACT_PROXY_ADDRESS, "bad proxy address");
 
-        // (imBTC) sent from the miner
+        // (wBTC) sent from the miner
         ERC20 collateralToken = ERC20(marketContractProxy.COLLATERAL_TOKEN_ADDRESS());
 
         uint256 neededCollateral = marketContractProxy.calculateRequiredCollateral(

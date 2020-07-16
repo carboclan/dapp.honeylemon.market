@@ -9,7 +9,7 @@ const { time } = require("@openzeppelin/test-helpers");
 
 const MinterBridge = artifacts.require("MinterBridge");
 const MarketContractProxy = artifacts.require("MarketContractProxy");
-const CollateralToken = artifacts.require("CollateralToken"); // IMBTC
+const CollateralToken = artifacts.require("CollateralToken"); // wBTC
 const PaymentToken = artifacts.require("PaymentToken"); // USDC
 const MarketContractMPX = artifacts.require("MarketContractMPX");
 const PositionToken = artifacts.require("PositionToken"); // Long & Short tokens

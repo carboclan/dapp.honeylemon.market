@@ -9,11 +9,11 @@ module.exports = async function(deployer, network, accounts) {
   if (network == "skip-migrations") return;
 
   //TODO: update migrations to pull the address of this token from the respective network.
-  // Deploy imBTC token
+  // Deploy wBTC token
 
   let collateralTokenAddress = process.env.COLLATERAL_TOKEN_ADDRESS;
   if (network != "mainnet" && network != "mainnet-fork") {
-    await deployer.deploy(CollateralToken, "Mock imBTC", "imBTC", 1000000000000000, 8);
+    await deployer.deploy(CollateralToken, "Mock wBTC", "wBTC", 1000000000000000, 8);
     // Give some collateral token to miner
     const collateralToken = await CollateralToken.deployed();
     collateralToken.transfer(accounts[1], 1000000000000000);

@@ -22,7 +22,7 @@ const assert = require("assert").strict;
 const pc = new PayoutCalculator();
 
 // Token mocks
-const CollateralToken = artifacts.require("CollateralToken"); // IMBTC
+const CollateralToken = artifacts.require("CollateralToken"); // wBTC
 const PaymentToken = artifacts.require("PaymentToken"); // USDC
 
 // Honey Lemon contracts

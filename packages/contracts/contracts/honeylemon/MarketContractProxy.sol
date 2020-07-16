@@ -29,7 +29,7 @@ contract MarketContractProxy is ReentrancyGuard, Ownable {
 
     address public HONEY_LEMON_ORACLE_ADDRESS;
     address public MINTER_BRIDGE_ADDRESS;
-    address public COLLATERAL_TOKEN_ADDRESS; //imBTC
+    address public COLLATERAL_TOKEN_ADDRESS; //wBTC
 
     uint256 public CONTRACT_DURATION_DAYS = 28;
     // uint public CONTRACT_DURATION_DAYS = 2; // for kovan deployment
@@ -70,13 +70,13 @@ contract MarketContractProxy is ReentrancyGuard, Ownable {
      * @param _marketContractFactoryMPX market contract factory address
      * @param _honeyLemonOracle honeylemon oracle address
      * @param _minterBridge 0x minter bridge address
-     * @param _imBTCTokenAddress imBTC token address
+     * @param _wBTCTokenAddress wBTC token address
      */
     constructor(
         address _marketContractFactoryMPX,
         address _honeyLemonOracle,
         address _minterBridge,
-        address _imBTCTokenAddress
+        address _wBTCTokenAddress
     ) public ReentrancyGuard() {
         require(
             _marketContractFactoryMPX != address(0),
@@ -84,12 +84,12 @@ contract MarketContractProxy is ReentrancyGuard, Ownable {
         );
         require(_honeyLemonOracle != address(0), "invalid HoneyLemonOracle address");
         require(_minterBridge != address(0), "invalid MinterBridge address");
-        require(_imBTCTokenAddress != address(0), "invalid IMBTC address");
+        require(_wBTCTokenAddress != address(0), "invalid wBTC address");
 
         marketContractFactoryMPX = MarketContractFactoryMPX(_marketContractFactoryMPX);
         HONEY_LEMON_ORACLE_ADDRESS = _honeyLemonOracle;
         MINTER_BRIDGE_ADDRESS = _minterBridge;
-        COLLATERAL_TOKEN_ADDRESS = _imBTCTokenAddress;
+        COLLATERAL_TOKEN_ADDRESS = _wBTCTokenAddress;
 
         //Deploy a new DSProxyFactory instance to faciliate hot wallet creation
         dSProxyFactory = new DSProxyFactory();
@@ -228,7 +228,7 @@ contract MarketContractProxy is ReentrancyGuard, Ownable {
 
     /**
      * @notice calculate the TH amount that can be filled based on owner’s BTC balance and allowance
-     * @param makerAddress address or BTC(imBTC) owner
+     * @param makerAddress address or BTC(wBTC) owner
      * @return TH amount
      */
     function getFillableAmount(address makerAddress) public view returns (uint256) {
@@ -548,7 +548,7 @@ contract MarketContractProxy is ReentrancyGuard, Ownable {
         ERC20 longToken = ERC20(latestMarketContract.LONG_POSITION_TOKEN());
         // Short token sent to the miner
         ERC20 shortToken = ERC20(latestMarketContract.SHORT_POSITION_TOKEN());
-        // Collateral token (imBTC)
+        // Collateral token (wBTC)
         ERC20 collateralToken = ERC20(COLLATERAL_TOKEN_ADDRESS);
 
         // Move tokens from the MinterBridge to this proxy address
