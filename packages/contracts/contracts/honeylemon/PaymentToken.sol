@@ -16,7 +16,8 @@
 
 pragma solidity 0.5.2;
 
-import 'openzeppelin-solidity/contracts/token/ERC20/ERC20.sol';
+import "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
+
 
 // dummy ERC20 token for testing purposes
 contract PaymentToken is ERC20 {
@@ -36,6 +37,6 @@ contract PaymentToken is ERC20 {
         name = tokenName;
         symbol = tokenSymbol;
         decimals = tokenDecimals;
-        _mint(msg.sender, initialSupply * 10**uint(decimals));
+        _mint(msg.sender, initialSupply * 10**uint256(decimals));
     }
 }

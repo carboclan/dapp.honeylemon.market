@@ -3,9 +3,14 @@
   "version": "3.0.0",
   "description": "Decentralized Synthetic cloud mining contracts built on Ethereum",
   "private": true,
-  "dependencies": {},
   "engines": {
     "node": ">=0.10.3 <0.12"
+  },
+  "dependencies": {
+    "prettier": "1.19.1",
+    "prettier-plugin-solidity": "1.0.0-alpha.49",
+    "pretty-quick": "^2.0.1",
+    "husky": "^4.2.3"
   },
   "devDependencies": {
     "chalk": "^2.0.1",
@@ -20,20 +25,23 @@
     "start:webapp": "yarn wsrun -p @honeylemon/webapp -c start",
     "test:contracts": "yarn wsrun -p @honeylemon/contracts -c test",
     "test:integration": "make local-reset && yarn wsrun -p @honeylemon/contracts -c integration-proxy-redemption && make local-reset && yarn wsrun -p @honeylemon/contracts -c integration-order-redemption && make local-reset && yarn wsrun -p @honeylemon/contracts -c integration-trade-lifecycle",
-    "clean": "rm -rf ./node_modules && rm -rf ./*/node_modules"
+    "clean": "rm -rf ./node_modules && rm -rf ./*/node_modules",
+    "lint": "npm run prettier -- --write",
+    "prettier": "prettier './**/*.js' './**/*.sol' './**/*.md'"
   },
   "workspaces": {
-<<<<<<< HEAD
     "packages": [
       "packages/*"
     ],
     "nohoist": [
       "**/truffle",
-      "**/typechain"
+      "**/typechain",
+      "**/openzeppelin-solidity"
     ]
-=======
-    "packages": ["packages/*"],
-    "nohoist": ["**/truffle", "**/typechain", "**/openzeppelin-solidity"]
->>>>>>> master
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "pretty-quick --staged"
+    }
   }
 }

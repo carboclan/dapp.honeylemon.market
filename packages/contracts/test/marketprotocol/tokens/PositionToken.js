@@ -1,11 +1,11 @@
-const MarketCollateralPool = artifacts.require('MarketCollateralPool');
-const MarketContractRegistry = artifacts.require('MarketContractRegistry');
-const CollateralToken = artifacts.require('CollateralToken');
-const PositionToken = artifacts.require('PositionToken');
-const utility = require('../../utility');
+const MarketCollateralPool = artifacts.require("MarketCollateralPool");
+const MarketContractRegistry = artifacts.require("MarketContractRegistry");
+const CollateralToken = artifacts.require("CollateralToken");
+const PositionToken = artifacts.require("PositionToken");
+const utility = require("../../utility");
 
 // basic tests to ensure PositionToken works and is set up to allow minting and redeeming tokens
-contract('PositionToken', function(accounts) {
+contract("PositionToken", function(accounts) {
   let collateralToken;
   let collateralPool;
   let marketContract;
@@ -47,25 +47,25 @@ contract('PositionToken', function(accounts) {
     );
   });
 
-  describe('Token symbols correctly created', function() {
+  describe("Token symbols correctly created", function() {
     it(`long position token symbol`, async function() {
       assert.equal(
-        (await longPositionToken.symbol()).replace(/\0.*$/g, ''),
-        'LBTC',
-        'should set symbol of long position token correctly from constructor'
+        (await longPositionToken.symbol()).replace(/\0.*$/g, ""),
+        "LBTC",
+        "should set symbol of long position token correctly from constructor"
       );
     });
 
     it(`short position token symbol`, async function() {
       assert.equal(
-        (await shortPositionToken.symbol()).replace(/\0.*$/g, ''),
-        'SBTC',
-        'should set symbol of long position token correctly from constructor'
+        (await shortPositionToken.symbol()).replace(/\0.*$/g, ""),
+        "SBTC",
+        "should set symbol of long position token correctly from constructor"
       );
     });
   });
 
-  describe('onlyOwner can call mintAndSendToken and redeemToken', function() {
+  describe("onlyOwner can call mintAndSendToken and redeemToken", function() {
     it(`mint position tokens fails calling directly`, async function() {
       let error = null;
       try {
@@ -95,10 +95,10 @@ contract('PositionToken', function(accounts) {
     });
   });
 
-  describe('total supply and balances of long and short position tokens', function() {
+  describe("total supply and balances of long and short position tokens", function() {
     it(`mintAndSendToken and redeemToken updates total supply and balances of minter/redeemer correctly`, async function() {
       // 1. approve collateral and mint tokens
-      const amountToApprove = '10000000000000000000000'; // 10e22 as a string to avoid issues with web3 bugs
+      const amountToApprove = "10000000000000000000000"; // 10e22 as a string to avoid issues with web3 bugs
       await collateralToken.approve(collateralPool.address, amountToApprove);
       const qtyToMint = 100;
       await collateralPool.mintPositionTokens(marketContract.address, qtyToMint, false, {
@@ -115,12 +115,12 @@ contract('PositionToken', function(accounts) {
       assert.equal(
         initialLongPosTokenBalance.toNumber(),
         qtyToMint,
-        'incorrect amount of long tokens minted'
+        "incorrect amount of long tokens minted"
       );
       assert.equal(
         initialShortPosTokenBalance.toNumber(),
         qtyToMint,
-        'incorrect amount of short tokens minted'
+        "incorrect amount of short tokens minted"
       );
 
       const initialLongPosTokenSupply = await longPositionToken.totalSupply();
@@ -129,12 +129,12 @@ contract('PositionToken', function(accounts) {
       assert.equal(
         initialLongPosTokenSupply.toNumber(),
         qtyToMint,
-        'incorrect amount of long tokens total supply'
+        "incorrect amount of long tokens total supply"
       );
       assert.equal(
         initialShortPosTokenSupply.toNumber(),
         qtyToMint,
-        'incorrect amount of short tokens total supply'
+        "incorrect amount of short tokens total supply"
       );
 
       // 2. redeem tokens
@@ -157,12 +157,12 @@ contract('PositionToken', function(accounts) {
       assert.equal(
         finalLongPosTokenBalance.toNumber(),
         expectedFinalLongPosTokenBalance,
-        'incorrect long position token balance after redeeming'
+        "incorrect long position token balance after redeeming"
       );
       assert.equal(
         finalShortPosTokenBalance.toNumber(),
         expectedFinalShortPosTokenBalance,
-        'incorrect short position token balance after redeeming'
+        "incorrect short position token balance after redeeming"
       );
 
       // 4. assert final tokens total supply are as expected
@@ -175,12 +175,12 @@ contract('PositionToken', function(accounts) {
       assert.equal(
         finalLongPosTokenSupply.toNumber(),
         expectedFinalLongPosTokenSupply,
-        'incorrect long position token total supply after redeeming'
+        "incorrect long position token total supply after redeeming"
       );
       assert.equal(
         finalShortPosTokenSupply.toNumber(),
         expectedFinalShortPosTokenSupply,
-        'incorrect short position token total supply after redeeming'
+        "incorrect short position token total supply after redeeming"
       );
     });
   });

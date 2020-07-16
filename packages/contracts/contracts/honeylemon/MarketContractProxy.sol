@@ -1,17 +1,18 @@
 pragma solidity 0.5.2;
 
-import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
-import 'openzeppelin-solidity/contracts/math/SafeMath.sol';
-import 'openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol';
-import 'openzeppelin-solidity/contracts/utils/ReentrancyGuard.sol';
+import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
+import "openzeppelin-solidity/contracts/math/SafeMath.sol";
+import "openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol";
+import "openzeppelin-solidity/contracts/utils/ReentrancyGuard.sol";
 
-import '../marketprotocol/MarketCollateralPool.sol';
-import '../marketprotocol/mpx/MarketContractFactoryMPX.sol';
-import '../marketprotocol/mpx/MarketContractMPX.sol';
+import "../marketprotocol/MarketCollateralPool.sol";
+import "../marketprotocol/mpx/MarketContractFactoryMPX.sol";
+import "../marketprotocol/mpx/MarketContractMPX.sol";
 
-import '../libraries/MathLib.sol';
+import "../libraries/MathLib.sol";
 
-import './DSProxy.sol';
+import "./DSProxy.sol";
+
 
 /// @title Market Contract Proxy.
 /// @notice Handles the interconnection of the Market Protocol with 0x to
@@ -30,12 +31,12 @@ contract MarketContractProxy is ReentrancyGuard, Ownable {
     address public MINTER_BRIDGE_ADDRESS;
     address public COLLATERAL_TOKEN_ADDRESS; //imBTC
 
-    uint public CONTRACT_DURATION_DAYS = 28;
+    uint256 public CONTRACT_DURATION_DAYS = 28;
     // uint public CONTRACT_DURATION_DAYS = 2; // for kovan deployment
-    uint public CONTRACT_DURATION = CONTRACT_DURATION_DAYS * 24 * 60 * 60; // 28 days in seconds
-    uint public CONTRACT_COLLATERAL_RATIO = 125000000; //1.25e8; 1.25, with 8 decimal places
+    uint256 public CONTRACT_DURATION = CONTRACT_DURATION_DAYS * 24 * 60 * 60; // 28 days in seconds
+    uint256 public CONTRACT_COLLATERAL_RATIO = 125000000; //1.25e8; 1.25, with 8 decimal places
 
-    uint[7] public marketContractSpecs = [
+    uint256[7] public marketContractSpecs = [
         0, // floorPrice - the lower bound price for the CFD [constant]
         0, // capPrice - the upper bound price for the CFD [updated before deployment]
         8, // priceDecimalPlaces - number of decimals used to convert prices [constant]
@@ -79,11 +80,11 @@ contract MarketContractProxy is ReentrancyGuard, Ownable {
     ) public ReentrancyGuard() {
         require(
             _marketContractFactoryMPX != address(0),
-            'invalid MarketContractFactoryMPX address'
+            "invalid MarketContractFactoryMPX address"
         );
-        require(_honeyLemonOracle != address(0), 'invalid HoneyLemonOracle address');
-        require(_minterBridge != address(0), 'invalid MinterBridge address');
-        require(_imBTCTokenAddress != address(0), 'invalid IMBTC address');
+        require(_honeyLemonOracle != address(0), "invalid HoneyLemonOracle address");
+        require(_minterBridge != address(0), "invalid MinterBridge address");
+        require(_imBTCTokenAddress != address(0), "invalid IMBTC address");
 
         marketContractFactoryMPX = MarketContractFactoryMPX(_marketContractFactoryMPX);
         HONEY_LEMON_ORACLE_ADDRESS = _honeyLemonOracle;
@@ -99,7 +100,7 @@ contract MarketContractProxy is ReentrancyGuard, Ownable {
     ////////////////
     event PositionTokensMinted(
         uint256 qtyToMint,
-        uint indexed marketId,
+        uint256 indexed marketId,
         string contractName,
         address indexed longTokenRecipient,
         address longTokenDSProxy,
@@ -108,22 +109,22 @@ contract MarketContractProxy is ReentrancyGuard, Ownable {
         address latestMarketContract,
         address longTokenAddress,
         address shortTokenAddress,
-        uint time
+        uint256 time
     );
 
     event MarketContractSettled(
         address indexed contractAddress,
-        uint revenuePerUnit,
-        uint index
+        uint256 revenuePerUnit,
+        uint256 index
     );
 
     event MarketContractDeployed(
-        uint currentMRI,
+        uint256 currentMRI,
         bytes32 contractName,
-        uint expiration,
-        uint indexed index,
+        uint256 expiration,
+        uint256 indexed index,
         address contractAddress,
-        uint collateralPerUnit
+        uint256 collateralPerUnit
     );
 
     event dSProxyCreated(address owner, address DSProxy);
@@ -136,7 +137,7 @@ contract MarketContractProxy is ReentrancyGuard, Ownable {
      * @notice modifier to check that the caller is honeylemon oracle address
      */
     modifier onlyHoneyLemonOracle() {
-        require(msg.sender == HONEY_LEMON_ORACLE_ADDRESS, 'Only Honey Lemon Oracle');
+        require(msg.sender == HONEY_LEMON_ORACLE_ADDRESS, "Only Honey Lemon Oracle");
         _;
     }
 
@@ -144,7 +145,7 @@ contract MarketContractProxy is ReentrancyGuard, Ownable {
      * @notice modifier to check that the caller is minter bridge address
      */
     modifier onlyMinterBridge() {
-        require(msg.sender == MINTER_BRIDGE_ADDRESS, 'Only Minter Bridge');
+        require(msg.sender == MINTER_BRIDGE_ADDRESS, "Only Minter Bridge");
         _;
     }
 
@@ -152,7 +153,7 @@ contract MarketContractProxy is ReentrancyGuard, Ownable {
      * @notice modifier to check that a fresh daily contract has been deployed
      */
     modifier onlyIfFreshDailyContract() {
-        require(isDailyContractDeployed(), 'No contract has been deployed yet today');
+        require(isDailyContractDeployed(), "No contract has been deployed yet today");
         _;
     }
 
@@ -168,7 +169,7 @@ contract MarketContractProxy is ReentrancyGuard, Ownable {
     function setOracleAddress(address _honeyLemonOracleAddress) external onlyOwner {
         require(
             _honeyLemonOracleAddress != address(0),
-            'invalid HoneyLemonOracle address'
+            "invalid HoneyLemonOracle address"
         );
 
         HONEY_LEMON_ORACLE_ADDRESS = _honeyLemonOracleAddress;
@@ -180,7 +181,7 @@ contract MarketContractProxy is ReentrancyGuard, Ownable {
      * @param _minterBridgeAddress 0x minter bridge address
      */
     function setMinterBridgeAddress(address _minterBridgeAddress) external onlyOwner {
-        require(_minterBridgeAddress != address(0), 'invalid MinterBridge address');
+        require(_minterBridgeAddress != address(0), "invalid MinterBridge address");
 
         MINTER_BRIDGE_ADDRESS = _minterBridgeAddress;
     }
@@ -233,13 +234,13 @@ contract MarketContractProxy is ReentrancyGuard, Ownable {
     function getFillableAmount(address makerAddress) public view returns (uint256) {
         ERC20 collateralToken = ERC20(COLLATERAL_TOKEN_ADDRESS);
 
-        uint minerBalance = collateralToken.balanceOf(makerAddress);
-        uint minerAllowance = collateralToken.allowance(
+        uint256 minerBalance = collateralToken.balanceOf(makerAddress);
+        uint256 minerAllowance = collateralToken.allowance(
             makerAddress,
             MINTER_BRIDGE_ADDRESS
         );
 
-        uint uintMinAllowanceBalance = minerBalance < minerAllowance
+        uint256 uintMinAllowanceBalance = minerBalance < minerAllowance
             ? minerBalance
             : minerAllowance;
 
@@ -258,7 +259,7 @@ contract MarketContractProxy is ReentrancyGuard, Ownable {
      * @return market contract address
      */
     function getLatestMarketContract() public view returns (MarketContractMPX) {
-        uint lastIndex = marketContracts.length.sub(1);
+        uint256 lastIndex = marketContracts.length.sub(1);
         return MarketContractMPX(marketContracts[lastIndex]);
     }
 
@@ -268,13 +269,13 @@ contract MarketContractProxy is ReentrancyGuard, Ownable {
      * @return expired market contract address
      */
     function getExpiringMarketContract() public view returns (MarketContractMPX) {
-        uint contractsAdded = marketContracts.length;
+        uint256 contractsAdded = marketContracts.length;
 
         // If the marketContracts array has not had enough markets pushed into it to settle an old one then return 0x0.
         if (contractsAdded < CONTRACT_DURATION_DAYS) {
             return MarketContractMPX(address(0x0));
         }
-        uint expiringIndex = contractsAdded.sub(CONTRACT_DURATION_DAYS);
+        uint256 expiringIndex = contractsAdded.sub(CONTRACT_DURATION_DAYS);
         return MarketContractMPX(marketContracts[expiringIndex]);
     }
 
@@ -305,7 +306,7 @@ contract MarketContractProxy is ReentrancyGuard, Ownable {
      * @param amount deposited amount
      * @return needed collateral
      */
-    function calculateRequiredCollateral(uint amount) public view returns (uint) {
+    function calculateRequiredCollateral(uint256 amount) public view returns (uint256) {
         MarketContractMPX latestMarketContract = getLatestMarketContract();
         return MathLib.multiply(amount, latestMarketContract.COLLATERAL_PER_UNIT());
     }
@@ -316,7 +317,7 @@ contract MarketContractProxy is ReentrancyGuard, Ownable {
      * @param owner address
      * @return long token balance
      */
-    function balanceOf(address owner) public view returns (uint) {
+    function balanceOf(address owner) public view returns (uint256) {
         address addressToCheck = getUserAddressOrDSProxy(owner);
         MarketContract latestMarketContract = getLatestMarketContract();
         ERC20 longToken = ERC20(latestMarketContract.LONG_POSITION_TOKEN());
@@ -326,7 +327,7 @@ contract MarketContractProxy is ReentrancyGuard, Ownable {
     /**
      * @notice get current timestamp
      */
-    function getTime() public view returns (uint) {
+    function getTime() public view returns (uint256) {
         return now;
     }
 
@@ -336,12 +337,12 @@ contract MarketContractProxy is ReentrancyGuard, Ownable {
      * @param expiration market expiration timestamp
      * @return market specs
      */
-    function generateContractSpecs(uint currentMRI, uint expiration)
+    function generateContractSpecs(uint256 currentMRI, uint256 expiration)
         public
         view
-        returns (uint[7] memory)
+        returns (uint256[7] memory)
     {
-        uint[7] memory dailySpecs = marketContractSpecs;
+        uint256[7] memory dailySpecs = marketContractSpecs;
         // capPrice. div by 1e8 for correct scaling
         // dailySpecs[1] =
         //     (CONTRACT_DURATION_DAYS * currentMRI * (CONTRACT_COLLATERAL_RATIO)) /
@@ -376,9 +377,9 @@ contract MarketContractProxy is ReentrancyGuard, Ownable {
      * @return bool true if there is a fresh contract, false if there is not a fresh contract
      */
     function isDailyContractDeployed() public view returns (bool) {
-        uint settlementTimestamp = MarketContractMPX(getLatestMarketContract())
+        uint256 settlementTimestamp = MarketContractMPX(getLatestMarketContract())
             .EXPIRATION();
-        uint oneDayFromLatestDeployment = settlementTimestamp -
+        uint256 oneDayFromLatestDeployment = settlementTimestamp -
             CONTRACT_DURATION +
             60 *
             60 *
@@ -418,7 +419,7 @@ contract MarketContractProxy is ReentrancyGuard, Ownable {
         address[] memory tokenAddresses, // Address of the long or short token to redeem
         uint256[] memory tokensToRedeem // the number of tokens to redeem
     ) public nonReentrant {
-        require(tokenAddresses.length == tokensToRedeem.length, 'Invalid input params');
+        require(tokenAddresses.length == tokensToRedeem.length, "Invalid input params");
         require(this.owner() == msg.sender, "You don't own this DSProxy GTFO");
 
         MarketContractMPX marketInstance;
@@ -431,7 +432,7 @@ contract MarketContractProxy is ReentrancyGuard, Ownable {
 
             require(
                 tokenInstance.balanceOf(address(this)) >= tokensToRedeem[i],
-                'Insufficient position token balance'
+                "Insufficient position token balance"
             );
 
             marketInstance = MarketContractMPX(tokenInstance.owner());
@@ -459,7 +460,7 @@ contract MarketContractProxy is ReentrancyGuard, Ownable {
         ERC20 collateralToken = ERC20(marketInstance.COLLATERAL_TOKEN_ADDRESS());
 
         // DSProxy balance. address(this) is the DSProxy contract address that will redeem the tokens.
-        uint dSProxyBalance = collateralToken.balanceOf(address(this));
+        uint256 dSProxyBalance = collateralToken.balanceOf(address(this));
 
         // Move all redeemed tokens from DSProxy back to users wallet. msg.sender is the owner of the DSProxy.
         collateralToken.transfer(msg.sender, dSProxyBalance);
@@ -478,12 +479,12 @@ contract MarketContractProxy is ReentrancyGuard, Ownable {
      * @param newMarketExpiration new market expiration timestamp
      */
     function dailySettlement(
-        uint lookbackIndexValue,
-        uint currentIndexValue,
+        uint256 lookbackIndexValue,
+        uint256 currentIndexValue,
         bytes32[3] memory marketAndsTokenNames,
-        uint newMarketExpiration
+        uint256 newMarketExpiration
     ) public onlyHoneyLemonOracle {
-        require(currentIndexValue != 0, 'Current MRI value cant be zero');
+        require(currentIndexValue != 0, "Current MRI value cant be zero");
 
         // 1. Settle the past contract, if there is a price and contract exists.
         MarketContractMPX expiringMarketContract = getExpiringMarketContract();
@@ -505,12 +506,12 @@ contract MarketContractProxy is ReentrancyGuard, Ownable {
      * @dev mri MRI value
      * @dev marketContractAddress market contract
      */
-    function settleMarketContract(uint mri, address marketContractAddress)
+    function settleMarketContract(uint256 mri, address marketContractAddress)
         public
         onlyHoneyLemonOracle
     {
-        require(mri != 0, 'The mri loockback value can not be 0');
-        require(marketContractAddress != address(0x0), 'Invalid market contract address');
+        require(mri != 0, "The mri loockback value can not be 0");
+        require(marketContractAddress != address(0x0), "Invalid market contract address");
 
         MarketContractMPX marketContract = MarketContractMPX(marketContractAddress);
         marketContract.oracleCallBack(mri);
@@ -532,11 +533,11 @@ contract MarketContractProxy is ReentrancyGuard, Ownable {
      * @param shortTokenRecipient address of short token recipient (will receive token at this address unless address have deployed DSProxy)
      */
     function mintPositionTokens(
-        uint qtyToMint,
+        uint256 qtyToMint,
         address longTokenRecipient,
         address shortTokenRecipient
     ) public onlyMinterBridge onlyIfFreshDailyContract nonReentrant {
-        uint collateralNeeded = calculateRequiredCollateral(qtyToMint);
+        uint256 collateralNeeded = calculateRequiredCollateral(qtyToMint);
 
         // Create instance of the latest market contract for today
         MarketContractMPX latestMarketContract = getLatestMarketContract();
@@ -603,20 +604,20 @@ contract MarketContractProxy is ReentrancyGuard, Ownable {
      * @param expiration expiration timestamp
      */
     function deployContract(
-        uint currentMRI,
+        uint256 currentMRI,
         bytes32[3] memory marketAndsTokenNames,
-        uint expiration
+        uint256 expiration
     ) internal returns (address) {
         address contractAddress = marketContractFactoryMPX.deployMarketContractMPX(
             marketAndsTokenNames,
             COLLATERAL_TOKEN_ADDRESS,
             generateContractSpecs(currentMRI, expiration),
-            'null', //ORACLE_URL
-            'null' // ORACLE_STATISTIC
+            "null", //ORACLE_URL
+            "null" // ORACLE_STATISTIC
         );
 
         // Add new market to storage
-        uint index = marketContracts.push(contractAddress) - 1;
+        uint256 index = marketContracts.push(contractAddress) - 1;
         addressToMarketId[contractAddress] = index;
         MarketContractMPX marketContract = MarketContractMPX(contractAddress);
         marketContract.transferOwnership(owner());

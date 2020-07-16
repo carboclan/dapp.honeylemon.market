@@ -16,9 +16,10 @@
 
 pragma solidity 0.5.2;
 
-import './UpgradeableTarget.sol';
-import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
-import 'openzeppelin-solidity/contracts/token/ERC20/ERC20Burnable.sol';
+import "./UpgradeableTarget.sol";
+import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
+import "openzeppelin-solidity/contracts/token/ERC20/ERC20Burnable.sol";
+
 
 /// @title Upgradeable Token
 /// @notice allows for us to update some of the needed functionality in our tokens post deployment. Inspiration taken
@@ -37,7 +38,7 @@ contract UpgradeableToken is Ownable, ERC20Burnable {
     /// @notice Update token to the new upgraded token
     /// @param value The amount of token to be migrated to upgraded token
     function upgrade(uint256 value) external {
-        require(upgradeableTarget != address(0), 'cannot upgrade with no target');
+        require(upgradeableTarget != address(0), "cannot upgrade with no target");
 
         burn(value); // burn tokens as we migrate them.
         totalUpgraded = totalUpgraded.add(value);

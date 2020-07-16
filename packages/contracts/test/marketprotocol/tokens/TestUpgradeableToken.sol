@@ -16,9 +16,10 @@
 
 pragma solidity 0.5.2;
 
-import 'truffle/Assert.sol';
-import '../../../contracts/marketprotocol/tokens/MarketToken.sol';
-import '../../../contracts/marketprotocol/tokens/UpgradeableTokenMock.sol';
+import "truffle/Assert.sol";
+import "../../../contracts/marketprotocol/tokens/MarketToken.sol";
+import "../../../contracts/marketprotocol/tokens/UpgradeableTokenMock.sol";
+
 
 /// @title TestUpgradeableToken
 /// @author Phil Elsasser <phil@marketprotcol.io>
@@ -38,13 +39,13 @@ contract TestUpgradeableToken {
         Assert.equal(
             marketToken.balanceOf(address(this)),
             marketToken.INITIAL_SUPPLY(),
-            'Unexpected initial supply allocation'
+            "Unexpected initial supply allocation"
         );
 
         Assert.equal(
             marketToken.balanceOf(address(this)),
             marketToken.totalSupply(),
-            'Unexpected total supply allocation'
+            "Unexpected total supply allocation"
         );
 
         marketToken.setUpgradeableTarget(address(upgradedToken));
@@ -52,13 +53,13 @@ contract TestUpgradeableToken {
         Assert.equal(
             marketToken.upgradeableTarget(),
             address(upgradedToken),
-            'Unable to set correct address for upgrade token target'
+            "Unable to set correct address for upgrade token target"
         );
 
         Assert.equal(
             upgradedToken.PREVIOUS_TOKEN_ADDRESS(),
             address(marketToken),
-            'Unable to set correct address for upgrade token target'
+            "Unable to set correct address for upgrade token target"
         );
 
         marketToken.upgrade(marketToken.balanceOf(address(this)));
@@ -66,19 +67,19 @@ contract TestUpgradeableToken {
         Assert.equal(
             marketToken.INITIAL_SUPPLY(),
             upgradedToken.totalSupply(),
-            'Entire supply not upgraded in new contract'
+            "Entire supply not upgraded in new contract"
         );
 
         Assert.equal(
             marketToken.INITIAL_SUPPLY(),
             marketToken.totalUpgraded(),
-            'Entire supply not upgraded in old contract'
+            "Entire supply not upgraded in old contract"
         );
 
         Assert.equal(
             upgradedToken.balanceOf(address(this)),
             upgradedToken.totalSupply(),
-            'Supply not allocated to user'
+            "Supply not allocated to user"
         );
     }
 }

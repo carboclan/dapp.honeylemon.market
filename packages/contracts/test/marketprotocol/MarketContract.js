@@ -1,10 +1,10 @@
-const BN = require('bn.js');
-const CollateralToken = artifacts.require('CollateralToken');
-const MarketCollateralPool = artifacts.require('MarketCollateralPool');
-const PositionToken = artifacts.require('PositionToken');
-const utility = require('../utility');
+const BN = require("bn.js");
+const CollateralToken = artifacts.require("CollateralToken");
+const MarketCollateralPool = artifacts.require("MarketCollateralPool");
+const PositionToken = artifacts.require("PositionToken");
+const utility = require("../utility");
 
-contract('MarketContract', function(accounts) {
+contract("MarketContract", function(accounts) {
   let marketContract;
   let collateralToken;
   let collateralPool;
@@ -14,15 +14,15 @@ contract('MarketContract', function(accounts) {
     collateralPool = await MarketCollateralPool.deployed();
   });
 
-  describe('constructor', function() {
-    it('should set needed variables correctly', async function() {
-      const name = web3.utils.toUtf8(web3.utils.asciiToHex('BTC', 32));
-      const priceFloor = new BN('50');
-      const priceCap = new BN('100');
-      const priceDecimalPlaces = new BN('2');
-      const qtyMultiplier = new BN('10');
+  describe("constructor", function() {
+    it("should set needed variables correctly", async function() {
+      const name = web3.utils.toUtf8(web3.utils.asciiToHex("BTC", 32));
+      const priceFloor = new BN("50");
+      const priceCap = new BN("100");
+      const priceDecimalPlaces = new BN("2");
+      const qtyMultiplier = new BN("10");
       const expiration = Math.floor(new Date().getTime() / 1000 + 60 * 50);
-      const fees = new BN('0');
+      const fees = new BN("0");
 
       marketContract = await utility.createMarketContract(
         collateralToken,
@@ -34,41 +34,41 @@ contract('MarketContract', function(accounts) {
 
       assert.isTrue(
         (await marketContract.PRICE_FLOOR()).eq(priceFloor),
-        'price floor is not correct'
+        "price floor is not correct"
       );
       assert.isTrue(
         (await marketContract.PRICE_CAP()).eq(priceCap),
-        'price cap is not correct'
+        "price cap is not correct"
       );
       assert.isTrue(
         (await marketContract.PRICE_DECIMAL_PLACES()).eq(priceDecimalPlaces),
-        'price decimal places is not correct'
+        "price decimal places is not correct"
       );
       assert.isTrue(
         (await marketContract.QTY_MULTIPLIER()).eq(qtyMultiplier),
-        'qty multiplier is not correct'
+        "qty multiplier is not correct"
       );
       assert.equal(
         await marketContract.EXPIRATION(),
         expiration,
-        'expiration is not correct'
+        "expiration is not correct"
       );
       // strip null chars from string!
       assert.equal(
-        (await marketContract.CONTRACT_NAME()).replace(/\0.*$/g, ''),
+        (await marketContract.CONTRACT_NAME()).replace(/\0.*$/g, ""),
         name,
-        'contract name is not correct'
+        "contract name is not correct"
       );
 
       assert.equal(
         await marketContract.COLLATERAL_TOKEN_ADDRESS(),
         collateralToken.address,
-        'collateral token address is not correct'
+        "collateral token address is not correct"
       );
       assert.equal(
         await marketContract.COLLATERAL_POOL_ADDRESS(),
         collateralPool.address,
-        'collateral pool address is not correct'
+        "collateral pool address is not correct"
       );
 
       const collateralPerUnit = utility.calculateTotalCollateral(
@@ -78,11 +78,11 @@ contract('MarketContract', function(accounts) {
       );
       assert.isTrue(
         (await marketContract.COLLATERAL_PER_UNIT()).eq(collateralPerUnit),
-        'collateral per unit is not correct'
+        "collateral per unit is not correct"
       );
     });
 
-    it('should fail if price floor is greater than price cap', async function() {
+    it("should fail if price floor is greater than price cap", async function() {
       const higherPriceFloor = 500;
       const lowerPriceCap = 100;
       const priceDecimalPlaces = 2;
@@ -100,7 +100,7 @@ contract('MarketContract', function(accounts) {
       });
     });
 
-    it('should fail if expiration is in the past', async function() {
+    it("should fail if expiration is in the past", async function() {
       const priceFloor = 50;
       const priceCap = 100;
       const priceDecimalPlaces = 2;
@@ -119,8 +119,8 @@ contract('MarketContract', function(accounts) {
     });
   });
 
-  describe('mintPositionTokens', function() {
-    it('should successfully mint', async function() {
+  describe("mintPositionTokens", function() {
+    it("should successfully mint", async function() {
       marketContract = await utility.createMarketContract(
         collateralToken,
         { address: accounts[0] }, // setting first account as collateral pool
@@ -142,16 +142,16 @@ contract('MarketContract', function(accounts) {
       assert.equal(
         (await longPositionTokens.balanceOf.call(accounts[1])).toNumber(),
         qtyToMint,
-        'long position tokens not minted'
+        "long position tokens not minted"
       );
       assert.equal(
         (await shortPositionTokens.balanceOf.call(accounts[1])).toNumber(),
         qtyToMint,
-        'short position tokens not minted'
+        "short position tokens not minted"
       );
     });
 
-    it('should fail if caller is not collateral pool', async function() {
+    it("should fail if caller is not collateral pool", async function() {
       marketContract = await utility.createMarketContract(
         collateralToken,
         collateralPool,
@@ -164,8 +164,8 @@ contract('MarketContract', function(accounts) {
     });
   });
 
-  describe('redeemLongToken', function() {
-    it('should fail if caller is not collateral pool', async function() {
+  describe("redeemLongToken", function() {
+    it("should fail if caller is not collateral pool", async function() {
       marketContract = await utility.createMarketContract(
         collateralToken,
         { address: accounts[0] },
@@ -180,8 +180,8 @@ contract('MarketContract', function(accounts) {
     });
   });
 
-  describe('redeemShortToken', function() {
-    it('should fail if caller is not collateral pool', async function() {
+  describe("redeemShortToken", function() {
+    it("should fail if caller is not collateral pool", async function() {
       marketContract = await utility.createMarketContract(
         collateralToken,
         { address: accounts[0] },

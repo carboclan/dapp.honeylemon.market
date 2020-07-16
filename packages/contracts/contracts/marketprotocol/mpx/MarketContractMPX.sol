@@ -16,7 +16,8 @@
 
 pragma solidity 0.5.2;
 
-import '../MarketContract.sol';
+import "../MarketContract.sol";
+
 
 /// @title MarketContractMPX - a MarketContract designed to be used with our internal oracle service
 /// @author Phil Elsasser <phil@marketprotocol.io>
@@ -49,7 +50,7 @@ contract MarketContractMPX is MarketContract {
         bytes32[3] memory contractNames,
         address[3] memory baseAddresses,
         address oracleHubAddress,
-        uint[7] memory contractSpecs,
+        uint256[7] memory contractSpecs,
         string memory oracleURL,
         string memory oracleStatistic
     ) public MarketContract(contractNames, baseAddresses, contractSpecs) {
@@ -78,7 +79,7 @@ contract MarketContractMPX is MarketContract {
     function arbitrateSettlement(uint256 price) public onlyOwner {
         require(
             price >= PRICE_FLOOR && price <= PRICE_CAP,
-            'arbitration price must be within contract bounds'
+            "arbitration price must be within contract bounds"
         );
         lastPrice = price;
         emit UpdatedLastPrice(price);
@@ -88,7 +89,7 @@ contract MarketContractMPX is MarketContract {
 
     /// @dev allows calls only from the oracle hub.
     modifier onlyOracleHub() {
-        require(msg.sender == ORACLE_HUB_ADDRESS, 'only callable by the oracle hub');
+        require(msg.sender == ORACLE_HUB_ADDRESS, "only callable by the oracle hub");
         _;
     }
 
@@ -96,7 +97,7 @@ contract MarketContractMPX is MarketContract {
     function setOracleHubAddress(address oracleHubAddress) public onlyOwner {
         require(
             oracleHubAddress != address(0),
-            'cannot set oracleHubAddress to null address'
+            "cannot set oracleHubAddress to null address"
         );
         ORACLE_HUB_ADDRESS = oracleHubAddress;
     }

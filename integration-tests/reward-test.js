@@ -1,12 +1,12 @@
-const assert = require('assert').strict;
-const { time } = require('@openzeppelin/test-helpers');
-const { BigNumber } = require('@0x/utils');
-const { Web3Wrapper } = require('@0x/web3-wrapper');
+const assert = require("assert").strict;
+const { time } = require("@openzeppelin/test-helpers");
+const { BigNumber } = require("@0x/utils");
+const { Web3Wrapper } = require("@0x/web3-wrapper");
 
-const { HoneylemonService } = require('../src/lib/HoneylemonService');
-const delay = require('../test/helpers/delay');
+const { HoneylemonService } = require("../src/lib/HoneylemonService");
+const delay = require("../test/helpers/delay");
 
-const MarketContractProxy = artifacts.require('MarketContractProxy');
+const MarketContractProxy = artifacts.require("MarketContractProxy");
 
 let honeylemonService,
   marketContractProxy,
@@ -53,8 +53,8 @@ async function createNewMarketProtocolContract(lookbackIndex, mriInput, marketNa
     currentMRIScaled.toString(), // current index value
     [
       web3.utils.utf8ToHex(marketName),
-      web3.utils.utf8ToHex(marketName + '-Long'),
-      web3.utils.utf8ToHex(marketName + '-Short')
+      web3.utils.utf8ToHex(marketName + "-Long"),
+      web3.utils.utf8ToHex(marketName + "-Short")
     ], // new market name
     expirationTime.toString(), // new market expiration
     {
@@ -118,10 +118,10 @@ async function main() {
   const fillSize = new BigNumber(1);
 
   // deploy first contract
-  console.log('Deploying first contract...');
-  await createNewMarketProtocolContract(mriInput * 28, mriInput, 'MRI-BTC-28D-test');
+  console.log("Deploying first contract...");
+  await createNewMarketProtocolContract(mriInput * 28, mriInput, "MRI-BTC-28D-test");
 
-  console.log('Filling 3 orders...');
+  console.log("Filling 3 orders...");
   // Give approval for taker
   await honeylemonService.approvePaymentToken(takerAddress);
   // Create two contracts. taker participates as a taker in both. Maker is only involved
@@ -132,21 +132,21 @@ async function main() {
   // await time.increase(10); // increase by 10 seconds to signify 1 day
   await fill0xOrderForAddresses(3, takerAddress, makerAddress);
 
-  console.log('Deploying 28 contracts...');
+  console.log("Deploying 28 contracts...");
   // fast forward 28 days
   await time.increase(28 * 24 * 60 * 60 + 1);
   // we need to deploy 28 times in order to be able to settle
   await Promise.all(
     Array.from({ length: 28 }, (x, i) => {
-      return createNewMarketProtocolContract(mriInput * 28, mriInput, 'MRI-BTC-28D-test');
+      return createNewMarketProtocolContract(mriInput * 28, mriInput, "MRI-BTC-28D-test");
     })
   );
 
-  console.log('Filling one more order...');
+  console.log("Filling one more order...");
   await fill0xOrderForAddresses(4, takerAddress, makerAddress);
-  console.log('Deploying another contract...');
-  await createNewMarketProtocolContract(mriInput * 28, mriInput, 'MRI-BTC-28D-test');
-  console.log('Filling the final order...');
+  console.log("Deploying another contract...");
+  await createNewMarketProtocolContract(mriInput * 28, mriInput, "MRI-BTC-28D-test");
+  console.log("Filling the final order...");
   await fill0xOrderForAddresses(5, takerAddress, makerAddress);
 
   // Wait for subgraph to index the events
@@ -162,8 +162,8 @@ async function main() {
     shortPositions: shortPositions2
   } = await honeylemonService.getPositions(makerAddress);
 
-  console.log('longPositions:', JSON.stringify(longPositions, null, 4));
-  console.log('shortPositions2:', JSON.stringify(shortPositions2, null, 4));
+  console.log("longPositions:", JSON.stringify(longPositions, null, 4));
+  console.log("shortPositions2:", JSON.stringify(shortPositions2, null, 4));
 }
 
 module.exports = async () => {

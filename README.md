@@ -57,7 +57,9 @@ yarn run test:service #Honey lemon.js service tests. Used in front end.
 ```
 
 ## Building packages 🛠
+
 You can build each of the packages within the repo by executing the following.
+
 ```text
 yarn build:contracts
 yarn build:honeylemonjs
@@ -85,8 +87,8 @@ truffle migrate --network kovan
 
 When MarketContractProxy address changes it needs to be updated in the following places:
 
-* docker/docker-compose-local.yml \(look for `HONEYLEMON_MARKET_CONTARCT_PROXY_ADDRESS`\)
-* subgraph/subgraph.yml \(in the MarketContractProxy source `address` field\)
+- docker/docker-compose-local.yml \(look for `HONEYLEMON_MARKET_CONTARCT_PROXY_ADDRESS`\)
+- subgraph/subgraph.yml \(in the MarketContractProxy source `address` field\)
 
 ### Running The Linter 🧽
 

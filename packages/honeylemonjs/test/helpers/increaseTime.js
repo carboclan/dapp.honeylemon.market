@@ -8,8 +8,8 @@ module.exports.increaseTime = duration => {
   return new Promise((resolve, reject) => {
     web3.currentProvider.sendAsync(
       {
-        jsonrpc: '2.0',
-        method: 'evm_increaseTime',
+        jsonrpc: "2.0",
+        method: "evm_increaseTime",
         params: [duration],
         id: id
       },
@@ -18,8 +18,8 @@ module.exports.increaseTime = duration => {
 
         web3.currentProvider.sendAsync(
           {
-            jsonrpc: '2.0',
-            method: 'evm_mine',
+            jsonrpc: "2.0",
+            method: "evm_mine",
             id: id + 1
           },
           (err2, res) => {

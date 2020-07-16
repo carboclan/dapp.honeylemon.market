@@ -11,13 +11,14 @@
 
 pragma solidity 0.5.2;
 
+
 contract DSNote {
     event LogNote(
         bytes4 indexed sig,
         address indexed guy,
         bytes32 indexed foo,
         bytes32 bar,
-        uint wad,
+        uint256 wad,
         bytes fax
     );
 
@@ -35,6 +36,7 @@ contract DSNote {
     }
 }
 
+
 contract DSAuthority {
     function canCall(
         address src,
@@ -43,10 +45,12 @@ contract DSAuthority {
     ) public view returns (bool);
 }
 
+
 contract DSAuthEvents {
     event LogSetAuthority(address indexed authority);
     event LogSetOwner(address indexed owner);
 }
+
 
 contract DSAuth is DSAuthEvents {
     DSAuthority public authority;
@@ -85,6 +89,7 @@ contract DSAuth is DSAuthEvents {
     }
 }
 
+
 // DSProxy
 // Allows code execution using a persistant identity This can be very
 // useful to execute a sequence of atomic actions. Since the owner of
@@ -100,7 +105,7 @@ contract DSProxy is DSAuth, DSNote {
         note
         returns (bytes memory response)
     {
-        require(_target != address(0), 'ds-proxy-target-address-required');
+        require(_target != address(0), "ds-proxy-target-address-required");
 
         // call contract in current context
         assembly {
@@ -128,6 +133,7 @@ contract DSProxy is DSAuth, DSNote {
     }
 }
 
+
 // DSProxyFactory
 // This factory deploys new proxy instances through build()
 // Deployed proxy addresses are logged
@@ -143,7 +149,7 @@ contract DSProxyFactory {
     modifier onlyMarketContractProxy() {
         require(
             msg.sender == marketContractProxy,
-            'Only callable by MarketContractProxy'
+            "Only callable by MarketContractProxy"
         );
         _;
     }

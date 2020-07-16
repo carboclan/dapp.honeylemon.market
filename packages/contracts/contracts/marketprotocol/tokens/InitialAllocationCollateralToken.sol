@@ -16,7 +16,8 @@
 
 pragma solidity 0.5.2;
 
-import './CollateralToken.sol';
+import "./CollateralToken.sol";
+
 
 /// token with initial grant to all addresses
 contract InitialAllocationCollateralToken is CollateralToken {

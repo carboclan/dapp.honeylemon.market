@@ -15,6 +15,7 @@
 */
 pragma solidity 0.5.2;
 
+
 /// @title Math function library with overflow protection inspired by Open Zeppelin
 library MathLib {
     int256 constant INT256_MIN = int256((uint256(1) << 255));
@@ -26,7 +27,7 @@ library MathLib {
         }
 
         uint256 c = a * b;
-        require(c / a == b, 'MathLib: multiplication overflow');
+        require(c / a == b, "MathLib: multiplication overflow");
 
         return c;
     }
@@ -40,13 +41,13 @@ library MathLib {
     }
 
     function subtract(uint256 a, uint256 b) internal pure returns (uint256) {
-        require(b <= a, 'MathLib: subtraction overflow');
+        require(b <= a, "MathLib: subtraction overflow");
         return a - b;
     }
 
     function add(uint256 a, uint256 b) internal pure returns (uint256) {
         uint256 c = a + b;
-        require(c >= a, 'MathLib: addition overflow');
+        require(c >= a, "MathLib: addition overflow");
         return c;
     }
 
@@ -58,15 +59,15 @@ library MathLib {
     /// @param shortQty qty to redeem
     /// @param price of the trade
     function calculateCollateralToReturn(
-        uint priceFloor,
-        uint priceCap,
-        uint qtyMultiplier,
-        uint longQty,
-        uint shortQty,
-        uint price
-    ) internal pure returns (uint) {
-        uint neededCollateral = 0;
-        uint maxLoss;
+        uint256 priceFloor,
+        uint256 priceCap,
+        uint256 qtyMultiplier,
+        uint256 longQty,
+        uint256 shortQty,
+        uint256 price
+    ) internal pure returns (uint256) {
+        uint256 neededCollateral = 0;
+        uint256 maxLoss;
         if (longQty > 0) {
             // calculate max loss from entry price to floor
             if (price <= priceFloor) {
@@ -94,21 +95,21 @@ library MathLib {
 
     /// @notice determines the amount of needed collateral for minting a long and short position token
     function calculateTotalCollateral(
-        uint priceFloor,
-        uint priceCap,
-        uint qtyMultiplier
-    ) internal pure returns (uint) {
+        uint256 priceFloor,
+        uint256 priceCap,
+        uint256 qtyMultiplier
+    ) internal pure returns (uint256) {
         return multiply(subtract(priceCap, priceFloor), qtyMultiplier);
     }
 
     /// @notice calculates the fee in terms of base units of the collateral token per unit pair minted.
     function calculateFeePerUnit(
-        uint priceFloor,
-        uint priceCap,
-        uint qtyMultiplier,
-        uint feeInBasisPoints
-    ) internal pure returns (uint) {
-        uint midPrice = add(priceCap, priceFloor) / 2;
+        uint256 priceFloor,
+        uint256 priceCap,
+        uint256 qtyMultiplier,
+        uint256 feeInBasisPoints
+    ) internal pure returns (uint256) {
+        uint256 midPrice = add(priceCap, priceFloor) / 2;
         return multiply(multiply(midPrice, qtyMultiplier), feeInBasisPoints) / 10000;
     }
 }

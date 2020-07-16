@@ -16,46 +16,47 @@
 
 pragma solidity 0.5.2;
 
-import '../libraries/MathLib.sol';
-import './MarketContract.sol';
-import './tokens/PositionToken.sol';
-import './MarketContractRegistryInterface.sol';
+import "../libraries/MathLib.sol";
+import "./MarketContract.sol";
+import "./tokens/PositionToken.sol";
+import "./MarketContractRegistryInterface.sol";
 
-import 'openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol';
-import 'openzeppelin-solidity/contracts/token/ERC20/ERC20.sol';
-import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
-import 'openzeppelin-solidity/contracts/utils/ReentrancyGuard.sol';
+import "openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol";
+import "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
+import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
+import "openzeppelin-solidity/contracts/utils/ReentrancyGuard.sol";
+
 
 /// @title MarketCollateralPool
 /// @notice This collateral pool houses all of the collateral for all market contracts currently in circulation.
 /// This pool facilitates locking of collateral and minting / redemption of position tokens for that collateral.
 /// @author Phil Elsasser <phil@marketprotocol.io>
 contract MarketCollateralPool is ReentrancyGuard, Ownable {
-    using MathLib for uint;
-    using MathLib for int;
+    using MathLib for uint256;
+    using MathLib for int256;
     using SafeERC20 for ERC20;
 
     address public marketContractRegistry;
     address public mktToken;
 
-    mapping(address => uint) public contractAddressToCollateralPoolBalance; // current balance of all collateral committed
-    mapping(address => uint) public feesCollectedByTokenAddress;
+    mapping(address => uint256) public contractAddressToCollateralPoolBalance; // current balance of all collateral committed
+    mapping(address => uint256) public feesCollectedByTokenAddress;
 
     event TokensMinted(
         address indexed marketContract,
         address indexed user,
         address indexed feeToken,
-        uint qtyMinted,
-        uint collateralLocked,
-        uint feesPaid
+        uint256 qtyMinted,
+        uint256 collateralLocked,
+        uint256 feesPaid
     );
 
     event TokensRedeemed(
         address indexed marketContract,
         address indexed user,
-        uint longQtyRedeemed,
-        uint shortQtyRedeemed,
-        uint collateralUnlocked
+        uint256 longQtyRedeemed,
+        uint256 shortQtyRedeemed,
+        uint256 collateralUnlocked
     );
 
     constructor(address marketContractRegistryAddress, address mktTokenAddress)
@@ -78,14 +79,14 @@ contract MarketCollateralPool is ReentrancyGuard, Ownable {
     /// @param isAttemptToPayInMKT            if possible, attempt to pay fee's in MKT rather than collateral tokens
     function mintPositionTokens(
         address marketContractAddress,
-        uint qtyToMint,
+        uint256 qtyToMint,
         bool isAttemptToPayInMKT
     ) external onlyWhiteListedAddress(marketContractAddress) nonReentrant {
         MarketContract marketContract = MarketContract(marketContractAddress);
-        require(!marketContract.isSettled(), 'Contract is already settled');
+        require(!marketContract.isSettled(), "Contract is already settled");
 
         address collateralTokenAddress = marketContract.COLLATERAL_TOKEN_ADDRESS();
-        uint neededCollateral = MathLib.multiply(
+        uint256 neededCollateral = MathLib.multiply(
             qtyToMint,
             marketContract.COLLATERAL_PER_UNIT()
         );
@@ -98,8 +99,8 @@ contract MarketCollateralPool is ReentrancyGuard, Ownable {
                 marketContract.MKT_TOKEN_FEE_PER_UNIT() != 0 &&
                 marketContract.COLLATERAL_TOKEN_FEE_PER_UNIT() == 0);
 
-        uint feeAmount;
-        uint totalCollateralTokenTransferAmount;
+        uint256 feeAmount;
+        uint256 totalCollateralTokenTransferAmount;
         address feeToken;
         if (isPayFeesInMKT) {
             // fees are able to be paid in MKT
@@ -159,7 +160,7 @@ contract MarketCollateralPool is ReentrancyGuard, Ownable {
     /// for their collateral.
     /// @param marketContractAddress            address of the market contract to redeem tokens for
     /// @param qtyToRedeem                      quantity of long / short tokens to redeem.
-    function redeemPositionTokens(address marketContractAddress, uint qtyToRedeem)
+    function redeemPositionTokens(address marketContractAddress, uint256 qtyToRedeem)
         external
         onlyWhiteListedAddress(marketContractAddress)
     {
@@ -169,7 +170,7 @@ contract MarketCollateralPool is ReentrancyGuard, Ownable {
         marketContract.redeemShortToken(qtyToRedeem, msg.sender);
 
         // calculate collateral to return and update pool balance
-        uint collateralToReturn = MathLib.multiply(
+        uint256 collateralToReturn = MathLib.multiply(
             qtyToRedeem,
             marketContract.COLLATERAL_PER_UNIT()
         );
@@ -200,13 +201,13 @@ contract MarketCollateralPool is ReentrancyGuard, Ownable {
     /// @param shortQtyToRedeem qty to redeem of short tokens
     function settleAndClose(
         address marketContractAddress,
-        uint longQtyToRedeem,
-        uint shortQtyToRedeem
+        uint256 longQtyToRedeem,
+        uint256 shortQtyToRedeem
     ) external onlyWhiteListedAddress(marketContractAddress) {
         MarketContract marketContract = MarketContract(marketContractAddress);
         require(
             marketContract.isPostSettlementDelay(),
-            'Contract is not past settlement delay'
+            "Contract is not past settlement delay"
         );
 
         // burn tokens being redeemed.
@@ -219,7 +220,7 @@ contract MarketCollateralPool is ReentrancyGuard, Ownable {
         }
 
         // calculate amount of collateral to return and update pool balances
-        uint collateralToReturn = MathLib.calculateCollateralToReturn(
+        uint256 collateralToReturn = MathLib.calculateCollateralToReturn(
             marketContract.PRICE_FLOOR(),
             marketContract.PRICE_CAP(),
             marketContract.QTY_MULTIPLIER(),
@@ -253,9 +254,9 @@ contract MarketCollateralPool is ReentrancyGuard, Ownable {
         public
         onlyOwner
     {
-        uint feesAvailableForWithdrawal = feesCollectedByTokenAddress[feeTokenAddress];
-        require(feesAvailableForWithdrawal != 0, 'No fees available for withdrawal');
-        require(feeRecipient != address(0), 'Cannot send fees to null address');
+        uint256 feesAvailableForWithdrawal = feesCollectedByTokenAddress[feeTokenAddress];
+        require(feesAvailableForWithdrawal != 0, "No fees available for withdrawal");
+        require(feeRecipient != address(0), "Cannot send fees to null address");
         feesCollectedByTokenAddress[feeTokenAddress] = 0;
         // EXTERNAL CALL
         ERC20(feeTokenAddress).safeTransfer(feeRecipient, feesAvailableForWithdrawal);
@@ -264,7 +265,7 @@ contract MarketCollateralPool is ReentrancyGuard, Ownable {
     /// @dev allows the owner to update the mkt token address in use for fees
     /// @param mktTokenAddress address of new MKT token
     function setMKTTokenAddress(address mktTokenAddress) public onlyOwner {
-        require(mktTokenAddress != address(0), 'Cannot set MKT Token Address To Null');
+        require(mktTokenAddress != address(0), "Cannot set MKT Token Address To Null");
         mktToken = mktTokenAddress;
     }
 
@@ -276,7 +277,7 @@ contract MarketCollateralPool is ReentrancyGuard, Ownable {
     {
         require(
             marketContractRegistryAddress != address(0),
-            'Cannot set Market Contract Registry Address To Null'
+            "Cannot set Market Contract Registry Address To Null"
         );
         marketContractRegistry = marketContractRegistryAddress;
     }
@@ -294,7 +295,7 @@ contract MarketCollateralPool is ReentrancyGuard, Ownable {
             MarketContractRegistryInterface(marketContractRegistry).isAddressWhiteListed(
                 marketContractAddress
             ),
-            'Contract is not whitelisted'
+            "Contract is not whitelisted"
         );
         _;
     }

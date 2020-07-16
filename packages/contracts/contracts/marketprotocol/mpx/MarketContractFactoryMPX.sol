@@ -16,10 +16,11 @@
 
 pragma solidity 0.5.2;
 
-import './MarketContractMPX.sol';
-import '../MarketContractRegistryInterface.sol';
+import "./MarketContractMPX.sol";
+import "../MarketContractRegistryInterface.sol";
 
-import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
+import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
+
 
 /// @title MarketContractFactoryMPX
 /// @author Phil Elsasser <phil@marketprotocol.io>
@@ -39,12 +40,12 @@ contract MarketContractFactoryMPX is Ownable {
         address collateralPoolAddress,
         address oracleHubAddress
     ) public {
-        require(registryAddress != address(0), 'registryAddress can not be null');
+        require(registryAddress != address(0), "registryAddress can not be null");
         require(
             collateralPoolAddress != address(0),
-            'collateralPoolAddress can not be null'
+            "collateralPoolAddress can not be null"
         );
-        require(oracleHubAddress != address(0), 'oracleHubAddress can not be null');
+        require(oracleHubAddress != address(0), "oracleHubAddress can not be null");
 
         marketContractRegistry = registryAddress;
         MARKET_COLLATERAL_POOL = collateralPoolAddress;
@@ -71,7 +72,7 @@ contract MarketContractFactoryMPX is Ownable {
     function deployMarketContractMPX(
         bytes32[3] calldata contractNames,
         address collateralTokenAddress,
-        uint[7] calldata contractSpecs,
+        uint256[7] calldata contractSpecs,
         string calldata oracleURL,
         string calldata oracleStatistic
     ) external onlyOwner returns (address) {
@@ -94,7 +95,7 @@ contract MarketContractFactoryMPX is Ownable {
     /// @dev allows for the owner to set the desired registry for contract creation.
     /// @param registryAddress desired registry address.
     function setRegistryAddress(address registryAddress) external onlyOwner {
-        require(registryAddress != address(0), 'registryAddress can not be null');
+        require(registryAddress != address(0), "registryAddress can not be null");
         marketContractRegistry = registryAddress;
     }
 
@@ -102,7 +103,7 @@ contract MarketContractFactoryMPX is Ownable {
     /// contracts
     /// @param oracleHubAddress   address of the oracle hub, cannot be null address
     function setOracleHubAddress(address oracleHubAddress) external onlyOwner {
-        require(oracleHubAddress != address(0), 'oracleHubAddress can not be null');
+        require(oracleHubAddress != address(0), "oracleHubAddress can not be null");
         oracleHub = oracleHubAddress;
     }
 }
