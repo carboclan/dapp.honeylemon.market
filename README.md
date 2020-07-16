@@ -64,7 +64,7 @@ You can build each of the packages within the repo by executing the following.
 yarn build:contracts
 yarn build:honeylemonjs
 yarn build:subgraph
-yarn build: webapp
+yarn build:webapp
 ```
 
 ### React Front End 🖥
