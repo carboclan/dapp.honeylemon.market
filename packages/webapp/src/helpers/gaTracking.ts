@@ -8,6 +8,6 @@ export const GAPageView = (page: any) => {
   ReactGA.pageview(page);
 }
 
-export const GAmodalView = (modal) => {
+export const GAModalView = (modal: any) => {
   ReactGA.modalview(modal);
 };
