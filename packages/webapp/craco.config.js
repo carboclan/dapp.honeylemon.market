@@ -28,14 +28,14 @@ module.exports = {
                 ascii_only: true
               }
             },
-            parallel: 4,
+            parallel: 2,
             cache: true,
             sourceMap: true,
             extractComments: false
           })
         ]
       },
-      devtool: "source-map",
+      devtool: "source-map"
     })
   }
 };
