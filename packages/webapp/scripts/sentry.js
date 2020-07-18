@@ -1,9 +1,10 @@
 const SentryCli = require('@sentry/cli');
+const dotenv = require('dotenv');
+dotenv.config();
 
 async function createReleaseAndUpload() {
   const release = process.env.REACT_APP_SENTRY_RELEASE;
   const environment = process.env.REACT_APP_SENTRY_ENV;
-  const sentryAuthToken = process.env.SENTRY_AUTH_TOKEN;
 
   if (!release || !environment) {
     console.warn('REACT_APP_SENTRY_RELEASE or SENTRY_ENV is not set');
@@ -11,6 +12,7 @@ async function createReleaseAndUpload() {
     return;
   }
 
+  const cli = new SentryCli();
 
   try {
     await cli.login()
