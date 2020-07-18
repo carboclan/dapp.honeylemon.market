@@ -32,7 +32,6 @@
     "web3": "1.2.7"
   },
   "devDependencies": {
-    "@sentry/cli": "1.55.0",
     "@testing-library/jest-dom": "4.2.4",
     "@testing-library/react": "9.3.2",
     "@testing-library/user-event": "7.1.2",
@@ -48,8 +47,8 @@
   "scripts": {
     "start": "craco --max_old_space_size=8192 start",
     "build": "craco --max_old_space_size=8192 build",
-    "sentry": "(export REACT_APP_SENTRY_RELEASE=$(git rev-parse --short HEAD); node scripts/sentry.js)",
-    "release": "(export REACT_APP_SENTRY_RELEASE=$(git rev-parse --short HEAD); craco --max_old_space_size=8192 build && node scripts/sentry.js)",
+    "sentry": "(export REACT_APP_SENTRY_RELEASE=$(sentry-cli releases propose-version); node scripts/sentry.js)",
+    "release": "(export REACT_APP_SENTRY_RELEASE=$(sentry-cli releases propose-version); craco --max_old_space_size=8192 build && node scripts/sentry.js)",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "analyze": "source-map-explorer 'build/static/js/*.js'"
