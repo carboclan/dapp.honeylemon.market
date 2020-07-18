@@ -1,5 +1,5 @@
-const SentryCli = require('@sentry/cli');
-const dotenv = require('dotenv');
+const SentryCli = require("@sentry/cli");
+const dotenv = require("dotenv");
 dotenv.config();
 
 async function createReleaseAndUpload() {
@@ -7,7 +7,7 @@ async function createReleaseAndUpload() {
   const environment = process.env.REACT_APP_SENTRY_ENV;
 
   if (!release || !environment) {
-    console.warn('REACT_APP_SENTRY_RELEASE or SENTRY_ENV is not set');
+    console.warn("REACT_APP_SENTRY_RELEASE or SENTRY_ENV is not set");
 
     return;
   }
@@ -15,24 +15,23 @@ async function createReleaseAndUpload() {
   const cli = new SentryCli();
 
   try {
-    await cli.login()
-    console.log('Creating sentry release ' + release);
+    console.log("Creating sentry release " + release);
     await cli.releases.new(release);
 
-    console.log('Uploading source maps');
+    console.log("Uploading source maps");
     await cli.releases.uploadSourceMaps(release, {
-      include: ['build/static/js'],
+      include: ["build/static/js"],
       rewrite: true,
-      validate: true,
+      validate: true
     });
 
-    console.log('Finalizing release');
+    console.log("Finalizing release");
 
-    await cli.releases.newDeploy(release, environment)
+    await cli.releases.newDeploy(release, { env: environment });
 
     await cli.releases.finalize(release);
   } catch (e) {
-    console.error('Creating a release on Sentry failed.', e);
+    console.error("Creating a release on Sentry failed.", e);
   }
 }
 
