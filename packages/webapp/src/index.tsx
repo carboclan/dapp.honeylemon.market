@@ -9,10 +9,10 @@ import * as Sentry from '@sentry/react';
 if (
   process.env.NODE_ENV === "production" &&
   process.env.REACT_APP_SENTRY_RELEASE &&
-  process.env.SENTRY_DSN_URL
+  process.env.REACT_APP_SENTRY_DSN_URL
 ) {
   Sentry.init({
-    dsn: process.env.SENTRY_DSN_URL,
+    dsn: process.env.REACT_APP_SENTRY_DSN_URL,
     release: process.env.REACT_APP_SENTRY_RELEASE,
     environment: process.env.REACT_APP_SENTRY_ENV,
   });
