@@ -135,6 +135,14 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
           networkId: network || validNetworks[0],
           darkMode: true,
         }));
+        
+        Sentry.configureScope(function (scope) {
+          scope.setUser({ 
+            "id": address, 
+            "network": networkName(network),
+            // "wallet": 
+          });
+        });
       } catch (error) {
         console.log('Error initializing onboard');
         console.log(error);
@@ -149,7 +157,11 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
     setIsReady(!!isReady);
     !!isReady &&
       Sentry.configureScope(function (scope) {
-        scope.setUser({ "id": address, "network": networkName(network) });
+        scope.setUser({ 
+          "id": address, 
+          "network": networkName(network),
+          // "wallet": 
+        });
       });
     return !!isReady;
   }
