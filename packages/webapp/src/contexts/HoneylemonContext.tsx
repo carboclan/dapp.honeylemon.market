@@ -357,7 +357,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
   // Instantiate Orderbook service
   useEffect(() => {
     const initOrderbookService = async () => {
-      const activeNetwork = network || validNetworks[0];
+      const activeNetwork = (network && validNetworks.includes(network)) ? network : validNetworks[0];
       const orderbookServiceInstance = new OrderbookService(
         config[activeNetwork].apiUrl,
         config[activeNetwork].minterBridgeAddress,
@@ -367,7 +367,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
       setOrderbookService(orderbookServiceInstance);
     }
     initOrderbookService();
-  }, []);
+  }, [network]);
 
   // Order book poller
   useEffect(() => {
