@@ -4,15 +4,16 @@
   "description": "Decentralized Synthetic cloud mining contracts built on Ethereum",
   "private": true,
   "dependencies": {
+  },
+  "devDependencies": {
+    "@sentry/cli": "1.55.0",
+    "chalk": "^2.0.1",
+    "husky": "^4.2.3",
     "prettier": "1.19.1",
     "prettier-plugin-solidity": "1.0.0-alpha.49",
     "pretty-quick": "^2.0.1",
-    "husky": "^4.2.3"
-  },
-  "devDependencies": {
-    "chalk": "^2.0.1",
-    "wsrun": "^3.6.5",
-    "typescript": "3.9.5"
+    "typescript": "3.9.5",
+    "wsrun": "^3.6.5"
   },
   "scripts": {
     "build": "yarn wsrun --stages --exclude @honeylemon/graph -c build",
