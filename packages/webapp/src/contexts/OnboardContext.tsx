@@ -10,6 +10,7 @@ import * as Sentry from '@sentry/react';
 
 import { networkName } from '../helpers/ethereumNetworkUtils';
 import config from './HoneylemonConfig';
+import { User } from '@sentry/react';
 
 export type OnboardProviderProps = {
   dappId: string;
@@ -144,18 +145,19 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
     initializeOnboard();
   }, [onboardProps.dappId])
 
-  useEffect(() => { 
+  useEffect(() => {
     const setUserScope = () => {
+      const user: User = {
+        id: address,
+        network: networkName(network),
+        wallet: wallet?.name,
+      }
       Sentry.configureScope((scope) => {
-        scope.setUser({ 
-          "id": address, 
-          "network": networkName(network),
-          "wallet": wallet?.name, 
-        });
+        scope.setUser(user);
       });
     }
     setUserScope();
-  },[wallet, network, address])
+  }, [wallet, network, address])
 
   const checkIsReady = async () => {
     const isReady = await onboard?.walletCheck();
