@@ -140,7 +140,7 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
           scope.setUser({ 
             "id": address, 
             "network": networkName(network),
-            // "wallet": 
+            "wallet": wallet?.name, 
           });
         });
       } catch (error) {
@@ -160,7 +160,7 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
         scope.setUser({ 
           "id": address, 
           "network": networkName(network),
-          // "wallet": 
+          "wallet": wallet?.name, 
         });
       });
     return !!isReady;
