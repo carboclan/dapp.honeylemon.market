@@ -21,6 +21,7 @@
     "build:subgraph": "yarn wsrun -p @honeylemon/graph -c build",
     "build:webapp": "yarn wsrun -p @honeylemon/webapp -c build",
     "start:webapp": "yarn wsrun -p @honeylemon/webapp -c start",
+    "release:webapp": "yarn wsrun -p @honeylemon/webapp -c release",
     "clean": "rm -rf ./node_modules && rm -rf ./*/node_modules",
     "lint": "npm run prettier -- --write",
     "prettier": "prettier './**/*.js' './**/*.sol' './**/*.md'"
