@@ -135,14 +135,6 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
           networkId: network || validNetworks[0],
           darkMode: true,
         }));
-        
-        Sentry.configureScope(function (scope) {
-          scope.setUser({ 
-            "id": address, 
-            "network": networkName(network),
-            "wallet": wallet?.name, 
-          });
-        });
       } catch (error) {
         console.log('Error initializing onboard');
         console.log(error);
@@ -152,17 +144,22 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
     initializeOnboard();
   }, [onboardProps.dappId])
 
-  const checkIsReady = async () => {
-    const isReady = await onboard?.walletCheck();
-    setIsReady(!!isReady);
-    !!isReady &&
-      Sentry.configureScope(function (scope) {
+  useEffect(() => { 
+    const setUserScope = () => {
+      Sentry.configureScope((scope) => {
         scope.setUser({ 
           "id": address, 
           "network": networkName(network),
           "wallet": wallet?.name, 
         });
       });
+    }
+    setUserScope();
+  },[wallet, network, address])
+
+  const checkIsReady = async () => {
+    const isReady = await onboard?.walletCheck();
+    setIsReady(!!isReady);
     return !!isReady;
   }
 
