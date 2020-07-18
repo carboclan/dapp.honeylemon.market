@@ -6,7 +6,17 @@ import 'typeface-montserrat';
 import './App.css';
 import * as Sentry from '@sentry/react';
 
-Sentry.init({dsn: "https://9b6507fbe15848f2aea20a9d65d048d3@o418372.ingest.sentry.io/5320855"});
+if (
+  process.env.NODE_ENV === "production" &&
+  process.env.REACT_APP_SENTRY_RELEASE &&
+  process.env.SENTRY_DSN_URL
+) {
+  Sentry.init({
+    dsn: process.env.SENTRY_DSN_URL,
+    release: process.env.REACT_APP_SENTRY_RELEASE,
+    environment: process.env.REACT_APP_SENTRY_ENV,
+  });
+}
 
 ReactDOM.render(
   <App />,
