@@ -9,7 +9,7 @@
     "@honeylemon/honeylemonjs": "0.1.0",
     "@material-ui/core": "4.9.12",
     "@material-ui/icons": "4.9.1",
-    "@sentry/react": "5.19.1",
+    "@sentry/react": "5.19.2",
     "@truffle/contract": "4.2.3",
     "@truffle/debug-utils": "4.1.1",
     "@types/fontfaceobserver": "0.0.6",
@@ -47,6 +47,8 @@
   "scripts": {
     "start": "craco --max_old_space_size=8192 start",
     "build": "craco --max_old_space_size=8192 build",
+    "sentry": "(export REACT_APP_SENTRY_RELEASE=$(sentry-cli releases propose-version); node scripts/sentry.js)",
+    "release": "(export REACT_APP_SENTRY_RELEASE=$(sentry-cli releases propose-version); craco --max_old_space_size=8192 build && node scripts/sentry.js)",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "analyze": "source-map-explorer 'build/static/js/*.js'"
