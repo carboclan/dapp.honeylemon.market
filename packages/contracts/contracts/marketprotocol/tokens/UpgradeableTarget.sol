@@ -16,7 +16,6 @@
 
 pragma solidity 0.5.2;
 
-
 /// @title Upgradeable Target
 /// @notice A contract (or a token itself) that can facilitate the upgrade from an existing deployed token
 /// to allow us to upgrade our token's functionality.
