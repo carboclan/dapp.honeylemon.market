@@ -36,6 +36,13 @@ You'll need the latest LTS release of nodejs and npm installed. You'll also need
 yarn
 ```
 
+If you are having issues running the sub graph locally (or in a Docker container) then navigate to the subgraph directory and run an additional install there. To do this run
+
+```
+cd packages/subgraph
+npm install
+```
+
 Once this is done you can start the local development env by running a make command. This will clean all data and start/restart docker containers. Some unit tests are coupled and require you to run this between executions as well such as running If running `order-test.js` script.
 
 ```text
@@ -47,8 +54,6 @@ After running this you will have a local 0x API, a Ganache instance and a Subgra
 ### Running Tests🧪
 
 Next, you can run the tests. There are three main tests kinds of tests: 1\) Smart contract tests, 2\) Honeylemon.js service tests that validate the service data retrieval and on-chain interactions including the Graph protocol and 3\) integration tests that show full lifesycle interconnection between the Marketprotocol, 0x order book, DSProxy contracts and the custom honey lemon smart contracts.
-
-TODO: UPDATE with actual commands.
 
 ```text
 yarn run test:contracts #Smart contract tests. Used throughout the stack.
@@ -65,6 +70,7 @@ yarn build:contracts
 yarn build:honeylemonjs
 yarn build:subgraph
 yarn build:webapp
+release:webapp
 ```
 
 ### React Front End 🖥
@@ -95,7 +101,7 @@ When MarketContractProxy address changes it needs to be updated in the following
 To run the formatter, run:
 
 ```text
-npm run lint-fix
+yarn lint
 ```
 
 ### Coverage 🔎
