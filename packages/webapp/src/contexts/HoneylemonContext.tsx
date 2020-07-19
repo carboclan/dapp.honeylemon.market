@@ -1,17 +1,22 @@
 import * as React from "react";
-import Web3 from 'web3'
+import Web3 from "web3";
 import { useState, useEffect, Dispatch, SetStateAction } from "react";
-import { MetamaskSubprovider, Web3JsProvider } from '@0x/subproviders';
-import { HoneylemonService, OrderbookService, COLLATERAL_TOKEN_DECIMALS, PAYMENT_TOKEN_DECIMALS } from "@honeylemon/honeylemonjs/lib/src";
+import { MetamaskSubprovider, Web3JsProvider } from "@0x/subproviders";
+import {
+  HoneylemonService,
+  OrderbookService,
+  COLLATERAL_TOKEN_DECIMALS,
+  PAYMENT_TOKEN_DECIMALS
+} from "@honeylemon/honeylemonjs/lib/src";
 import { useOnboard } from "./OnboardContext";
-import { ethers } from 'ethers';
-import dayjs from 'dayjs';
-import utc from 'dayjs/plugin/utc';
+import { ethers } from "ethers";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
 import { BigNumber } from "@0x/utils";
-import * as Sentry from '@sentry/react';
+import * as Sentry from "@sentry/react";
 
 import { networkName } from "../helpers/ethereumNetworkUtils";
-import config from './HoneylemonConfig';
+import config from "./HoneylemonConfig";
 
 dayjs.extend(utc);
 
@@ -21,25 +26,26 @@ enum TokenType {
 }
 
 export enum PositionType {
-  Long = 'Long',
-  Short = 'Short'
+  Long = "Long",
+  Short = "Short"
 }
 
 export enum PositionStatus {
-  active = 'Active',
-  expiredAwaitingSettlement = 'Expired Awaiting Settlement',
-  withdrawalPending = 'Withdrawal Pending',
-  withdrawn = 'Withdrawn'
+  active = "Active",
+  expiredAwaitingSettlement = "Expired Awaiting Settlement",
+  withdrawalPending = "Withdrawal Pending",
+  withdrawn = "Withdrawn"
 }
 
-const COLLATERAL_TOKEN_NAME = process.env.REACT_APP_COLLATERAL_TOKEN_NAME || 'wBTC';
-const PAYMENT_TOKEN_NAME = process.env.REACT_APP_PAYMENT_TOKEN_NAME || 'USDT';
-const CONTRACT_COLLATERAL_RATIO = Number(process.env.REACT_APP_CONTRACT_COLLATERAL_RATIO) || 1.25;
-const MAINTENANCE_MODE = (process.env.REACT_APP_MAINTENANCE_MODE === 'true');
+const COLLATERAL_TOKEN_NAME = process.env.REACT_APP_COLLATERAL_TOKEN_NAME || "wBTC";
+const PAYMENT_TOKEN_NAME = process.env.REACT_APP_PAYMENT_TOKEN_NAME || "USDT";
+const CONTRACT_COLLATERAL_RATIO =
+  Number(process.env.REACT_APP_CONTRACT_COLLATERAL_RATIO) || 1.25;
+const MAINTENANCE_MODE = process.env.REACT_APP_MAINTENANCE_MODE === "true";
 
 type OrderSummary = {
-  price: number,
-  quantity: number,
+  price: number;
+  quantity: number;
 };
 
 export type HoneylemonContext = {
@@ -65,7 +71,7 @@ export type HoneylemonContext = {
     currentMRI: number;
     currentBTCSpotPrice: number;
     btcDifficultyAdjustmentDate: Date;
-  }
+  };
   portfolioData: {
     openOrdersMetadata: Array<OpenOrderMetadata>;
     openOrders: { [orderHash: string]: OpenOrder } | undefined;
@@ -73,9 +79,9 @@ export type HoneylemonContext = {
     activeShortPositions: Array<any>;
     expiredLongPositions: Array<any>;
     expiredShortPositions: Array<any>;
-  }
+  };
   orderbook: Array<OrderSummary>;
-  btcStats: any,
+  btcStats: any;
   isPortfolioRefreshing: boolean;
   isInMaintenanceMode: boolean;
   deployDSProxyContract(): Promise<void>;
@@ -88,11 +94,11 @@ export type HoneylemonProviderProps = {
 };
 
 export type OpenOrderMetadata = {
-  orderHash: string,
-  remainingFillableMakerAssetAmount: number,
-  price: BigNumber
+  orderHash: string;
+  remainingFillableMakerAssetAmount: number;
+  price: BigNumber;
   //TODO: update to use types once definitions have been added
-}
+};
 
 export type OpenOrder = {
   makerAddress: string;
@@ -104,43 +110,53 @@ export type OpenOrder = {
   makerFee: BigNumber;
   takerFee: BigNumber;
   expirationTimeSeconds: BigNumber;
-  expirationDate: Date,
-  listingDate: Date,
+  expirationDate: Date;
+  listingDate: Date;
   salt: BigNumber;
   makerAssetData: string;
   takerAssetData: string;
   makerFeeAssetData: string;
   takerFeeAssetData: string;
-}
+};
 
 export type ContractDetails = {
-  instrumentName: string,
-  duration: number,
-  startDate: Date,
-  expirationDate: Date,
-  settlementDate: Date,
-}
+  instrumentName: string;
+  duration: number;
+  startDate: Date;
+  expirationDate: Date;
+  settlementDate: Date;
+};
 
 const HoneylemonContext = React.createContext<HoneylemonContext | undefined>(undefined);
 
 const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
   const { wallet, network, isReady, address, notify, gasPrice } = useOnboard();
 
-  const [honeylemonService, setHoneylemonService] = useState<HoneylemonService | undefined>(undefined);
-  const [orderbookService, setOrderbookService] = useState<OrderbookService | undefined>(undefined);
+  const [honeylemonService, setHoneylemonService] = useState<
+    HoneylemonService | undefined
+  >(undefined);
+  const [orderbookService, setOrderbookService] = useState<OrderbookService | undefined>(
+    undefined
+  );
   const [collateralTokenBalance, setCollateralTokenBalance] = useState<number>(0);
   const [collateralTokenAllowance, setCollateralTokenAllowance] = useState<number>(0);
   const [paymentTokenBalance, setPaymentTokenBalance] = useState<number>(0);
   const [paymentTokenAllowance, setPaymentTokenAllowance] = useState<number>(0);
   const [isDsProxyDeployed, setIsDsProxyDeployed] = useState<boolean>(false);
-  const [dsProxyAddress, setDsProxyAddress] = useState<string>('');
+  const [dsProxyAddress, setDsProxyAddress] = useState<string>("");
   const [miningContracts, setMiningContracts] = useState<Array<any>>([]);
   const [currentMRI, setCurrentMRI] = useState(0);
   const [currentBTCSpotPrice, setCurrentBTCSpotPrice] = useState(0);
-  const [btcDifficultyAdjustmentDate, setBtcDifficultyAdjustmentDate] = useState(new Date());
+  const [btcDifficultyAdjustmentDate, setBtcDifficultyAdjustmentDate] = useState(
+    new Date()
+  );
   const [btcStats, setBtcStats] = useState<any>(undefined);
-  const [openOrdersMetadata, setOpenOrdersMetadata] = useState<Array<OpenOrderMetadata>>([]);
-  const [openOrders, setOpenOrders] = useState<{ [orderHash: string]: OpenOrder } | undefined>()
+  const [openOrdersMetadata, setOpenOrdersMetadata] = useState<Array<OpenOrderMetadata>>(
+    []
+  );
+  const [openOrders, setOpenOrders] = useState<
+    { [orderHash: string]: OpenOrder } | undefined
+  >();
   const [activeLongPositions, setActiveLongPositions] = useState([]);
   const [activeShortPositions, setActiveShortPositions] = useState([]);
   const [expiredLongPositions, setExpiredLongPositions] = useState([]);
@@ -152,77 +168,106 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
   const [showTokenInfoModal, setShowTokenInfoModal] = useState(false);
 
   const deployDSProxyContract = async () => {
-    if (!honeylemonService || !address) { 
-      console.log('Please connect a wallet to deploy a DSProxy Contract')
-      return; 
+    if (!honeylemonService || !address) {
+      console.log("Please connect a wallet to deploy a DSProxy Contract");
+      return;
     }
     try {
-      const dsProxyAddress = await honeylemonService.deployDSProxyContract(address, gasPrice);
+      const dsProxyAddress = await honeylemonService.deployDSProxyContract(
+        address,
+        gasPrice
+      );
       setIsDsProxyDeployed(true);
       setDsProxyAddress(dsProxyAddress);
     } catch (error) {
-      console.log('Something went wrong deploying the DS Proxy wallet');
+      console.log("Something went wrong deploying the DS Proxy wallet");
       console.log(error);
       Sentry.captureException(error);
-      throw new Error('Something went wrong deploying the honeylemon vault. Please try again.')
+      throw new Error(
+        "Something went wrong deploying the honeylemon vault. Please try again."
+      );
     }
-  }
+  };
 
   const approveToken = async (tokenType: TokenType, amount?: number): Promise<void> => {
-    if (!honeylemonService || !address) { 
-      console.log('Please connect a wallet to deploy a DSProxy Contract')
-      return; 
+    if (!honeylemonService || !address) {
+      console.log("Please connect a wallet to deploy a DSProxy Contract");
+      return;
     }
     try {
       switch (tokenType) {
         case TokenType.CollateralToken:
           await honeylemonService.approveCollateralToken(address, amount, gasPrice);
           const collateral = await honeylemonService.getCollateralTokenAmounts(address);
-          setCollateralTokenAllowance(Number(collateral.allowance.shiftedBy(-COLLATERAL_TOKEN_DECIMALS).toString()));
-          setCollateralTokenBalance(Number(collateral.balance.shiftedBy(-COLLATERAL_TOKEN_DECIMALS).toString()));
+          setCollateralTokenAllowance(
+            Number(collateral.allowance.shiftedBy(-COLLATERAL_TOKEN_DECIMALS).toString())
+          );
+          setCollateralTokenBalance(
+            Number(collateral.balance.shiftedBy(-COLLATERAL_TOKEN_DECIMALS).toString())
+          );
           break;
         case TokenType.PaymentToken:
           await honeylemonService.approvePaymentToken(address, amount, gasPrice);
           const payment = await honeylemonService.getPaymentTokenAmounts(address);
-          setCollateralTokenAllowance(Number(payment.allowance.shiftedBy(-PAYMENT_TOKEN_DECIMALS).toString()));
-          setCollateralTokenBalance(Number(payment.balance.shiftedBy(-PAYMENT_TOKEN_DECIMALS).toString()));
+          setCollateralTokenAllowance(
+            Number(payment.allowance.shiftedBy(-PAYMENT_TOKEN_DECIMALS).toString())
+          );
+          setCollateralTokenBalance(
+            Number(payment.balance.shiftedBy(-PAYMENT_TOKEN_DECIMALS).toString())
+          );
           break;
         default:
           break;
       }
     } catch (error) {
-      console.log('Something went wrong approving the tokens');
+      console.log("Something went wrong approving the tokens");
       console.log(error);
       Sentry.captureException(error);
-      const errorMessage = tokenType === TokenType.CollateralToken ?
-        `${COLLATERAL_TOKEN_NAME} approval failed. Please try again later.` :
-        `${PAYMENT_TOKEN_NAME} approval failed. Please try again later.`
+      const errorMessage =
+        tokenType === TokenType.CollateralToken
+          ? `${COLLATERAL_TOKEN_NAME} approval failed. Please try again later.`
+          : `${PAYMENT_TOKEN_NAME} approval failed. Please try again later.`;
 
-      throw Error(errorMessage)
+      throw Error(errorMessage);
     }
-  }
+  };
 
   const parseContractName = (contractName: string): ContractDetails => {
-    const [indexType, collateralInstrument, durationString, startDate] = contractName.split('-');
-    const duration = Number(durationString.replace('D', ''));
+    const [
+      indexType,
+      collateralInstrument,
+      durationString,
+      startDate
+    ] = contractName.split("-");
+    const duration = Number(durationString.replace("D", ""));
     return {
       instrumentName: `${indexType}-${collateralInstrument}`,
-      startDate: dayjs(startDate, { utc: true }).startOf('day').toDate(), //This will always be UTC 00:00 the date the contract was concluded
-      expirationDate: dayjs(startDate, { utc: true }).startOf('day').add(duration, 'd').toDate(),
-      settlementDate: dayjs(startDate, { utc: true }).startOf('day').add(duration + 1, 'd').toDate(),
-      duration,
-    }
-  }
+      startDate: dayjs(startDate, { utc: true })
+        .startOf("day")
+        .toDate(), //This will always be UTC 00:00 the date the contract was concluded
+      expirationDate: dayjs(startDate, { utc: true })
+        .startOf("day")
+        .add(duration, "d")
+        .toDate(),
+      settlementDate: dayjs(startDate, { utc: true })
+        .startOf("day")
+        .add(duration + 1, "d")
+        .toDate(),
+      duration
+    };
+  };
 
   const getPositionStatus = (position: any): PositionStatus => {
     if (!position?.contract.settlement) {
       return PositionStatus.active;
     } else {
-      if (!position.isRedeemed && !position.canRedeem) return PositionStatus.expiredAwaitingSettlement;
-      if (!position.isRedeemed && position.canRedeem) return PositionStatus.withdrawalPending;
+      if (!position.isRedeemed && !position.canRedeem)
+        return PositionStatus.expiredAwaitingSettlement;
+      if (!position.isRedeemed && position.canRedeem)
+        return PositionStatus.withdrawalPending;
       return PositionStatus.withdrawn;
     }
-  }
+  };
 
   const getPorfolio = async () => {
     if (!honeylemonService) return;
@@ -230,60 +275,98 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
       setIsPortfolioRefreshing(true);
 
       const openOrdersRes = await honeylemonService.getOpenOrders(address);
-      setOpenOrdersMetadata(openOrdersRes.records.map((openOrder: any) => openOrder.metaData))
-      setOpenOrders(Object.fromEntries(
-        openOrdersRes.records.map(((openOrder: any) => [openOrder.metaData.orderHash, {
-          ...openOrder.order,
-          expirationDate: dayjs(openOrder.order.expirationTimeSeconds.toNumber() * 1000).toDate(),
-          listingDate: dayjs(openOrder.order.expirationTimeSeconds.toNumber() * 1000).subtract(10, 'd').toDate()
-        }]))
-      ));
+      setOpenOrdersMetadata(
+        openOrdersRes.records.map((openOrder: any) => openOrder.metaData)
+      );
+      setOpenOrders(
+        Object.fromEntries(
+          openOrdersRes.records.map((openOrder: any) => [
+            openOrder.metaData.orderHash,
+            {
+              ...openOrder.order,
+              expirationDate: dayjs(
+                openOrder.order.expirationTimeSeconds.toNumber() * 1000
+              ).toDate(),
+              listingDate: dayjs(openOrder.order.expirationTimeSeconds.toNumber() * 1000)
+                .subtract(10, "d")
+                .toDate()
+            }
+          ])
+        )
+      );
 
       const positions = await honeylemonService.getPositions(address);
-      const allPositions = positions.longPositions.map((lp: any) => ({
-        ...lp,
-        contractName: lp.contractName + '-long',
-        type: PositionType.Long
-      })).concat(positions.shortPositions.map((sp: any) => ({
-        ...sp,
-        contractName: sp.contractName + '-short',
-        type: PositionType.Short
-      }))).map((p: any) => {
-        return {
-          ...p,
-          daysToExpiration: Math.ceil(dayjs(p.contract.expiration * 1000).diff(dayjs(), 'd', true)),
-          pendingReward: Number(p.pendingReward?.shiftedBy(-COLLATERAL_TOKEN_DECIMALS).toString()) || 0,
-          finalReward: Number(p.finalReward?.shiftedBy(-COLLATERAL_TOKEN_DECIMALS).toString()) || 0,
-          totalCost: Number(new BigNumber(p.price).multipliedBy(p.qtyToMint).toString()),
-          totalCollateralLocked: Number(new BigNumber(p.contract.collateralPerUnit).multipliedBy(p.qtyToMint).shiftedBy(-COLLATERAL_TOKEN_DECIMALS).toString()),
-          canBeBatchRedeemed: (p.type === PositionType.Long) ?
-            (p.longTokenDSProxy !== p.longTokenRecipient.id) :
-            (p.shortTokenDSProxy !== p.shortTokenRecipient.id),
-          ...parseContractName(p.contractName),
-          status: getPositionStatus(p),
-        }
-      });
+      const allPositions = positions.longPositions
+        .map((lp: any) => ({
+          ...lp,
+          contractName: lp.contractName + "-long",
+          type: PositionType.Long
+        }))
+        .concat(
+          positions.shortPositions.map((sp: any) => ({
+            ...sp,
+            contractName: sp.contractName + "-short",
+            type: PositionType.Short
+          }))
+        )
+        .map((p: any) => {
+          return {
+            ...p,
+            daysToExpiration: Math.ceil(
+              dayjs(p.contract.expiration * 1000).diff(dayjs(), "d", true)
+            ),
+            pendingReward:
+              Number(p.pendingReward?.shiftedBy(-COLLATERAL_TOKEN_DECIMALS).toString()) ||
+              0,
+            finalReward:
+              Number(p.finalReward?.shiftedBy(-COLLATERAL_TOKEN_DECIMALS).toString()) ||
+              0,
+            totalCost: Number(
+              new BigNumber(p.price).multipliedBy(p.qtyToMint).toString()
+            ),
+            totalCollateralLocked: Number(
+              new BigNumber(p.contract.collateralPerUnit)
+                .multipliedBy(p.qtyToMint)
+                .shiftedBy(-COLLATERAL_TOKEN_DECIMALS)
+                .toString()
+            ),
+            canBeBatchRedeemed:
+              p.type === PositionType.Long
+                ? p.longTokenDSProxy !== p.longTokenRecipient.id
+                : p.shortTokenDSProxy !== p.shortTokenRecipient.id,
+            ...parseContractName(p.contractName),
+            status: getPositionStatus(p)
+          };
+        });
 
-      const newActiveLongPositions = allPositions.filter((p: any) => p.status === PositionStatus.active && p.type === PositionType.Long)
+      const newActiveLongPositions = allPositions.filter(
+        (p: any) => p.status === PositionStatus.active && p.type === PositionType.Long
+      );
       setActiveLongPositions(newActiveLongPositions);
 
-      const newActiveShortPositions = allPositions.filter((p: any) => p.status === PositionStatus.active && p.type === PositionType.Short)
+      const newActiveShortPositions = allPositions.filter(
+        (p: any) => p.status === PositionStatus.active && p.type === PositionType.Short
+      );
       setActiveShortPositions(newActiveShortPositions);
 
-      const newExpiredLongPositions = allPositions.filter((p: any) => p.status !== PositionStatus.active && p.type === PositionType.Long)
+      const newExpiredLongPositions = allPositions.filter(
+        (p: any) => p.status !== PositionStatus.active && p.type === PositionType.Long
+      );
       setExpiredLongPositions(newExpiredLongPositions);
 
-      const newExpiredShortPositions = allPositions.filter((p: any) => p.status !== PositionStatus.active && p.type === PositionType.Short)
+      const newExpiredShortPositions = allPositions.filter(
+        (p: any) => p.status !== PositionStatus.active && p.type === PositionType.Short
+      );
       setExpiredShortPositions(newExpiredShortPositions);
     } catch (error) {
       Sentry.captureException(error);
-      console.log('There was an error getting the market data')
+      console.log("There was an error getting the market data");
     } finally {
       setIsPortfolioRefreshing(false);
     }
-  }
+  };
 
-  const validNetworks = Object.keys(config).map(network => Number(network))
+  const validNetworks = Object.keys(config).map(network => Number(network));
 
   // Instantiate honeylemon service and get all initial user data
   useEffect(() => {
@@ -292,13 +375,17 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
       const initHoneylemonService = async () => {
         try {
           let wrappedSubprovider;
-          const web3 = new Web3(wallet.provider)
+          const web3 = new Web3(wallet.provider);
           switch (wallet.name) {
-            case 'MetaMask':
-              wrappedSubprovider = new MetamaskSubprovider(web3.currentProvider as Web3JsProvider);
+            case "MetaMask":
+              wrappedSubprovider = new MetamaskSubprovider(
+                web3.currentProvider as Web3JsProvider
+              );
               break;
             default:
-              wrappedSubprovider = new MetamaskSubprovider(web3.currentProvider as Web3JsProvider);
+              wrappedSubprovider = new MetamaskSubprovider(
+                web3.currentProvider as Web3JsProvider
+              );
           }
 
           const honeylemonService = new HoneylemonService(
@@ -310,16 +397,20 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
             config[network].marketContractProxy,
             config[network].collateralTokenAddress,
             config[network].paymentTokenAddress,
-            contractDuration,
+            contractDuration
           );
           setHoneylemonService(honeylemonService);
           const collateral = await honeylemonService.getCollateralTokenAmounts(address);
-          setCollateralTokenAllowance(Number(collateral.allowance.shiftedBy(-8).toString()));
+          setCollateralTokenAllowance(
+            Number(collateral.allowance.shiftedBy(-8).toString())
+          );
           setCollateralTokenBalance(Number(collateral.balance.shiftedBy(-8).toString()));
           const payment = await honeylemonService.getPaymentTokenAmounts(address);
           setPaymentTokenAllowance(Number(payment.allowance.shiftedBy(-6).toString()));
           setPaymentTokenBalance(Number(payment.balance.shiftedBy(-6).toString()));
-          const proxyDeployed: boolean = await honeylemonService.addressHasDSProxy(address)
+          const proxyDeployed: boolean = await honeylemonService.addressHasDSProxy(
+            address
+          );
           setIsDsProxyDeployed(proxyDeployed);
           if (proxyDeployed) {
             const proxyAddress = await honeylemonService.getDSProxyAddress(address);
@@ -329,13 +420,16 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
           setIsDailyContractDeployed(isContractDeployed);
           if (address && notify) {
             const { emitter } = notify.account(address);
-            const etherscanUrl = (network === 1) ? 'https://etherscan.io' : `https://${networkName(network)}.etherscan.io`
-            emitter.on('all', tx => ({
+            const etherscanUrl =
+              network === 1
+                ? "https://etherscan.io"
+                : `https://${networkName(network)}.etherscan.io`;
+            emitter.on("all", tx => ({
               onclick: () => window.open(`${etherscanUrl}/tx/${tx.hash}`) // TODO: update this to work on other networks
-            }))
+            }));
           }
         } catch (error) {
-          console.log('Error initializing Honeylemon context');
+          console.log("Error initializing Honeylemon context");
           Sentry.captureEvent(error);
         }
       };
@@ -343,31 +437,32 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
 
       return () => {
         setHoneylemonService(undefined);
-        setCollateralTokenAllowance(0)
+        setCollateralTokenAllowance(0);
         setCollateralTokenBalance(0);
         setPaymentTokenAllowance(0);
         setPaymentTokenBalance(0);
         setIsDsProxyDeployed(false);
-        setDsProxyAddress('');
+        setDsProxyAddress("");
         notify?.unsubscribe(address || "0x");
-      }
+      };
     }
   }, [wallet, network, isReady, address]);
 
   // Instantiate Orderbook service
   useEffect(() => {
     const initOrderbookService = async () => {
-      const activeNetwork = network || validNetworks[0];
+      const activeNetwork =
+        network && validNetworks.includes(network) ? network : validNetworks[0];
       const orderbookServiceInstance = new OrderbookService(
         config[activeNetwork].apiUrl,
         config[activeNetwork].minterBridgeAddress,
         config[activeNetwork].marketContractProxy,
-        config[activeNetwork].paymentTokenAddress,
+        config[activeNetwork].paymentTokenAddress
       );
       setOrderbookService(orderbookServiceInstance);
-    }
+    };
     initOrderbookService();
-  }, []);
+  }, [network]);
 
   // Order book poller
   useEffect(() => {
@@ -376,19 +471,25 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
         try {
           const orderbookResponse = await orderbookService.getOrderbook();
           const book = orderbookResponse.asks.records
-            .filter((order: any) => new BigNumber(order.metaData.remainingFillableMakerAssetAmount).gt(0))
+            .filter((order: any) =>
+              new BigNumber(order.metaData.remainingFillableMakerAssetAmount).gt(0)
+            )
             .map((order: any) => ({
-              price: Number(new BigNumber(order.metaData.price).dividedBy(contractDuration).toString()),
-              quantity: Number(new BigNumber(order.metaData.remainingFillableMakerAssetAmount).toString())
+              price: Number(
+                new BigNumber(order.metaData.price).dividedBy(contractDuration).toString()
+              ),
+              quantity: Number(
+                new BigNumber(order.metaData.remainingFillableMakerAssetAmount).toString()
+              )
             }));
-          setOrderbook(book)
+          setOrderbook(book);
         } catch (error) {
-          console.log('There was an error getting the orderbook.')
+          console.log("There was an error getting the orderbook.");
           console.log(error);
           Sentry.captureException(error);
         }
       }
-    }
+    };
 
     let poller: NodeJS.Timeout;
     getOrderbookData();
@@ -396,9 +497,8 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
 
     return () => {
       clearInterval(poller);
-    }
-  }, [orderbookService, contractDuration])
-
+    };
+  }, [orderbookService, contractDuration]);
 
   // Market Data Poller
   useEffect(() => {
@@ -406,18 +506,22 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
       try {
         const marketDataApiUrl = process.env.REACT_APP_MARKET_DATA_API_URL;
         if (marketDataApiUrl) {
-          const { contracts } = await (await fetch(`${marketDataApiUrl}/blockchain/agg?coin=BTC`)).json();
-          const stats = await (await fetch(`${marketDataApiUrl}/blockchain/stats`)).json();
+          const { contracts } = await (
+            await fetch(`${marketDataApiUrl}/blockchain/agg?coin=BTC`)
+          ).json();
+          const stats = await (
+            await fetch(`${marketDataApiUrl}/blockchain/stats`)
+          ).json();
           setMiningContracts(contracts);
           setCurrentBTCSpotPrice(stats.quote?.price);
           setCurrentMRI(stats.mri);
           setBtcStats(stats);
         }
       } catch (error) {
-        console.log('There was an error getting the market data')
+        console.log("There was an error getting the market data");
         Sentry.captureException(error);
       }
-    }
+    };
 
     let poller: NodeJS.Timeout;
     getMarketData();
@@ -425,8 +529,8 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
 
     return () => {
       clearInterval(poller);
-    }
-  }, [])
+    };
+  }, []);
 
   // Portfolio Data Poller
   useEffect(() => {
@@ -436,7 +540,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
       if (!isPortfolioRefreshing) {
         await getPorfolio();
       }
-    }
+    };
 
     if (honeylemonService && address) {
       getPortfolioData();
@@ -444,8 +548,8 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
     }
     return () => {
       clearInterval(poller);
-    }
-  }, [honeylemonService, address])
+    };
+  }, [honeylemonService, address]);
 
   // Difficulty Adjustment Date
   useEffect(() => {
@@ -453,19 +557,23 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
       try {
         const btcStatsUrl = process.env.REACT_APP_BTC_STATS_URL;
         if (btcStatsUrl) {
-          const { currentBlockHeight, avgBlockTime } = await (await fetch(btcStatsUrl)).json()
+          const { currentBlockHeight, avgBlockTime } = await (
+            await fetch(btcStatsUrl)
+          ).json();
           const currentEpochBlocks = currentBlockHeight % 2016;
           const remainingEpochTime = (2016 - currentEpochBlocks) * avgBlockTime;
-          const date = dayjs().utc().add(remainingEpochTime, 's');
+          const date = dayjs()
+            .utc()
+            .add(remainingEpochTime, "s");
           setBtcDifficultyAdjustmentDate(date.toDate());
         }
       } catch (error) {
         Sentry.captureException(error);
-        console.log('Error getting next difficulty adjustment date');
+        console.log("Error getting next difficulty adjustment date");
       }
-    }
-    getDifficultyAdjustmentDate()
-  }, [])
+    };
+    getDifficultyAdjustmentDate();
+  }, []);
 
   // Transfer & Approval event listeners for Payment & Collateral Tokens
   useEffect(() => {
@@ -477,7 +585,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
       const payment = await honeylemonService.getPaymentTokenAmounts(address);
       setPaymentTokenAllowance(Number(payment.allowance.shiftedBy(-6).toString()));
       setPaymentTokenBalance(Number(payment.balance.shiftedBy(-6).toString()));
-    }
+    };
     if (honeylemonService && address) {
       checkBalancesAndApprovals();
 
@@ -489,39 +597,74 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
         "function balanceOf(address who) view returns (uint256)",
         "function allowance(address owner, address spender) view returns (uint256)",
         "event Transfer(address indexed from, address indexed to, uint256 value)",
-        "event Approval(address indexed owner, address indexed spender, uint256 value)",
-      ]
+        "event Approval(address indexed owner, address indexed spender, uint256 value)"
+      ];
 
       let provider = new ethers.providers.Web3Provider(honeylemonService.provider);
       const paymentTokenContractAddress = honeylemonService.paymentTokenAddress;
-      const paymentTokenContract = new ethers.Contract(paymentTokenContractAddress, erc20Abi, provider);
+      const paymentTokenContract = new ethers.Contract(
+        paymentTokenContractAddress,
+        erc20Abi,
+        provider
+      );
       const filterPaymentTokenApproval = paymentTokenContract.filters.Approval(address);
-      const transferPaymentTokenFrom = paymentTokenContract.filters.Transfer(address, null, null);
-      const transferPaymentTokenTo = paymentTokenContract.filters.Transfer(null, address, null);
-      paymentTokenContract.on(filterPaymentTokenApproval, () => checkBalancesAndApprovals())
-      paymentTokenContract.on(transferPaymentTokenFrom, () => checkBalancesAndApprovals())
-      paymentTokenContract.on(transferPaymentTokenTo, () => checkBalancesAndApprovals())
+      const transferPaymentTokenFrom = paymentTokenContract.filters.Transfer(
+        address,
+        null,
+        null
+      );
+      const transferPaymentTokenTo = paymentTokenContract.filters.Transfer(
+        null,
+        address,
+        null
+      );
+      paymentTokenContract.on(filterPaymentTokenApproval, () =>
+        checkBalancesAndApprovals()
+      );
+      paymentTokenContract.on(transferPaymentTokenFrom, () =>
+        checkBalancesAndApprovals()
+      );
+      paymentTokenContract.on(transferPaymentTokenTo, () => checkBalancesAndApprovals());
 
       const collateralTokenContractAddress = honeylemonService.collateralTokenAddress;
-      const collateralTokenContract = new ethers.Contract(collateralTokenContractAddress, erc20Abi, provider);
-      const filterCollateralTokenApproval = collateralTokenContract.filters.Approval(address);
-      const transferCollateralTokenFrom = collateralTokenContract.filters.Transfer(address, null, null);
-      const transferCollateralTokenTo = collateralTokenContract.filters.Transfer(null, address, null);
+      const collateralTokenContract = new ethers.Contract(
+        collateralTokenContractAddress,
+        erc20Abi,
+        provider
+      );
+      const filterCollateralTokenApproval = collateralTokenContract.filters.Approval(
+        address
+      );
+      const transferCollateralTokenFrom = collateralTokenContract.filters.Transfer(
+        address,
+        null,
+        null
+      );
+      const transferCollateralTokenTo = collateralTokenContract.filters.Transfer(
+        null,
+        address,
+        null
+      );
 
-      collateralTokenContract.on(filterCollateralTokenApproval, () => checkBalancesAndApprovals())
-      collateralTokenContract.on(transferCollateralTokenFrom, () => checkBalancesAndApprovals())
-      collateralTokenContract.on(transferCollateralTokenTo, () => checkBalancesAndApprovals())
+      collateralTokenContract.on(filterCollateralTokenApproval, () =>
+        checkBalancesAndApprovals()
+      );
+      collateralTokenContract.on(transferCollateralTokenFrom, () =>
+        checkBalancesAndApprovals()
+      );
+      collateralTokenContract.on(transferCollateralTokenTo, () =>
+        checkBalancesAndApprovals()
+      );
       return () => {
-        paymentTokenContract.removeAllListeners(filterPaymentTokenApproval)
-        paymentTokenContract.removeAllListeners(transferPaymentTokenFrom)
-        paymentTokenContract.removeAllListeners(transferPaymentTokenTo)
-        collateralTokenContract.removeAllListeners(filterCollateralTokenApproval)
-        collateralTokenContract.removeAllListeners(transferCollateralTokenFrom)
-        collateralTokenContract.removeAllListeners(transferCollateralTokenTo)
-      }
+        paymentTokenContract.removeAllListeners(filterPaymentTokenApproval);
+        paymentTokenContract.removeAllListeners(transferPaymentTokenFrom);
+        paymentTokenContract.removeAllListeners(transferPaymentTokenTo);
+        collateralTokenContract.removeAllListeners(filterCollateralTokenApproval);
+        collateralTokenContract.removeAllListeners(transferCollateralTokenFrom);
+        collateralTokenContract.removeAllListeners(transferCollateralTokenTo);
+      };
     }
-
-  }, [honeylemonService, address])
+  }, [honeylemonService, address]);
 
   return (
     <HoneylemonContext.Provider
@@ -545,7 +688,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
           miningContracts,
           currentBTCSpotPrice,
           currentMRI,
-          btcDifficultyAdjustmentDate,
+          btcDifficultyAdjustmentDate
         },
         portfolioData: {
           activeLongPositions,
@@ -553,7 +696,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
           openOrders,
           openOrdersMetadata,
           expiredLongPositions,
-          expiredShortPositions,
+          expiredShortPositions
         },
         orderbook,
         btcStats,
@@ -564,11 +707,12 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
         showTokenInfoModal,
         setShowTokenInfoModal,
         isInMaintenanceMode: MAINTENANCE_MODE
-      }}>
+      }}
+    >
       {children}
     </HoneylemonContext.Provider>
   );
-}
+};
 
 function useHoneylemon() {
   const context = React.useContext(HoneylemonContext);

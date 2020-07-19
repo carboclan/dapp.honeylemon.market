@@ -32,8 +32,8 @@ There are 3 main roles in the protocol: the Honeylemon **admin**, **Miner** and 
 #### **Miner \(short trader\)**
 
 1. Miner goes to the UI.
-2. Miner enters the sale price and amount of TH they want to sell. The UI shows required imBTC collateral and whether there’s enough in the wallet \(otherwise order can’t be created\).
-3. Gives approval to draw the collateral token \(imBTC\) from their wallet. MetaMask popup with ETH transaction - once per address.
+2. Miner enters the sale price and amount of TH they want to sell. The UI shows required wBTC collateral and whether there’s enough in the wallet \(otherwise order can’t be created\).
+3. Gives approval to draw the collateral token \(wBTC\) from their wallet. MetaMask popup with ETH transaction - once per address.
 4. The UI constructs a 0x order, opens MetaMask to sign it \(no transaction, just signature\).
 5. Order is sent to the server to be stored in a DB \(0x relayer / mesh node\)
 6. The miner optionally can ask the server to remove the order. Canceled orders require on-chain transactions.
@@ -47,7 +47,7 @@ There are 3 main roles in the protocol: the Honeylemon **admin**, **Miner** and 
 3. Gives approval to draw USDT token from their wallet. MetaMask popup with ETH transaction - once per address.
 4. Investor submits Ethereum transaction to fill the order with 0x protocol
 5. Once the tx is mined both miner and investor receive Market position tokens
-6. After contract settlement investor can claim imBTC reward from MarketCollateralPool contract by calling `MakerCollateralPool.settleAndClose`.
+6. After contract settlement investor can claim wBTC reward from MarketCollateralPool contract by calling `MakerCollateralPool.settleAndClose`.
 
 ## **DSProxy wallets**
 

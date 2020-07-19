@@ -30,11 +30,12 @@ module.exports = {
             },
             parallel: 2,
             cache: true,
-            sourceMap: false,
+            sourceMap: true,
             extractComments: false
           })
         ]
-      }
+      },
+      devtool: "source-map"
     })
   }
 };

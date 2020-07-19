@@ -6,16 +6,16 @@
   "engines": {
     "node": ">=0.10.3 <0.12"
   },
-  "dependencies": {
+  "dependencies": {},
+  "devDependencies": {
+    "@sentry/cli": "1.55.0",
+    "chalk": "^2.0.1",
+    "husky": "^4.2.3",
     "prettier": "1.19.1",
     "prettier-plugin-solidity": "1.0.0-alpha.49",
     "pretty-quick": "^2.0.1",
-    "husky": "^4.2.3"
-  },
-  "devDependencies": {
-    "chalk": "^2.0.1",
-    "wsrun": "^3.6.5",
-    "typescript": "3.9.5"
+    "typescript": "3.9.5",
+    "wsrun": "^3.6.5"
   },
   "scripts": {
     "build:contracts": "yarn wsrun -p @honeylemon/contracts -c build",
@@ -25,6 +25,7 @@
     "start:webapp": "yarn wsrun -p @honeylemon/webapp -c start",
     "test:contracts": "yarn wsrun -p @honeylemon/contracts -c test",
     "test:integration": "make local-reset && yarn wsrun -p @honeylemon/contracts -c integration-proxy-redemption && make local-reset && yarn wsrun -p @honeylemon/contracts -c integration-order-redemption && make local-reset && yarn wsrun -p @honeylemon/contracts -c integration-trade-lifecycle",
+    "release:webapp": "yarn wsrun -p @honeylemon/webapp -c release",
     "clean": "rm -rf ./node_modules && rm -rf ./*/node_modules",
     "lint": "npm run prettier -- --write",
     "prettier": "prettier './**/*.js' './**/*.sol' './**/*.md'"

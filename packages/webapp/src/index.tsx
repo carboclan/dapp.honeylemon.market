@@ -1,17 +1,25 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import App from './App';
-import * as serviceWorker from './serviceWorker';
-import 'typeface-montserrat';
-import './App.css';
-import * as Sentry from '@sentry/react';
+import React from "react";
+import ReactDOM from "react-dom";
+import App from "./App";
+import * as serviceWorker from "./serviceWorker";
+import "typeface-montserrat";
+import "./App.css";
+import * as Sentry from "@sentry/react";
 
-Sentry.init({dsn: "https://9b6507fbe15848f2aea20a9d65d048d3@o418372.ingest.sentry.io/5320855"});
+if (
+  process.env.NODE_ENV === "production" &&
+  process.env.REACT_APP_SENTRY_RELEASE &&
+  process.env.REACT_APP_SENTRY_DSN_URL
+) {
+  Sentry.init({
+    dsn: process.env.REACT_APP_SENTRY_DSN_URL,
+    release: process.env.REACT_APP_SENTRY_RELEASE,
+    environment: process.env.REACT_APP_SENTRY_ENV,
+    debug: true
+  });
+}
 
-ReactDOM.render(
-  <App />,
-  document.getElementById('root')
-);
+ReactDOM.render(<App />, document.getElementById("root"));
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.

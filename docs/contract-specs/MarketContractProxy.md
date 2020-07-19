@@ -76,7 +76,7 @@ modifier onlyMinterBridge() internal
 
 ## Functions
 
-- [(address _marketContractFactoryMPX, address _honeyLemonOracle, address _minterBridge, address _imBTCTokenAddress)](#)
+- [(address _marketContractFactoryMPX, address _honeyLemonOracle, address _minterBridge, address _wBTCTokenAddress)](#)
 - [setOracleAddress(address _honeyLemonOracleAddress)](#setoracleaddress)
 - [setMinterBridgeAddress(address _minterBridgeAddress)](#setminterbridgeaddress)
 - [setMarketContractSpecs(uint256[7] _params)](#setmarketcontractspecs)
@@ -105,7 +105,7 @@ modifier onlyMinterBridge() internal
 constructor
 
 ```js
-function (address _marketContractFactoryMPX, address _honeyLemonOracle, address _minterBridge, address _imBTCTokenAddress) public nonpayable
+function (address _marketContractFactoryMPX, address _honeyLemonOracle, address _minterBridge, address _wBTCTokenAddress) public nonpayable
 ```
 
 **Arguments**
@@ -115,7 +115,7 @@ function (address _marketContractFactoryMPX, address _honeyLemonOracle, address 
 | _marketContractFactoryMPX | address | market contract factory address | 
 | _honeyLemonOracle | address | honeylemon oracle address | 
 | _minterBridge | address | 0x minter bridge address | 
-| _imBTCTokenAddress | address | imBTC token address | 
+| _wBTCTokenAddress | address | wBTC token address | 
 
 ### setOracleAddress
 
@@ -231,7 +231,7 @@ TH amount
 
 | Name        | Type           | Description  |
 | ------------- |------------- | -----|
-| makerAddress | address | address or BTC(imBTC) owner | 
+| makerAddress | address | address or BTC(wBTC) owner | 
 
 ### getLatestMarketContract
 

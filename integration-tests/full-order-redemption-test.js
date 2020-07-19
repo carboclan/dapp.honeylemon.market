@@ -35,7 +35,7 @@ const assert = require("assert").strict;
 const pc = new PayoutCalculator();
 
 // Token mocks
-const CollateralToken = artifacts.require("CollateralToken"); // IMBTC
+const CollateralToken = artifacts.require("CollateralToken"); // wBTC
 const PaymentToken = artifacts.require("PaymentToken"); // USDC
 const PositionToken = artifacts.require("PositionToken"); // To create the Long & Short tokens
 
@@ -51,7 +51,7 @@ const MarketCollateralPool = artifacts.require("MarketCollateralPool");
 // Calculation constants
 const necessaryCollateralRatio = 0.25; // for 125% collateralization
 const multiplier = 28; // contract duration in days
-const collateralDecimals = 1e8; // scaling for imBTC (8 decimal points)
+const collateralDecimals = 1e8; // scaling for wBTC (8 decimal points)
 
 // simulation inputs
 const startingDay = 35; // Start date for day payout-calculator beginning contract date
@@ -69,7 +69,7 @@ async function runExport() {
   let balanceTracker = {};
   async function recordBalances(timeLabel) {
     balanceTracker[timeLabel] = {};
-    balanceTracker[timeLabel]["Maker imBTC"] = (
+    balanceTracker[timeLabel]["Maker wBTC"] = (
       await collateralToken.balanceOf(makerAddress)
     ).toString();
     balanceTracker[timeLabel]["Maker USDC"] = (
@@ -81,7 +81,7 @@ async function runExport() {
     balanceTracker[timeLabel]["Maker Short"] = (
       await shortToken.balanceOf(makerAddress)
     ).toString();
-    balanceTracker[timeLabel]["Taker imBTC"] = (
+    balanceTracker[timeLabel]["Taker wBTC"] = (
       await collateralToken.balanceOf(takerAddress)
     ).toString();
     balanceTracker[timeLabel]["Taker USDC"] = (
@@ -201,8 +201,8 @@ async function runExport() {
    *********************/
   console.log("2. Generating 0x order...");
 
-  // Taker token is imBTC sent to collateralize the contractWe use CollateralToken.
-  // This is imBTC sent from the investor to the Market protocol contract
+  // Taker token is wBTC sent to collateralize the contractWe use CollateralToken.
+  // This is wBTC sent from the investor to the Market protocol contract
   const takerToken = { address: paymentToken.address };
 
   // 0x sees the marketContractProxy as the maker token. This has a `balanceOf` method to get 0x
@@ -237,11 +237,11 @@ async function runExport() {
       Amount: (mriInput * (1 + necessaryCollateralRatio)).toFixed(8),
       Description: "Maximum MRI value that can be achieved in market"
     },
-    "Taker expected long(imBTC)": {
+    "Taker expected long(wBTC)": {
       Amount: (mriInput * 28 * makerAmountToMint).toFixed(8),
       Description: "Long value in BTC if current MRI continues over contract duration"
     },
-    "Maker required collateral(imBTC)": {
+    "Maker required collateral(wBTC)": {
       Amount: contractSpecs[1].toNumber() * makerAmountToMint,
       Description: "Satoshi the position will cost in collateral for the miner"
     }
@@ -266,7 +266,7 @@ async function runExport() {
     }
   );
 
-  // Approve the contract wrapper from 0x to pull imBTC from the maker(miner)
+  // Approve the contract wrapper from 0x to pull wBTC from the maker(miner)
   await collateralToken.approve(
     minterBridge.address,
     new BigNumber(2).pow(256).minus(1),
@@ -385,7 +385,7 @@ async function runExport() {
    ***********************************************************/
 
   console.log("6. Validating token balance transfers...");
-  console.log("6.1 Correct imBTC collateral from maker👇");
+  console.log("6.1 Correct wBTC collateral from maker👇");
   // Upper Bound = Miner Revenue Index * (1 + Necessary Collateral Ratio)
   // Necessary Collateral = Upper Bound * Multiplier
   const upperBound = mriInput * (1 + necessaryCollateralRatio); //1 + 0.25
@@ -396,12 +396,12 @@ async function runExport() {
     .multipliedBy(new BigNumber(collateralDecimals))
     .multipliedBy(new BigNumber(makerAmountToMint));
 
-  const actualCollateralTaken = // Difference in imBTC balance before and after 0x order
-    balanceTracker["Before 0x order"]["Maker imBTC"] -
-    balanceTracker["After 0x order"]["Maker imBTC"];
-  console.log("\t -> Actual imBTC Taken as collateral from miner", actualCollateralTaken);
+  const actualCollateralTaken = // Difference in wBTC balance before and after 0x order
+    balanceTracker["Before 0x order"]["Maker wBTC"] -
+    balanceTracker["After 0x order"]["Maker wBTC"];
+  console.log("\t -> Actual wBTC Taken as collateral from miner", actualCollateralTaken);
   console.log(
-    "\t -> expected imBTC Taken as collateral from miner",
+    "\t -> expected wBTC Taken as collateral from miner",
     expectedCollateralTaken
   );
 
@@ -453,8 +453,8 @@ async function runExport() {
     .multipliedBy(new BigNumber(lookedBackMRI))
     .multipliedBy(new BigNumber(collateralDecimals));
   const actualLongRedemption =
-    balanceTracker["After redemption"]["Taker imBTC"] -
-    balanceTracker["After 0x order"]["Taker imBTC"];
+    balanceTracker["After redemption"]["Taker wBTC"] -
+    balanceTracker["After 0x order"]["Taker wBTC"];
   console.log("\t -> Actual BTC redeemed for long token(Investor)", actualLongRedemption);
   console.log(
     "\t -> Expected BTC redeemed for long token(Investor)",
@@ -470,8 +470,8 @@ async function runExport() {
   // SHORT (miner holding tokens)
   const expectedShortRedemption = expectedCollateralTaken - expectedLongRedemption;
   const actualShortRedemption =
-    balanceTracker["After redemption"]["Maker imBTC"] -
-    balanceTracker["After 0x order"]["Maker imBTC"];
+    balanceTracker["After redemption"]["Maker wBTC"] -
+    balanceTracker["After 0x order"]["Maker wBTC"];
   console.log("\t -> Actual BTC redeemed for short token(Miner)", actualShortRedemption);
   console.log(
     "\t -> Expected BTC redeemed for short token(Miner)",
