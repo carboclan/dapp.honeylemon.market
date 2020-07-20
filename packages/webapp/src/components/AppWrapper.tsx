@@ -370,8 +370,8 @@ function AppWrapper(props: { children: ReactNode }) {
         <Divider />
         <List>
           {network !== 1 &&
-            <ListItem>
-              <ListItemText inset className={classes.menuHeading}>
+            <ListItem className={classes.menuHeading}>
+              <ListItemText inset >
                 <b>Network: {networkName(network).toUpperCase()}</b>
               </ListItemText>
             </ListItem>
