@@ -301,28 +301,30 @@ const BuyContractPage: React.SFC = () => {
       );
 
       const orderGasPrice = Number(`${gasPrice}e9`);
+      console.log(`Order Gas Price: ${orderGasPrice}`);
+
       const value = await honeylemonService.get0xFeeForOrderBatch(
         orderGasPrice,
         resultOrders.length
       );
-
-
+      console.log(`0x Order Fee: ${value.toString()}`);
       const gasEstimate = await honeylemonService.estimateGas(
         resultOrders,
         takerAssetFillAmounts,
         address,
         orderGasPrice,
       );
-
+      console.log(`Order Gas Estimate: ${gasEstimate.toString()}`);
+      
       const gasLimit = new BigNumber(gasEstimate).multipliedBy(1.5).decimalPlaces(0).toString();
-
+      console.log(`Order Gas Limit: ${gasLimit.toString()}`);
       // Hack to ensure imToken doesnt break
       // @ts-ignore
-      (!!window.imToken) ?
-      await tx.awaitTransactionSuccessAsync({
-        from: address,
-        value
-      }) :  
+      // (!!window.imToken) ?
+      // await tx.awaitTransactionSuccessAsync({
+      //   from: address,
+      //   value
+      // }) :  
       await tx.awaitTransactionSuccessAsync({
         from: address,
         gas: gasLimit,
