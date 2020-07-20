@@ -153,9 +153,9 @@ const BuyContractPage: React.SFC = () => {
 
   useEffect(() => {
     const getQuoteForBudget = async () => {
-      if (!honeylemonService) { 
+      if (!honeylemonService) {
         console.log('Please connect a wallet to deploy a DSProxy Contract')
-        return; 
+        return;
       }
       try {
         const result = await honeylemonService.getQuoteForBudget(budget);
@@ -186,9 +186,9 @@ const BuyContractPage: React.SFC = () => {
     }
 
     const getQuoteForSize = async () => {
-      if (!honeylemonService) { 
+      if (!honeylemonService) {
         console.log('Please connect a wallet to deploy a DSProxy Contract')
-        return; 
+        return;
       }
       try {
         const result = await honeylemonService.getQuoteForSize(new BigNumber(orderQuantity))
@@ -293,6 +293,7 @@ const BuyContractPage: React.SFC = () => {
     }
     setTxActive(true);
     setErrorMessage('')
+
     try {
       await refreshGasPrice();
       const tx = await honeylemonService.getFillOrdersTx(
@@ -319,16 +320,16 @@ const BuyContractPage: React.SFC = () => {
       // Hack to ensure imToken doesnt break
       // @ts-ignore
       (!!window.imToken) ?
-      await tx.awaitTransactionSuccessAsync({
-        from: address,
-        value
-      }) :  
-      await tx.awaitTransactionSuccessAsync({
-        from: address,
-        gas: gasLimit,
-        gasPrice: orderGasPrice,
-        value
-      });
+        await tx.awaitTransactionSuccessAsync({
+          from: address,
+          value
+        }) :
+        await tx.awaitTransactionSuccessAsync({
+          from: address,
+          gas: gasLimit,
+          gasPrice: orderGasPrice,
+          value
+        });
       setShowBuyModal(false);
       forwardTo('/portfolio')
     } catch (error) {
@@ -572,7 +573,7 @@ const BuyContractPage: React.SFC = () => {
                       <TableCell colSpan={2}>
                         <Typography variant='caption' color='secondary'>
                           Suggest to increase your contract total to above 100 {PAYMENT_TOKEN_NAME} due to recent high fees in ethereum network.
-                            See <Link href='https://docs.honeylemon.market/fees' target="_blank" rel='noopener' color='secondary'>fees for details.<OpenInNew fontSize='small' /></Link> 
+                            See <Link href='https://docs.honeylemon.market/fees' target="_blank" rel='noopener' color='secondary'>fees for details.<OpenInNew fontSize='small' /></Link>
                         </Typography>
                       </TableCell>
                     </TableRow> :
