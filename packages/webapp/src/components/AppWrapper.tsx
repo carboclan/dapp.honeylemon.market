@@ -108,6 +108,7 @@ const useStyles = makeStyles(({ transitions, palette, mixins, spacing }) => ({
   menuHeading: {
     paddingTop: spacing(1),
     color: palette.secondary.main,
+    cursor: 'pointer',
   }
 }));
 
@@ -282,11 +283,6 @@ function AppWrapper(props: { children: ReactNode }) {
         <Divider />
         <List>
           <ListItem onClick={() => setShowTokenInfoModal(true)} className={classes.menuHeading}>
-            <ListItemIcon>
-              <IconButton style={{ padding: 2.5 }}>
-                <Settings color='secondary' fontSize='large' />
-              </IconButton>
-            </ListItemIcon>
             <ListItemText inset>
               <b>Manage My Wallet</b>
             </ListItemText>
@@ -373,11 +369,13 @@ function AppWrapper(props: { children: ReactNode }) {
         </List>
         <Divider />
         <List>
-          <ListItem>
-            <ListItemText inset>
-              {networkName(network).toUpperCase()}
-            </ListItemText>
-          </ListItem>
+          {network !== 1 &&
+            <ListItem className={classes.menuHeading}>
+              <ListItemText inset >
+                <b>Network: {networkName(network).toUpperCase()}</b>
+              </ListItemText>
+            </ListItem>
+          }
           <ListItem>
             <ListItemIcon>
               <Avatar>
