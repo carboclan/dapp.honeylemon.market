@@ -20,7 +20,7 @@ const TokenInfoModal: React.SFC<TokenInfoModalProps> = ({ open, onClose }: Token
         Honeylemon Mining Revenue Contracts are traded in {PAYMENT_TOKEN_NAME}, settled in {COLLATERAL_TOKEN_NAME}, and requires ETH for <Link href='https://docs.honeylemon.market/fees'>fees.<OpenInNew fontSize='small' /></Link>
         Honeylemon plans to support more BTC &amp; stable coins, and more contracts in the future. <br />
         • <b>{PAYMENT_TOKEN_NAME}</b> is a ERC-20 token representation of US Dollar on Ethereum, issued by Tether.<br />
-        • <b>{COLLATERAL_TOKEN_NAME}</b> is a ERC-20 token representation of BTC on Ethereum, issued by imToken.<br />
+        • <b>{COLLATERAL_TOKEN_NAME}</b> is a ERC-20 token representation of BTC on Ethereum, issued by WBTC DAO.<br />
       </Typography>
       <br /><br />
       <Typography variant='subtitle2'>
@@ -41,15 +41,16 @@ const TokenInfoModal: React.SFC<TokenInfoModalProps> = ({ open, onClose }: Token
       </Typography>
       <Typography variant='body2'>
         • Visit <Link href='https://tokenlon.im/' target="_blank" rel='noopener' underline='always'>tokenlon.im<OpenInNew fontSize='small' /></Link>, or use Tokenlon directly from your <Link href='https://www.token.im/' target="_blank" rel='noopener' underline='always'>imToken wallet app<OpenInNew fontSize='small' /></Link>, go to “Market” tab<br />
-        • Mint {COLLATERAL_TOKEN_NAME} directly with your BTC on <Link href='https://www.token.im/' target="_blank" rel='noopener' underline='always'>imToken wallet app<OpenInNew fontSize='small' /></Link>, go to “Browser” tab, open <b>imBTC dApp.</b>
+        • Mint {COLLATERAL_TOKEN_NAME} directly with your BTC on <Link href='https://wbtc.cafe/' target="_blank" rel='noopener' underline='always'>wBTC.cafe<OpenInNew fontSize='small' /></Link>
       </Typography>
       <br />
       <Typography variant='subtitle2'>
         <b>MINT {COLLATERAL_TOKEN_NAME} from BTC or REDEEM BTC from {COLLATERAL_TOKEN_NAME}:</b>
       </Typography>
       <Typography variant='body2'>
-        • Mint {COLLATERAL_TOKEN_NAME} directly with your BTC on <Link href='https://www.token.im/' target="_blank" rel='noopener' underline='always'>imToken wallet app<OpenInNew fontSize='small' /></Link>, go to “Browser” tab, open <b>imBTC dApp.</b> <br/>
-        • Minting and redeeming {COLLATERAL_TOKEN_NAME} may take up to 24 hours.
+        • Mint {COLLATERAL_TOKEN_NAME} directly with your BTC on <Link href='https://wbtc.cafe/' target="_blank" rel='noopener' underline='always'>wBTC.cafe<OpenInNew fontSize='small' /></Link> and select <b>Get wBTC</b> <br />
+        • Redeem your {COLLATERAL_TOKEN_NAME} for BTC on <Link href='https://wbtc.cafe/' target="_blank" rel='noopener' underline='always'>wBTC.cafe<OpenInNew fontSize='small' /></Link> and select <b>Get BTC</b> <br />
+        • Minting and redeeming {COLLATERAL_TOKEN_NAME} is subject to wBTC.cafe terms and conditions.
       </Typography>
       <br />
       <Typography variant='subtitle2'>
