@@ -21,6 +21,7 @@
     "@0x/utils": "5.4.1",
     "@0x/web3-wrapper": "7.0.7",
     "@honeylemon/contracts": "0.1.0",
-    "graphql-request": "^1.8.2"
+    "graphql-request": "^1.8.2",
+    "truffle": "^5.1.34"
   }
 }

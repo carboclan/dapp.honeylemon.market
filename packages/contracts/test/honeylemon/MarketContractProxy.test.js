@@ -12,9 +12,7 @@ const PositionToken = artifacts.require("PositionToken"); // Long & Short tokens
 const DSProxy = artifacts.require("DSProxy");
 
 // Helper libraries
-const {
-  PayoutCalculator
-} = require("../../honeylemon-intergration-tests/helpers/payout-calculator");
+const { PayoutCalculator } = require("../helpers/payout-calculator.js");
 
 const isMarketExpired = (contractIndex, contractDay) => {
   return contractIndex < contractDay ? false : true;
@@ -310,6 +308,8 @@ contract(
           amount.toString()
         );
         await wBTC.transfer(_0xBridgeProxy, neededCollateral.toString());
+
+        console.log("new BigNumber(2),", new BigNumber(2));
 
         // approve token transfer from makerAddress
         await wBTC.approve(

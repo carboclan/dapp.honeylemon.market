@@ -95,6 +95,16 @@ const useStyles = makeStyles(({ transitions, palette, mixins, spacing }) => ({
       backgroundColor: '#303030',
     },
   },
+  getMoreTokensButton: {
+    borderColor: palette.secondary.main,
+    borderWidth: 2,
+    borderStyle: 'solid',
+    color: palette.secondary.main,
+    backgroundColor: '#424242',
+    '&:hover': {
+      backgroundColor: '#303030',
+    },
+  },
   menuHeading: {
     paddingTop: spacing(1),
     color: palette.secondary.main,
@@ -278,7 +288,7 @@ function AppWrapper(props: { children: ReactNode }) {
               </IconButton>
             </ListItemIcon>
             <ListItemText>
-              Manage My Wallet <Info fontSize='small' color='secondary'/>
+              Manage My Wallet <Info fontSize='small' color='secondary' />
             </ListItemText>
           </ListItem>
           <ListItem>
@@ -301,7 +311,7 @@ function AppWrapper(props: { children: ReactNode }) {
           </ListItem>
           <ListItem>
             <ListItemIcon>
-              <img src='wbtc.png' style={{ width: '40px', height: '40px' }}  alt='wbtc logo' />
+              <img src='wbtc.png' style={{ width: '40px', height: '40px' }} alt='wbtc logo' />
             </ListItemIcon>
             <Switch
               color="primary"
@@ -350,7 +360,14 @@ function AppWrapper(props: { children: ReactNode }) {
             <ListItemText primaryTypographyProps={{
               align: 'right'
             }}>
-              <Link href='https://tokenlon.im/' target="_blank" rel='noopener' underline='always'>Get More Tokens <OpenInNew fontSize='small' /></Link>
+              <Button
+                variant='contained'
+                color='secondary'
+                fullWidth
+                onClick={() => window.open('https://tokenlon.im/', "_blank", 'noopener')}
+                className={classes.getMoreTokensButton}>
+                Get More Tokens
+              </Button>
             </ListItemText>
           </ListItem>
         </List>
