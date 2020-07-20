@@ -287,8 +287,8 @@ function AppWrapper(props: { children: ReactNode }) {
                 <Settings color='secondary' fontSize='large' />
               </IconButton>
             </ListItemIcon>
-            <ListItemText>
-              Manage My Wallet <Info fontSize='small' color='secondary' />
+            <ListItemText inset>
+              <b>Manage My Wallet</b>
             </ListItemText>
           </ListItem>
           <ListItem>
@@ -373,6 +373,11 @@ function AppWrapper(props: { children: ReactNode }) {
         </List>
         <Divider />
         <List>
+          <ListItem>
+            <ListItemText inset>
+              {networkName(network).toUpperCase()}
+            </ListItemText>
+          </ListItem>
           <ListItem>
             <ListItemIcon>
               <Avatar>
