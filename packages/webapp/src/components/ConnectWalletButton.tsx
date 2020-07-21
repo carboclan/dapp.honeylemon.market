@@ -8,10 +8,6 @@ const useStyles = makeStyles(({ palette, spacing }) => ({
     paddingBottom: spacing(1),
     fontWeight: "bold"
   },
-  connectSpacer: {
-    paddingTop: `${spacing(8)}px !important`,
-    textAlign: "center"
-  },
   loadingSpinner: {
     width: 20,
     flexBasis: "end",
@@ -41,25 +37,7 @@ const ConnectWalletButton: React.SFC = () => {
     return (
       <>
         <Typography variant="subtitle2" color="secondary" align="left" paragraph>
-          Please note that this is am alpha version of the Honeylemon website which is
-          still undergoing final testing before its official release. The website, its
-          software and all content found on it are provided on an “as is” and “as
-          available” basis. Honeylemon does not give any warranties, whether express or
-          implied, as to the suitability or usability of the website, its software or any
-          of its content.
-        </Typography>
-        <Typography variant="subtitle2" color="secondary" align="left" paragraph>
-          Honeylemon will not be liable for any loss, whether such loss is direct,
-          indirect, special or consequential, suffered by any party as a result of their
-          use of the Honeylemon website, its software or content. Any downloading or
-          uploading of material to the website is done at the user’s own risk and the user
-          will be solely responsible for any damage to any computer system or loss of data
-          that results from such activities.
-        </Typography>
-        <Typography variant="subtitle2" color="secondary" align="left" paragraph>
-          Should you encounter any bugs, glitches, lack of functionality or other problems
-          on the website, please let us know immediately so we can rectify these
-          accordingly. Your help in this regard is greatly appreciated.
+          ⚠️ This is <b>alpha</b> softare provided "as-is". Use at own risk.
         </Typography>
         <Button
           color="primary"

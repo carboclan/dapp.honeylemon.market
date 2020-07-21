@@ -107,9 +107,6 @@ const useStyles = makeStyles(({ transitions, palette, mixins, spacing }) => ({
   contentDrawerOpen: {
     marginRight: -drawerWidth
   },
-  contentWrapper: {
-    paddingBottom: footerHeight
-  },
   deployWalletButton: {
     borderColor: palette.primary.main,
     borderWidth: 2,
@@ -267,7 +264,7 @@ function AppWrapper(props: { children: ReactNode }) {
       <main
         className={clsx(classes.content, { [classes.contentDrawerOpen]: drawerOpen })}
       >
-        <div className={classes.contentWrapper}>{props.children}</div>
+        <div>{props.children}</div>
         <Footer footerHeight={footerHeight} />
       </main>
       <Drawer
