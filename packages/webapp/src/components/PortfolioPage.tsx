@@ -808,89 +808,92 @@ const PorfolioPage: React.SFC = () => {
                     )}
                   </ExpansionPanelSummary>
                   <ExpansionPanelDetails>
-                    <Table>
-                      <TableHead>
-                        <TableRow>
-                          <TableCell>Position</TableCell>
-                          <TableCell align="center">
-                            Total ({COLLATERAL_TOKEN_NAME})
-                          </TableCell>
-                          <TableCell align="right">No of Contracts</TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        <TableRow>
-                          <TableCell>Long</TableCell>
-                          <TableCell>
-                            {longCollateralForBatchWithdraw.toLocaleString(undefined, {
-                              maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS
-                            })}
-                          </TableCell>
-                          <TableCell>
-                            {
-                              expiredLongPositions.filter(
-                                p =>
-                                  p.status === PositionStatus.withdrawalPending &&
-                                  p.canBeBatchRedeemed
-                              ).length
-                            }
-                          </TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell>Short</TableCell>
-                          <TableCell>
-                            {shortCollateralForBatchWithdraw.toLocaleString(undefined, {
-                              maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS
-                            })}
-                          </TableCell>
-                          <TableCell>
-                            {
-                              expiredShortPositions.filter(
-                                p =>
-                                  p.status === PositionStatus.withdrawalPending &&
-                                  p.canBeBatchRedeemed
-                              ).length
-                            }
-                          </TableCell>
-                        </TableRow>
-                      </TableBody>
-                    </Table>
-                    <Grid item xs={12} style={{ paddingTop: 8, paddingBottom: 8 }}>
-                      <Button
-                        disabled={
-                          longCollateralForBatchWithdraw +
-                            shortCollateralForBatchWithdraw ===
-                          0
-                        }
-                        onClick={batchWithdraw}
-                        variant="contained"
-                        color="primary"
-                      >
-                        {!isWithdrawing ? (
-                          longCollateralForBatchWithdraw +
-                            shortCollateralForBatchWithdraw >
-                          0 ? (
-                            `REDEEM ALL (${(
-                              longCollateralForBatchWithdraw +
-                              shortCollateralForBatchWithdraw
-                            ).toLocaleString(undefined, {
-                              maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS
-                            })} ${COLLATERAL_TOKEN_NAME})`
+                    <Grid container direction="column">
+                      <Table>
+                        <TableHead>
+                          <TableRow>
+                            <TableCell>Position</TableCell>
+                            <TableCell align="center">
+                              Total ({COLLATERAL_TOKEN_NAME})
+                            </TableCell>
+                            <TableCell align="right">No of Contracts</TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          <TableRow>
+                            <TableCell>Long</TableCell>
+                            <TableCell>
+                              {longCollateralForBatchWithdraw.toLocaleString(undefined, {
+                                maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS
+                              })}
+                            </TableCell>
+                            <TableCell>
+                              {
+                                expiredLongPositions.filter(
+                                  p =>
+                                    p.status === PositionStatus.withdrawalPending &&
+                                    p.canBeBatchRedeemed
+                                ).length
+                              }
+                            </TableCell>
+                          </TableRow>
+                          <TableRow>
+                            <TableCell>Short</TableCell>
+                            <TableCell>
+                              {shortCollateralForBatchWithdraw.toLocaleString(undefined, {
+                                maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS
+                              })}
+                            </TableCell>
+                            <TableCell>
+                              {
+                                expiredShortPositions.filter(
+                                  p =>
+                                    p.status === PositionStatus.withdrawalPending &&
+                                    p.canBeBatchRedeemed
+                                ).length
+                              }
+                            </TableCell>
+                          </TableRow>
+                        </TableBody>
+                      </Table>
+                      <Grid item xs={12} style={{ paddingTop: 8, paddingBottom: 8 }}>
+                        <Button
+                          disabled={
+                            longCollateralForBatchWithdraw +
+                              shortCollateralForBatchWithdraw ===
+                            0
+                          }
+                          onClick={batchWithdraw}
+                          variant="contained"
+                          color="primary"
+                        >
+                          {!isWithdrawing ? (
+                            longCollateralForBatchWithdraw +
+                              shortCollateralForBatchWithdraw >
+                            0 ? (
+                              `REDEEM ALL (${(
+                                longCollateralForBatchWithdraw +
+                                shortCollateralForBatchWithdraw
+                              ).toLocaleString(undefined, {
+                                maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS
+                              })} ${COLLATERAL_TOKEN_NAME})`
+                            ) : (
+                              <>
+                                REDEEM ALL{" "}
+                                <RadioButtonUnchecked className={classes.icon} />
+                              </>
+                            )
                           ) : (
                             <>
-                              REDEEM ALL <RadioButtonUnchecked className={classes.icon} />
+                              REDEEM ALL{" "}
+                              <CircularProgress
+                                className={classes.loadingSpinner}
+                                size={20}
+                              />
                             </>
-                          )
-                        ) : (
-                          <>
-                            REDEEM ALL{" "}
-                            <CircularProgress
-                              className={classes.loadingSpinner}
-                              size={20}
-                            />
-                          </>
-                        )}
-                      </Button>
+                          )}
+                        </Button>
+                      </Grid>
                     </Grid>
                   </ExpansionPanelDetails>
                 </ExpansionPanel>
@@ -958,7 +961,13 @@ const PorfolioPage: React.SFC = () => {
                                     )
                                   }
                                 >
-                                  REDEEM
+                                  REDEEM{" "}
+                                  {isWithdrawing && (
+                                    <CircularProgress
+                                      className={classes.loadingSpinner}
+                                      size={20}
+                                    />
+                                  )}
                                 </Button>
                               </TableCell>
                             </TableRow>

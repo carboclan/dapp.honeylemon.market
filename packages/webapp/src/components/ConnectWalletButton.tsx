@@ -1,6 +1,13 @@
 import React, { useState } from "react";
-import { Button, makeStyles, CircularProgress, Typography } from "@material-ui/core";
+import {
+  Button,
+  makeStyles,
+  CircularProgress,
+  Typography,
+  Link
+} from "@material-ui/core";
 import { useOnboard } from "../contexts/OnboardContext";
+import { OpenInBrowser, OpenInNew } from "@material-ui/icons";
 
 const useStyles = makeStyles(({ palette, spacing }) => ({
   button: {
@@ -37,7 +44,15 @@ const ConnectWalletButton: React.SFC = () => {
     return (
       <>
         <Typography variant="subtitle2" color="secondary" align="left" paragraph>
-          ⚠️ This is <b>alpha</b> softare. Use at own risk.
+          <Link
+            href="https://docs.honeylemon.market/audit-report"
+            target="_blank"
+            rel="noopener"
+            color="secondary"
+          >
+            ⚠️ This is <b>alpha</b> softare. Use at own risk.{" "}
+            <OpenInNew fontSize="small" />
+          </Link>
         </Typography>
         <Button
           color="primary"
