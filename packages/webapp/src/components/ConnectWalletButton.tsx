@@ -37,7 +37,7 @@ const ConnectWalletButton: React.SFC = () => {
     return (
       <>
         <Typography variant="subtitle2" color="secondary" align="left" paragraph>
-          ⚠️ This is <b>alpha</b> softare provided "as-is". Use at own risk.
+          ⚠️ This is <b>alpha</b> softare. Use at own risk.
         </Typography>
         <Button
           color="primary"
