@@ -341,13 +341,14 @@ const BuyContractPage: React.SFC = () => {
       );
 
       const orderGasPrice = Number(`${gasPrice}e9`);
-      console.log(`Order Gas Price: ${orderGasPrice}`);
+      console.log(`Order Gas Price: ${orderGasPrice.toString()}`);
 
       const value = await honeylemonService.get0xFeeForOrderBatch(
         orderGasPrice,
         resultOrders.length
       );
       console.log(`0x Order Fee: ${value.toString()}`);
+
       const gasEstimate = await honeylemonService.estimateGas(
         resultOrders,
         takerAssetFillAmounts,
@@ -370,9 +371,9 @@ const BuyContractPage: React.SFC = () => {
       // }) :
       await await tx.awaitTransactionSuccessAsync({
         from: address,
-        value,
-        gas: gasLimit,
-        gasPrice: orderGasPrice
+        value: value.toString(),
+        gas: gasLimit.toString(),
+        gasPrice: orderGasPrice.toString()
       });
       setShowBuyModal(false);
       forwardTo("/portfolio");

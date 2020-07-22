@@ -114,6 +114,9 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
               }
             },
             balance: balance => {
+              console.log("Balance");
+              console.log(balance);
+              console.log(Number(fromWei(balance, "ether")));
               balance
                 ? setEthBalance(Number(fromWei(balance, "ether")))
                 : setEthBalance(0);
