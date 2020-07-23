@@ -26,7 +26,8 @@ import {
   MonetizationOn,
   Whatshot,
   ExitToApp,
-  Home
+  Home,
+  Info
 } from "@material-ui/icons";
 import Blockies from "react-blockies";
 
@@ -352,7 +353,7 @@ function AppWrapper(props: { children: ReactNode }) {
             className={classes.menuHeading}
           >
             <ListItemText inset>
-              <b>Manage My Wallet</b>
+              <b>Manage My Wallet</b> <Info fontSize="small" />
             </ListItemText>
           </ListItem>
           <ListItem>
