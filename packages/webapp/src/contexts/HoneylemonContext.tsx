@@ -549,7 +549,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
     return () => {
       clearInterval(poller);
     };
-  }, [honeylemonService, address]);
+  }, [honeylemonService, address, network]);
 
   // Difficulty Adjustment Date
   useEffect(() => {
@@ -664,7 +664,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
         collateralTokenContract.removeAllListeners(transferCollateralTokenTo);
       };
     }
-  }, [honeylemonService, address]);
+  }, [honeylemonService, address, network]);
 
   return (
     <HoneylemonContext.Provider

@@ -28,7 +28,8 @@
     "release:webapp": "yarn wsrun -p @honeylemon/webapp -c release",
     "clean": "rm -rf ./node_modules && rm -rf ./*/node_modules",
     "lint": "npm run prettier -- --write",
-    "prettier": "prettier './**/*.js' './**/*.sol' './**/*.md'"
+    "prettier": "prettier './**/*.js' './**/*.sol' './**/*.md'",
+    "start:tunnel": "./ngrok http https://localhost:3000"
   },
   "workspaces": {
     "packages": [
