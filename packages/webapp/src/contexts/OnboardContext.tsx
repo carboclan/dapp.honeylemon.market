@@ -103,20 +103,32 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
             { checkName: "balance", minimumBalance: "0" }
           ],
           subscriptions: {
-            address: setAddress,
+            address: address => {
+              console.log("Address has been changed: ", address);
+              setAddress(address);
+              checkIsReady();
+            },
             network: network => {
+              console.log("Network has been changed: ", network);
               if (validNetworks.includes(network)) {
+                console.log("Setting OnboardJs network");
                 onboard.config({ networkId: network });
               }
               setNetwork(network);
-              if (isReady) {
-                onboard.walletCheck();
-              }
+              console.log("Running wallet check");
+              checkIsReady();
             },
             balance: balance => {
-              balance
-                ? setEthBalance(Number(fromWei(balance, "ether")))
-                : setEthBalance(0);
+              console.log("Balance has been changed: ", balance);
+              try {
+                const bal = Number(fromWei(balance || "0", "ether"));
+                !isNaN(bal) ? setEthBalance(bal) : setEthBalance(0);
+              } catch (error) {
+                console.log("There was an error getting the current ETH balance");
+                console.log(error);
+                Sentry.captureException(error);
+                setEthBalance(0);
+              }
             },
             wallet: (wallet: Wallet) => {
               if (wallet.provider) {
@@ -134,7 +146,7 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
         savedWallet && onboard.walletSelect(savedWallet);
 
         setOnboard(onboard);
-
+        setEthBalance(Number(fromWei(onboard.getState().balance, "ether")));
         setNotify(
           Notify({
             dappId: onboardProps.dappId,
@@ -168,6 +180,9 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
   const checkIsReady = async () => {
     const isReady = await onboard?.walletCheck();
     setIsReady(!!isReady);
+    if (!isReady) {
+      setEthBalance(0);
+    }
     return !!isReady;
   };
 
@@ -200,7 +215,7 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
 
   // Gas Price poller
   useEffect(() => {
-    if (network || validNetworks[0] === 1) {
+    if ((network || validNetworks[0]) === 1) {
       console.log("Starting Gas Price Poller");
       const getGasPrice = refreshGasPrice;
 
