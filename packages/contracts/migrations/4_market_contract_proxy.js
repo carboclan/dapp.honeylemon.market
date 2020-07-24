@@ -12,7 +12,12 @@ module.exports = async function(deployer, network, accounts) {
   // Deploy wBTC token
 
   let collateralTokenAddress = process.env.COLLATERAL_TOKEN_ADDRESS;
-  if (network != "mainnet" && network != "mainnet-fork") {
+
+  if (!collateralTokenAddress && (network == "mainnet" || network == "mainnet-fork")) {
+    throw 'COLLATERAL_TOKEN_ADDRESS must be specified for mainnet';
+  }
+
+  if (!collateralTokenAddress) {
     await deployer.deploy(CollateralToken, "Mock wBTC", "wBTC", 1000000000000000, 8);
     // Give some collateral token to miner
     const collateralToken = await CollateralToken.deployed();

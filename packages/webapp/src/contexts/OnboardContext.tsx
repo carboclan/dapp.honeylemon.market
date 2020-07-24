@@ -202,14 +202,14 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
       ).json();
       const newGasPrice = !isNaN(Number(ethGasStationResponse.fast))
         ? Number(ethGasStationResponse.fast) / 10
-        : 35;
+        : 65;
       console.log(`Settings new gas price ${newGasPrice} gwei`);
       setGasPrice(newGasPrice);
     } catch (error) {
       Sentry.captureException(error);
       console.log(error);
-      console.log("Using 35 gwei as default");
-      setGasPrice(35);
+      console.log("Using 65 gwei as default");
+      setGasPrice(65);
     }
   };
 
