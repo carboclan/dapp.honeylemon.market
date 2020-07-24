@@ -20,12 +20,12 @@
       "type": "function"
     }
   ],
-  "metadata": "{\"compiler\":{\"version\":\"0.5.2+commit.1df8f40c\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"constant\":false,\"inputs\":[{\"name\":\"marketContractAddress\",\"type\":\"address\"},{\"name\":\"qtyToRedeem\",\"type\":\"uint256\"}],\"name\":\"redeemPositionTokens\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"methods\":{}},\"userdoc\":{\"methods\":{}}},\"settings\":{\"compilationTarget\":{\"/Users/andreianisimov/projects/honeylemon/dapp.honeylemon.market/packages/contracts/contracts/honeylemon/Utils.sol\":\"Utils\"},\"evmVersion\":\"byzantium\",\"libraries\":{},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"/Users/andreianisimov/projects/honeylemon/dapp.honeylemon.market/packages/contracts/contracts/honeylemon/Utils.sol\":{\"keccak256\":\"0xf4dd3864272cdede8690e38b6690618d9f22c39230d0cef153c6339e1b74cf4c\",\"urls\":[\"bzzr://6761a425ab2c6381c3d5bfe77ccf4593a482b316644f92cf397620963c698126\"]},\"/Users/andreianisimov/projects/honeylemon/dapp.honeylemon.market/packages/contracts/contracts/libraries/MathLib.sol\":{\"keccak256\":\"0xe7069fcd38bcd09a3ed7e0aecbeb9e4fd5c7ac7b1bdd2f6865e26b97bbe0b679\",\"urls\":[\"bzzr://3e349a8352b3d4f25ec8e684a36c2cbf8fc4cda9d230a5331b101a8c80ac23ee\"]},\"/Users/andreianisimov/projects/honeylemon/dapp.honeylemon.market/packages/contracts/contracts/libraries/StringLib.sol\":{\"keccak256\":\"0xfe9df18e4239bd30aa3a257a7cf15665547ec0a47bd5ec05566ef0efe390b551\",\"urls\":[\"bzzr://763e42c56f8bbd8d091c17c754e1ab28e8d439d797827db9589f0a9fbf6a814b\"]},\"/Users/andreianisimov/projects/honeylemon/dapp.honeylemon.market/packages/contracts/contracts/marketprotocol/MarketCollateralPool.sol\":{\"keccak256\":\"0x2d78cf5b2dfad8d5cc906eacd737af5c1624ca5d18b5bc1b0bc203d59056c1df\",\"urls\":[\"bzzr://1147f33615e8e9734541f940603ec4af657f685dfb670100a9a63399e64c90c2\"]},\"/Users/andreianisimov/projects/honeylemon/dapp.honeylemon.market/packages/contracts/contracts/marketprotocol/MarketContract.sol\":{\"keccak256\":\"0xf5654f0e62eb7cf41bb48e5c069b03efefe33778c9e2ba867c5a616891ad1ce3\",\"urls\":[\"bzzr://1c1860bb8f0de2ab378d0e8a0c0b697c4f2b06dd2157472aa934f115e266fbf2\"]},\"/Users/andreianisimov/projects/honeylemon/dapp.honeylemon.market/packages/contracts/contracts/marketprotocol/MarketContractRegistryInterface.sol\":{\"keccak256\":\"0xb0259d3f0dbf7f52df2274f66c01563f7ae3d3bdacc018fede764b4a78bc1dd9\",\"urls\":[\"bzzr://db91f063cb13da449814f8d7d990039b51cdef45110e735d7bebf116cf963735\"]},\"/Users/andreianisimov/projects/honeylemon/dapp.honeylemon.market/packages/contracts/contracts/marketprotocol/tokens/PositionToken.sol\":{\"keccak256\":\"0xb27773c7601c1ca550ce926cbaa0fb94aca6d3a9dbcf63555187449154d0481d\",\"urls\":[\"bzzr://4e178aac5b6bde395c90ae516f0319ffe62608bd8eb8a92027161f200c5d3026\"]},\"openzeppelin-solidity/contracts/math/SafeMath.sol\":{\"keccak256\":\"0xc2a200a877c4a9b2475c246c54ffecc69ffde3e11af83319c63c2dc5458bac80\",\"urls\":[\"bzzr://c8876e2c39b60f155d748d71d715c8f3903fae5a405ac599adcb6ad2f9a583f9\"]},\"openzeppelin-solidity/contracts/ownership/Ownable.sol\":{\"keccak256\":\"0xcb16adc00dcf0d75e0bdf94379f4d5a6d74dca7c74e4183b94e15721159f8a30\",\"urls\":[\"bzzr://b81e03f7203cd628cfed19255911a04a05e8670d248afb48a7b067dd03b4ff55\"]},\"openzeppelin-solidity/contracts/token/ERC20/ERC20.sol\":{\"keccak256\":\"0x3dceb7e4aa237a56111c13f77d7efadeceda7271d62bfac94ac79afab7c1f411\",\"urls\":[\"bzzr://2f34152a5bec385352002c31bc89f5e9935f628f1923ccea45c2281e0084a4db\"]},\"openzeppelin-solidity/contracts/token/ERC20/IERC20.sol\":{\"keccak256\":\"0x59e7df16169a498cb8837963b2f5461d88e63bd1eb6c7d58b814d76b84ccbe61\",\"urls\":[\"bzzr://e572c9c4e02e37349702451bf3b5dcbbc86a19da5a51695b5b3e1bfe1e7825dc\"]},\"openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol\":{\"keccak256\":\"0x7230c14d692aff375e4931d60ef73ac8a79c28b9e54c200a377b7dc613c81a78\",\"urls\":[\"bzzr://3538d7da02640c67ac909e84d90e799439f3b3195cf0de39fd173dacd5a98311\"]},\"openzeppelin-solidity/contracts/utils/Address.sol\":{\"keccak256\":\"0xea16b9933153c647242ba50b3e494fb133063d49f1fa81823f35a8c28754142e\",\"urls\":[\"bzzr://aa2b2eb534149525e194341c01cadf666668a1b7d679a268d10e23570a7e26b1\"]},\"openzeppelin-solidity/contracts/utils/ReentrancyGuard.sol\":{\"keccak256\":\"0x080fa336eb92fca1f96bf5c7738b6ef6e23582809d81868e9498c08e1207c125\",\"urls\":[\"bzzr://3bc299fd722679f1313dc1387e2efc0591dcddc3727b6a7ccc98132c6e02f323\"]}},\"version\":1}",
-  "bytecode": "0x608060405234801561001057600080fd5b50610565806100206000396000f3fe608060405234801561001057600080fd5b506004361061002e5760e060020a6000350463c1b214118114610033575b600080fd5b61005f6004803603604081101561004957600080fd5b50600160a060020a038135169060200135610061565b005b6000829050600081600160a060020a031663eaafb4fa6040518163ffffffff1660e060020a02815260040160206040518083038186803b1580156100a457600080fd5b505afa1580156100b8573d6000803e3d6000fd5b505050506040513d60208110156100ce57600080fd5b5051604080517f22d1c35e0000000000000000000000000000000000000000000000000000000081529051919250600091600160a060020a038516916322d1c35e916004808301926020929190829003018186803b15801561012f57600080fd5b505afa158015610143573d6000803e3d6000fd5b505050506040513d602081101561015957600080fd5b5051604080517f5b3f1e3f0000000000000000000000000000000000000000000000000000000081529051919250600091600160a060020a03861691635b3f1e3f916004808301926020929190829003018186803b1580156101ba57600080fd5b505afa1580156101ce573d6000803e3d6000fd5b505050506040513d60208110156101e457600080fd5b5051604080517f095ea7b3000000000000000000000000000000000000000000000000000000008152600160a060020a0387811660048301526024820189905291519293509084169163095ea7b3916044808201926020929091908290030181600087803b15801561025557600080fd5b505af1158015610269573d6000803e3d6000fd5b505050506040513d602081101561027f57600080fd5b5050604080517f095ea7b3000000000000000000000000000000000000000000000000000000008152600160a060020a0386811660048301526024820188905291519183169163095ea7b3916044808201926020929091908290030181600087803b1580156102ed57600080fd5b505af1158015610301573d6000803e3d6000fd5b505050506040513d602081101561031757600080fd5b5050604080517fc1b21411000000000000000000000000000000000000000000000000000000008152600160a060020a0388811660048301526024820188905291519185169163c1b214119160448082019260009290919082900301818387803b15801561038457600080fd5b505af1158015610398573d6000803e3d6000fd5b50505050600084600160a060020a031663323bb7756040518163ffffffff1660e060020a02815260040160206040518083038186803b1580156103da57600080fd5b505afa1580156103ee573d6000803e3d6000fd5b505050506040513d602081101561040457600080fd5b5051604080517f70a082310000000000000000000000000000000000000000000000000000000081523060048201529051919250600091600160a060020a038416916370a08231916024808301926020929190829003018186803b15801561046b57600080fd5b505afa15801561047f573d6000803e3d6000fd5b505050506040513d602081101561049557600080fd5b5051604080517fa9059cbb000000000000000000000000000000000000000000000000000000008152336004820152602481018390529051919250600160a060020a0384169163a9059cbb916044808201926020929091908290030181600087803b15801561050357600080fd5b505af1158015610517573d6000803e3d6000fd5b505050506040513d602081101561052d57600080fd5b5050505050505050505056fea165627a7a723058206bff391781a3e5bf595c62b098b84bcdcb7b598fb45c1e37629ad408f12c511b0029",
-  "deployedBytecode": "0x608060405234801561001057600080fd5b506004361061002e5760e060020a6000350463c1b214118114610033575b600080fd5b61005f6004803603604081101561004957600080fd5b50600160a060020a038135169060200135610061565b005b6000829050600081600160a060020a031663eaafb4fa6040518163ffffffff1660e060020a02815260040160206040518083038186803b1580156100a457600080fd5b505afa1580156100b8573d6000803e3d6000fd5b505050506040513d60208110156100ce57600080fd5b5051604080517f22d1c35e0000000000000000000000000000000000000000000000000000000081529051919250600091600160a060020a038516916322d1c35e916004808301926020929190829003018186803b15801561012f57600080fd5b505afa158015610143573d6000803e3d6000fd5b505050506040513d602081101561015957600080fd5b5051604080517f5b3f1e3f0000000000000000000000000000000000000000000000000000000081529051919250600091600160a060020a03861691635b3f1e3f916004808301926020929190829003018186803b1580156101ba57600080fd5b505afa1580156101ce573d6000803e3d6000fd5b505050506040513d60208110156101e457600080fd5b5051604080517f095ea7b3000000000000000000000000000000000000000000000000000000008152600160a060020a0387811660048301526024820189905291519293509084169163095ea7b3916044808201926020929091908290030181600087803b15801561025557600080fd5b505af1158015610269573d6000803e3d6000fd5b505050506040513d602081101561027f57600080fd5b5050604080517f095ea7b3000000000000000000000000000000000000000000000000000000008152600160a060020a0386811660048301526024820188905291519183169163095ea7b3916044808201926020929091908290030181600087803b1580156102ed57600080fd5b505af1158015610301573d6000803e3d6000fd5b505050506040513d602081101561031757600080fd5b5050604080517fc1b21411000000000000000000000000000000000000000000000000000000008152600160a060020a0388811660048301526024820188905291519185169163c1b214119160448082019260009290919082900301818387803b15801561038457600080fd5b505af1158015610398573d6000803e3d6000fd5b50505050600084600160a060020a031663323bb7756040518163ffffffff1660e060020a02815260040160206040518083038186803b1580156103da57600080fd5b505afa1580156103ee573d6000803e3d6000fd5b505050506040513d602081101561040457600080fd5b5051604080517f70a082310000000000000000000000000000000000000000000000000000000081523060048201529051919250600091600160a060020a038416916370a08231916024808301926020929190829003018186803b15801561046b57600080fd5b505afa15801561047f573d6000803e3d6000fd5b505050506040513d602081101561049557600080fd5b5051604080517fa9059cbb000000000000000000000000000000000000000000000000000000008152336004820152602481018390529051919250600160a060020a0384169163a9059cbb916044808201926020929091908290030181600087803b15801561050357600080fd5b505af1158015610517573d6000803e3d6000fd5b505050506040513d602081101561052d57600080fd5b5050505050505050505056fea165627a7a723058206bff391781a3e5bf595c62b098b84bcdcb7b598fb45c1e37629ad408f12c511b0029",
-  "sourceMap": "244:1154:5:-;;;;8:9:-1;5:2;;;30:1;27;20:12;5:2;244:1154:5;;;;;;;",
-  "deployedSourceMap": "244:1154:5:-;;;;8:9:-1;5:2;;;30:1;27;20:12;5:2;244:1154:5;;;;;;-1:-1:-1;;;244:1154:5;;;;;;;;;;;;263:1133;;;;;;13:2:-1;8:3;5:11;2:2;;;29:1;26;19:12;2:2;-1:-1;;;;;;263:1133:5;;;;;;;;:::i;:::-;;;355:29;402:21;355:69;;430:41;495:14;-1:-1:-1;;;;;495:38:5;;:40;;;;;-1:-1:-1;;;495:40:5;;;;;;;;;;;;;;;;8:9:-1;5:2;;;30:1;27;20:12;5:2;495:40:5;;;;8:9:-1;5:2;;;45:16;42:1;39;24:38;77:16;74:1;67:27;5:2;495:40:5;;;;;;;13:2:-1;8:3;5:11;2:2;;;29:1;26;19:12;2:2;-1:-1;495:40:5;577:36;;;;;;;;495:40;;-1:-1:-1;542:18:5;;-1:-1:-1;;;;;577:34:5;;;;;:36;;;;;495:40;;577:36;;;;;;;:34;:36;;;5:2:-1;;;;30:1;27;20:12;5:2;577:36:5;;;;8:9:-1;5:2;;;45:16;42:1;39;24:38;77:16;74:1;67:27;5:2;577:36:5;;;;;;;13:2:-1;8:3;5:11;2:2;;;29:1;26;19:12;2:2;-1:-1;577:36:5;656:37;;;;;;;;577:36;;-1:-1:-1;620:19:5;;-1:-1:-1;;;;;656:35:5;;;;;:37;;;;;577:36;;656:37;;;;;;;:35;:37;;;5:2:-1;;;;30:1;27;20:12;5:2;656:37:5;;;;8:9:-1;5:2;;;45:16;42:1;39;24:38;77:16;74:1;67:27;5:2;656:37:5;;;;;;;13:2:-1;8:3;5:11;2:2;;;29:1;26;19:12;2:2;-1:-1;656:37:5;723:50;;;;;;-1:-1:-1;;;;;723:50:5;;;;;;;;;;;;;;;656:37;;-1:-1:-1;723:12:5;;;;;;:50;;;;;656:37;;723:50;;;;;;;;-1:-1:-1;723:12:5;:50;;;5:2:-1;;;;30:1;27;20:12;5:2;723:50:5;;;;8:9:-1;5:2;;;45:16;42:1;39;24:38;77:16;74:1;67:27;5:2;723:50:5;;;;;;;13:2:-1;8:3;5:11;2:2;;;29:1;26;19:12;2:2;-1:-1;;779:51:5;;;;;;-1:-1:-1;;;;;779:51:5;;;;;;;;;;;;;;;:13;;;;;;:51;;;;;723:50;;779:51;;;;;;;;-1:-1:-1;779:13:5;:51;;;5:2:-1;;;;30:1;27;20:12;5:2;779:51:5;;;;8:9:-1;5:2;;;45:16;42:1;39;24:38;77:16;74:1;67:27;5:2;779:51:5;;;;;;;13:2:-1;8:3;5:11;2:2;;;29:1;26;19:12;2:2;-1:-1;;851:77:5;;;;;;-1:-1:-1;;;;;851:77:5;;;;;;;;;;;;;;;:41;;;;;;:77;;;;;-1:-1:-1;;851:77:5;;;;;;;;-1:-1:-1;851:41:5;:77;;;5:2:-1;;;;30:1;27;20:12;5:2;851:77:5;;;;8:9:-1;5:2;;;45:16;42:1;39;24:38;77:16;74:1;67:27;5:2;851:77:5;;;;982:22;1014:14;-1:-1:-1;;;;;1014:39:5;;:41;;;;;-1:-1:-1;;;1014:41:5;;;;;;;;;;;;;;;;8:9:-1;5:2;;;30:1;27;20:12;5:2;1014:41:5;;;;8:9:-1;5:2;;;45:16;42:1;39;24:38;77:16;74:1;67:27;5:2;1014:41:5;;;;;;;13:2:-1;8:3;5:11;2:2;;;29:1;26;19:12;2:2;-1:-1;1014:41:5;1184:40;;;;;;1218:4;1184:40;;;;;;1014:41;;-1:-1:-1;1162:19:5;;-1:-1:-1;;;;;1184:25:5;;;;;:40;;;;;1014:41;;1184:40;;;;;;;:25;:40;;;5:2:-1;;;;30:1;27;20:12;5:2;1184:40:5;;;;8:9:-1;5:2;;;45:16;42:1;39;24:38;77:16;74:1;67:27;5:2;1184:40:5;;;;;;;13:2:-1;8:3;5:11;2:2;;;29:1;26;19:12;2:2;-1:-1;1184:40:5;1338:52;;;;;;1363:10;1338:52;;;;;;;;;;;;1184:40;;-1:-1:-1;;;;;;1338:24:5;;;;;:52;;;;;1184:40;;1338:52;;;;;;;;-1:-1:-1;1338:24:5;:52;;;5:2:-1;;;;30:1;27;20:12;5:2;1338:52:5;;;;8:9:-1;5:2;;;45:16;42:1;39;24:38;77:16;74:1;67:27;5:2;1338:52:5;;;;;;;13:2:-1;8:3;5:11;2:2;;;29:1;26;19:12;2:2;-1:-1;;;;;;;;;;263:1133:5:o",
-  "source": "pragma solidity 0.5.2;\n\nimport 'openzeppelin-solidity/contracts/token/ERC20/IERC20.sol';\n\nimport '../marketprotocol/MarketContract.sol';\nimport '../marketprotocol/MarketCollateralPool.sol';\nimport '../marketprotocol/tokens/PositionToken.sol';\n\ncontract Utils {\n  function redeemPositionTokens(address marketContractAddress, uint qtyToRedeem) public {\n    MarketContract marketContract = MarketContract(marketContractAddress);\n    MarketCollateralPool marketCollateralPool = MarketCollateralPool(marketContract.COLLATERAL_POOL_ADDRESS());\n    PositionToken long = PositionToken(marketContract.LONG_POSITION_TOKEN());\n    PositionToken short = PositionToken(marketContract.SHORT_POSITION_TOKEN());\n\n    // approve tokens\n    long.approve(address(marketContract), qtyToRedeem);\n    short.approve(address(marketContract), qtyToRedeem);\n\n    // redeem\n    marketCollateralPool.redeemPositionTokens(marketContractAddress, qtyToRedeem);\n\n    // Finally redeem collateral back to user.\n    IERC20 collateralToken = IERC20(marketContract.COLLATERAL_TOKEN_ADDRESS());\n\n    // DSProxy balance. address(this) is the DSProxy contract address that will redeem the tokens.\n    uint dSProxyBalance = collateralToken.balanceOf(address(this));\n\n    // Move all redeemed tokens from DSProxy back to users wallet. msg.sender is the owner of the DSProxy.\n    collateralToken.transfer(msg.sender, dSProxyBalance);\n\n  }\n}",
+  "metadata": "{\"compiler\":{\"version\":\"0.5.2+commit.1df8f40c\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"constant\":false,\"inputs\":[{\"name\":\"marketContractAddress\",\"type\":\"address\"},{\"name\":\"qtyToRedeem\",\"type\":\"uint256\"}],\"name\":\"redeemPositionTokens\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"methods\":{}},\"userdoc\":{\"methods\":{}}},\"settings\":{\"compilationTarget\":{\"/Users/andreianisimov/projects/honeylemon/dapp.honeylemon.market/packages/contracts/contracts/honeylemon/Utils.sol\":\"Utils\"},\"evmVersion\":\"byzantium\",\"libraries\":{},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"/Users/andreianisimov/projects/honeylemon/dapp.honeylemon.market/packages/contracts/contracts/honeylemon/Utils.sol\":{\"keccak256\":\"0x1220c829dff085e657502fdef97894623409ffa803c12b3221f2b3c1ef85d929\",\"urls\":[\"bzzr://045b53fdc5922cfef079b9c72fd3ec13cbdde94052bf0748d1a6c3a603331590\"]},\"/Users/andreianisimov/projects/honeylemon/dapp.honeylemon.market/packages/contracts/contracts/libraries/MathLib.sol\":{\"keccak256\":\"0xe7069fcd38bcd09a3ed7e0aecbeb9e4fd5c7ac7b1bdd2f6865e26b97bbe0b679\",\"urls\":[\"bzzr://3e349a8352b3d4f25ec8e684a36c2cbf8fc4cda9d230a5331b101a8c80ac23ee\"]},\"/Users/andreianisimov/projects/honeylemon/dapp.honeylemon.market/packages/contracts/contracts/libraries/StringLib.sol\":{\"keccak256\":\"0x63430cd177dbab37a8b75fd12e05d4c46a6cd6c7b8322cc3dec873f45fc85caf\",\"urls\":[\"bzzr://b38f04dc41ecadd70bf778c26a7c67ab6e58927bced4ad35b84374b5b09ecde5\"]},\"/Users/andreianisimov/projects/honeylemon/dapp.honeylemon.market/packages/contracts/contracts/marketprotocol/MarketCollateralPool.sol\":{\"keccak256\":\"0x2d78cf5b2dfad8d5cc906eacd737af5c1624ca5d18b5bc1b0bc203d59056c1df\",\"urls\":[\"bzzr://1147f33615e8e9734541f940603ec4af657f685dfb670100a9a63399e64c90c2\"]},\"/Users/andreianisimov/projects/honeylemon/dapp.honeylemon.market/packages/contracts/contracts/marketprotocol/MarketContract.sol\":{\"keccak256\":\"0xf5654f0e62eb7cf41bb48e5c069b03efefe33778c9e2ba867c5a616891ad1ce3\",\"urls\":[\"bzzr://1c1860bb8f0de2ab378d0e8a0c0b697c4f2b06dd2157472aa934f115e266fbf2\"]},\"/Users/andreianisimov/projects/honeylemon/dapp.honeylemon.market/packages/contracts/contracts/marketprotocol/MarketContractRegistryInterface.sol\":{\"keccak256\":\"0x0400a7e9b4257a4250075d09f30b5750ec6b73aa13eb8bf69e7ed6aaacd32b77\",\"urls\":[\"bzzr://a936987d29c8d14a654c743c9645c5f52d0b5ed347611959d6af3ded03a8ab78\"]},\"/Users/andreianisimov/projects/honeylemon/dapp.honeylemon.market/packages/contracts/contracts/marketprotocol/tokens/PositionToken.sol\":{\"keccak256\":\"0xb27773c7601c1ca550ce926cbaa0fb94aca6d3a9dbcf63555187449154d0481d\",\"urls\":[\"bzzr://4e178aac5b6bde395c90ae516f0319ffe62608bd8eb8a92027161f200c5d3026\"]},\"openzeppelin-solidity/contracts/math/SafeMath.sol\":{\"keccak256\":\"0xc2a200a877c4a9b2475c246c54ffecc69ffde3e11af83319c63c2dc5458bac80\",\"urls\":[\"bzzr://c8876e2c39b60f155d748d71d715c8f3903fae5a405ac599adcb6ad2f9a583f9\"]},\"openzeppelin-solidity/contracts/ownership/Ownable.sol\":{\"keccak256\":\"0xcb16adc00dcf0d75e0bdf94379f4d5a6d74dca7c74e4183b94e15721159f8a30\",\"urls\":[\"bzzr://b81e03f7203cd628cfed19255911a04a05e8670d248afb48a7b067dd03b4ff55\"]},\"openzeppelin-solidity/contracts/token/ERC20/ERC20.sol\":{\"keccak256\":\"0x3dceb7e4aa237a56111c13f77d7efadeceda7271d62bfac94ac79afab7c1f411\",\"urls\":[\"bzzr://2f34152a5bec385352002c31bc89f5e9935f628f1923ccea45c2281e0084a4db\"]},\"openzeppelin-solidity/contracts/token/ERC20/IERC20.sol\":{\"keccak256\":\"0x59e7df16169a498cb8837963b2f5461d88e63bd1eb6c7d58b814d76b84ccbe61\",\"urls\":[\"bzzr://e572c9c4e02e37349702451bf3b5dcbbc86a19da5a51695b5b3e1bfe1e7825dc\"]},\"openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol\":{\"keccak256\":\"0x7230c14d692aff375e4931d60ef73ac8a79c28b9e54c200a377b7dc613c81a78\",\"urls\":[\"bzzr://3538d7da02640c67ac909e84d90e799439f3b3195cf0de39fd173dacd5a98311\"]},\"openzeppelin-solidity/contracts/utils/Address.sol\":{\"keccak256\":\"0xea16b9933153c647242ba50b3e494fb133063d49f1fa81823f35a8c28754142e\",\"urls\":[\"bzzr://aa2b2eb534149525e194341c01cadf666668a1b7d679a268d10e23570a7e26b1\"]},\"openzeppelin-solidity/contracts/utils/ReentrancyGuard.sol\":{\"keccak256\":\"0x080fa336eb92fca1f96bf5c7738b6ef6e23582809d81868e9498c08e1207c125\",\"urls\":[\"bzzr://3bc299fd722679f1313dc1387e2efc0591dcddc3727b6a7ccc98132c6e02f323\"]}},\"version\":1}",
+  "bytecode": "0x608060405234801561001057600080fd5b50610565806100206000396000f3fe608060405234801561001057600080fd5b506004361061002e5760e060020a6000350463c1b214118114610033575b600080fd5b61005f6004803603604081101561004957600080fd5b50600160a060020a038135169060200135610061565b005b6000829050600081600160a060020a031663eaafb4fa6040518163ffffffff1660e060020a02815260040160206040518083038186803b1580156100a457600080fd5b505afa1580156100b8573d6000803e3d6000fd5b505050506040513d60208110156100ce57600080fd5b5051604080517f22d1c35e0000000000000000000000000000000000000000000000000000000081529051919250600091600160a060020a038516916322d1c35e916004808301926020929190829003018186803b15801561012f57600080fd5b505afa158015610143573d6000803e3d6000fd5b505050506040513d602081101561015957600080fd5b5051604080517f5b3f1e3f0000000000000000000000000000000000000000000000000000000081529051919250600091600160a060020a03861691635b3f1e3f916004808301926020929190829003018186803b1580156101ba57600080fd5b505afa1580156101ce573d6000803e3d6000fd5b505050506040513d60208110156101e457600080fd5b5051604080517f095ea7b3000000000000000000000000000000000000000000000000000000008152600160a060020a0387811660048301526024820189905291519293509084169163095ea7b3916044808201926020929091908290030181600087803b15801561025557600080fd5b505af1158015610269573d6000803e3d6000fd5b505050506040513d602081101561027f57600080fd5b5050604080517f095ea7b3000000000000000000000000000000000000000000000000000000008152600160a060020a0386811660048301526024820188905291519183169163095ea7b3916044808201926020929091908290030181600087803b1580156102ed57600080fd5b505af1158015610301573d6000803e3d6000fd5b505050506040513d602081101561031757600080fd5b5050604080517fc1b21411000000000000000000000000000000000000000000000000000000008152600160a060020a0388811660048301526024820188905291519185169163c1b214119160448082019260009290919082900301818387803b15801561038457600080fd5b505af1158015610398573d6000803e3d6000fd5b50505050600084600160a060020a031663323bb7756040518163ffffffff1660e060020a02815260040160206040518083038186803b1580156103da57600080fd5b505afa1580156103ee573d6000803e3d6000fd5b505050506040513d602081101561040457600080fd5b5051604080517f70a082310000000000000000000000000000000000000000000000000000000081523060048201529051919250600091600160a060020a038416916370a08231916024808301926020929190829003018186803b15801561046b57600080fd5b505afa15801561047f573d6000803e3d6000fd5b505050506040513d602081101561049557600080fd5b5051604080517fa9059cbb000000000000000000000000000000000000000000000000000000008152336004820152602481018390529051919250600160a060020a0384169163a9059cbb916044808201926020929091908290030181600087803b15801561050357600080fd5b505af1158015610517573d6000803e3d6000fd5b505050506040513d602081101561052d57600080fd5b5050505050505050505056fea165627a7a72305820bdd537efbea7f1afd402de6f259607d10b510be0293f772b3e4b29f0ac3fbae80029",
+  "deployedBytecode": "0x608060405234801561001057600080fd5b506004361061002e5760e060020a6000350463c1b214118114610033575b600080fd5b61005f6004803603604081101561004957600080fd5b50600160a060020a038135169060200135610061565b005b6000829050600081600160a060020a031663eaafb4fa6040518163ffffffff1660e060020a02815260040160206040518083038186803b1580156100a457600080fd5b505afa1580156100b8573d6000803e3d6000fd5b505050506040513d60208110156100ce57600080fd5b5051604080517f22d1c35e0000000000000000000000000000000000000000000000000000000081529051919250600091600160a060020a038516916322d1c35e916004808301926020929190829003018186803b15801561012f57600080fd5b505afa158015610143573d6000803e3d6000fd5b505050506040513d602081101561015957600080fd5b5051604080517f5b3f1e3f0000000000000000000000000000000000000000000000000000000081529051919250600091600160a060020a03861691635b3f1e3f916004808301926020929190829003018186803b1580156101ba57600080fd5b505afa1580156101ce573d6000803e3d6000fd5b505050506040513d60208110156101e457600080fd5b5051604080517f095ea7b3000000000000000000000000000000000000000000000000000000008152600160a060020a0387811660048301526024820189905291519293509084169163095ea7b3916044808201926020929091908290030181600087803b15801561025557600080fd5b505af1158015610269573d6000803e3d6000fd5b505050506040513d602081101561027f57600080fd5b5050604080517f095ea7b3000000000000000000000000000000000000000000000000000000008152600160a060020a0386811660048301526024820188905291519183169163095ea7b3916044808201926020929091908290030181600087803b1580156102ed57600080fd5b505af1158015610301573d6000803e3d6000fd5b505050506040513d602081101561031757600080fd5b5050604080517fc1b21411000000000000000000000000000000000000000000000000000000008152600160a060020a0388811660048301526024820188905291519185169163c1b214119160448082019260009290919082900301818387803b15801561038457600080fd5b505af1158015610398573d6000803e3d6000fd5b50505050600084600160a060020a031663323bb7756040518163ffffffff1660e060020a02815260040160206040518083038186803b1580156103da57600080fd5b505afa1580156103ee573d6000803e3d6000fd5b505050506040513d602081101561040457600080fd5b5051604080517f70a082310000000000000000000000000000000000000000000000000000000081523060048201529051919250600091600160a060020a038416916370a08231916024808301926020929190829003018186803b15801561046b57600080fd5b505afa15801561047f573d6000803e3d6000fd5b505050506040513d602081101561049557600080fd5b5051604080517fa9059cbb000000000000000000000000000000000000000000000000000000008152336004820152602481018390529051919250600160a060020a0384169163a9059cbb916044808201926020929091908290030181600087803b15801561050357600080fd5b505af1158015610517573d6000803e3d6000fd5b505050506040513d602081101561052d57600080fd5b5050505050505050505056fea165627a7a72305820bdd537efbea7f1afd402de6f259607d10b510be0293f772b3e4b29f0ac3fbae80029",
+  "sourceMap": "245:1257:5:-;;;;8:9:-1;5:2;;;30:1;27;20:12;5:2;245:1257:5;;;;;;;",
+  "deployedSourceMap": "245:1257:5:-;;;;8:9:-1;5:2;;;30:1;27;20:12;5:2;245:1257:5;;;;;;-1:-1:-1;;;245:1257:5;;;;;;;;;;;;266:1234;;;;;;13:2:-1;8:3;5:11;2:2;;;29:1;26;19:12;2:2;-1:-1;;;;;;266:1234:5;;;;;;;;:::i;:::-;;;377:29;424:21;377:69;;456:41;534:14;-1:-1:-1;;;;;534:38:5;;:40;;;;;-1:-1:-1;;;534:40:5;;;;;;;;;;;;;;;;8:9:-1;5:2;;;30:1;27;20:12;5:2;534:40:5;;;;8:9:-1;5:2;;;45:16;42:1;39;24:38;77:16;74:1;67:27;5:2;534:40:5;;;;;;;13:2:-1;8:3;5:11;2:2;;;29:1;26;19:12;2:2;-1:-1;534:40:5;629:36;;;;;;;;534:40;;-1:-1:-1;594:18:5;;-1:-1:-1;;;;;629:34:5;;;;;:36;;;;;534:40;;629:36;;;;;;;:34;:36;;;5:2:-1;;;;30:1;27;20:12;5:2;629:36:5;;;;8:9:-1;5:2;;;45:16;42:1;39;24:38;77:16;74:1;67:27;5:2;629:36:5;;;;;;;13:2:-1;8:3;5:11;2:2;;;29:1;26;19:12;2:2;-1:-1;629:36:5;712:37;;;;;;;;629:36;;-1:-1:-1;676:19:5;;-1:-1:-1;;;;;712:35:5;;;;;:37;;;;;629:36;;712:37;;;;;;;:35;:37;;;5:2:-1;;;;30:1;27;20:12;5:2;712:37:5;;;;8:9:-1;5:2;;;45:16;42:1;39;24:38;77:16;74:1;67:27;5:2;712:37:5;;;;;;;13:2:-1;8:3;5:11;2:2;;;29:1;26;19:12;2:2;-1:-1;712:37:5;787:50;;;;;;-1:-1:-1;;;;;787:50:5;;;;;;;;;;;;;;;712:37;;-1:-1:-1;787:12:5;;;;;;:50;;;;;712:37;;787:50;;;;;;;;-1:-1:-1;787:12:5;:50;;;5:2:-1;;;;30:1;27;20:12;5:2;787:50:5;;;;8:9:-1;5:2;;;45:16;42:1;39;24:38;77:16;74:1;67:27;5:2;787:50:5;;;;;;;13:2:-1;8:3;5:11;2:2;;;29:1;26;19:12;2:2;-1:-1;;847:51:5;;;;;;-1:-1:-1;;;;;847:51:5;;;;;;;;;;;;;;;:13;;;;;;:51;;;;;787:50;;847:51;;;;;;;;-1:-1:-1;847:13:5;:51;;;5:2:-1;;;;30:1;27;20:12;5:2;847:51:5;;;;8:9:-1;5:2;;;45:16;42:1;39;24:38;77:16;74:1;67:27;5:2;847:51:5;;;;;;;13:2:-1;8:3;5:11;2:2;;;29:1;26;19:12;2:2;-1:-1;;927:77:5;;;;;;-1:-1:-1;;;;;927:77:5;;;;;;;;;;;;;;;:41;;;;;;:77;;;;;-1:-1:-1;;927:77:5;;;;;;;;-1:-1:-1;927:41:5;:77;;;5:2:-1;;;;30:1;27;20:12;5:2;927:77:5;;;;8:9:-1;5:2;;;45:16;42:1;39;24:38;77:16;74:1;67:27;5:2;927:77:5;;;;1066:22;1098:14;-1:-1:-1;;;;;1098:39:5;;:41;;;;;-1:-1:-1;;;1098:41:5;;;;;;;;;;;;;;;;8:9:-1;5:2;;;30:1;27;20:12;5:2;1098:41:5;;;;8:9:-1;5:2;;;45:16;42:1;39;24:38;77:16;74:1;67:27;5:2;1098:41:5;;;;;;;13:2:-1;8:3;5:11;2:2;;;29:1;26;19:12;2:2;-1:-1;1098:41:5;1279:40;;;;;;1313:4;1279:40;;;;;;1098:41;;-1:-1:-1;1254:22:5;;-1:-1:-1;;;;;1279:25:5;;;;;:40;;;;;1098:41;;1279:40;;;;;;;:25;:40;;;5:2:-1;;;;30:1;27;20:12;5:2;1279:40:5;;;;8:9:-1;5:2;;;45:16;42:1;39;24:38;77:16;74:1;67:27;5:2;1279:40:5;;;;;;;13:2:-1;8:3;5:11;2:2;;;29:1;26;19:12;2:2;-1:-1;1279:40:5;1441:52;;;;;;1466:10;1441:52;;;;;;;;;;;;1279:40;;-1:-1:-1;;;;;;1441:24:5;;;;;:52;;;;;1279:40;;1441:52;;;;;;;;-1:-1:-1;1441:24:5;:52;;;5:2:-1;;;;30:1;27;20:12;5:2;1441:52:5;;;;8:9:-1;5:2;;;45:16;42:1;39;24:38;77:16;74:1;67:27;5:2;1441:52:5;;;;;;;13:2:-1;8:3;5:11;2:2;;;29:1;26;19:12;2:2;-1:-1;;;;;;;;;;266:1234:5:o",
+  "source": "pragma solidity 0.5.2;\n\nimport \"openzeppelin-solidity/contracts/token/ERC20/IERC20.sol\";\n\nimport \"../marketprotocol/MarketContract.sol\";\nimport \"../marketprotocol/MarketCollateralPool.sol\";\nimport \"../marketprotocol/tokens/PositionToken.sol\";\n\n\ncontract Utils {\n    function redeemPositionTokens(address marketContractAddress, uint256 qtyToRedeem)\n        public\n    {\n        MarketContract marketContract = MarketContract(marketContractAddress);\n        MarketCollateralPool marketCollateralPool = MarketCollateralPool(\n            marketContract.COLLATERAL_POOL_ADDRESS()\n        );\n        PositionToken long = PositionToken(marketContract.LONG_POSITION_TOKEN());\n        PositionToken short = PositionToken(marketContract.SHORT_POSITION_TOKEN());\n\n        // approve tokens\n        long.approve(address(marketContract), qtyToRedeem);\n        short.approve(address(marketContract), qtyToRedeem);\n\n        // redeem\n        marketCollateralPool.redeemPositionTokens(marketContractAddress, qtyToRedeem);\n\n        // Finally redeem collateral back to user.\n        IERC20 collateralToken = IERC20(marketContract.COLLATERAL_TOKEN_ADDRESS());\n\n        // DSProxy balance. address(this) is the DSProxy contract address that will redeem the tokens.\n        uint256 dSProxyBalance = collateralToken.balanceOf(address(this));\n\n        // Move all redeemed tokens from DSProxy back to users wallet. msg.sender is the owner of the DSProxy.\n        collateralToken.transfer(msg.sender, dSProxyBalance);\n    }\n}\n",
   "sourcePath": "/Users/andreianisimov/projects/honeylemon/dapp.honeylemon.market/packages/contracts/contracts/honeylemon/Utils.sol",
   "ast": {
     "absolutePath": "/Users/andreianisimov/projects/honeylemon/dapp.honeylemon.market/packages/contracts/contracts/honeylemon/Utils.sol",
@@ -108,7 +108,7 @@
             "body": {
               "id": 1798,
               "nodeType": "Block",
-              "src": "349:1047:5",
+              "src": "367:1133:5",
               "statements": [
                 {
                   "assignments": [
@@ -121,7 +121,7 @@
                       "name": "marketContract",
                       "nodeType": "VariableDeclaration",
                       "scope": 1798,
-                      "src": "355:29:5",
+                      "src": "377:29:5",
                       "stateVariable": false,
                       "storageLocation": "default",
                       "typeDescriptions": {
@@ -134,7 +134,7 @@
                         "name": "MarketContract",
                         "nodeType": "UserDefinedTypeName",
                         "referencedDeclaration": 3131,
-                        "src": "355:14:5",
+                        "src": "377:14:5",
                         "typeDescriptions": {
                           "typeIdentifier": "t_contract$_MarketContract_$3131",
                           "typeString": "contract MarketContract"
@@ -155,7 +155,7 @@
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 1713,
-                        "src": "402:21:5",
+                        "src": "424:21:5",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -174,7 +174,7 @@
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
                       "referencedDeclaration": 3131,
-                      "src": "387:14:5",
+                      "src": "409:14:5",
                       "typeDescriptions": {
                         "typeIdentifier": "t_type$_t_contract$_MarketContract_$3131_$",
                         "typeString": "type(contract MarketContract)"
@@ -188,14 +188,14 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "387:37:5",
+                    "src": "409:37:5",
                     "typeDescriptions": {
                       "typeIdentifier": "t_contract$_MarketContract_$3131",
                       "typeString": "contract MarketContract"
                     }
                   },
                   "nodeType": "VariableDeclarationStatement",
-                  "src": "355:69:5"
+                  "src": "377:69:5"
                 },
                 {
                   "assignments": [
@@ -208,7 +208,7 @@
                       "name": "marketCollateralPool",
                       "nodeType": "VariableDeclaration",
                       "scope": 1798,
-                      "src": "430:41:5",
+                      "src": "456:41:5",
                       "stateVariable": false,
                       "storageLocation": "default",
                       "typeDescriptions": {
@@ -221,7 +221,7 @@
                         "name": "MarketCollateralPool",
                         "nodeType": "UserDefinedTypeName",
                         "referencedDeclaration": 2735,
-                        "src": "430:20:5",
+                        "src": "456:20:5",
                         "typeDescriptions": {
                           "typeIdentifier": "t_contract$_MarketCollateralPool_$2735",
                           "typeString": "contract MarketCollateralPool"
@@ -247,7 +247,7 @@
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
                             "referencedDeclaration": 1719,
-                            "src": "495:14:5",
+                            "src": "534:14:5",
                             "typeDescriptions": {
                               "typeIdentifier": "t_contract$_MarketContract_$3131",
                               "typeString": "contract MarketContract"
@@ -261,7 +261,7 @@
                           "memberName": "COLLATERAL_POOL_ADDRESS",
                           "nodeType": "MemberAccess",
                           "referencedDeclaration": 2751,
-                          "src": "495:38:5",
+                          "src": "534:38:5",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_external_view$__$returns$_t_address_$",
                             "typeString": "function () view external returns (address)"
@@ -275,7 +275,7 @@
                         "lValueRequested": false,
                         "names": [],
                         "nodeType": "FunctionCall",
-                        "src": "495:40:5",
+                        "src": "534:40:5",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -294,7 +294,7 @@
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
                       "referencedDeclaration": 2735,
-                      "src": "474:20:5",
+                      "src": "500:20:5",
                       "typeDescriptions": {
                         "typeIdentifier": "t_type$_t_contract$_MarketCollateralPool_$2735_$",
                         "typeString": "type(contract MarketCollateralPool)"
@@ -308,14 +308,14 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "474:62:5",
+                    "src": "500:84:5",
                     "typeDescriptions": {
                       "typeIdentifier": "t_contract$_MarketCollateralPool_$2735",
                       "typeString": "contract MarketCollateralPool"
                     }
                   },
                   "nodeType": "VariableDeclarationStatement",
-                  "src": "430:106:5"
+                  "src": "456:128:5"
                 },
                 {
                   "assignments": [
@@ -328,7 +328,7 @@
                       "name": "long",
                       "nodeType": "VariableDeclaration",
                       "scope": 1798,
-                      "src": "542:18:5",
+                      "src": "594:18:5",
                       "stateVariable": false,
                       "storageLocation": "default",
                       "typeDescriptions": {
@@ -341,7 +341,7 @@
                         "name": "PositionToken",
                         "nodeType": "UserDefinedTypeName",
                         "referencedDeclaration": 3913,
-                        "src": "542:13:5",
+                        "src": "594:13:5",
                         "typeDescriptions": {
                           "typeIdentifier": "t_contract$_PositionToken_$3913",
                           "typeString": "contract PositionToken"
@@ -367,7 +367,7 @@
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
                             "referencedDeclaration": 1719,
-                            "src": "577:14:5",
+                            "src": "629:14:5",
                             "typeDescriptions": {
                               "typeIdentifier": "t_contract$_MarketContract_$3131",
                               "typeString": "contract MarketContract"
@@ -381,7 +381,7 @@
                           "memberName": "LONG_POSITION_TOKEN",
                           "nodeType": "MemberAccess",
                           "referencedDeclaration": 2772,
-                          "src": "577:34:5",
+                          "src": "629:34:5",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_external_view$__$returns$_t_address_$",
                             "typeString": "function () view external returns (address)"
@@ -395,7 +395,7 @@
                         "lValueRequested": false,
                         "names": [],
                         "nodeType": "FunctionCall",
-                        "src": "577:36:5",
+                        "src": "629:36:5",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -414,7 +414,7 @@
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
                       "referencedDeclaration": 3913,
-                      "src": "563:13:5",
+                      "src": "615:13:5",
                       "typeDescriptions": {
                         "typeIdentifier": "t_type$_t_contract$_PositionToken_$3913_$",
                         "typeString": "type(contract PositionToken)"
@@ -428,14 +428,14 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "563:51:5",
+                    "src": "615:51:5",
                     "typeDescriptions": {
                       "typeIdentifier": "t_contract$_PositionToken_$3913",
                       "typeString": "contract PositionToken"
                     }
                   },
                   "nodeType": "VariableDeclarationStatement",
-                  "src": "542:72:5"
+                  "src": "594:72:5"
                 },
                 {
                   "assignments": [
@@ -448,7 +448,7 @@
                       "name": "short",
                       "nodeType": "VariableDeclaration",
                       "scope": 1798,
-                      "src": "620:19:5",
+                      "src": "676:19:5",
                       "stateVariable": false,
                       "storageLocation": "default",
                       "typeDescriptions": {
@@ -461,7 +461,7 @@
                         "name": "PositionToken",
                         "nodeType": "UserDefinedTypeName",
                         "referencedDeclaration": 3913,
-                        "src": "620:13:5",
+                        "src": "676:13:5",
                         "typeDescriptions": {
                           "typeIdentifier": "t_contract$_PositionToken_$3913",
                           "typeString": "contract PositionToken"
@@ -487,7 +487,7 @@
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
                             "referencedDeclaration": 1719,
-                            "src": "656:14:5",
+                            "src": "712:14:5",
                             "typeDescriptions": {
                               "typeIdentifier": "t_contract$_MarketContract_$3131",
                               "typeString": "contract MarketContract"
@@ -501,7 +501,7 @@
                           "memberName": "SHORT_POSITION_TOKEN",
                           "nodeType": "MemberAccess",
                           "referencedDeclaration": 2774,
-                          "src": "656:35:5",
+                          "src": "712:35:5",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_external_view$__$returns$_t_address_$",
                             "typeString": "function () view external returns (address)"
@@ -515,7 +515,7 @@
                         "lValueRequested": false,
                         "names": [],
                         "nodeType": "FunctionCall",
-                        "src": "656:37:5",
+                        "src": "712:37:5",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -534,7 +534,7 @@
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
                       "referencedDeclaration": 3913,
-                      "src": "642:13:5",
+                      "src": "698:13:5",
                       "typeDescriptions": {
                         "typeIdentifier": "t_type$_t_contract$_PositionToken_$3913_$",
                         "typeString": "type(contract PositionToken)"
@@ -548,14 +548,14 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "642:52:5",
+                    "src": "698:52:5",
                     "typeDescriptions": {
                       "typeIdentifier": "t_contract$_PositionToken_$3913",
                       "typeString": "contract PositionToken"
                     }
                   },
                   "nodeType": "VariableDeclarationStatement",
-                  "src": "620:74:5"
+                  "src": "676:74:5"
                 },
                 {
                   "expression": {
@@ -571,7 +571,7 @@
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
                             "referencedDeclaration": 1719,
-                            "src": "744:14:5",
+                            "src": "808:14:5",
                             "typeDescriptions": {
                               "typeIdentifier": "t_contract$_MarketContract_$3131",
                               "typeString": "contract MarketContract"
@@ -591,7 +591,7 @@
                           "isPure": true,
                           "lValueRequested": false,
                           "nodeType": "ElementaryTypeNameExpression",
-                          "src": "736:7:5",
+                          "src": "800:7:5",
                           "typeDescriptions": {
                             "typeIdentifier": "t_type$_t_address_$",
                             "typeString": "type(address)"
@@ -606,7 +606,7 @@
                         "lValueRequested": false,
                         "names": [],
                         "nodeType": "FunctionCall",
-                        "src": "736:23:5",
+                        "src": "800:23:5",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -619,7 +619,7 @@
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 1715,
-                        "src": "761:11:5",
+                        "src": "825:11:5",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -644,7 +644,7 @@
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 1733,
-                        "src": "723:4:5",
+                        "src": "787:4:5",
                         "typeDescriptions": {
                           "typeIdentifier": "t_contract$_PositionToken_$3913",
                           "typeString": "contract PositionToken"
@@ -658,7 +658,7 @@
                       "memberName": "approve",
                       "nodeType": "MemberAccess",
                       "referencedDeclaration": 4373,
-                      "src": "723:12:5",
+                      "src": "787:12:5",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_nonpayable$_t_address_$_t_uint256_$returns$_t_bool_$",
                         "typeString": "function (address,uint256) external returns (bool)"
@@ -672,7 +672,7 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "723:50:5",
+                    "src": "787:50:5",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
@@ -680,7 +680,7 @@
                   },
                   "id": 1756,
                   "nodeType": "ExpressionStatement",
-                  "src": "723:50:5"
+                  "src": "787:50:5"
                 },
                 {
                   "expression": {
@@ -696,7 +696,7 @@
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
                             "referencedDeclaration": 1719,
-                            "src": "801:14:5",
+                            "src": "869:14:5",
                             "typeDescriptions": {
                               "typeIdentifier": "t_contract$_MarketContract_$3131",
                               "typeString": "contract MarketContract"
@@ -716,7 +716,7 @@
                           "isPure": true,
                           "lValueRequested": false,
                           "nodeType": "ElementaryTypeNameExpression",
-                          "src": "793:7:5",
+                          "src": "861:7:5",
                           "typeDescriptions": {
                             "typeIdentifier": "t_type$_t_address_$",
                             "typeString": "type(address)"
@@ -731,7 +731,7 @@
                         "lValueRequested": false,
                         "names": [],
                         "nodeType": "FunctionCall",
-                        "src": "793:23:5",
+                        "src": "861:23:5",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -744,7 +744,7 @@
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 1715,
-                        "src": "818:11:5",
+                        "src": "886:11:5",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -769,7 +769,7 @@
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 1741,
-                        "src": "779:5:5",
+                        "src": "847:5:5",
                         "typeDescriptions": {
                           "typeIdentifier": "t_contract$_PositionToken_$3913",
                           "typeString": "contract PositionToken"
@@ -783,7 +783,7 @@
                       "memberName": "approve",
                       "nodeType": "MemberAccess",
                       "referencedDeclaration": 4373,
-                      "src": "779:13:5",
+                      "src": "847:13:5",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_nonpayable$_t_address_$_t_uint256_$returns$_t_bool_$",
                         "typeString": "function (address,uint256) external returns (bool)"
@@ -797,7 +797,7 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "779:51:5",
+                    "src": "847:51:5",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
@@ -805,7 +805,7 @@
                   },
                   "id": 1765,
                   "nodeType": "ExpressionStatement",
-                  "src": "779:51:5"
+                  "src": "847:51:5"
                 },
                 {
                   "expression": {
@@ -818,7 +818,7 @@
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 1713,
-                        "src": "893:21:5",
+                        "src": "969:21:5",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -831,7 +831,7 @@
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 1715,
-                        "src": "916:11:5",
+                        "src": "992:11:5",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -856,7 +856,7 @@
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 1725,
-                        "src": "851:20:5",
+                        "src": "927:20:5",
                         "typeDescriptions": {
                           "typeIdentifier": "t_contract$_MarketCollateralPool_$2735",
                           "typeString": "contract MarketCollateralPool"
@@ -870,7 +870,7 @@
                       "memberName": "redeemPositionTokens",
                       "nodeType": "MemberAccess",
                       "referencedDeclaration": 2527,
-                      "src": "851:41:5",
+                      "src": "927:41:5",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_nonpayable$_t_address_$_t_uint256_$returns$__$",
                         "typeString": "function (address,uint256) external"
@@ -884,7 +884,7 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "851:77:5",
+                    "src": "927:77:5",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
@@ -892,7 +892,7 @@
                   },
                   "id": 1772,
                   "nodeType": "ExpressionStatement",
-                  "src": "851:77:5"
+                  "src": "927:77:5"
                 },
                 {
                   "assignments": [
@@ -905,7 +905,7 @@
                       "name": "collateralToken",
                       "nodeType": "VariableDeclaration",
                       "scope": 1798,
-                      "src": "982:22:5",
+                      "src": "1066:22:5",
                       "stateVariable": false,
                       "storageLocation": "default",
                       "typeDescriptions": {
@@ -918,7 +918,7 @@
                         "name": "IERC20",
                         "nodeType": "UserDefinedTypeName",
                         "referencedDeclaration": 4761,
-                        "src": "982:6:5",
+                        "src": "1066:6:5",
                         "typeDescriptions": {
                           "typeIdentifier": "t_contract$_IERC20_$4761",
                           "typeString": "contract IERC20"
@@ -944,7 +944,7 @@
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
                             "referencedDeclaration": 1719,
-                            "src": "1014:14:5",
+                            "src": "1098:14:5",
                             "typeDescriptions": {
                               "typeIdentifier": "t_contract$_MarketContract_$3131",
                               "typeString": "contract MarketContract"
@@ -958,7 +958,7 @@
                           "memberName": "COLLATERAL_TOKEN_ADDRESS",
                           "nodeType": "MemberAccess",
                           "referencedDeclaration": 2749,
-                          "src": "1014:39:5",
+                          "src": "1098:39:5",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_external_view$__$returns$_t_address_$",
                             "typeString": "function () view external returns (address)"
@@ -972,7 +972,7 @@
                         "lValueRequested": false,
                         "names": [],
                         "nodeType": "FunctionCall",
-                        "src": "1014:41:5",
+                        "src": "1098:41:5",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -991,7 +991,7 @@
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
                       "referencedDeclaration": 4761,
-                      "src": "1007:6:5",
+                      "src": "1091:6:5",
                       "typeDescriptions": {
                         "typeIdentifier": "t_type$_t_contract$_IERC20_$4761_$",
                         "typeString": "type(contract IERC20)"
@@ -1005,14 +1005,14 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "1007:49:5",
+                    "src": "1091:49:5",
                     "typeDescriptions": {
                       "typeIdentifier": "t_contract$_IERC20_$4761",
                       "typeString": "contract IERC20"
                     }
                   },
                   "nodeType": "VariableDeclarationStatement",
-                  "src": "982:74:5"
+                  "src": "1066:74:5"
                 },
                 {
                   "assignments": [
@@ -1025,7 +1025,7 @@
                       "name": "dSProxyBalance",
                       "nodeType": "VariableDeclaration",
                       "scope": 1798,
-                      "src": "1162:19:5",
+                      "src": "1254:22:5",
                       "stateVariable": false,
                       "storageLocation": "default",
                       "typeDescriptions": {
@@ -1034,9 +1034,9 @@
                       },
                       "typeName": {
                         "id": 1781,
-                        "name": "uint",
+                        "name": "uint256",
                         "nodeType": "ElementaryTypeName",
-                        "src": "1162:4:5",
+                        "src": "1254:7:5",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -1060,7 +1060,7 @@
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
                             "referencedDeclaration": 5104,
-                            "src": "1218:4:5",
+                            "src": "1313:4:5",
                             "typeDescriptions": {
                               "typeIdentifier": "t_contract$_Utils_$1800",
                               "typeString": "contract Utils"
@@ -1080,7 +1080,7 @@
                           "isPure": true,
                           "lValueRequested": false,
                           "nodeType": "ElementaryTypeNameExpression",
-                          "src": "1210:7:5",
+                          "src": "1305:7:5",
                           "typeDescriptions": {
                             "typeIdentifier": "t_type$_t_address_$",
                             "typeString": "type(address)"
@@ -1095,7 +1095,7 @@
                         "lValueRequested": false,
                         "names": [],
                         "nodeType": "FunctionCall",
-                        "src": "1210:13:5",
+                        "src": "1305:13:5",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -1116,7 +1116,7 @@
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 1774,
-                        "src": "1184:15:5",
+                        "src": "1279:15:5",
                         "typeDescriptions": {
                           "typeIdentifier": "t_contract$_IERC20_$4761",
                           "typeString": "contract IERC20"
@@ -1130,7 +1130,7 @@
                       "memberName": "balanceOf",
                       "nodeType": "MemberAccess",
                       "referencedDeclaration": 4735,
-                      "src": "1184:25:5",
+                      "src": "1279:25:5",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_view$_t_address_$returns$_t_uint256_$",
                         "typeString": "function (address) view external returns (uint256)"
@@ -1144,14 +1144,14 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "1184:40:5",
+                    "src": "1279:40:5",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
                   "nodeType": "VariableDeclarationStatement",
-                  "src": "1162:62:5"
+                  "src": "1254:65:5"
                 },
                 {
                   "expression": {
@@ -1166,7 +1166,7 @@
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
                           "referencedDeclaration": 5041,
-                          "src": "1363:3:5",
+                          "src": "1466:3:5",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
                             "typeString": "msg"
@@ -1180,7 +1180,7 @@
                         "memberName": "sender",
                         "nodeType": "MemberAccess",
                         "referencedDeclaration": null,
-                        "src": "1363:10:5",
+                        "src": "1466:10:5",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address_payable",
                           "typeString": "address payable"
@@ -1193,7 +1193,7 @@
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 1782,
-                        "src": "1375:14:5",
+                        "src": "1478:14:5",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -1218,7 +1218,7 @@
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 1774,
-                        "src": "1338:15:5",
+                        "src": "1441:15:5",
                         "typeDescriptions": {
                           "typeIdentifier": "t_contract$_IERC20_$4761",
                           "typeString": "contract IERC20"
@@ -1232,7 +1232,7 @@
                       "memberName": "transfer",
                       "nodeType": "MemberAccess",
                       "referencedDeclaration": 4703,
-                      "src": "1338:24:5",
+                      "src": "1441:24:5",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_nonpayable$_t_address_$_t_uint256_$returns$_t_bool_$",
                         "typeString": "function (address,uint256) external returns (bool)"
@@ -1246,7 +1246,7 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "1338:52:5",
+                    "src": "1441:52:5",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
@@ -1254,7 +1254,7 @@
                   },
                   "id": 1797,
                   "nodeType": "ExpressionStatement",
-                  "src": "1338:52:5"
+                  "src": "1441:52:5"
                 }
               ]
             },
@@ -1275,7 +1275,7 @@
                   "name": "marketContractAddress",
                   "nodeType": "VariableDeclaration",
                   "scope": 1799,
-                  "src": "293:29:5",
+                  "src": "296:29:5",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1286,7 +1286,7 @@
                     "id": 1712,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "293:7:5",
+                    "src": "296:7:5",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -1302,7 +1302,7 @@
                   "name": "qtyToRedeem",
                   "nodeType": "VariableDeclaration",
                   "scope": 1799,
-                  "src": "324:16:5",
+                  "src": "327:19:5",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1311,9 +1311,9 @@
                   },
                   "typeName": {
                     "id": 1714,
-                    "name": "uint",
+                    "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "324:4:5",
+                    "src": "327:7:5",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -1323,26 +1323,26 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "292:49:5"
+              "src": "295:52:5"
             },
             "returnParameters": {
               "id": 1717,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "349:0:5"
+              "src": "367:0:5"
             },
             "scope": 1800,
-            "src": "263:1133:5",
+            "src": "266:1234:5",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
           }
         ],
         "scope": 1801,
-        "src": "244:1154:5"
+        "src": "245:1257:5"
       }
     ],
-    "src": "0:1398:5"
+    "src": "0:1503:5"
   },
   "legacyAST": {
     "absolutePath": "/Users/andreianisimov/projects/honeylemon/dapp.honeylemon.market/packages/contracts/contracts/honeylemon/Utils.sol",
@@ -1425,7 +1425,7 @@
             "body": {
               "id": 1798,
               "nodeType": "Block",
-              "src": "349:1047:5",
+              "src": "367:1133:5",
               "statements": [
                 {
                   "assignments": [
@@ -1438,7 +1438,7 @@
                       "name": "marketContract",
                       "nodeType": "VariableDeclaration",
                       "scope": 1798,
-                      "src": "355:29:5",
+                      "src": "377:29:5",
                       "stateVariable": false,
                       "storageLocation": "default",
                       "typeDescriptions": {
@@ -1451,7 +1451,7 @@
                         "name": "MarketContract",
                         "nodeType": "UserDefinedTypeName",
                         "referencedDeclaration": 3131,
-                        "src": "355:14:5",
+                        "src": "377:14:5",
                         "typeDescriptions": {
                           "typeIdentifier": "t_contract$_MarketContract_$3131",
                           "typeString": "contract MarketContract"
@@ -1472,7 +1472,7 @@
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 1713,
-                        "src": "402:21:5",
+                        "src": "424:21:5",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -1491,7 +1491,7 @@
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
                       "referencedDeclaration": 3131,
-                      "src": "387:14:5",
+                      "src": "409:14:5",
                       "typeDescriptions": {
                         "typeIdentifier": "t_type$_t_contract$_MarketContract_$3131_$",
                         "typeString": "type(contract MarketContract)"
@@ -1505,14 +1505,14 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "387:37:5",
+                    "src": "409:37:5",
                     "typeDescriptions": {
                       "typeIdentifier": "t_contract$_MarketContract_$3131",
                       "typeString": "contract MarketContract"
                     }
                   },
                   "nodeType": "VariableDeclarationStatement",
-                  "src": "355:69:5"
+                  "src": "377:69:5"
                 },
                 {
                   "assignments": [
@@ -1525,7 +1525,7 @@
                       "name": "marketCollateralPool",
                       "nodeType": "VariableDeclaration",
                       "scope": 1798,
-                      "src": "430:41:5",
+                      "src": "456:41:5",
                       "stateVariable": false,
                       "storageLocation": "default",
                       "typeDescriptions": {
@@ -1538,7 +1538,7 @@
                         "name": "MarketCollateralPool",
                         "nodeType": "UserDefinedTypeName",
                         "referencedDeclaration": 2735,
-                        "src": "430:20:5",
+                        "src": "456:20:5",
                         "typeDescriptions": {
                           "typeIdentifier": "t_contract$_MarketCollateralPool_$2735",
                           "typeString": "contract MarketCollateralPool"
@@ -1564,7 +1564,7 @@
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
                             "referencedDeclaration": 1719,
-                            "src": "495:14:5",
+                            "src": "534:14:5",
                             "typeDescriptions": {
                               "typeIdentifier": "t_contract$_MarketContract_$3131",
                               "typeString": "contract MarketContract"
@@ -1578,7 +1578,7 @@
                           "memberName": "COLLATERAL_POOL_ADDRESS",
                           "nodeType": "MemberAccess",
                           "referencedDeclaration": 2751,
-                          "src": "495:38:5",
+                          "src": "534:38:5",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_external_view$__$returns$_t_address_$",
                             "typeString": "function () view external returns (address)"
@@ -1592,7 +1592,7 @@
                         "lValueRequested": false,
                         "names": [],
                         "nodeType": "FunctionCall",
-                        "src": "495:40:5",
+                        "src": "534:40:5",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -1611,7 +1611,7 @@
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
                       "referencedDeclaration": 2735,
-                      "src": "474:20:5",
+                      "src": "500:20:5",
                       "typeDescriptions": {
                         "typeIdentifier": "t_type$_t_contract$_MarketCollateralPool_$2735_$",
                         "typeString": "type(contract MarketCollateralPool)"
@@ -1625,14 +1625,14 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "474:62:5",
+                    "src": "500:84:5",
                     "typeDescriptions": {
                       "typeIdentifier": "t_contract$_MarketCollateralPool_$2735",
                       "typeString": "contract MarketCollateralPool"
                     }
                   },
                   "nodeType": "VariableDeclarationStatement",
-                  "src": "430:106:5"
+                  "src": "456:128:5"
                 },
                 {
                   "assignments": [
@@ -1645,7 +1645,7 @@
                       "name": "long",
                       "nodeType": "VariableDeclaration",
                       "scope": 1798,
-                      "src": "542:18:5",
+                      "src": "594:18:5",
                       "stateVariable": false,
                       "storageLocation": "default",
                       "typeDescriptions": {
@@ -1658,7 +1658,7 @@
                         "name": "PositionToken",
                         "nodeType": "UserDefinedTypeName",
                         "referencedDeclaration": 3913,
-                        "src": "542:13:5",
+                        "src": "594:13:5",
                         "typeDescriptions": {
                           "typeIdentifier": "t_contract$_PositionToken_$3913",
                           "typeString": "contract PositionToken"
@@ -1684,7 +1684,7 @@
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
                             "referencedDeclaration": 1719,
-                            "src": "577:14:5",
+                            "src": "629:14:5",
                             "typeDescriptions": {
                               "typeIdentifier": "t_contract$_MarketContract_$3131",
                               "typeString": "contract MarketContract"
@@ -1698,7 +1698,7 @@
                           "memberName": "LONG_POSITION_TOKEN",
                           "nodeType": "MemberAccess",
                           "referencedDeclaration": 2772,
-                          "src": "577:34:5",
+                          "src": "629:34:5",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_external_view$__$returns$_t_address_$",
                             "typeString": "function () view external returns (address)"
@@ -1712,7 +1712,7 @@
                         "lValueRequested": false,
                         "names": [],
                         "nodeType": "FunctionCall",
-                        "src": "577:36:5",
+                        "src": "629:36:5",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -1731,7 +1731,7 @@
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
                       "referencedDeclaration": 3913,
-                      "src": "563:13:5",
+                      "src": "615:13:5",
                       "typeDescriptions": {
                         "typeIdentifier": "t_type$_t_contract$_PositionToken_$3913_$",
                         "typeString": "type(contract PositionToken)"
@@ -1745,14 +1745,14 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "563:51:5",
+                    "src": "615:51:5",
                     "typeDescriptions": {
                       "typeIdentifier": "t_contract$_PositionToken_$3913",
                       "typeString": "contract PositionToken"
                     }
                   },
                   "nodeType": "VariableDeclarationStatement",
-                  "src": "542:72:5"
+                  "src": "594:72:5"
                 },
                 {
                   "assignments": [
@@ -1765,7 +1765,7 @@
                       "name": "short",
                       "nodeType": "VariableDeclaration",
                       "scope": 1798,
-                      "src": "620:19:5",
+                      "src": "676:19:5",
                       "stateVariable": false,
                       "storageLocation": "default",
                       "typeDescriptions": {
@@ -1778,7 +1778,7 @@
                         "name": "PositionToken",
                         "nodeType": "UserDefinedTypeName",
                         "referencedDeclaration": 3913,
-                        "src": "620:13:5",
+                        "src": "676:13:5",
                         "typeDescriptions": {
                           "typeIdentifier": "t_contract$_PositionToken_$3913",
                           "typeString": "contract PositionToken"
@@ -1804,7 +1804,7 @@
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
                             "referencedDeclaration": 1719,
-                            "src": "656:14:5",
+                            "src": "712:14:5",
                             "typeDescriptions": {
                               "typeIdentifier": "t_contract$_MarketContract_$3131",
                               "typeString": "contract MarketContract"
@@ -1818,7 +1818,7 @@
                           "memberName": "SHORT_POSITION_TOKEN",
                           "nodeType": "MemberAccess",
                           "referencedDeclaration": 2774,
-                          "src": "656:35:5",
+                          "src": "712:35:5",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_external_view$__$returns$_t_address_$",
                             "typeString": "function () view external returns (address)"
@@ -1832,7 +1832,7 @@
                         "lValueRequested": false,
                         "names": [],
                         "nodeType": "FunctionCall",
-                        "src": "656:37:5",
+                        "src": "712:37:5",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -1851,7 +1851,7 @@
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
                       "referencedDeclaration": 3913,
-                      "src": "642:13:5",
+                      "src": "698:13:5",
                       "typeDescriptions": {
                         "typeIdentifier": "t_type$_t_contract$_PositionToken_$3913_$",
                         "typeString": "type(contract PositionToken)"
@@ -1865,14 +1865,14 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "642:52:5",
+                    "src": "698:52:5",
                     "typeDescriptions": {
                       "typeIdentifier": "t_contract$_PositionToken_$3913",
                       "typeString": "contract PositionToken"
                     }
                   },
                   "nodeType": "VariableDeclarationStatement",
-                  "src": "620:74:5"
+                  "src": "676:74:5"
                 },
                 {
                   "expression": {
@@ -1888,7 +1888,7 @@
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
                             "referencedDeclaration": 1719,
-                            "src": "744:14:5",
+                            "src": "808:14:5",
                             "typeDescriptions": {
                               "typeIdentifier": "t_contract$_MarketContract_$3131",
                               "typeString": "contract MarketContract"
@@ -1908,7 +1908,7 @@
                           "isPure": true,
                           "lValueRequested": false,
                           "nodeType": "ElementaryTypeNameExpression",
-                          "src": "736:7:5",
+                          "src": "800:7:5",
                           "typeDescriptions": {
                             "typeIdentifier": "t_type$_t_address_$",
                             "typeString": "type(address)"
@@ -1923,7 +1923,7 @@
                         "lValueRequested": false,
                         "names": [],
                         "nodeType": "FunctionCall",
-                        "src": "736:23:5",
+                        "src": "800:23:5",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -1936,7 +1936,7 @@
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 1715,
-                        "src": "761:11:5",
+                        "src": "825:11:5",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -1961,7 +1961,7 @@
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 1733,
-                        "src": "723:4:5",
+                        "src": "787:4:5",
                         "typeDescriptions": {
                           "typeIdentifier": "t_contract$_PositionToken_$3913",
                           "typeString": "contract PositionToken"
@@ -1975,7 +1975,7 @@
                       "memberName": "approve",
                       "nodeType": "MemberAccess",
                       "referencedDeclaration": 4373,
-                      "src": "723:12:5",
+                      "src": "787:12:5",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_nonpayable$_t_address_$_t_uint256_$returns$_t_bool_$",
                         "typeString": "function (address,uint256) external returns (bool)"
@@ -1989,7 +1989,7 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "723:50:5",
+                    "src": "787:50:5",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
@@ -1997,7 +1997,7 @@
                   },
                   "id": 1756,
                   "nodeType": "ExpressionStatement",
-                  "src": "723:50:5"
+                  "src": "787:50:5"
                 },
                 {
                   "expression": {
@@ -2013,7 +2013,7 @@
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
                             "referencedDeclaration": 1719,
-                            "src": "801:14:5",
+                            "src": "869:14:5",
                             "typeDescriptions": {
                               "typeIdentifier": "t_contract$_MarketContract_$3131",
                               "typeString": "contract MarketContract"
@@ -2033,7 +2033,7 @@
                           "isPure": true,
                           "lValueRequested": false,
                           "nodeType": "ElementaryTypeNameExpression",
-                          "src": "793:7:5",
+                          "src": "861:7:5",
                           "typeDescriptions": {
                             "typeIdentifier": "t_type$_t_address_$",
                             "typeString": "type(address)"
@@ -2048,7 +2048,7 @@
                         "lValueRequested": false,
                         "names": [],
                         "nodeType": "FunctionCall",
-                        "src": "793:23:5",
+                        "src": "861:23:5",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -2061,7 +2061,7 @@
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 1715,
-                        "src": "818:11:5",
+                        "src": "886:11:5",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -2086,7 +2086,7 @@
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 1741,
-                        "src": "779:5:5",
+                        "src": "847:5:5",
                         "typeDescriptions": {
                           "typeIdentifier": "t_contract$_PositionToken_$3913",
                           "typeString": "contract PositionToken"
@@ -2100,7 +2100,7 @@
                       "memberName": "approve",
                       "nodeType": "MemberAccess",
                       "referencedDeclaration": 4373,
-                      "src": "779:13:5",
+                      "src": "847:13:5",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_nonpayable$_t_address_$_t_uint256_$returns$_t_bool_$",
                         "typeString": "function (address,uint256) external returns (bool)"
@@ -2114,7 +2114,7 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "779:51:5",
+                    "src": "847:51:5",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
@@ -2122,7 +2122,7 @@
                   },
                   "id": 1765,
                   "nodeType": "ExpressionStatement",
-                  "src": "779:51:5"
+                  "src": "847:51:5"
                 },
                 {
                   "expression": {
@@ -2135,7 +2135,7 @@
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 1713,
-                        "src": "893:21:5",
+                        "src": "969:21:5",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -2148,7 +2148,7 @@
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 1715,
-                        "src": "916:11:5",
+                        "src": "992:11:5",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -2173,7 +2173,7 @@
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 1725,
-                        "src": "851:20:5",
+                        "src": "927:20:5",
                         "typeDescriptions": {
                           "typeIdentifier": "t_contract$_MarketCollateralPool_$2735",
                           "typeString": "contract MarketCollateralPool"
@@ -2187,7 +2187,7 @@
                       "memberName": "redeemPositionTokens",
                       "nodeType": "MemberAccess",
                       "referencedDeclaration": 2527,
-                      "src": "851:41:5",
+                      "src": "927:41:5",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_nonpayable$_t_address_$_t_uint256_$returns$__$",
                         "typeString": "function (address,uint256) external"
@@ -2201,7 +2201,7 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "851:77:5",
+                    "src": "927:77:5",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
@@ -2209,7 +2209,7 @@
                   },
                   "id": 1772,
                   "nodeType": "ExpressionStatement",
-                  "src": "851:77:5"
+                  "src": "927:77:5"
                 },
                 {
                   "assignments": [
@@ -2222,7 +2222,7 @@
                       "name": "collateralToken",
                       "nodeType": "VariableDeclaration",
                       "scope": 1798,
-                      "src": "982:22:5",
+                      "src": "1066:22:5",
                       "stateVariable": false,
                       "storageLocation": "default",
                       "typeDescriptions": {
@@ -2235,7 +2235,7 @@
                         "name": "IERC20",
                         "nodeType": "UserDefinedTypeName",
                         "referencedDeclaration": 4761,
-                        "src": "982:6:5",
+                        "src": "1066:6:5",
                         "typeDescriptions": {
                           "typeIdentifier": "t_contract$_IERC20_$4761",
                           "typeString": "contract IERC20"
@@ -2261,7 +2261,7 @@
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
                             "referencedDeclaration": 1719,
-                            "src": "1014:14:5",
+                            "src": "1098:14:5",
                             "typeDescriptions": {
                               "typeIdentifier": "t_contract$_MarketContract_$3131",
                               "typeString": "contract MarketContract"
@@ -2275,7 +2275,7 @@
                           "memberName": "COLLATERAL_TOKEN_ADDRESS",
                           "nodeType": "MemberAccess",
                           "referencedDeclaration": 2749,
-                          "src": "1014:39:5",
+                          "src": "1098:39:5",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_external_view$__$returns$_t_address_$",
                             "typeString": "function () view external returns (address)"
@@ -2289,7 +2289,7 @@
                         "lValueRequested": false,
                         "names": [],
                         "nodeType": "FunctionCall",
-                        "src": "1014:41:5",
+                        "src": "1098:41:5",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -2308,7 +2308,7 @@
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
                       "referencedDeclaration": 4761,
-                      "src": "1007:6:5",
+                      "src": "1091:6:5",
                       "typeDescriptions": {
                         "typeIdentifier": "t_type$_t_contract$_IERC20_$4761_$",
                         "typeString": "type(contract IERC20)"
@@ -2322,14 +2322,14 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "1007:49:5",
+                    "src": "1091:49:5",
                     "typeDescriptions": {
                       "typeIdentifier": "t_contract$_IERC20_$4761",
                       "typeString": "contract IERC20"
                     }
                   },
                   "nodeType": "VariableDeclarationStatement",
-                  "src": "982:74:5"
+                  "src": "1066:74:5"
                 },
                 {
                   "assignments": [
@@ -2342,7 +2342,7 @@
                       "name": "dSProxyBalance",
                       "nodeType": "VariableDeclaration",
                       "scope": 1798,
-                      "src": "1162:19:5",
+                      "src": "1254:22:5",
                       "stateVariable": false,
                       "storageLocation": "default",
                       "typeDescriptions": {
@@ -2351,9 +2351,9 @@
                       },
                       "typeName": {
                         "id": 1781,
-                        "name": "uint",
+                        "name": "uint256",
                         "nodeType": "ElementaryTypeName",
-                        "src": "1162:4:5",
+                        "src": "1254:7:5",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -2377,7 +2377,7 @@
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
                             "referencedDeclaration": 5104,
-                            "src": "1218:4:5",
+                            "src": "1313:4:5",
                             "typeDescriptions": {
                               "typeIdentifier": "t_contract$_Utils_$1800",
                               "typeString": "contract Utils"
@@ -2397,7 +2397,7 @@
                           "isPure": true,
                           "lValueRequested": false,
                           "nodeType": "ElementaryTypeNameExpression",
-                          "src": "1210:7:5",
+                          "src": "1305:7:5",
                           "typeDescriptions": {
                             "typeIdentifier": "t_type$_t_address_$",
                             "typeString": "type(address)"
@@ -2412,7 +2412,7 @@
                         "lValueRequested": false,
                         "names": [],
                         "nodeType": "FunctionCall",
-                        "src": "1210:13:5",
+                        "src": "1305:13:5",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -2433,7 +2433,7 @@
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 1774,
-                        "src": "1184:15:5",
+                        "src": "1279:15:5",
                         "typeDescriptions": {
                           "typeIdentifier": "t_contract$_IERC20_$4761",
                           "typeString": "contract IERC20"
@@ -2447,7 +2447,7 @@
                       "memberName": "balanceOf",
                       "nodeType": "MemberAccess",
                       "referencedDeclaration": 4735,
-                      "src": "1184:25:5",
+                      "src": "1279:25:5",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_view$_t_address_$returns$_t_uint256_$",
                         "typeString": "function (address) view external returns (uint256)"
@@ -2461,14 +2461,14 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "1184:40:5",
+                    "src": "1279:40:5",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
                   "nodeType": "VariableDeclarationStatement",
-                  "src": "1162:62:5"
+                  "src": "1254:65:5"
                 },
                 {
                   "expression": {
@@ -2483,7 +2483,7 @@
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
                           "referencedDeclaration": 5041,
-                          "src": "1363:3:5",
+                          "src": "1466:3:5",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
                             "typeString": "msg"
@@ -2497,7 +2497,7 @@
                         "memberName": "sender",
                         "nodeType": "MemberAccess",
                         "referencedDeclaration": null,
-                        "src": "1363:10:5",
+                        "src": "1466:10:5",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address_payable",
                           "typeString": "address payable"
@@ -2510,7 +2510,7 @@
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 1782,
-                        "src": "1375:14:5",
+                        "src": "1478:14:5",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -2535,7 +2535,7 @@
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 1774,
-                        "src": "1338:15:5",
+                        "src": "1441:15:5",
                         "typeDescriptions": {
                           "typeIdentifier": "t_contract$_IERC20_$4761",
                           "typeString": "contract IERC20"
@@ -2549,7 +2549,7 @@
                       "memberName": "transfer",
                       "nodeType": "MemberAccess",
                       "referencedDeclaration": 4703,
-                      "src": "1338:24:5",
+                      "src": "1441:24:5",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_nonpayable$_t_address_$_t_uint256_$returns$_t_bool_$",
                         "typeString": "function (address,uint256) external returns (bool)"
@@ -2563,7 +2563,7 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "1338:52:5",
+                    "src": "1441:52:5",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
@@ -2571,7 +2571,7 @@
                   },
                   "id": 1797,
                   "nodeType": "ExpressionStatement",
-                  "src": "1338:52:5"
+                  "src": "1441:52:5"
                 }
               ]
             },
@@ -2592,7 +2592,7 @@
                   "name": "marketContractAddress",
                   "nodeType": "VariableDeclaration",
                   "scope": 1799,
-                  "src": "293:29:5",
+                  "src": "296:29:5",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2603,7 +2603,7 @@
                     "id": 1712,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "293:7:5",
+                    "src": "296:7:5",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -2619,7 +2619,7 @@
                   "name": "qtyToRedeem",
                   "nodeType": "VariableDeclaration",
                   "scope": 1799,
-                  "src": "324:16:5",
+                  "src": "327:19:5",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2628,9 +2628,9 @@
                   },
                   "typeName": {
                     "id": 1714,
-                    "name": "uint",
+                    "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "324:4:5",
+                    "src": "327:7:5",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -2640,26 +2640,26 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "292:49:5"
+              "src": "295:52:5"
             },
             "returnParameters": {
               "id": 1717,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "349:0:5"
+              "src": "367:0:5"
             },
             "scope": 1800,
-            "src": "263:1133:5",
+            "src": "266:1234:5",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
           }
         ],
         "scope": 1801,
-        "src": "244:1154:5"
+        "src": "245:1257:5"
       }
     ],
-    "src": "0:1398:5"
+    "src": "0:1503:5"
   },
   "compiler": {
     "name": "solc",
@@ -2667,7 +2667,7 @@
   },
   "networks": {},
   "schemaVersion": "3.2.0",
-  "updatedAt": "2020-07-17T15:20:56.302Z",
+  "updatedAt": "2020-07-24T21:16:20.781Z",
   "devdoc": {
     "methods": {}
   },
