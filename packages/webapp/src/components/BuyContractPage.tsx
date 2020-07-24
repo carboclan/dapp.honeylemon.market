@@ -308,7 +308,7 @@ const BuyContractPage: React.SFC = () => {
       await deployDSProxyContract();
     } catch (error) {
       Sentry.captureException(error);
-      setErrorMessage(error);
+      setErrorMessage(error.message);
     }
     setTxActive(false);
   };

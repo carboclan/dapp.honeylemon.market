@@ -112,7 +112,7 @@ const MiningStatsPage: React.SFC = () => {
         month: "%b %Y",
         year: "%b %Y"
       },
-      tickInterval: 365 * 86400 * 100,
+      tickInterval: 365 * 86400 * 125,
       gridLineWidth: 0,
       tickWidth: 0,
       endOnTick: false
