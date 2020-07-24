@@ -512,7 +512,16 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
           const stats = await (
             await fetch(`${marketDataApiUrl}/blockchain/stats`)
           ).json();
-          setMiningContracts(contracts);
+          setMiningContracts(
+            contracts.map((c: any) =>
+              c.type === "DIFFICULTY_FUTURES"
+                ? {
+                    ...c,
+                    duration: dayjs(c.expiry).diff(dayjs(), "d", true)
+                  }
+                : c
+            )
+          );
           setCurrentBTCSpotPrice(stats.quote?.price);
           setCurrentMRI(stats.mri);
           setBtcStats(stats);
