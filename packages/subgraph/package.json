@@ -3,12 +3,12 @@
   "version": "0.1.0",
   "scripts": {
     "create": "graph create carboclan/honeylemon --node https://api.thegraph.com/deploy/",
-    "create:local": "graph create honeylemon/honeylemon-graph --node http://127.0.0.1:8020",
+    "create:local": "graph create carboclan/honeylemon --node http://127.0.0.1:8020",
     "codegen": "graph codegen --debug --output-dir src/types/",
     "build": "graph build --debug",
     "deploy:kovan": "graph deploy carboclan/honeylemon-kovan --debug --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/",
     "deploy:mainnet": "graph deploy carboclan/honeylemon --debug --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/",
-    "deploy:local": "graph deploy honeylemon/honeylemon-graph --debug --ipfs http://localhost:5001 --node http://127.0.0.1:8020",
+    "deploy:local": "graph deploy carboclan/honeylemon --debug --ipfs http://localhost:5001 --node http://127.0.0.1:8020",
     "prepare:kovan": "mustache config/kovan.json subgraph.template.yaml > subgraph.yaml",
     "prepare:mainnet": "mustache config/mainnet.json subgraph.template.yaml > subgraph.yaml",
     "prepare:local": "mustache config/local.json subgraph.template.yaml > subgraph.yaml"

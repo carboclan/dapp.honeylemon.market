@@ -341,7 +341,7 @@ class HoneylemonService {
     );
     return await approveTx.awaitTransactionSuccessAsync({
       from: makerAddress,
-      gasPrice: price
+      gasPrice: price?.toString()
     });
   }
 
@@ -379,8 +379,8 @@ class HoneylemonService {
       const gas = await approveTx.estimateGas({ from: takerAddress });
       const approveResult = await approveTx.send({
         from: takerAddress,
-        gas,
-        gasPrice: price
+        gas: gas.toString(),
+        gasPrice: price?.toString()
       });
 
       return await web3Wrapper.awaitTransactionSuccessAsync(
@@ -393,7 +393,7 @@ class HoneylemonService {
       );
       return await approveTx.awaitTransactionSuccessAsync({
         from: takerAddress,
-        gasPrice: price
+        gasPrice: price?.toString()
       });
     }
   }
@@ -440,8 +440,8 @@ class HoneylemonService {
     const gas = await deployDSProxyTx.estimateGas({ from: deployer });
     const deployResult = await deployDSProxyTx.send({
       from: deployer,
-      gas,
-      gasPrice: price
+      gas: gas.toString(),
+      gasPrice: price?.toString()
     });
     const web3Wrapper: Web3Wrapper = new Web3Wrapper(this.provider);
     await web3Wrapper.awaitTransactionSuccessAsync(deployResult.transactionHash);
@@ -489,7 +489,7 @@ class HoneylemonService {
         .approve(marketContractAddress, amount)
         .send({
           from: recipientAddress,
-          gasPrice: price
+          gasPrice: price?.toString()
         });
       await web3Wrapper.awaitTransactionSuccessAsync(approvalResult.transactionHash);
     }
@@ -511,8 +511,8 @@ class HoneylemonService {
     const gas = await redeemTx.estimateGas({ from: recipientAddress });
     const redeemResult = await redeemTx.send({
       from: recipientAddress,
-      gas,
-      gasPrice: price
+      gas: gas.toString(),
+      gasPrice: price?.toString()
     });
 
     return await web3Wrapper.awaitTransactionSuccessAsync(redeemResult.transactionHash);
@@ -584,8 +584,8 @@ class HoneylemonService {
         const gas = await method.estimateGas({ from: recipientAddress, gas: 9000000 });
         redemptionTxLong = await method.send({
           from: recipientAddress,
-          gas,
-          gasPrice: price
+          gas: gas.toString(),
+          gasPrice: price?.toString(),
         });
       }
     }

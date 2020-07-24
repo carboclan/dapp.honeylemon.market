@@ -1,0 +1,37 @@
+version: "3"
+services:
+    mesh:
+        image: docker.pkg.github.com/carboclan/0x-mesh/0x-mesh:1.4
+        restart: on-failure
+        environment:
+            ETHEREUM_RPC_URL: "${ETHEREUM_RPC_URL}"
+            ETHEREUM_CHAIN_ID: "${CHAIN_ID}"
+            USE_BOOTSTRAP_LIST: "false"
+            VERBOSITY: 5
+            PRIVATE_KEY_PATH: ""
+            WS_RPC_ADDR: "0.0.0.0:60557"
+            HTTP_RPC_ADDR: "0.0.0.0:60556"
+            ETHEREUM_RPC_MAX_REQUESTS_PER_24_HR_UTC: 100000
+            BLOCK_POLLING_INTERVAL: "5s"
+            HONEYLEMON_MARKET_CONTARCT_PROXY_ADDRESS: "${HONEYLEMON_MARKET_CONTARCT_PROXY_ADDRESS}"
+        volumes:
+            - .volumes/mainnet/0x_mesh:/usr/mesh/0x_mesh
+        ports:
+            - "60556"
+            - "60557"
+            - "60558"
+            - "60559"
+    api:
+        depends_on:
+            - mesh
+        image: 0xorg/0x-api:latest@sha256:54aa7a7f8b8ab8ad84a403ac8eb1ff995e5e5066ce4d45c2aa700e8b115406e3
+        restart: on-failure
+        environment:
+            ETHEREUM_RPC_URL: "${ETHEREUM_RPC_URL}"
+            CHAIN_ID: "${CHAIN_ID}"
+            MESH_WEBSOCKET_URI: "http://mesh:60557"
+            MESH_HTTP_URI: "http://mesh:60556"
+            POSTGRES_URI: "postgresql://${DB_USER}:${DB_PASSWORD}@hl-orderbook.cluster-ctyabaidtsxx.us-east-2.rds.amazonaws.com"
+            WHITELIST_ALL_TOKENS: "*"
+        ports:
+            - "${API_PORT}:3000"
