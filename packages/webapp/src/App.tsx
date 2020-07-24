@@ -5,8 +5,9 @@ import { Router } from "react-router-dom";
 import ScrollToTop from "./helpers/scrollToTop";
 import history from "./helpers/history";
 import { initGA, GAPageView } from "./helpers/gaTracking";
+import { initHotjar } from "./helpers/hotjar";
 import ReactGA from "react-ga";
-
+import config from "./contexts/HoneylemonConfig";
 import HoneyLemonApp from "./components/HoneyLemonApp";
 import { OnboardProvider } from "./contexts/OnboardContext";
 import { HoneylemonProvider } from "./contexts/HoneylemonContext";
@@ -16,14 +17,17 @@ history.listen(location => {
   GAPageView(location.pathname);
 });
 
+const validNetworks = Object.keys(config).map(network => Number(network));
+
 function App() {
   const onboardInit = {
     dappId: process.env.REACT_APP_BLOCKNATIVE_API_KEY || "",
-    networkId: Number.parseInt(process.env.REACT_APP_NETWORK_ID || "1")
+    networkId: validNetworks[0],
   };
 
   useEffect(() => {
     initGA();
+    initHotjar();
     GAPageView(window.location.pathname);
   }, []);
 
