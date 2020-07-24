@@ -866,7 +866,7 @@ const PorfolioPage: React.SFC = () => {
                           onClick={batchWithdraw}
                           variant="contained"
                           color="primary"
-                        >
+                          fullWidth>
                           {!isWithdrawing ? (
                             longCollateralForBatchWithdraw +
                               shortCollateralForBatchWithdraw >
