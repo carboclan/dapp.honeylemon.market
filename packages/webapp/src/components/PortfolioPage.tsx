@@ -383,7 +383,7 @@ const PorfolioPage: React.SFC = () => {
             <Tab label="Settled" value="expired" />
             {showWithdrawTab && <Tab label="Redeem" value="withdraw" />}
           </Tabs>
-          <Grid item style={{paddingTop: 8}}>
+          <Grid item style={{ paddingTop: 8 }}>
             <Typography variant='caption'>
               This page refreshes every 30 seconds. Click <Link href='#' onClick={refreshPortfolio}>here</Link> to refresh.
             </Typography>
