@@ -808,7 +808,7 @@ const PorfolioPage: React.SFC = () => {
                     )}
                   </ExpansionPanelSummary>
                   <ExpansionPanelDetails>
-                    <Grid container direction="column">
+                    <Grid container direction="row">
                       <Table>
                         <TableHead>
                           <TableRow>
@@ -822,12 +822,12 @@ const PorfolioPage: React.SFC = () => {
                         <TableBody>
                           <TableRow>
                             <TableCell>Long</TableCell>
-                            <TableCell>
+                            <TableCell align='center'>
                               {longCollateralForBatchWithdraw.toLocaleString(undefined, {
                                 maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS
                               })}
                             </TableCell>
-                            <TableCell>
+                            <TableCell align='right'>
                               {
                                 expiredLongPositions.filter(
                                   p =>
@@ -839,12 +839,12 @@ const PorfolioPage: React.SFC = () => {
                           </TableRow>
                           <TableRow>
                             <TableCell>Short</TableCell>
-                            <TableCell>
+                            <TableCell align='center'>
                               {shortCollateralForBatchWithdraw.toLocaleString(undefined, {
                                 maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS
                               })}
                             </TableCell>
-                            <TableCell>
+                            <TableCell align='right'>
                               {
                                 expiredShortPositions.filter(
                                   p =>
