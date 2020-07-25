@@ -91,7 +91,7 @@ const Footer: React.SFC<FooterProps> = (props: FooterProps) => {
               variant="caption"
               style={{ fontSize: 6 }}
             >
-              {process.env.REACT_APP_SENTRY_ENV} - {process.env.REACT_APP_SENTRY_RELEASE}
+              {process.env.REACT_APP_SENTRY_ENV?.toLocaleUpperCase()} BUILD: {process.env.REACT_APP_SENTRY_RELEASE?.toUpperCase()}
             </Typography>
           </Grid>
         </Grid>
