@@ -61,8 +61,7 @@ const ConnectWalletButton: React.SFC = () => {
           }}
           className={classes.button}
           fullWidth
-          disabled={!onboard || isConnecting}
-        >
+          disabled={!onboard || isConnecting}>
           CONNECT WALLET TO TRADE&nbsp;
           {isConnecting && (
             <CircularProgress className={classes.loadingSpinner} size={20} />
