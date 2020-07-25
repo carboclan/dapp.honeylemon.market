@@ -115,18 +115,13 @@ const OfferContractPage: React.SFC = () => {
     PAYMENT_TOKEN_DECIMALS,
     deployDSProxyContract,
     approveToken,
-    setShowTokenInfoModal
+    setShowTokenInfoModal,
+    orderbook,
   } = useHoneylemon();
   const { address = "0x" } = useOnboard();
   const classes = useStyles();
 
-  const [hashPrice, setHashPrice] = useState(
-    Number(
-      (btcStats.mri * marketData.currentBTCSpotPrice).toLocaleString(undefined, {
-        maximumFractionDigits: PAYMENT_TOKEN_DECIMALS
-      })
-    )
-  );
+  const [hashPrice, setHashPrice] = useState(0);
   const [hashAmount, setHashAmount] = useState<number | undefined>(0);
   const [totalContractPrice, setTotalContractPrice] = useState(0);
   const [collateralAmount, setCollateralAmount] = useState(0);
@@ -146,7 +141,7 @@ const OfferContractPage: React.SFC = () => {
   const [activeStep, setActiveStep] = useState(0);
   const [errorMessage, setErrorMessage] = useState("");
 
-  // Set default quantity
+  // Set default quantity and price
   useEffect(() => {
     const maxQuanityCollateralized = Math.floor(
       collateralTokenBalance /
@@ -156,6 +151,16 @@ const OfferContractPage: React.SFC = () => {
     );
     const startingQuantity = Math.min(1000, maxQuanityCollateralized);
     setHashAmount(startingQuantity);
+
+    const mriPrice = Number(
+      (btcStats.mri * marketData.currentBTCSpotPrice).toLocaleString(undefined, {
+        maximumFractionDigits: PAYMENT_TOKEN_DECIMALS
+      })
+    )
+
+    const startingPrice = orderbook.length > 0 ? orderbook[0].price : mriPrice
+
+    setHashPrice(startingPrice)
   }, []);
 
   useEffect(() => {
