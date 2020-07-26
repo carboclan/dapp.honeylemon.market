@@ -180,7 +180,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
       setIsDsProxyDeployed(true);
       setDsProxyAddress(dsProxyAddress);
     } catch (error) {
-      console.log("Something went wrong deploying the DS Proxy wallet");
+      console.log("Something went wrong deploying the honeylemon vault");
       console.log(error);
       Sentry.captureException(error);
       throw new Error(
