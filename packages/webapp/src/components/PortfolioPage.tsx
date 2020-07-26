@@ -642,6 +642,78 @@ const PorfolioPage: React.SFC = () => {
               </>
             ) : activeTab === "expired" ? (
               <>
+                <ExpansionPanel expanded={showExpiredLongPositions}>
+                  <ExpansionPanelSummary
+                    expandIcon={<ExpandMore />}
+                    classes={{
+                      content: classes.sectionHeading
+                    }}
+                    IconButtonProps={{ onClick: handleToggleExpiredLongPositionsPanel }}
+                  >
+                    <Typography
+                      variant="subtitle1"
+                      className={classes.sectionHeadingText}
+                    >
+                      <b>
+                        {expiredLongPositions.length > 0 &&
+                          `${expiredLongPositions.length} `}
+                        Contracts Bought (Long)
+                      </b>
+                    </Typography>
+                    {isPortfolioRefreshing && (
+                      <CircularProgress className={classes.loadingSpinner} size={20} />
+                    )}
+                  </ExpansionPanelSummary>
+                  <ExpansionPanelDetails>
+                    <Table>
+                      <TableHead>
+                        <TableRow>
+                          <TableCell align="center">
+                            Cost ({PAYMENT_TOKEN_NAME})
+                          </TableCell>
+                          <TableCell align="center">
+                            Received ({COLLATERAL_TOKEN_NAME})
+                          </TableCell>
+                          <TableCell align="right">Status</TableCell>
+                          <TableCell></TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {expiredLongPositions &&
+                          expiredLongPositions?.map((position: any, i) => (
+                            <TableRow key={i}>
+                              <TableCell align="center">
+                                {position.totalCost.toLocaleString(undefined, {
+                                  minimumFractionDigits: 2,
+                                  maximumFractionDigits: 2
+                                })}
+                              </TableCell>
+                              <TableCell align="center">{position.finalReward}</TableCell>
+                              <TableCell align="center">{position.status}</TableCell>
+                              <TableCell align="right">
+                                <MoreVert
+                                  onClick={() => handleShowExpiredLongPositionDetails(i)}
+                                  style={{ cursor: "pointer" }}
+                                />
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        {!isPortfolioRefreshing && expiredLongPositions.length === 0 && (
+                          <TableRow>
+                            <TableCell
+                              colSpan={5}
+                              align="center"
+                              className={classes.placeholderRow}
+                            >
+                              No Expired Long Positions
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      </TableBody>
+                    </Table>
+                  </ExpansionPanelDetails>
+                </ExpansionPanel>
+                <Divider className={classes.sectionDivider} light variant="middle" />
                 <ExpansionPanel expanded={showExpiredShortPositions}>
                   <ExpansionPanelSummary
                     expandIcon={<ExpandMore />}
@@ -712,78 +784,6 @@ const PorfolioPage: React.SFC = () => {
                               className={classes.placeholderRow}
                             >
                               No Expired Short Positions
-                            </TableCell>
-                          </TableRow>
-                        )}
-                      </TableBody>
-                    </Table>
-                  </ExpansionPanelDetails>
-                </ExpansionPanel>
-                <Divider className={classes.sectionDivider} light variant="middle" />
-                <ExpansionPanel expanded={showExpiredLongPositions}>
-                  <ExpansionPanelSummary
-                    expandIcon={<ExpandMore />}
-                    classes={{
-                      content: classes.sectionHeading
-                    }}
-                    IconButtonProps={{ onClick: handleToggleExpiredLongPositionsPanel }}
-                  >
-                    <Typography
-                      variant="subtitle1"
-                      className={classes.sectionHeadingText}
-                    >
-                      <b>
-                        {expiredLongPositions.length > 0 &&
-                          `${expiredLongPositions.length} `}
-                        Contracts Bought (Long)
-                      </b>
-                    </Typography>
-                    {isPortfolioRefreshing && (
-                      <CircularProgress className={classes.loadingSpinner} size={20} />
-                    )}
-                  </ExpansionPanelSummary>
-                  <ExpansionPanelDetails>
-                    <Table>
-                      <TableHead>
-                        <TableRow>
-                          <TableCell align="center">
-                            Cost ({PAYMENT_TOKEN_NAME})
-                          </TableCell>
-                          <TableCell align="center">
-                            Received ({COLLATERAL_TOKEN_NAME})
-                          </TableCell>
-                          <TableCell align="right">Status</TableCell>
-                          <TableCell></TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {expiredLongPositions &&
-                          expiredLongPositions?.map((position: any, i) => (
-                            <TableRow key={i}>
-                              <TableCell align="center">
-                                {position.totalCost.toLocaleString(undefined, {
-                                  minimumFractionDigits: 2,
-                                  maximumFractionDigits: 2
-                                })}
-                              </TableCell>
-                              <TableCell align="center">{position.finalReward}</TableCell>
-                              <TableCell align="center">{position.status}</TableCell>
-                              <TableCell align="right">
-                                <MoreVert
-                                  onClick={() => handleShowExpiredLongPositionDetails(i)}
-                                  style={{ cursor: "pointer" }}
-                                />
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        {!isPortfolioRefreshing && expiredLongPositions.length === 0 && (
-                          <TableRow>
-                            <TableCell
-                              colSpan={5}
-                              align="center"
-                              className={classes.placeholderRow}
-                            >
-                              No Expired Long Positions
                             </TableCell>
                           </TableRow>
                         )}

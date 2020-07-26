@@ -202,7 +202,6 @@ const OfferContractPage: React.SFC = () => {
         maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS
       })} ${COLLATERAL_TOKEN_NAME} to proceed. Open Side Menu (top-right) to manage your wallet balance and get more.`
     );
-  // totalContractPrice && totalContractPrice < 99 && errors.push('')
 
   const handleCloseOfferDialog = () => {
     setErrorMessage("");
@@ -210,14 +209,13 @@ const OfferContractPage: React.SFC = () => {
   };
 
   const handleDeployDSProxy = async () => {
+    setTxActive(true);
     setErrorMessage("");
     try {
       await deployDSProxyContract();
     } catch (error) {
       Sentry.captureException(error);
-      setErrorMessage(
-        "There was an error deploying the honeylemon vault. Please try again."
-      );
+      setErrorMessage(error.message);
     }
     setTxActive(false);
   };
