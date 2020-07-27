@@ -5,6 +5,8 @@ dotenv.config();
 async function createReleaseAndUpload() {
   const release = process.env.REACT_APP_SENTRY_RELEASE;
   const environment = process.env.REACT_APP_SENTRY_ENV;
+  const auth = process.env.SENTRY_AUTH_TOKEN;
+  console.log('Using auth token', auth);
 
   if (!release || !environment) {
     console.warn("REACT_APP_SENTRY_RELEASE or SENTRY_ENV is not set");
@@ -26,7 +28,7 @@ async function createReleaseAndUpload() {
     });
 
     console.log("Finalizing release");
-
+    // await cli.releases.setCommits(release, {auto: true})
     await cli.releases.newDeploy(release, { env: environment });
 
     await cli.releases.finalize(release);
