@@ -11,3 +11,7 @@ export const GAPageView = (page: any) => {
 export const GAModalView = (modal: any) => {
   ReactGA.modalview(modal);
 };
+
+export const GASetUser = (userAddress: string) => {
+  ReactGA.set({userId: userAddress});
+}

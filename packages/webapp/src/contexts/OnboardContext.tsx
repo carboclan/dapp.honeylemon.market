@@ -11,6 +11,7 @@ import * as Sentry from "@sentry/react";
 import { networkName } from "../helpers/ethereumNetworkUtils";
 import config from "./HoneylemonConfig";
 import { User } from "@sentry/react";
+import { GASetUser } from "../helpers/gaTracking";
 
 export type OnboardProviderProps = {
   dappId: string;
@@ -173,6 +174,7 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
       Sentry.configureScope(scope => {
         scope.setUser(user);
       });
+      GASetUser(address || '');
     };
     setUserScope();
   }, [wallet, network, address]);

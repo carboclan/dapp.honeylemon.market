@@ -1505,6 +1505,11 @@
   resolved "https://registry.yarnpkg.com/@csstools/normalize.css/-/normalize.css-10.1.0.tgz#f0950bba18819512d42f7197e56c518aa491cf18"
   integrity sha512-ij4wRiunFfaJxjB0BdrYHIH8FxBJpOwNPhhAcunlmPdXudL1WQV1qoP9un6JsEBAgQH+7UXyyjh0g7jTxXK6tg==
 
+"@elgorditosalsero/react-gtm-hook@^1.0.6":
+  version "1.0.6"
+  resolved "https://registry.yarnpkg.com/@elgorditosalsero/react-gtm-hook/-/react-gtm-hook-1.0.6.tgz#48b18b6c097abb502053cd8f9b6079a027adf78a"
+  integrity sha512-X87w1UMAtJ22YXftw/QXDjnTHYV1uEvqHq2T5E9EX0tdxOHDRR5836mym00V90G/VFixZlBboDXqa+P2uq19pQ==
+
 "@emotion/hash@^0.8.0":
   version "0.8.0"
   resolved "https://registry.yarnpkg.com/@emotion/hash/-/hash-0.8.0.tgz#bbbff68978fefdbe68ccb533bc8cbe1d1afb5413"
