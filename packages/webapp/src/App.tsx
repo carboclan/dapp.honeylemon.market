@@ -4,7 +4,7 @@ import { MuiThemeProvider, CssBaseline } from "@material-ui/core";
 import { Router } from "react-router-dom";
 import ScrollToTop from "./helpers/scrollToTop";
 import history from "./helpers/history";
-import { initGA, GAPageView } from "./helpers/gaTracking";
+// import { initGA, GAPageView } from "./helpers/gaTracking";
 import { initHotjar } from "./helpers/hotjar";
 import ReactGA from "react-ga";
 import config from "./contexts/HoneylemonConfig";
