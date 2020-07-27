@@ -175,7 +175,7 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
         scope.setUser(user);
       });
       //@ts-ignore
-      window.dataLayer.push({ 'userId': address })
+      window?.dataLayer?.push({ 'userId': address })
     };
     setUserScope();
   }, [wallet, network, address]);
