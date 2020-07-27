@@ -174,7 +174,7 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
       Sentry.configureScope(scope => {
         scope.setUser(user);
       });
-      GASetUser(address || '');
+      // GASetUser(address || '');
     };
     setUserScope();
   }, [wallet, network, address]);
