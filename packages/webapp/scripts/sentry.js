@@ -28,7 +28,7 @@ async function createReleaseAndUpload() {
     });
 
     console.log("Finalizing release");
-    await cli.releases.setCommits(release, {auto: true})
+    // await cli.releases.setCommits(release, {auto: true})
     await cli.releases.newDeploy(release, { env: environment });
 
     await cli.releases.finalize(release);
