@@ -11,11 +11,13 @@ import config from "./contexts/HoneylemonConfig";
 import HoneyLemonApp from "./components/HoneyLemonApp";
 import { OnboardProvider } from "./contexts/OnboardContext";
 import { HoneylemonProvider } from "./contexts/HoneylemonContext";
+import useGTM from '@elgorditosalsero/react-gtm-hook'
 
-history.listen(location => {
-  ReactGA.set({ page: location.pathname });
-  GAPageView(location.pathname);
-});
+// history.listen(location => {
+//   ReactGA.set({ page: location.pathname });
+
+//   GAPageView(location.pathname);
+// });
 
 const validNetworks = Object.keys(config).map(network => Number(network));
 
@@ -24,11 +26,14 @@ function App() {
     dappId: process.env.REACT_APP_BLOCKNATIVE_API_KEY || "",
     networkId: validNetworks[0],
   };
+  // const { init } = useGTM()
 
+  // Initialise all tracking and analytics
   useEffect(() => {
-    initGA();
+    // initGA();
+    // init({ id: 'GTM-MR553Q9' })
     initHotjar();
-    GAPageView(window.location.pathname);
+    // GAPageView(window.location.pathname);
   }, []);
 
   return (
