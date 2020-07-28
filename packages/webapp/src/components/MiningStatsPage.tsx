@@ -61,7 +61,7 @@ const MiningStatsPage: React.SFC = () => {
     btcStats
   } = useHoneylemon();
 
-  const contractDurations = [0, 90, 100, 180, 360];
+  const contractDurations = [0, 90, 100, 180, 360, 365];
   const bestHoneylemonPrice =
     orderbook.length > 0 ? orderbook[0].price : currentMRI * currentBTCSpotPrice;
 
@@ -82,9 +82,9 @@ const MiningStatsPage: React.SFC = () => {
       backgroundColor: "#000",
       style: {
         fontFamily: '"Roboto", Helvetica, Arial, sans-serif'
-      }
+      },
+      height: 300,
     },
-    colors: ["#cece4b"],
     yAxis: [
       {
         title: {
@@ -136,7 +136,7 @@ const MiningStatsPage: React.SFC = () => {
         },
         dataLabels: {
           enabled: true,
-          formatter: function() {
+          formatter: function () {
             // @ts-ignore
             return this.point.desc + "<br/>" + Highcharts.numberFormat(this.y || 0, 4);
           },
@@ -145,12 +145,23 @@ const MiningStatsPage: React.SFC = () => {
         enableMouseTracking: true
       }
     },
+    tooltip: {
+      useHTML: true,
+      style: {
+        pointerEvents: 'auto'
+      },
+      formatter() {
+        //@ts-ignore
+        return `${this.point.desc}<br/> Best Price: $${this.y.toFixed(4)}/TH/Day<br/>
+        `}
+    },
     series: [
       {
         name: "",
         type: "line",
         color: "#FFF",
         yAxis: 0,
+        dataLabels: { style: { color: 'white' } },
         tooltip: {
           valueDecimals: 4,
           valueSuffix: `$/TH/Day`
@@ -169,12 +180,13 @@ const MiningStatsPage: React.SFC = () => {
       {
         name: "",
         type: "line",
-        color: "#FFF",
+        color: "#2b908f",
         yAxis: 0,
         tooltip: {
           valueDecimals: 4,
           valueSuffix: `$/TH/Day`
         },
+        dataLabels: { style: { color: 'white' } },
         data: [
           ...miningContracts
             .filter(c => c.issuer === "FTX")
@@ -182,7 +194,7 @@ const MiningStatsPage: React.SFC = () => {
             .map(c => ({
               x: Date.now() + c.duration * 1000 * 86400,
               y: c.contract_cost || c.contract_cost_btc * currentBTCSpotPrice,
-              desc: c.durationAlias
+              desc: `FTX ${c.durationAlias}`
             }))
         ]
       },
@@ -296,9 +308,9 @@ const MiningStatsPage: React.SFC = () => {
                   >
                     {`${
                       difficultyChange > 0 ? "+" : ""
-                    } ${difficultyChange.toLocaleString(undefined, {
-                      maximumFractionDigits: 1
-                    })}`}
+                      } ${difficultyChange.toLocaleString(undefined, {
+                        maximumFractionDigits: 1
+                      })}`}
                     %
                   </Typography>
                   <br />
@@ -367,15 +379,10 @@ const MiningStatsPage: React.SFC = () => {
         </Paper>
       </Grid>
       <Grid item xs={12}>
-        <Typography variant="h6" className={classes.pageHeader}>
-          Mining Contracts
-        </Typography>
+        <HighchartsReact highcharts={Highcharts} options={chartOptions} />
       </Grid>
       <Grid item xs={12}>
         <MRIDisplay />
-      </Grid>
-      <Grid item xs={12}>
-        <HighchartsReact highcharts={Highcharts} options={chartOptions} />
       </Grid>
       <Grid item xs={12}>
         <Table size="small">
@@ -411,41 +418,6 @@ const MiningStatsPage: React.SFC = () => {
                 </Link>
               </TableCell>
             </TableRow>
-            <TableRow>
-              <TableCell className={classes.heading}>
-                <strong>Futures Market</strong>
-              </TableCell>
-              <TableCell style={{ width: 50 }}>
-                <strong>($/TH/Day)</strong>
-              </TableCell>
-              <TableCell></TableCell>
-            </TableRow>
-            {miningContracts
-              .filter(mc => mc.issuer === "FTX")
-              .sort((a, b) => (a.duration < b.duration ? -1 : 1))
-              .map(mc => (
-                <TableRow key={mc.durationAlias}>
-                  <TableCell>{`${mc.issuer} ${mc.id}`}</TableCell>
-                  <TableCell>
-                    ${" "}
-                    {(
-                      mc.contract_cost_btc * currentBTCSpotPrice
-                    ).toLocaleString(undefined, {
-                      maximumFractionDigits: PAYMENT_TOKEN_DECIMALS
-                    })}
-                  </TableCell>
-                  <TableCell style={{ width: 50 }} align="right">
-                    <Link
-                      href={`https://honeylemon.market/#/products?coin=BTC&duration=${mc.duration}`}
-                      target="_blank"
-                      rel="noopener"
-                      style={{ color: "#FFF" }}
-                    >
-                      <OpenInNew fontSize="small" />
-                    </Link>
-                  </TableCell>
-                </TableRow>
-              ))}
             <TableRow>
               <TableCell className={classes.heading}>
                 <strong>Forward Market</strong>
@@ -500,6 +472,48 @@ const MiningStatsPage: React.SFC = () => {
                   </TableCell>
                 </TableRow>
               ))}
+            <TableRow>
+              <TableCell className={classes.heading}>
+                <strong>Futures Market</strong>
+              </TableCell>
+              <TableCell style={{ width: 50 }}>
+                <strong>($/TH/Day)</strong>
+              </TableCell>
+              <TableCell></TableCell>
+            </TableRow>
+            {miningContracts
+              .filter(mc => mc.issuer === "FTX")
+              .sort((a, b) => (a.duration < b.duration ? -1 : 1))
+              .map(mc => (
+                <TableRow key={mc.durationAlias}>
+                  <TableCell>{`${mc.issuer} ${mc.id}`}</TableCell>
+                  <TableCell>
+                    ${" "}
+                    {(
+                      mc.contract_cost_btc * currentBTCSpotPrice
+                    ).toLocaleString(undefined, {
+                      maximumFractionDigits: PAYMENT_TOKEN_DECIMALS
+                    })}
+                  </TableCell>
+                  <TableCell style={{ width: 50 }} align="right">
+                    <Link
+                      href={`https://honeylemon.market/#/products?coin=BTC&duration=${mc.duration}`}
+                      target="_blank"
+                      rel="noopener"
+                      style={{ color: "#FFF" }}
+                    >
+                      <OpenInNew fontSize="small" />
+                    </Link>
+                  </TableCell>
+                </TableRow>
+              ))}
+            <TableRow>
+              <TableCell colSpan={3}>
+                <Typography variant='caption'  style={{ color: "#a9a9a9" }}>
+                  FTX hashrate futures are instrument on difficulty, price shown is implied.
+                </Typography>
+              </TableCell>
+            </TableRow>
           </TableBody>
         </Table>
         <Grid item xs={12} style={{ paddingTop: 16 }}>
