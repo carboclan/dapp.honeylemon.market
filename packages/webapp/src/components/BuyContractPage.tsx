@@ -41,8 +41,6 @@ import OrderbookModal from "./OrderbookModal";
 import { useEffect } from "react";
 import * as Sentry from "@sentry/react";
 import { t, Trans } from "@lingui/macro";
-import { MessageDescriptor } from "@lingui/core";
-import { I18n } from "@lingui/react";
 import { i18n } from "../App";
 
 const useStyles = makeStyles(({ spacing, palette, transitions }) => ({
@@ -396,12 +394,12 @@ const BuyContractPage: React.SFC = () => {
   }
   const errors = [];
 
-  !isDailyContractDeployed && errors.push(t`New contracts are not available right now`);
+  !isDailyContractDeployed && errors.push(i18n._(t`New contracts are not available right now`));
   !sufficientPaymentTokens &&
     errors.push(
-      t`You do not have enough ${PAYMENT_TOKEN_NAME} to proceed. Open Side Menu (top-right) to manage your wallet balance and get more.`
+      i18n._(t`You do not have enough ${PAYMENT_TOKEN_NAME} to proceed. Open Side Menu (top-right) to manage your wallet balance and get more.`)
     );
-  !isLiquid && errors.push(t`There are not enough contracts available right now.`);
+  !isLiquid && errors.push(i18n._(t`There are not enough contracts available right now.`));
 
   const getActiveStep = () => {
     if (!skipDsProxy && !isDsProxyDeployed) return 0;
@@ -590,19 +588,19 @@ const BuyContractPage: React.SFC = () => {
         </TabPanel>
         {errors.length > 0 && (
           <Grid item xs={12}>
-            {errors.map((error: MessageDescriptor, i) => (
+            {errors.map((error, i) => (
               <Typography
                 key={i}
                 variant="caption"
                 paragraph
                 color="secondary"
                 onClick={() =>
-                  error.id.includes(`enough ${PAYMENT_TOKEN_NAME}`)
+                  error.includes(`enough ${PAYMENT_TOKEN_NAME}`)
                     ? setShowTokenInfoModal(true)
                     : null
                 }
               >
-                <Trans id={error.id} />
+                {error}
               </Typography>
             ))}
           </Grid>

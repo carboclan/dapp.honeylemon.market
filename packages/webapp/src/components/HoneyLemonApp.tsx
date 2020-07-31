@@ -48,7 +48,7 @@ const HoneyLemonApp: React.FC = () => {
   return (
     <Sentry.ErrorBoundary
       showDialog={showErrorDialog}
-      fallback={({ componentStack, error, eventId }) => (
+      fallback={({ error, eventId }) => (
         <Dialog open={showErrorDialog} onClose={() => setShowErrorDialog(false)}>
           <Typography>{error}</Typography>
           <Typography>{eventId}</Typography>
@@ -82,7 +82,7 @@ const HoneyLemonApp: React.FC = () => {
               redirectPath="/"
             />
             <Route exact path="/404">
-              Not Found
+              Page Not Found
             </Route>
             <Route exact path="/403">
               You are not authorized to view this page
