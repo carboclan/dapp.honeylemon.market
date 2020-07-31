@@ -526,9 +526,9 @@ const OfferContractPage: React.SFC = () => {
                   <TableRow>
                     <TableCell colSpan={2}>
                       <Typography variant="caption" color="secondary">
-                        Suggest to increase your contract total to above 100{" "}
+                        Suggest to increase your contract total to above 100&nbsp;
                         {PAYMENT_TOKEN_NAME} due to recent high fees in ethereum network.
-                        See{" "}
+                        See&nbsp;
                         <Link
                           href="https://docs.honeylemon.market/fees"
                           target="_blank"
@@ -549,7 +549,7 @@ const OfferContractPage: React.SFC = () => {
                   <TableCell align="right" className={classes.offerSummaryEstimate}>
                     {`${collateralAmount.toLocaleString(undefined, {
                       maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS
-                    })} ${COLLATERAL_TOKEN_NAME}`}{" "}
+                    })} ${COLLATERAL_TOKEN_NAME}`}&nbsp;
                     <br />
                   </TableCell>
                 </TableRow>
@@ -610,13 +610,13 @@ const OfferContractPage: React.SFC = () => {
                       <TableCell colSpan={2} style={{ color: "#a9a9a9" }}>
                         <Typography variant="subtitle1" style={{ paddingTop: 4 }}>
                           WHAT DOES IT MEAN?
-                        </Typography>{" "}
+                        </Typography>&nbsp;
                         <br />
                         <Typography variant="body2" paragraph>
-                          You are offering <strong>{hashAmount} TH</strong> of{" "}
+                          You are offering <strong>{hashAmount} TH</strong> of&nbsp;
                           {CONTRACT_DURATION}-Day Mining Revenue Contract at&nbsp;
                           <strong>
-                            {PAYMENT_TOKEN_NAME}{" "}
+                            {PAYMENT_TOKEN_NAME}&nbsp;
                             {hashPrice.toLocaleString(undefined, {
                               maximumFractionDigits: PAYMENT_TOKEN_DECIMALS
                             })}
@@ -625,30 +625,30 @@ const OfferContractPage: React.SFC = () => {
                           .
                         </Typography>
                         <Typography variant="body2" paragraph>
-                          You need to have at least{" "}
+                          You need to have at least&nbsp;
                           <strong>
                             {collateralAmount.toLocaleString(undefined, {
                               maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS
-                            })}{" "}
+                            })}&nbsp;
                             {COLLATERAL_TOKEN_NAME}
-                          </strong>{" "}
+                          </strong>&nbsp;
                           in your wallet balance now, and approve Honeylemon smart
                           contract to access your {COLLATERAL_TOKEN_NAME} in your wallet
                           as collateral to list your offer. You may cancel your offer from
                           your Portfolio anytime prior to it being filled. As soon as your
                           order is filled, your approved collateral will be automatically
-                          deposited, you will receive payment in {PAYMENT_TOKEN_NAME}{" "}
+                          deposited, you will receive payment in {PAYMENT_TOKEN_NAME}&nbsp;
                           immediately and the contract will start.
                         </Typography>
                         <Typography variant="body2" paragraph>
                           At the end of <strong>{CONTRACT_DURATION} days</strong> your
                           counterparty will receive the network average BTC block reward &
-                          transaction fees per TH based on the average value of the{" "}
+                          transaction fees per TH based on the average value of the&nbsp;
                           <Link href="#" onClick={() => setShowMRIInformationModal(true)}>
-                            Bitcoin Mining Revenue Index (MRI_BTC){" "}
+                            Bitcoin Mining Revenue Index (MRI_BTC)&nbsp;
                             <Info fontSize="small" />
-                          </Link>{" "}
-                          over {CONTRACT_DURATION} days up to a{" "}
+                          </Link>&nbsp;
+                          over {CONTRACT_DURATION} days up to a&nbsp;
                           <strong>max capped by your collateral</strong>.
                         </Typography>
                         <Typography variant="body2" paragraph>

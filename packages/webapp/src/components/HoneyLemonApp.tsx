@@ -47,7 +47,7 @@ const HoneyLemonApp: React.FC = () => {
 
   return (
     <Sentry.ErrorBoundary
-      showDialog
+      showDialog={showErrorDialog}
       fallback={({ componentStack, error, eventId }) => (
         <Dialog open={showErrorDialog} onClose={() => setShowErrorDialog(false)}>
           <Typography>{error}</Typography>

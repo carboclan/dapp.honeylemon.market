@@ -232,7 +232,7 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
       console.log("You are not using mainnet. Defaulting to 10 gwei");
       setGasPrice(10);
     }
-  }, []);
+  }, [network]);
 
   const onboardState = onboard?.getState();
 

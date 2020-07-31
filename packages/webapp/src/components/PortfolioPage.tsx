@@ -353,9 +353,9 @@ const PorfolioPage: React.SFC = () => {
 
   const showWithdrawTab =
     longCollateralForBatchWithdraw +
-    shortCollateralForBatchWithdraw +
-    longCollateralForIndividualWithdraw +
-    shortCollateralForIndividualWithdraw >
+      shortCollateralForBatchWithdraw +
+      longCollateralForIndividualWithdraw +
+      shortCollateralForIndividualWithdraw >
     0;
   if (activeTab === "withdraw" && !showWithdrawTab) {
     setActiveTab("active");
@@ -368,7 +368,8 @@ const PorfolioPage: React.SFC = () => {
           <Typography
             variant="h5"
             style={{ fontWeight: "bold", textAlign: "center" }}
-            color="primary">
+            color="primary"
+          >
             Portfolio
           </Typography>
         </Grid>
@@ -384,12 +385,16 @@ const PorfolioPage: React.SFC = () => {
             {showWithdrawTab && <Tab label="Redeem" value="withdraw" />}
           </Tabs>
           <Grid item style={{ paddingTop: 8 }}>
-            <Typography variant='caption'>
-              This page refreshes every 30 seconds. Click <Link href='#' onClick={refreshPortfolio}>here</Link> to refresh.
+            <Typography variant="caption">
+              This page refreshes every 30 seconds. Click&nbsp;
+              <Link href="#" onClick={refreshPortfolio}>
+                here
+              </Link>&nbsp;
+              to refresh.
             </Typography>
           </Grid>
           <div className={classes.tabContent}>
-            {activeTab === "active" ? (
+            {activeTab === "active" && (
               <>
                 <ExpansionPanel expanded={showActiveLongPositions}>
                   <ExpansionPanelSummary
@@ -596,10 +601,10 @@ const PorfolioPage: React.SFC = () => {
                               <TableCell>
                                 $
                                 {Number(
-                                order?.price.dividedBy(CONTRACT_DURATION).toString()
-                              ).toLocaleString(undefined, {
-                                maximumFractionDigits: PAYMENT_TOKEN_DECIMALS
-                              })}
+                                  order?.price.dividedBy(CONTRACT_DURATION).toString()
+                                ).toLocaleString(undefined, {
+                                  maximumFractionDigits: PAYMENT_TOKEN_DECIMALS
+                                })}
                               </TableCell>
                               <TableCell align="center">
                                 {Number(
@@ -640,7 +645,8 @@ const PorfolioPage: React.SFC = () => {
                   </ExpansionPanelDetails>
                 </ExpansionPanel>
               </>
-            ) : activeTab === "expired" ? (
+            )}
+            {activeTab === "expired" && (
               <>
                 <ExpansionPanel expanded={showExpiredLongPositions}>
                   <ExpansionPanelSummary
@@ -792,195 +798,199 @@ const PorfolioPage: React.SFC = () => {
                   </ExpansionPanelDetails>
                 </ExpansionPanel>
               </>
-            ) : (
-                  <>
-                    <ExpansionPanel expanded={true}>
-                      <ExpansionPanelSummary
-                        expandIcon={<ExpandMore />}
-                        classes={{
-                          content: classes.sectionHeading
-                        }}
-                        IconButtonProps={{ onClick: handleToggleOpenOrdersPanel }}
-                      >
-                        <Typography
-                          variant="subtitle1"
-                          className={classes.sectionHeadingText}
-                        >
-                          <b>Honeylemon Vault Positions</b>
-                        </Typography>
-                        {isPortfolioRefreshing && (
-                          <CircularProgress className={classes.loadingSpinner} size={20} />
-                        )}
-                      </ExpansionPanelSummary>
-                      <ExpansionPanelDetails>
-                        <Grid container direction="row">
-                          <Table>
-                            <TableHead>
-                              <TableRow>
-                                <TableCell>Position</TableCell>
-                                <TableCell align="center">
-                                  Total ({COLLATERAL_TOKEN_NAME})
+            )}
+            {activeTab === "withdraw" && (
+              <>
+                <ExpansionPanel expanded={true}>
+                  <ExpansionPanelSummary
+                    expandIcon={<ExpandMore />}
+                    classes={{
+                      content: classes.sectionHeading
+                    }}
+                    IconButtonProps={{ onClick: handleToggleOpenOrdersPanel }}
+                  >
+                    <Typography
+                      variant="subtitle1"
+                      className={classes.sectionHeadingText}
+                    >
+                      <b>Honeylemon Vault Positions</b>
+                    </Typography>
+                    {isPortfolioRefreshing && (
+                      <CircularProgress className={classes.loadingSpinner} size={20} />
+                    )}
+                  </ExpansionPanelSummary>
+                  <ExpansionPanelDetails>
+                    <Grid container direction="row">
+                      <Table>
+                        <TableHead>
+                          <TableRow>
+                            <TableCell>Position</TableCell>
+                            <TableCell align="center">
+                              Total ({COLLATERAL_TOKEN_NAME})
                             </TableCell>
-                                <TableCell align="right">No of Contracts</TableCell>
-                              </TableRow>
-                            </TableHead>
-                            <TableBody>
-                              <TableRow>
-                                <TableCell>Long</TableCell>
-                                <TableCell align='center'>
-                                  {longCollateralForBatchWithdraw.toLocaleString(undefined, {
-                                    maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS
-                                  })}
-                                </TableCell>
-                                <TableCell align='right'>
-                                  {
-                                    expiredLongPositions.filter(
-                                      p =>
-                                        p.status === PositionStatus.withdrawalPending &&
-                                        p.canBeBatchRedeemed
-                                    ).length
-                                  }
-                                </TableCell>
-                              </TableRow>
-                              <TableRow>
-                                <TableCell>Short</TableCell>
-                                <TableCell align='center'>
-                                  {shortCollateralForBatchWithdraw.toLocaleString(undefined, {
-                                    maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS
-                                  })}
-                                </TableCell>
-                                <TableCell align='right'>
-                                  {
-                                    expiredShortPositions.filter(
-                                      p =>
-                                        p.status === PositionStatus.withdrawalPending &&
-                                        p.canBeBatchRedeemed
-                                    ).length
-                                  }
-                                </TableCell>
-                              </TableRow>
-                            </TableBody>
-                          </Table>
-                          <Grid item xs={12} style={{ paddingTop: 8, paddingBottom: 8 }}>
-                            <Button
-                              disabled={
-                                (longCollateralForBatchWithdraw + shortCollateralForBatchWithdraw === 0) || isWithdrawing
+                            <TableCell align="right">No of Contracts</TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          <TableRow>
+                            <TableCell>Long</TableCell>
+                            <TableCell align="center">
+                              {longCollateralForBatchWithdraw.toLocaleString(undefined, {
+                                maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS
+                              })}
+                            </TableCell>
+                            <TableCell align="right">
+                              {
+                                expiredLongPositions.filter(
+                                  p =>
+                                    p.status === PositionStatus.withdrawalPending &&
+                                    p.canBeBatchRedeemed
+                                ).length
                               }
-                              onClick={batchWithdraw}
-                              variant="contained"
-                              color="primary"
-                              fullWidth>
-                              {!isWithdrawing ? (
+                            </TableCell>
+                          </TableRow>
+                          <TableRow>
+                            <TableCell>Short</TableCell>
+                            <TableCell align="center">
+                              {shortCollateralForBatchWithdraw.toLocaleString(undefined, {
+                                maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS
+                              })}
+                            </TableCell>
+                            <TableCell align="right">
+                              {
+                                expiredShortPositions.filter(
+                                  p =>
+                                    p.status === PositionStatus.withdrawalPending &&
+                                    p.canBeBatchRedeemed
+                                ).length
+                              }
+                            </TableCell>
+                          </TableRow>
+                        </TableBody>
+                      </Table>
+                      <Grid item xs={12} style={{ paddingTop: 8, paddingBottom: 8 }}>
+                        <Button
+                          disabled={
+                            longCollateralForBatchWithdraw +
+                              shortCollateralForBatchWithdraw ===
+                              0 || isWithdrawing
+                          }
+                          onClick={batchWithdraw}
+                          variant="contained"
+                          color="primary"
+                          fullWidth
+                        >
+                          {!isWithdrawing ? (
+                            longCollateralForBatchWithdraw +
+                              shortCollateralForBatchWithdraw >
+                            0 ? (
+                              `REDEEM ALL (${(
                                 longCollateralForBatchWithdraw +
-                                  shortCollateralForBatchWithdraw >
-                                  0 ? (
-                                    `REDEEM ALL (${(
-                                      longCollateralForBatchWithdraw +
-                                      shortCollateralForBatchWithdraw
-                                    ).toLocaleString(undefined, {
-                                      maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS
-                                    })} ${COLLATERAL_TOKEN_NAME})`
-                                  ) : (
-                                    <>
-                                      REDEEM ALL&nbsp;
+                                shortCollateralForBatchWithdraw
+                              ).toLocaleString(undefined, {
+                                maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS
+                              })} ${COLLATERAL_TOKEN_NAME})`
+                            ) : (
+                              <>
+                                REDEEM ALL&nbsp;
                                 <RadioButtonUnchecked className={classes.icon} />
-                                    </>
-                                  )
-                              ) : (
-                                  <>
-                                    REDEEM ALL&nbsp;
+                              </>
+                            )
+                          ) : (
+                            <>
+                              REDEEM ALL&nbsp;
                               <CircularProgress
+                                className={classes.loadingSpinner}
+                                size={20}
+                              />
+                            </>
+                          )}
+                        </Button>
+                      </Grid>
+                    </Grid>
+                  </ExpansionPanelDetails>
+                </ExpansionPanel>
+                <Divider className={classes.sectionDivider} light variant="middle" />
+                <ExpansionPanel expanded={true}>
+                  <ExpansionPanelSummary
+                    expandIcon={<ExpandMore />}
+                    classes={{
+                      content: classes.sectionHeading
+                    }}
+                    IconButtonProps={{ onClick: handleToggleOpenOrdersPanel }}
+                  >
+                    <Typography
+                      variant="subtitle1"
+                      className={classes.sectionHeadingText}
+                    >
+                      <b>Other Positions</b>
+                    </Typography>
+                  </ExpansionPanelSummary>
+                  <ExpansionPanelDetails>
+                    <Table>
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>Position</TableCell>
+                          <TableCell align="center">
+                            Amount ({COLLATERAL_TOKEN_NAME})
+                          </TableCell>
+                          <TableCell align="center">Settlement</TableCell>
+                          <TableCell />
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {expiredLongPositions
+                          .concat(expiredShortPositions)
+                          .filter(
+                            p =>
+                              p.status === PositionStatus.withdrawalPending &&
+                              !p.canBeBatchRedeemed
+                          )
+                          .sort((a, b) => (a.settlementDate < b.settlementDate ? -1 : 1))
+                          .map(p => (
+                            <TableRow key={p.transaction.id}>
+                              <TableCell>{p.type}</TableCell>
+                              <TableCell align="center">
+                                {p.finalReward.toLocaleString(undefined, {
+                                  maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS
+                                })}
+                              </TableCell>
+                              <TableCell align="center">
+                                {dayjs(p.settlementDate).format("DD-MMM-YY")}
+                              </TableCell>
+                              <TableCell>
+                                <Button
+                                  variant="contained"
+                                  color="primary"
+                                  disabled={isWithdrawing}
+                                  onClick={() =>
+                                    withdrawPosition(
+                                      p.type === PositionType.Long
+                                        ? p.longTokenAddress
+                                        : p.shortTokenAddress,
+                                      p.contract.id,
+                                      p.qtyToMint,
+                                      p.type
+                                    )
+                                  }
+                                >
+                                  REDEEM&nbsp;
+                                  {isWithdrawing && (
+                                    <CircularProgress
                                       className={classes.loadingSpinner}
                                       size={20}
                                     />
-                                  </>
-                                )}
-                            </Button>
-                          </Grid>
-                        </Grid>
-                      </ExpansionPanelDetails>
-                    </ExpansionPanel>
-                    <Divider className={classes.sectionDivider} light variant="middle" />
-                    <ExpansionPanel expanded={true}>
-                      <ExpansionPanelSummary
-                        expandIcon={<ExpandMore />}
-                        classes={{
-                          content: classes.sectionHeading
-                        }}
-                        IconButtonProps={{ onClick: handleToggleOpenOrdersPanel }}
-                      >
-                        <Typography
-                          variant="subtitle1"
-                          className={classes.sectionHeadingText}
-                        >
-                          <b>Other Positions</b>
-                        </Typography>
-                      </ExpansionPanelSummary>
-                      <ExpansionPanelDetails>
-                        <Table>
-                          <TableHead>
-                            <TableRow>
-                              <TableCell>Position</TableCell>
-                              <TableCell align="center">
-                                Amount ({COLLATERAL_TOKEN_NAME})
-                          </TableCell>
-                              <TableCell align="center">Settlement</TableCell>
-                              <TableCell />
+                                  )}
+                                </Button>
+                              </TableCell>
                             </TableRow>
-                          </TableHead>
-                          <TableBody>
-                            {expiredLongPositions
-                              .concat(expiredShortPositions)
-                              .filter(
-                                p =>
-                                  p.status === PositionStatus.withdrawalPending &&
-                                  !p.canBeBatchRedeemed
-                              )
-                              .sort((a, b) => (a.settlementDate < b.settlementDate ? -1 : 1))
-                              .map(p => (
-                                <TableRow key={p.transaction.id}>
-                                  <TableCell>{p.type}</TableCell>
-                                  <TableCell align="center">
-                                    {p.finalReward.toLocaleString(undefined, {
-                                      maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS
-                                    })}
-                                  </TableCell>
-                                  <TableCell align="center">
-                                    {dayjs(p.settlementDate).format("DD-MMM-YY")}
-                                  </TableCell>
-                                  <TableCell>
-                                    <Button
-                                      variant="contained"
-                                      color="primary"
-                                      disabled={isWithdrawing}
-                                      onClick={() =>
-                                        withdrawPosition(
-                                          p.type === PositionType.Long
-                                            ? p.longTokenAddress
-                                            : p.shortTokenAddress,
-                                          p.contract.id,
-                                          p.qtyToMint,
-                                          p.type
-                                        )
-                                      }
-                                    >
-                                      REDEEM{" "}
-                                      {isWithdrawing && (
-                                        <CircularProgress
-                                          className={classes.loadingSpinner}
-                                          size={20}
-                                        />
-                                      )}
-                                    </Button>
-                                  </TableCell>
-                                </TableRow>
-                              ))}
-                          </TableBody>
-                        </Table>
-                      </ExpansionPanelDetails>
-                    </ExpansionPanel>
-                  </>
-                )}
+                          ))}
+                      </TableBody>
+                    </Table>
+                  </ExpansionPanelDetails>
+                </ExpansionPanel>
+              </>
+            )}
           </div>
         </Grid>
       </Grid>
