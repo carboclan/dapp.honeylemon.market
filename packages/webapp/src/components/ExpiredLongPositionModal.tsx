@@ -20,6 +20,7 @@ import dayjs from "dayjs";
 import { useOnboard } from "../contexts/OnboardContext";
 import { networkName } from "../helpers/ethereumNetworkUtils";
 import { displayAddress } from "../helpers/displayAddress";
+import { Trans } from "@lingui/macro";
 
 interface ExpiredLongPositionModalProps {
   open: boolean;
@@ -60,32 +61,40 @@ const ExpiredLongPositionModal: React.SFC<ExpiredLongPositionModalProps> = ({
       maxWidth="sm"
       fullWidth
     >
-      <DialogTitle id="dialog-title">Expired Long Position Details</DialogTitle>
+      <DialogTitle id="dialog-title">
+        <Trans>Expired Long Position Details</Trans>
+      </DialogTitle>
       <DialogContent>
         <Table>
           <TableBody>
             <TableRow>
-              <TableCell>Contract Position</TableCell>
+              <TableCell>
+                <Trans>Contract Position</Trans>
+              </TableCell>
               <TableCell align="right">{position.contractName}</TableCell>
             </TableRow>
             <TableRow>
               <TableCell>
-                Start Date <br />
-                Expiration Date <br />
-                {position.status === PositionStatus.expiredAwaitingSettlement && (
-                  <>
-                    Time till Settlement <br />
-                  </>
-                )}
-                Settlement Date <br />
+                <Trans>
+                  Start Date <br />
+                  Expiration Date <br />
+                  {position.status === PositionStatus.expiredAwaitingSettlement && (
+                    <>
+                      Time till Settlement <br />
+                    </>
+                  )}
+                  Settlement Date <br />
+                </Trans>
               </TableCell>
               <TableCell align="right">
                 {dayjs(position.startDate).format("DD-MMM-YY")} <br />
                 {dayjs(position.expirationDate).format("DD-MMM-YY")} <br />
                 {position.status === PositionStatus.expiredAwaitingSettlement && (
                   <>
-                    {Math.ceil(dayjs(position.settlementDate).diff(dayjs(), "h", true))}&nbsp;
-                    hour(s)
+                    <Trans>
+                      {Math.ceil(dayjs(position.settlementDate).diff(dayjs(), "h", true))}
+                      &nbsp; hour(s)
+                    </Trans>
                     <br />
                   </>
                 )}
@@ -94,46 +103,51 @@ const ExpiredLongPositionModal: React.SFC<ExpiredLongPositionModalProps> = ({
             </TableRow>
             <TableRow>
               <TableCell>
-                Price
-                <br />
-                Quantity
+                <Trans>
+                  Price
+                  <br />
+                  Quantity
+                </Trans>
               </TableCell>
               <TableCell align="right">
-                $ {new BigNumber(position.price).toPrecision(PAYMENT_TOKEN_DECIMALS)}&nbsp;
-                /TH/Day
+                $ {new BigNumber(position.price).toPrecision(PAYMENT_TOKEN_DECIMALS)}
+                &nbsp; /TH/Day
                 <br />
                 {position.qtyToMint.toLocaleString(undefined, {
                   maximumFractionDigits: PAYMENT_TOKEN_DECIMALS
-                })}&nbsp;
-                TH
+                })}
+                &nbsp; TH
               </TableCell>
             </TableRow>
             <TableRow>
-              <TableCell>Cost</TableCell>
+              <TableCell><Trans>Cost</Trans></TableCell>
               <TableCell align="right">
                 $&nbsp;
                 {position.totalCost.toLocaleString(undefined, {
                   maximumFractionDigits: PAYMENT_TOKEN_DECIMALS
-                })}&nbsp;
+                })}
+                &nbsp;
                 {PAYMENT_TOKEN_NAME}
               </TableCell>
             </TableRow>
             <TableRow>
-              <TableCell>Received</TableCell>
+              <TableCell><Trans>Received</Trans></TableCell>
               <TableCell align="right">
                 {position.pendingReward.toLocaleString(undefined, {
                   maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS
-                })}&nbsp;
+                })}
+                &nbsp;
                 {COLLATERAL_TOKEN_NAME}
               </TableCell>
             </TableRow>
             <TableRow>
-              <TableCell>Status</TableCell>
+              <TableCell><Trans>Status</Trans></TableCell>
               <TableCell align="right">{position.status}</TableCell>
             </TableRow>
             <TableRow>
               <TableCell colSpan={2}>
                 <Typography variant="caption">
+                  <Trans>
                   Your transaction was executed on Ethereum blockchain, check on&nbsp;
                   <Link
                     href={`${etherscanUrl}/tx/${position.transaction.id}`}
@@ -144,6 +158,7 @@ const ExpiredLongPositionModal: React.SFC<ExpiredLongPositionModalProps> = ({
                     Etherscan
                   </Link>
                   : {`${displayAddress(position.transaction.id, 20)}`}
+                  </Trans>
                 </Typography>
               </TableCell>
             </TableRow>
