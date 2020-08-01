@@ -3,6 +3,7 @@ import { Link, Typography, makeStyles, Paper } from "@material-ui/core";
 import { Info } from "@material-ui/icons";
 import { useHoneylemon } from "../contexts/HoneylemonContext";
 import MRIInformationModal from "./MRIInformationModal";
+import { Trans } from "@lingui/macro";
 
 const useStyles = makeStyles(({ spacing, palette }) => ({
   mriInfo: {
@@ -29,10 +30,10 @@ const MRIDisplay: React.SFC = () => {
           onClick={() => setShowMRIInformationModal(true)}
           color="secondary"
         >
-          <b>BTC Mining Revenue Index (MRI_BTC)</b>
+          <b><Trans>BTC Mining Revenue Index (MRI_BTC)</Trans></b>
           <Info fontSize="small" />
         </Link>
-        <Typography variant="body2">Network Daily Average Mining Revenue</Typography>
+        <Typography variant="body2"><Trans>Network Daily Average Mining Revenue</Trans></Typography>
         {currentMRI > 0 ? (
           <>
             <Typography
@@ -48,7 +49,7 @@ const MRIDisplay: React.SFC = () => {
             })}/TH/Day)`}</Typography>
           </>
         ) : (
-          <Typography variant="body2">Loading...</Typography>
+          <Typography variant="body2"><Trans>Loading...</Trans></Typography>
         )}
       </Paper>
       <MRIInformationModal

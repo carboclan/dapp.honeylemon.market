@@ -6,7 +6,9 @@ import duration from "dayjs/plugin/duration";
 import { useOnboard } from "../contexts/OnboardContext";
 import { useHoneylemon } from "../contexts/HoneylemonContext";
 import ConnectWalletButton from "./ConnectWalletButton";
+import DifficultyAdjustmentCountdown from "./DifficultyAdjustmentCountdown";
 import MRIDisplay from "./MRIDisplay";
+import { Trans } from "@lingui/macro";
 
 dayjs.extend(duration);
 
@@ -55,48 +57,7 @@ const useStyles = makeStyles(({ palette, spacing }) => ({
 
 const HomePage: React.SFC = () => {
   const { isReady } = useOnboard();
-  const {
-    marketData: { btcDifficultyAdjustmentDate },
-    isInMaintenanceMode
-  } = useHoneylemon();
-  const [adjustmentInterval, setAdjustmentInterval] = useState({
-    days: "00",
-    hours: "00",
-    minutes: "00",
-    seconds: "00"
-  });
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setAdjustmentInterval({
-        days: Math.floor(
-          dayjs.duration(dayjs(btcDifficultyAdjustmentDate).diff(dayjs())).asDays()
-        )
-          .toString()
-          .padStart(2, "0"),
-        hours: dayjs
-          .duration(dayjs(btcDifficultyAdjustmentDate).diff(dayjs()))
-          .hours()
-          .toString()
-          .padStart(2, "0"),
-        minutes: dayjs
-          .duration(dayjs(btcDifficultyAdjustmentDate).diff(dayjs()))
-          .minutes()
-          .toString()
-          .padStart(2, "0"),
-        seconds: dayjs
-          .duration(dayjs(btcDifficultyAdjustmentDate).diff(dayjs()))
-          .seconds()
-          .toString()
-          .padStart(2, "0")
-      });
-    }, 1000);
-
-    return () => {
-      clearInterval(interval);
-    };
-  }, [btcDifficultyAdjustmentDate]);
-
+  const { isInMaintenanceMode } = useHoneylemon();
   const classes = useStyles();
 
   return (
@@ -104,71 +65,7 @@ const HomePage: React.SFC = () => {
       <Grid item>
         <MRIDisplay />
       </Grid>
-      <Grid
-        item
-        container
-        direction="row"
-        className={classes.countdownSection}
-        spacing={2}
-        justify="center"
-        alignItems="stretch"
-      >
-        <Grid item xs={12}>
-          <Typography style={{ fontWeight: "bold" }}>
-            Next Difficulty Adjustment
-          </Typography>
-        </Grid>
-        <Grid item xs={3}>
-          <span className={classes.countdownDigit}>
-            {adjustmentInterval.days.split("")[0]}
-          </span>
-          <span className={classes.countdownDigit}>
-            {adjustmentInterval.days.split("")[1]}
-          </span>
-        </Grid>
-        <Grid item xs={3}>
-          <span className={classes.countdownDigit}>
-            {adjustmentInterval.hours.split("")[0]}
-          </span>
-          <span className={classes.countdownDigit}>
-            {adjustmentInterval.hours.split("")[1]}
-          </span>
-        </Grid>
-        <Grid item xs={3}>
-          <span className={classes.countdownDigit}>
-            {adjustmentInterval.minutes.split("")[0]}
-          </span>
-          <span className={classes.countdownDigit}>
-            {adjustmentInterval.minutes.split("")[1]}
-          </span>
-        </Grid>
-        <Grid item xs={3}>
-          <span className={classes.countdownDigit}>
-            {adjustmentInterval.seconds.split("")[0]}
-          </span>
-          <span className={classes.countdownDigit}>
-            {adjustmentInterval.seconds.split("")[1]}
-          </span>
-        </Grid>
-        <Grid item xs={3}>
-          <span>Days</span>
-        </Grid>
-        <Grid item xs={3}>
-          <span>Hours</span>
-        </Grid>
-        <Grid item xs={3}>
-          <span>Mins</span>
-        </Grid>
-        <Grid item xs={3}>
-          <span>Secs</span>
-        </Grid>
-        <Grid item xs={12}>
-          <Typography style={{ fontWeight: "bold" }}>
-            Estimate: {dayjs(btcDifficultyAdjustmentDate).format("MMM DD, YYYY HH:mm")}{" "}
-            UTC
-          </Typography>
-        </Grid>
-      </Grid>
+      <DifficultyAdjustmentCountdown />
       <Grid item xs={12} style={{ textAlign: "center" }}>
         <Button
           onClick={() => forwardTo("/stats")}
@@ -179,7 +76,7 @@ const HomePage: React.SFC = () => {
             <span role="img" aria-label="fire">
               🔥
             </span>
-            Mining Market Live Stats
+            <Trans>Mining Market Live Stats</Trans>
             <span role="img" aria-label="fire">
               🔥
             </span>
@@ -198,15 +95,17 @@ const HomePage: React.SFC = () => {
               style={{ fontWeight: "bold" }}
               paragraph
             >
-              Honeylemon service is currently in maintenance mode. Please come back and
-              try again later.
+              <Trans>
+                Honeylemon service is currently in maintenance mode. Please come back and
+                try again later.
+              </Trans>
             </Typography>
           ) : null}
           <Typography variant="h5" style={{ fontWeight: "bold" }}>
-            I am a BTC investor.
+            <Trans>I am a BTC investor.</Trans>
           </Typography>
           <Typography color="primary" style={{ fontWeight: "bold" }} gutterBottom>
-            Pay Cash & Earn Mining Revenue in BTC
+            <Trans>Pay Cash & Earn Mining Revenue in BTC</Trans>
           </Typography>
           <Button
             variant="contained"
@@ -215,14 +114,14 @@ const HomePage: React.SFC = () => {
             className={classes.button}
             disabled={isInMaintenanceMode}
           >
-            BUY CONTRACTS
+            <Trans>BUY CONTRACTS</Trans>
           </Button>
           <Divider className={classes.divider} />
           <Typography variant="h5" style={{ fontWeight: "bold" }}>
-            I am a BTC miner.
+            <Trans>I am a BTC miner.</Trans>
           </Typography>
           <Typography color="primary" style={{ fontWeight: "bold" }}>
-            Hedge Mining Risk & Get Cash Upfront
+            <Trans>Hedge Mining Risk & Get Cash Upfront</Trans>
           </Typography>
           <Button
             variant="contained"
@@ -231,7 +130,7 @@ const HomePage: React.SFC = () => {
             className={classes.button}
             disabled={isInMaintenanceMode}
           >
-            OFFER CONTRACTS
+            <Trans>OFFER CONTRACTS</Trans>
           </Button>
         </>
       )}
