@@ -16,5 +16,5 @@ dist/*
 lib/
 # Local Netlify folder
 .netlify
-packages/contracts/yarn-error.log
+*/yarn-error.log
 ngrok
