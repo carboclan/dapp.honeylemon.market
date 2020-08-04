@@ -1,0 +1,5 @@
+{
+  "network": "kovan",
+  "ExchangeV3Address": "0x4eacd0af335451709e1e7b570b8ea68edec8bc97",
+  "MarketContractProxyAddress": "0x23C62ed951406C1da9fbBBc455555E7c41c8e0BA"
+}

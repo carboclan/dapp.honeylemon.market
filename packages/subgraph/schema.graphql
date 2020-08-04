@@ -79,6 +79,7 @@ type Contract @entity {
     index: BigInt!
     collateralPerUnit: BigInt!
     settlement: ContractSettlement @derivedFrom(field: "contract")
+    positions: [Position!] @derivedFrom(field: "contract")
 }
 
 type ContractSettlement @entity {

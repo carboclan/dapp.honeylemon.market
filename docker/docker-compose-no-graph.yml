@@ -31,7 +31,7 @@ services:
             CHAIN_ID: "${CHAIN_ID}"
             MESH_WEBSOCKET_URI: "http://mesh:60557"
             MESH_HTTP_URI: "http://mesh:60556"
-            POSTGRES_URI: "postgresql://${DB_USER}:${DB_PASSWORD}@hl-orderbook.cluster-ctyabaidtsxx.us-east-2.rds.amazonaws.com"
+            POSTGRES_URI: "postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}"
             WHITELIST_ALL_TOKENS: "*"
         ports:
             - "${API_PORT}:3000"

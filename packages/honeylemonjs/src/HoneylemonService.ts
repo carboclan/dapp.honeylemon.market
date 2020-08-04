@@ -815,7 +815,8 @@ class OrderbookService {
 
   async getOpenOrders(makerAddress) {
     const ordersResponse = await this.apiClient.getOrdersAsync({
-      makerAddress: makerAddress.toLowerCase()
+      makerAddress: makerAddress.toLowerCase(),
+      makerAssetData: this.makerAssetData
     });
 
     this._processOrders(ordersResponse);
