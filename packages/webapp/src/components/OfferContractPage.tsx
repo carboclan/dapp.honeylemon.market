@@ -145,24 +145,33 @@ const OfferContractPage: React.SFC = () => {
 
   // Set default quantity and price
   useEffect(() => {
-    const maxQuanityCollateralized = Math.floor(
-      collateralTokenBalance /
-        CONTRACT_COLLATERAL_RATIO /
-        marketData.currentMRI /
-        CONTRACT_DURATION
-    );
-    const startingQuantity = Math.min(1000, maxQuanityCollateralized);
-    setHashAmount(startingQuantity);
+    const setDefaultValues = async () => {
+      const maxQuanityCollateralized = Math.floor(
+        collateralTokenBalance /
+          CONTRACT_COLLATERAL_RATIO /
+          marketData.currentMRI /
+          CONTRACT_DURATION
+      );
+      const startingQuantity = Math.min(1000, maxQuanityCollateralized);
+      setHashAmount(startingQuantity);
 
-    const mriPrice = Number(
-      (btcStats.mri * marketData.currentBTCSpotPrice).toLocaleString(undefined, {
-        maximumFractionDigits: PAYMENT_TOKEN_DECIMALS
-      })
-    );
+      const mriPrice = Number(
+        (btcStats.mri * marketData.currentBTCSpotPrice).toLocaleString(undefined, {
+          maximumFractionDigits: PAYMENT_TOKEN_DECIMALS
+        })
+      );
 
-    const startingPrice = orderbook.length > 0 ? orderbook[0].price : mriPrice;
+      const quote = await honeylemonService?.getQuoteForSize(new BigNumber(startingQuantity));
 
-    setHashPrice(startingPrice);
+      const startingPrice =
+        Number(quote?.remainingMakerFillAmount?.toString() || -1) === 0
+          ? Number(quote?.price.dividedBy(CONTRACT_DURATION).decimalPlaces(PAYMENT_TOKEN_DECIMALS).toString())
+          : mriPrice;
+
+      setHashPrice(startingPrice);
+    };
+
+    setDefaultValues();
   }, []);
 
   useEffect(() => {
