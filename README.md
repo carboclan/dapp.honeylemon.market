@@ -1,5 +1,5 @@
 <p align="center">
-  <img alt="UMA Logo" src="./Docs/Honeylemon_Logo.jpg" width="200">
+  <img src="./Docs/Honeylemon_Logo.jpg" width="200">
 <p/>
 
 [![GitHub](https://img.shields.io/github/license/carboclan/dapp.honeylemon.market)](https://github.com/carboclan/dapp.honeylemon.market/blob/master/LICENSE) [![GitHub last commit](https://img.shields.io/github/last-commit/carboclan/dapp.honeylemon.market)](https://github.com/carboclan/dapp.honeylemon.market/commits/master) [![Generic badge](https://img.shields.io/badge/homepage-view-red.svg)](https://app.honeylemon.market/) [![Generic badge](https://img.shields.io/badge/telegram-join-green.svg)](https://t.me/joinchat/I9o0JBU3JKkxb-yRSkIFvA) ![Twitter Follow](https://img.shields.io/twitter/follow/HoneylemonM?style=social)
