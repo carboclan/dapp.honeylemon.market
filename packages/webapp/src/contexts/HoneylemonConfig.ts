@@ -5,10 +5,10 @@ type ConfigSet = {
   paymentTokenAddress: string;
   marketContractProxy: string;
   minterBridgeAddress: string;
-}
+};
 
 interface HoneylemonConfig {
-  [networkId: number]: ConfigSet
+  [networkId: number]: ConfigSet;
 }
 
 const config: HoneylemonConfig = {

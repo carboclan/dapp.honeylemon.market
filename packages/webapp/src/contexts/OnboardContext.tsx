@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import Onboard from "bnc-onboard";
 import Notify from "bnc-notify";
 import { API as OnboardApi, Wallet } from "bnc-onboard/dist/src/interfaces";
-import { API as NotifyApi } from "bnc-notify/dist/src/interfaces";
+import { API as NotifyApi } from "bnc-notify/dist/types/notify";
 import { fromWei } from "web3-utils";
 import FontFaceObserver from "fontfaceobserver";
 import * as Sentry from "@sentry/react";
@@ -148,21 +148,56 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
 
         setOnboard(onboard);
         setEthBalance(Number(fromWei(onboard.getState().balance, "ether")));
-        setNotify(
-          Notify({
-            dappId: onboardProps.dappId,
-            networkId: network || validNetworks[0],
-            darkMode: true
-          })
-        );
       } catch (error) {
         console.log("Error initializing onboard");
         console.log(error);
         Sentry.captureException(error);
       }
     };
+
     initializeOnboard();
   }, [onboardProps.dappId]);
+
+  useEffect(() => {
+    const initializeNotify = async () => {
+      if (network) {
+        //@ts-ignore
+        const notify = Notify({
+          dappId: onboardProps.dappId,
+          networkId: network,
+          darkMode: true
+        });
+
+        setNotify(notify);
+      }
+    };
+    initializeNotify();
+  }, []);
+
+  //TODO: Enable once Blocknative update notifyjs
+  // useEffect(() => {
+  //   if (notify && network) {
+  //     notify.config({ networkId: network });
+  //   }
+  // }, [network]);
+
+  useEffect(() => {
+    if (address && notify) {
+      const { emitter } = notify.account(address);
+      const etherscanUrl =
+        network === 1
+          ? "https://etherscan.io"
+          : `https://${networkName(network)}.etherscan.io`;
+      emitter.on("all", tx => ({
+        onclick: () => window.open(`${etherscanUrl}/tx/${tx.hash}`)
+      }));
+    }
+    return () => {
+      if (address) {
+        notify?.unsubscribe(address);
+      }
+    };
+  }, [network, address]);
 
   useEffect(() => {
     const setUserScope = () => {
@@ -175,7 +210,7 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
         scope.setUser(user);
       });
       //@ts-ignore
-      window?.dataLayer?.push({ 'userId': address })
+      window?.dataLayer?.push({ userId: address });
     };
     setUserScope();
   }, [wallet, network, address]);
