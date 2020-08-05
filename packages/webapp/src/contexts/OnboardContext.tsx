@@ -160,7 +160,8 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
 
   useEffect(() => {
     const initializeNotify = async () => {
-      if (network) {
+      if (network && !notify) {
+        debugger;
         //@ts-ignore
         const notify = Notify({
           dappId: onboardProps.dappId,
@@ -172,7 +173,7 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
       }
     };
     initializeNotify();
-  }, []);
+  }, [network]);
 
   //TODO: Enable once Blocknative update notifyjs
   // useEffect(() => {
@@ -197,7 +198,7 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
         notify?.unsubscribe(address);
       }
     };
-  }, [network, address]);
+  }, [network, address, notify]);
 
   useEffect(() => {
     const setUserScope = () => {
@@ -267,7 +268,7 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
       console.log("You are not using mainnet. Defaulting to 10 gwei");
       setGasPrice(10);
     }
-  }, [network]);
+  }, []);
 
   const onboardState = onboard?.getState();
 
