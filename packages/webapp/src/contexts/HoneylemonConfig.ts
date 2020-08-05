@@ -21,7 +21,7 @@ const config: HoneylemonConfig = {
     collateralTokenAddress: "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
     paymentTokenAddress: "0xdac17f958d2ee523a2206206994597c13d831ec7",
     marketContractProxy: "0x5B3fab261Fd55C79552297f1A0Cc97B35dC8631a",
-    minterBridgeAddress: "0xF905F6f2a482e39199BDC60b9257A62618e08C9a",
+    minterBridgeAddress: "0xF905F6f2a482e39199BDC60b9257A62618e08C9a"
   },
   42: {
     // This is the imBTC Kovan instance

@@ -209,10 +209,10 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
         case TokenType.PaymentToken:
           await honeylemonService.approvePaymentToken(address, amount, gasPrice);
           const payment = await honeylemonService.getPaymentTokenAmounts(address);
-          setCollateralTokenAllowance(
+          setPaymentTokenAllowance(
             Number(payment.allowance.shiftedBy(-PAYMENT_TOKEN_DECIMALS).toString())
           );
-          setCollateralTokenBalance(
+          setPaymentTokenBalance(
             Number(payment.balance.shiftedBy(-PAYMENT_TOKEN_DECIMALS).toString())
           );
           break;
@@ -402,12 +402,12 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
           setHoneylemonService(honeylemonService);
           const collateral = await honeylemonService.getCollateralTokenAmounts(address);
           setCollateralTokenAllowance(
-            Number(collateral.allowance.shiftedBy(-8).toString())
+            Number(collateral.allowance.shiftedBy(-COLLATERAL_TOKEN_DECIMALS).toString())
           );
-          setCollateralTokenBalance(Number(collateral.balance.shiftedBy(-8).toString()));
+          setCollateralTokenBalance(Number(collateral.balance.shiftedBy(-COLLATERAL_TOKEN_DECIMALS).toString()));
           const payment = await honeylemonService.getPaymentTokenAmounts(address);
-          setPaymentTokenAllowance(Number(payment.allowance.shiftedBy(-6).toString()));
-          setPaymentTokenBalance(Number(payment.balance.shiftedBy(-6).toString()));
+          setPaymentTokenAllowance(Number(payment.allowance.shiftedBy(-PAYMENT_TOKEN_DECIMALS).toString()));
+          setPaymentTokenBalance(Number(payment.balance.shiftedBy(-PAYMENT_TOKEN_DECIMALS).toString()));
           const proxyDeployed: boolean = await honeylemonService.addressHasDSProxy(
             address
           );
@@ -418,16 +418,6 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
           }
           const isContractDeployed = await honeylemonService.isDailyContractDeployed();
           setIsDailyContractDeployed(isContractDeployed);
-          if (address && notify) {
-            const { emitter } = notify.account(address);
-            const etherscanUrl =
-              network === 1
-                ? "https://etherscan.io"
-                : `https://${networkName(network)}.etherscan.io`;
-            emitter.on("all", tx => ({
-              onclick: () => window.open(`${etherscanUrl}/tx/${tx.hash}`) // TODO: update this to work on other networks
-            }));
-          }
         } catch (error) {
           console.log("Error initializing Honeylemon context");
           Sentry.captureEvent(error);
@@ -589,11 +579,11 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
     const checkBalancesAndApprovals = async () => {
       if (!honeylemonService) return;
       const collateral = await honeylemonService.getCollateralTokenAmounts(address);
-      setCollateralTokenAllowance(Number(collateral.allowance.shiftedBy(-8).toString()));
-      setCollateralTokenBalance(Number(collateral.balance.shiftedBy(-8).toString()));
+      setCollateralTokenAllowance(Number(collateral.allowance.shiftedBy(-COLLATERAL_TOKEN_DECIMALS).toString()));
+      setCollateralTokenBalance(Number(collateral.balance.shiftedBy(-COLLATERAL_TOKEN_DECIMALS).toString()));
       const payment = await honeylemonService.getPaymentTokenAmounts(address);
-      setPaymentTokenAllowance(Number(payment.allowance.shiftedBy(-6).toString()));
-      setPaymentTokenBalance(Number(payment.balance.shiftedBy(-6).toString()));
+      setPaymentTokenAllowance(Number(payment.allowance.shiftedBy(-PAYMENT_TOKEN_DECIMALS).toString()));
+      setPaymentTokenBalance(Number(payment.balance.shiftedBy(-PAYMENT_TOKEN_DECIMALS).toString()));
     };
     if (honeylemonService && address) {
       checkBalancesAndApprovals();
