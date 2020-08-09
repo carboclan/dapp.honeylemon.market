@@ -120,7 +120,9 @@ const ExpiredLongPositionModal: React.SFC<ExpiredLongPositionModalProps> = ({
               </TableCell>
             </TableRow>
             <TableRow>
-              <TableCell><Trans>Cost</Trans></TableCell>
+              <TableCell>
+                <Trans>Cost</Trans>
+              </TableCell>
               <TableCell align="right">
                 $&nbsp;
                 {position.totalCost.toLocaleString(undefined, {
@@ -131,7 +133,9 @@ const ExpiredLongPositionModal: React.SFC<ExpiredLongPositionModalProps> = ({
               </TableCell>
             </TableRow>
             <TableRow>
-              <TableCell><Trans>Received</Trans></TableCell>
+              <TableCell>
+                <Trans>Received</Trans>
+              </TableCell>
               <TableCell align="right">
                 {position.pendingReward.toLocaleString(undefined, {
                   maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS
@@ -141,14 +145,18 @@ const ExpiredLongPositionModal: React.SFC<ExpiredLongPositionModalProps> = ({
               </TableCell>
             </TableRow>
             <TableRow>
-              <TableCell><Trans>Status</Trans></TableCell>
+              <TableCell>
+                <Trans>Status</Trans>
+              </TableCell>
               <TableCell align="right">{position.status}</TableCell>
             </TableRow>
             <TableRow>
               <TableCell colSpan={2}>
                 <Typography variant="caption">
                   <Trans>
-                  Your transaction was executed on Ethereum blockchain, check on&nbsp;
+                    Your transaction was executed on Ethereum blockchain, check on
+                  </Trans>
+                  &nbsp;
                   <Link
                     href={`${etherscanUrl}/tx/${position.transaction.id}`}
                     target="_blank"
@@ -158,7 +166,6 @@ const ExpiredLongPositionModal: React.SFC<ExpiredLongPositionModalProps> = ({
                     Etherscan
                   </Link>
                   : {`${displayAddress(position.transaction.id, 20)}`}
-                  </Trans>
                 </Typography>
               </TableCell>
             </TableRow>

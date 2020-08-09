@@ -152,16 +152,17 @@ const ActiveShortPositionModal: React.SFC<ActiveShortPositionModalProps> = ({
                 <Typography variant="caption">
                   <Trans>
                     Your transaction was executed on Ethereum blockchain, check on{" "}
-                    <Link
-                      href={`${etherscanUrl}/tx/${position.transaction.id}`}
-                      target="_blank"
-                      rel="noopener"
-                      underline="always"
-                    >
-                      Etherscan
-                    </Link>
-                    : {`${displayAddress(position.transaction.id, 20)}`}
                   </Trans>
+                  &nbsp;
+                  <Link
+                    href={`${etherscanUrl}/tx/${position.transaction.id}`}
+                    target="_blank"
+                    rel="noopener"
+                    underline="always"
+                  >
+                    Etherscan
+                  </Link>
+                  : {`${displayAddress(position.transaction.id, 20)}`}
                 </Typography>
               </TableCell>
             </TableRow>
