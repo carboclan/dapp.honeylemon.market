@@ -395,10 +395,10 @@ const PorfolioPage: React.SFC = () => {
                             <Trans>Days till Expiration</Trans>
                           </TableCell>
                           <TableCell align="center">
-                            <Trans>Cost ({PAYMENT_TOKEN_NAME})</Trans>
+                            <Trans>Cost</Trans>&nbsp;({PAYMENT_TOKEN_NAME})
                           </TableCell>
                           <TableCell align="center">
-                            <Trans>Revenue Accrued ({COLLATERAL_TOKEN_NAME})</Trans>
+                            <Trans>Revenue Accrued</Trans>&nbsp;({COLLATERAL_TOKEN_NAME})
                           </TableCell>
                           <TableCell></TableCell>
                         </TableRow>
@@ -479,10 +479,11 @@ const PorfolioPage: React.SFC = () => {
                             <Trans>Days till Expiration</Trans>
                           </TableCell>
                           <TableCell align="center">
-                            <Trans>Received ({PAYMENT_TOKEN_NAME})</Trans>
+                            <Trans>Received</Trans>&nbsp;({PAYMENT_TOKEN_NAME})
                           </TableCell>
                           <TableCell align="center">
-                            <Trans>Collateral Locked ({COLLATERAL_TOKEN_NAME})</Trans>
+                            <Trans>Collateral Locked</Trans>&nbsp;({COLLATERAL_TOKEN_NAME}
+                            )
                           </TableCell>
                           <TableCell></TableCell>
                         </TableRow>
@@ -566,7 +567,7 @@ const PorfolioPage: React.SFC = () => {
                             <Trans>Quantity (TH)</Trans>
                           </TableCell>
                           <TableCell align="right">
-                            <Trans>Contract Total ({PAYMENT_TOKEN_NAME})</Trans>
+                            <Trans>Contract Total</Trans>&nbsp;({PAYMENT_TOKEN_NAME})
                           </TableCell>
                           <TableCell></TableCell>
                         </TableRow>
@@ -652,10 +653,10 @@ const PorfolioPage: React.SFC = () => {
                       <TableHead>
                         <TableRow>
                           <TableCell align="center">
-                            <Trans>Cost ({PAYMENT_TOKEN_NAME})</Trans>
+                            <Trans>Cost</Trans>&nbsp; ({PAYMENT_TOKEN_NAME})
                           </TableCell>
                           <TableCell align="center">
-                            <Trans>Received ({COLLATERAL_TOKEN_NAME})</Trans>
+                            <Trans>Received</Trans>&nbsp;({COLLATERAL_TOKEN_NAME})
                           </TableCell>
                           <TableCell align="right">
                             <Trans>Status</Trans>
@@ -726,10 +727,10 @@ const PorfolioPage: React.SFC = () => {
                       <TableHead>
                         <TableRow>
                           <TableCell align="center">
-                            <Trans>Received ({PAYMENT_TOKEN_NAME})</Trans>
+                            <Trans>Received</Trans>&nbsp;({PAYMENT_TOKEN_NAME})
                           </TableCell>
                           <TableCell align="center">
-                            Paid ({COLLATERAL_TOKEN_NAME})
+                            <Trans>Paid</Trans>&nbsp;({COLLATERAL_TOKEN_NAME})
                           </TableCell>
                           <TableCell align="center">
                             <Trans>Status</Trans>
@@ -809,7 +810,7 @@ const PorfolioPage: React.SFC = () => {
                               <Trans>Position</Trans>
                             </TableCell>
                             <TableCell align="center">
-                              Total ({COLLATERAL_TOKEN_NAME})
+                              <Trans>Total</Trans>&nbsp;({COLLATERAL_TOKEN_NAME})
                             </TableCell>
                             <TableCell align="right">
                               <Trans>No of Contracts</Trans>
@@ -873,14 +874,15 @@ const PorfolioPage: React.SFC = () => {
                             longCollateralForBatchWithdraw +
                               shortCollateralForBatchWithdraw >
                             0 ? (
-                              i18n._(
-                                t`REDEEM ALL (${(
+                              <>
+                                <Trans>REDEEM ALL</Trans>&nbsp;
+                                {`(${(
                                   longCollateralForBatchWithdraw +
                                   shortCollateralForBatchWithdraw
                                 ).toLocaleString(undefined, {
                                   maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS
-                                })} ${COLLATERAL_TOKEN_NAME})`
-                              )
+                                })} ${COLLATERAL_TOKEN_NAME})`}
+                              </>
                             ) : (
                               <>
                                 <Trans>REDEEM ALL</Trans>&nbsp;
@@ -912,18 +914,24 @@ const PorfolioPage: React.SFC = () => {
                       variant="subtitle1"
                       className={classes.sectionHeadingText}
                     >
-                      <b><Trans>Other Positions</Trans></b>
+                      <b>
+                        <Trans>Other Positions</Trans>
+                      </b>
                     </Typography>
                   </ExpansionPanelSummary>
                   <ExpansionPanelDetails>
                     <Table>
                       <TableHead>
                         <TableRow>
-                          <TableCell><Trans>Position</Trans></TableCell>
-                          <TableCell align="center">
-                            <Trans>Amount ({COLLATERAL_TOKEN_NAME})</Trans>
+                          <TableCell>
+                            <Trans>Position</Trans>
                           </TableCell>
-                          <TableCell align="center"><Trans>Settlement</Trans></TableCell>
+                          <TableCell align="center">
+                            <Trans>Amount</Trans>&nbsp; ({COLLATERAL_TOKEN_NAME})
+                          </TableCell>
+                          <TableCell align="center">
+                            <Trans>Settlement</Trans>
+                          </TableCell>
                           <TableCell />
                         </TableRow>
                       </TableHead>

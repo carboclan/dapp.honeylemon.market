@@ -77,9 +77,9 @@ msgstr "Active Long Position Details"
 msgid "Active Short Position Details"
 msgstr "Active Short Position Details"
 
-#: src/components/PortfolioPage.tsx:647
-msgid "Amount ({COLLATERAL_TOKEN_NAME})"
-msgstr "Amount ({COLLATERAL_TOKEN_NAME})"
+#: src/components/PortfolioPage.tsx:655
+msgid "Amount"
+msgstr "Amount"
 
 #: src/components/BuyContractPage.tsx:339
 #: src/components/OfferContractPage.tsx:244
@@ -180,8 +180,8 @@ msgid "Collateral"
 msgstr "Collateral"
 
 #: src/components/PortfolioPage.tsx:349
-msgid "Collateral Locked ({COLLATERAL_TOKEN_NAME})"
-msgstr "Collateral Locked ({COLLATERAL_TOKEN_NAME})"
+msgid "Collateral Locked"
+msgstr "Collateral Locked"
 
 #: src/components/ContractSpecificationModal.tsx:72
 msgid "Collateral Requirement"
@@ -227,16 +227,13 @@ msgstr "Contract Start"
 
 #: src/components/BuyContractPage.tsx:499
 #: src/components/OfferContractPage.tsx:408
+#: src/components/PortfolioPage.tsx:406
 #: src/components/UnfilledOfferModal.tsx:101
 msgid "Contract Total"
 msgstr "Contract Total"
 
-#: src/components/PortfolioPage.tsx:405
-msgid "Contract Total ({PAYMENT_TOKEN_NAME})"
-msgstr "Contract Total ({PAYMENT_TOKEN_NAME})"
-
 #: src/components/PortfolioPage.tsx:274
-#: src/components/PortfolioPage.tsx:450
+#: src/components/PortfolioPage.tsx:451
 msgid "Contracts Bought (Long)"
 msgstr "Contracts Bought (Long)"
 
@@ -244,19 +241,16 @@ msgstr "Contracts Bought (Long)"
 msgid "Contracts Offered (Short)"
 msgstr "Contracts Offered (Short)"
 
-#: src/components/PortfolioPage.tsx:503
+#: src/components/PortfolioPage.tsx:504
 msgid "Contracts Sold (Short)"
 msgstr "Contracts Sold (Short)"
 
 #: src/components/ActiveLongPositionModal.tsx:69
 #: src/components/ExpiredLongPositionModal.tsx:72
+#: src/components/PortfolioPage.tsx:287
+#: src/components/PortfolioPage.tsx:461
 msgid "Cost"
 msgstr "Cost"
-
-#: src/components/PortfolioPage.tsx:287
-#: src/components/PortfolioPage.tsx:460
-msgid "Cost ({PAYMENT_TOKEN_NAME})"
-msgstr "Cost ({PAYMENT_TOKEN_NAME})"
 
 #: src/components/BuyContractPage.tsx:337
 #: src/components/OfferContractPage.tsx:242
@@ -301,8 +295,12 @@ msgid "Enter your limit order. Make sure sufficient {COLLATERAL_TOKEN_NAME} (for
 msgstr "Enter your limit order. Make sure sufficient {COLLATERAL_TOKEN_NAME} (for collateral) & ETH (for Ethereum gas fees) is in your wallet."
 
 #: src/components/DifficultyAdjustmentCountdown.tsx:119
-msgid "Estimate: {0} UTC"
-msgstr "Estimate: {0} UTC"
+msgid "Estimate:"
+msgstr "Estimate:"
+
+#: src/components/DifficultyAdjustmentCountdown.tsx:119
+#~ msgid "Estimate: {0} UTC"
+#~ msgstr "Estimate: {0} UTC"
 
 #: src/components/UnfilledOfferModal.tsx:112
 msgid "Estimated Collateral"
@@ -365,7 +363,7 @@ msgstr "Honeylemon Vault  (Optional)"
 msgid "Honeylemon Vault (Optional)"
 msgstr "Honeylemon Vault (Optional)"
 
-#: src/components/PortfolioPage.tsx:559
+#: src/components/PortfolioPage.tsx:560
 msgid "Honeylemon Vault Positions"
 msgstr "Honeylemon Vault Positions"
 
@@ -410,7 +408,7 @@ msgstr "Loading..."
 msgid "Locked<0/>Payable<1/>Remaining<2/>"
 msgstr "Locked<0/>Payable<1/>Remaining<2/>"
 
-#: src/components/PortfolioPage.tsx:583
+#: src/components/PortfolioPage.tsx:584
 msgid "Long"
 msgstr "Long"
 
@@ -466,23 +464,23 @@ msgstr "Next Difficulty Adjustment"
 msgid "No Active Long Positions"
 msgstr "No Active Long Positions"
 
-#: src/components/PortfolioPage.tsx:374
+#: src/components/PortfolioPage.tsx:375
 msgid "No Active Short Positions"
 msgstr "No Active Short Positions"
 
-#: src/components/PortfolioPage.tsx:487
+#: src/components/PortfolioPage.tsx:488
 msgid "No Expired Long Positions"
 msgstr "No Expired Long Positions"
 
-#: src/components/PortfolioPage.tsx:544
+#: src/components/PortfolioPage.tsx:545
 msgid "No Expired Short Positions"
 msgstr "No Expired Short Positions"
 
-#: src/components/PortfolioPage.tsx:433
+#: src/components/PortfolioPage.tsx:434
 msgid "No Unfilled Positions (Open Orders)"
 msgstr "No Unfilled Positions (Open Orders)"
 
-#: src/components/PortfolioPage.tsx:576
+#: src/components/PortfolioPage.tsx:577
 msgid "No of Contracts"
 msgstr "No of Contracts"
 
@@ -515,7 +513,7 @@ msgstr "Offer Valid Till"
 msgid "Offer a {CONTRACT_DURATION}-day Mining Revenue Contract"
 msgstr "Offer a {CONTRACT_DURATION}-day Mining Revenue Contract"
 
-#: src/components/PortfolioPage.tsx:389
+#: src/components/PortfolioPage.tsx:390
 msgid "Open Offers (Unfilled Short)"
 msgstr "Open Offers (Unfilled Short)"
 
@@ -523,11 +521,12 @@ msgstr "Open Offers (Unfilled Short)"
 msgid "Order-fill Date UTC 00:01"
 msgstr "Order-fill Date UTC 00:01"
 
-#: src/components/PortfolioPage.tsx:638
+#: src/components/PortfolioPage.tsx:643
 msgid "Other Positions"
 msgstr "Other Positions"
 
 #: src/components/ExpiredShortPositionModal.tsx:82
+#: src/components/PortfolioPage.tsx:517
 msgid "Paid"
 msgstr "Paid"
 
@@ -539,13 +538,13 @@ msgstr "Pay Cash & Earn Mining Revenue in BTC"
 msgid "Portfolio"
 msgstr "Portfolio"
 
-#: src/components/PortfolioPage.tsx:570
-#: src/components/PortfolioPage.tsx:645
+#: src/components/PortfolioPage.tsx:571
+#: src/components/PortfolioPage.tsx:652
 msgid "Position"
 msgstr "Position"
 
 #: src/components/OrderbookModal.tsx:20
-#: src/components/PortfolioPage.tsx:399
+#: src/components/PortfolioPage.tsx:400
 msgid "Price ($/TH/Day)"
 msgstr "Price ($/TH/Day)"
 
@@ -581,35 +580,33 @@ msgid "Quantity"
 msgstr "Quantity"
 
 #: src/components/OrderbookModal.tsx:22
-#: src/components/PortfolioPage.tsx:402
+#: src/components/PortfolioPage.tsx:403
 msgid "Quantity (TH)"
 msgstr "Quantity (TH)"
 
-#: src/components/PortfolioPage.tsx:673
+#: src/components/PortfolioPage.tsx:683
 msgid "REDEEM"
 msgstr "REDEEM"
 
-#: src/components/PortfolioPage.tsx:621
-#: src/components/PortfolioPage.tsx:624
+#: src/components/PortfolioPage.tsx:619
+#: src/components/PortfolioPage.tsx:625
+#: src/components/PortfolioPage.tsx:628
 msgid "REDEEM ALL"
 msgstr "REDEEM ALL"
 
-#: src/components/PortfolioPage.tsx:617
-msgid "REDEEM ALL ({0} {COLLATERAL_TOKEN_NAME})"
-msgstr "REDEEM ALL ({0} {COLLATERAL_TOKEN_NAME})"
+#: src/components/PortfolioPage.tsx:618
+#~ msgid "REDEEM ALL ({0} {COLLATERAL_TOKEN_NAME})"
+#~ msgstr "REDEEM ALL ({0} {COLLATERAL_TOKEN_NAME})"
 
 #: src/components/ActiveShortPositionModal.tsx:70
 #: src/components/ExpiredLongPositionModal.tsx:83
+#: src/components/PortfolioPage.tsx:346
+#: src/components/PortfolioPage.tsx:464
+#: src/components/PortfolioPage.tsx:514
 msgid "Received"
 msgstr "Received"
 
-#: src/components/PortfolioPage.tsx:463
-msgid "Received ({COLLATERAL_TOKEN_NAME})"
-msgstr "Received ({COLLATERAL_TOKEN_NAME})"
-
 #: src/components/ExpiredShortPositionModal.tsx:71
-#: src/components/PortfolioPage.tsx:346
-#: src/components/PortfolioPage.tsx:513
 msgid "Received ({PAYMENT_TOKEN_NAME})"
 msgstr "Received ({PAYMENT_TOKEN_NAME})"
 
@@ -622,12 +619,9 @@ msgid "Remaining Collateral"
 msgstr "Remaining Collateral"
 
 #: src/components/ActiveLongPositionModal.tsx:80
+#: src/components/PortfolioPage.tsx:290
 msgid "Revenue Accrued"
 msgstr "Revenue Accrued"
-
-#: src/components/PortfolioPage.tsx:290
-msgid "Revenue Accrued ({COLLATERAL_TOKEN_NAME})"
-msgstr "Revenue Accrued ({COLLATERAL_TOKEN_NAME})"
 
 #: src/components/BuyContractPage.tsx:532
 msgid "Revenue Cap"
@@ -642,7 +636,7 @@ msgid "Settled"
 msgstr "Settled"
 
 #: src/components/OfferContractPage.tsx:485
-#: src/components/PortfolioPage.tsx:649
+#: src/components/PortfolioPage.tsx:658
 msgid "Settlement"
 msgstr "Settlement"
 
@@ -658,7 +652,7 @@ msgstr "Settlement Time"
 msgid "Settlement Value"
 msgstr "Settlement Value"
 
-#: src/components/PortfolioPage.tsx:597
+#: src/components/PortfolioPage.tsx:598
 msgid "Short"
 msgstr "Short"
 
@@ -701,8 +695,8 @@ msgid "Start<0/>Expiration<1/>Settlement<2/>Days till Expiration"
 msgstr "Start<0/>Expiration<1/>Settlement<2/>Days till Expiration"
 
 #: src/components/ExpiredLongPositionModal.tsx:93
-#: src/components/PortfolioPage.tsx:466
-#: src/components/PortfolioPage.tsx:519
+#: src/components/PortfolioPage.tsx:467
+#: src/components/PortfolioPage.tsx:520
 msgid "Status"
 msgstr "Status"
 
@@ -746,6 +740,10 @@ msgstr "Tick Size"
 #: src/components/ContractSpecificationModal.tsx:160
 msgid "Token Naming Method"
 msgstr "Token Naming Method"
+
+#: src/components/PortfolioPage.tsx:574
+msgid "Total"
+msgstr "Total"
 
 #: src/components/ContractSpecificationModal.tsx:24
 msgid "Trading Currency"
