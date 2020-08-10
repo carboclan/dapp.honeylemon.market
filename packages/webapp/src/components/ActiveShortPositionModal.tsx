@@ -79,7 +79,7 @@ const ActiveShortPositionModal: React.SFC<ActiveShortPositionModalProps> = ({
                 {dayjs(position.startDate).format("DD-MMM-YY")} <br />
                 {dayjs(position.expirationDate).format("DD-MMM-YY")} <br />
                 {dayjs(position.settlementDate).format("DD-MMM-YY")} <br />
-                <Trans>{position.daysToExpiration} days</Trans>
+                {position.daysToExpiration}&nbsp;<Trans>day(s)</Trans>
               </TableCell>
             </TableRow>
             <TableRow>

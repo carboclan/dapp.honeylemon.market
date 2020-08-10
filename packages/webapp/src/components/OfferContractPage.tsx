@@ -161,11 +161,18 @@ const OfferContractPage: React.SFC = () => {
         })
       );
 
-      const quote = await honeylemonService?.getQuoteForSize(new BigNumber(startingQuantity));
+      const quote = await honeylemonService?.getQuoteForSize(
+        new BigNumber(startingQuantity)
+      );
 
       const startingPrice =
         Number(quote?.remainingMakerFillAmount?.toString() || -1) === 0
-          ? Number(quote?.price.dividedBy(CONTRACT_DURATION).decimalPlaces(PAYMENT_TOKEN_DECIMALS).toString())
+          ? Number(
+              quote?.price
+                .dividedBy(CONTRACT_DURATION)
+                .decimalPlaces(PAYMENT_TOKEN_DECIMALS)
+                .toString()
+            )
           : mriPrice;
 
       setHashPrice(startingPrice);
@@ -530,7 +537,7 @@ const OfferContractPage: React.SFC = () => {
                     <br />
                   </TableCell>
                   <TableCell align="right">
-                    <Trans>{CONTRACT_DURATION} Days</Trans>
+                    {CONTRACT_DURATION}&nbsp;<Trans>Days</Trans>
                   </TableCell>
                 </TableRow>
                 <TableRow>
@@ -631,7 +638,7 @@ const OfferContractPage: React.SFC = () => {
                         <Trans>Expiration</Trans>
                       </TableCell>
                       <TableCell align="right">
-                        <Trans>{`${CONTRACT_DURATION} Days After Start`}</Trans>
+                        {CONTRACT_DURATION}&nbsp;<Trans>Days After Start</Trans>
                       </TableCell>
                     </TableRow>
                     <TableRow>
@@ -764,7 +771,9 @@ const OfferContractPage: React.SFC = () => {
         maxWidth="sm"
         fullWidth
       >
-        <DialogTitle id="form-dialog-title"><Trans>Create Offer</Trans></DialogTitle>
+        <DialogTitle id="form-dialog-title">
+          <Trans>Create Offer</Trans>
+        </DialogTitle>
         <DialogContent>
           <Stepper activeStep={activeStep} orientation="vertical">
             {steps.map((label, index) => (

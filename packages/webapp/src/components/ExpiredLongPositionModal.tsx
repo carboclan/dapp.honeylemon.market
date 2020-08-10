@@ -91,10 +91,8 @@ const ExpiredLongPositionModal: React.SFC<ExpiredLongPositionModalProps> = ({
                 {dayjs(position.expirationDate).format("DD-MMM-YY")} <br />
                 {position.status === PositionStatus.expiredAwaitingSettlement && (
                   <>
-                    <Trans>
-                      {Math.ceil(dayjs(position.settlementDate).diff(dayjs(), "h", true))}
-                      &nbsp; hour(s)
-                    </Trans>
+                    {Math.ceil(dayjs(position.settlementDate).diff(dayjs(), "h", true))}
+                    &nbsp;<Trans>hour(s)</Trans>
                     <br />
                   </>
                 )}

@@ -91,11 +91,10 @@ const ExpiredShortPositionModal: React.SFC<ExpiredShortPositionModalProps> = ({
                 {dayjs(position.expirationDate).format("DD-MMM-YY")} <br />
                 {position.status === PositionStatus.expiredAwaitingSettlement && (
                   <>
-                    <Trans>
-                      {Math.ceil(dayjs(position.settlementDate).diff(dayjs(), "h", true))}
-                      &nbsp; hour(s)
-                      <br />
-                    </Trans>
+                    {Math.ceil(dayjs(position.settlementDate).diff(dayjs(), "h", true))}
+                    &nbsp;
+                    <Trans>hour(s)</Trans>
+                    <br />
                   </>
                 )}
                 {dayjs(position.settlementDate).format("DD-MMM-YY")} <br />
@@ -119,7 +118,7 @@ const ExpiredShortPositionModal: React.SFC<ExpiredShortPositionModalProps> = ({
             </TableRow>
             <TableRow>
               <TableCell>
-                <Trans>Received ({PAYMENT_TOKEN_NAME})</Trans>
+                <Trans>Received</Trans>&nbsp;({PAYMENT_TOKEN_NAME})
               </TableCell>
               <TableCell align="right">
                 $&nbsp;

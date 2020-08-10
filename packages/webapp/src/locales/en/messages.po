@@ -163,7 +163,7 @@ msgid "CONNECT WALLET TO TRADE"
 msgstr "CONNECT WALLET TO TRADE"
 
 #: src/components/BuyContractPage.tsx:722
-#: src/components/OfferContractPage.tsx:601
+#: src/components/OfferContractPage.tsx:603
 msgid "Cancel"
 msgstr "Cancel"
 
@@ -246,7 +246,7 @@ msgid "Contracts Sold (Short)"
 msgstr "Contracts Sold (Short)"
 
 #: src/components/ActiveLongPositionModal.tsx:69
-#: src/components/ExpiredLongPositionModal.tsx:72
+#: src/components/ExpiredLongPositionModal.tsx:71
 #: src/components/PortfolioPage.tsx:287
 #: src/components/PortfolioPage.tsx:461
 msgid "Cost"
@@ -257,11 +257,12 @@ msgstr "Cost"
 msgid "Create"
 msgstr "Create"
 
-#: src/components/OfferContractPage.tsx:585
+#: src/components/OfferContractPage.tsx:586
 msgid "Create Offer"
 msgstr "Create Offer"
 
 #: src/components/DifficultyAdjustmentCountdown.tsx:99
+#: src/components/OfferContractPage.tsx:403
 msgid "Days"
 msgstr "Days"
 
@@ -297,10 +298,6 @@ msgstr "Enter your limit order. Make sure sufficient {COLLATERAL_TOKEN_NAME} (fo
 #: src/components/DifficultyAdjustmentCountdown.tsx:119
 msgid "Estimate:"
 msgstr "Estimate:"
-
-#: src/components/DifficultyAdjustmentCountdown.tsx:119
-#~ msgid "Estimate: {0} UTC"
-#~ msgstr "Estimate: {0} UTC"
 
 #: src/components/UnfilledOfferModal.tsx:112
 msgid "Estimated Collateral"
@@ -525,7 +522,7 @@ msgstr "Order-fill Date UTC 00:01"
 msgid "Other Positions"
 msgstr "Other Positions"
 
-#: src/components/ExpiredShortPositionModal.tsx:82
+#: src/components/ExpiredShortPositionModal.tsx:81
 #: src/components/PortfolioPage.tsx:517
 msgid "Paid"
 msgstr "Paid"
@@ -548,7 +545,7 @@ msgstr "Position"
 msgid "Price ($/TH/Day)"
 msgstr "Price ($/TH/Day)"
 
-#: src/components/ExpiredShortPositionModal.tsx:55
+#: src/components/ExpiredShortPositionModal.tsx:54
 msgid "Price <0/>Quantity"
 msgstr "Price <0/>Quantity"
 
@@ -566,7 +563,7 @@ msgstr "Price:"
 
 #: src/components/ActiveLongPositionModal.tsx:48
 #: src/components/ActiveShortPositionModal.tsx:50
-#: src/components/ExpiredLongPositionModal.tsx:55
+#: src/components/ExpiredLongPositionModal.tsx:53
 msgid "Price<0/>Quantity"
 msgstr "Price<0/>Quantity"
 
@@ -594,27 +591,20 @@ msgstr "REDEEM"
 msgid "REDEEM ALL"
 msgstr "REDEEM ALL"
 
-#: src/components/PortfolioPage.tsx:618
-#~ msgid "REDEEM ALL ({0} {COLLATERAL_TOKEN_NAME})"
-#~ msgstr "REDEEM ALL ({0} {COLLATERAL_TOKEN_NAME})"
-
 #: src/components/ActiveShortPositionModal.tsx:70
-#: src/components/ExpiredLongPositionModal.tsx:83
+#: src/components/ExpiredLongPositionModal.tsx:84
+#: src/components/ExpiredShortPositionModal.tsx:70
 #: src/components/PortfolioPage.tsx:346
 #: src/components/PortfolioPage.tsx:464
 #: src/components/PortfolioPage.tsx:514
 msgid "Received"
 msgstr "Received"
 
-#: src/components/ExpiredShortPositionModal.tsx:71
-msgid "Received ({PAYMENT_TOKEN_NAME})"
-msgstr "Received ({PAYMENT_TOKEN_NAME})"
-
 #: src/components/PortfolioPage.tsx:251
 msgid "Redeem"
 msgstr "Redeem"
 
-#: src/components/ExpiredShortPositionModal.tsx:94
+#: src/components/ExpiredShortPositionModal.tsx:93
 msgid "Remaining Collateral"
 msgstr "Remaining Collateral"
 
@@ -662,7 +652,7 @@ msgid "Show Less"
 msgstr "Show Less"
 
 #: src/components/BuyContractPage.tsx:720
-#: src/components/OfferContractPage.tsx:599
+#: src/components/OfferContractPage.tsx:601
 msgid "Skip"
 msgstr "Skip"
 
@@ -694,7 +684,7 @@ msgstr "Start Date <0/>Expiration Date <1/>{0} Settlement Date <2/>"
 msgid "Start<0/>Expiration<1/>Settlement<2/>Days till Expiration"
 msgstr "Start<0/>Expiration<1/>Settlement<2/>Days till Expiration"
 
-#: src/components/ExpiredLongPositionModal.tsx:93
+#: src/components/ExpiredLongPositionModal.tsx:96
 #: src/components/PortfolioPage.tsx:467
 #: src/components/PortfolioPage.tsx:520
 msgid "Status"
@@ -818,28 +808,21 @@ msgstr "Your Quantity"
 
 #: src/components/ActiveLongPositionModal.tsx:92
 #: src/components/ActiveShortPositionModal.tsx:113
-msgid "Your transaction was executed on Ethereum blockchain, check on <0>Etherscan</0>: {0}"
-msgstr "Your transaction was executed on Ethereum blockchain, check on <0>Etherscan</0>: {0}"
-
-#: src/components/ExpiredLongPositionModal.tsx:99
-#: src/components/ExpiredShortPositionModal.tsx:107
-msgid "Your transaction was executed on Ethereum blockchain, check on <0>Etherscan</0>: {0}"
-msgstr "Your transaction was executed on Ethereum blockchain, check on <0>Etherscan</0>: {0}"
+#: src/components/ExpiredLongPositionModal.tsx:103
+#: src/components/ExpiredShortPositionModal.tsx:106
+msgid "Your transaction was executed on Ethereum blockchain, check on"
+msgstr "Your transaction was executed on Ethereum blockchain, check on"
 
 #: src/components/ActiveLongPositionModal.tsx:43
 #: src/components/ActiveShortPositionModal.tsx:45
-msgid "{0} days"
-msgstr "{0} days"
+msgid "day(s)"
+msgstr "day(s)"
 
-#: src/components/ExpiredLongPositionModal.tsx:44
-msgid "{0} hour(s)"
-msgstr "{0} hour(s)"
+#: src/components/ExpiredLongPositionModal.tsx:45
+#: src/components/ExpiredShortPositionModal.tsx:46
+msgid "hour(s)"
+msgstr "hour(s)"
 
-#: src/components/ExpiredShortPositionModal.tsx:44
-msgid "{0} hour(s)<0/>"
-msgstr "{0} hour(s)<0/>"
-
-#: src/components/OfferContractPage.tsx:403
 #: src/components/UnfilledOfferModal.tsx:88
 msgid "{CONTRACT_DURATION} Days"
 msgstr "{CONTRACT_DURATION} Days"
