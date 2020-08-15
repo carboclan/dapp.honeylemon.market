@@ -1,6 +1,5 @@
 {
-   "localeDir": "src/locales/",
-   "srcPathDirs": ["src/"],
+   "locales": ["<rootDir>/src/locales"],
    "format": "po",
    "sourceLocale": "en"
 }
