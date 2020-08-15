@@ -66,8 +66,7 @@
     "analyze": "source-map-explorer 'build/static/js/*.js'",
     "add-locale": "lingui add-locale",
     "extract": "lingui extract",
-    "compile": "lingui compile",
-    "linguiversion": "lingui --version"
+    "compile": "lingui compile"
   },
   "eslintConfig": {
     "extends": "react-app"

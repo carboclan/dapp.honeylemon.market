@@ -29,15 +29,15 @@ const AboutHoneylemonContractModal: React.SFC<AboutHoneylemonContractModalProps>
         <Typography variant="body2">
           <Trans>
             • The Honeylemon Mining Revenue Contract is the first of a series of Mining
-            Revenue Contracts designed to replicate payoff of existing cloud mining.&nbsp;
+            Revenue Contracts designed to replicate payoff of existing cloud mining.{" "}
             <br />• The Honeylemon 28-Day Mining Revenue Contract is a forward-like
             product that settles to the market-wide block reward and fees per Terahash
             over 28 days as published in the BTC Mining Revenue Index (BTC_MRI_28), with a
-            125% max revenue cap for the buyer. See&nbsp;
+            125% max revenue cap for the buyer. See{" "}
             <Link href="https://docs.honeylemon.market/btc-mining-revenue-contract-1">
               Contract Specifications
               <OpenInNew fontSize="small" />
-            </Link>&nbsp;
+            </Link>{" "}
             in the Docs.
             <br />• The seller sets the offer price and deposit a collateral in ERC-20
             token representation of BTC ({COLLATERAL_TOKEN_NAME}) upfront and receives
@@ -46,11 +46,11 @@ const AboutHoneylemonContractModal: React.SFC<AboutHoneylemonContractModalProps>
             upfront and later receives the mining output in ERC-20 token representation of
             BTC ({COLLATERAL_TOKEN_NAME}) upon contract settlement. <br />• Honeylemon
             Mining Revenue Contracts are executed via a set of Ethereum smart contracts,
-            built upon Market Protocol and 0x Protocol v3. Check out our&nbsp;
+            built upon Market Protocol and 0x Protocol v3. Check out our{" "}
             <Link href="https://docs.honeylemon.market/technical-architecture">
               Technical Architecture
               <OpenInNew fontSize="small" />
-            </Link>&nbsp;
+            </Link>{" "}
             in Docs.
             <br />
           </Trans>

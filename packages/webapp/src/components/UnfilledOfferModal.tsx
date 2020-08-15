@@ -188,8 +188,7 @@ const UnfilledOfferModal: React.SFC<UnfilledOfferModalProps> = ({
               className={classes.cancelButton}
               fullWidth
             >
-              <Trans>Cancel Offer</Trans>
-              &nbsp;
+              <Trans>Cancel Offer</Trans>{" "}
               {isCancelling && (
                 <CircularProgress className={classes.loadingSpinner} size={20} />
               )}

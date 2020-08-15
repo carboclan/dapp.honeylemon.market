@@ -91,8 +91,7 @@ const ExpiredShortPositionModal: React.SFC<ExpiredShortPositionModalProps> = ({
                 {dayjs(position.expirationDate).format("DD-MMM-YY")} <br />
                 {position.status === PositionStatus.expiredAwaitingSettlement && (
                   <>
-                    {Math.ceil(dayjs(position.settlementDate).diff(dayjs(), "h", true))}
-                    &nbsp;
+                    {Math.ceil(dayjs(position.settlementDate).diff(dayjs(), "h", true))}{" "}
                     <Trans>hour(s)</Trans>
                     <br />
                   </>
@@ -108,20 +107,20 @@ const ExpiredShortPositionModal: React.SFC<ExpiredShortPositionModalProps> = ({
                 </Trans>
               </TableCell>
               <TableCell align="right">
-                $ {new BigNumber(position.price).toPrecision(PAYMENT_TOKEN_DECIMALS)}
-                &nbsp; /TH/Day <br />
+                $ {new BigNumber(position.price).toPrecision(PAYMENT_TOKEN_DECIMALS)}{" "}
+                /TH/Day <br />
                 {position.qtyToMint.toLocaleString(undefined, {
                   maximumFractionDigits: PAYMENT_TOKEN_DECIMALS
-                })}
-                &nbsp; TH
+                })}{" "}
+                TH
               </TableCell>
             </TableRow>
             <TableRow>
               <TableCell>
-                <Trans>Received</Trans>&nbsp;({PAYMENT_TOKEN_NAME})
+                <Trans>Received</Trans> ({PAYMENT_TOKEN_NAME})
               </TableCell>
               <TableCell align="right">
-                $&nbsp;
+                ${" "}
                 {position.totalCost.toLocaleString(undefined, {
                   maximumFractionDigits: PAYMENT_TOKEN_DECIMALS
                 })}
@@ -137,8 +136,7 @@ const ExpiredShortPositionModal: React.SFC<ExpiredShortPositionModalProps> = ({
                   {
                     maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS
                   }
-                )}
-                &nbsp;
+                )}{" "}
                 {COLLATERAL_TOKEN_NAME}
               </TableCell>
             </TableRow>
@@ -149,8 +147,7 @@ const ExpiredShortPositionModal: React.SFC<ExpiredShortPositionModalProps> = ({
               <TableCell align="right">
                 {position.finalReward.toLocaleString(undefined, {
                   maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS
-                })}
-                &nbsp;
+                })}{" "}
                 {COLLATERAL_TOKEN_NAME}
               </TableCell>
             </TableRow>
@@ -159,8 +156,7 @@ const ExpiredShortPositionModal: React.SFC<ExpiredShortPositionModalProps> = ({
                 <Typography variant="caption">
                   <Trans>
                     Your transaction was executed on Ethereum blockchain, check on
-                  </Trans>
-                  &nbsp;
+                  </Trans>{" "}
                   <Link
                     href={`${etherscanUrl}/tx/${position.transaction.id}`}
                     target="_blank"

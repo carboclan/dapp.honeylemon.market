@@ -35,7 +35,7 @@ import UnfilledOfferModal from "./UnfilledOfferModal";
 import TimeRemaining from "./TimeRemaining";
 import * as Sentry from "@sentry/react";
 import { Trans, t } from "@lingui/macro";
-import { i18n } from "../App";
+import { useLingui } from "@lingui/react";
 
 const useStyles = makeStyles(({ spacing, palette }) => ({
   icon: {
@@ -73,6 +73,7 @@ const useStyles = makeStyles(({ spacing, palette }) => ({
 }));
 
 const PorfolioPage: React.SFC = () => {
+  const { i18n } = useLingui();
   const { address, gasPrice } = useOnboard();
   const {
     honeylemonService,
@@ -354,11 +355,11 @@ const PorfolioPage: React.SFC = () => {
           <Grid item style={{ paddingTop: 8 }}>
             <Typography variant="caption">
               <Trans>
-                This page refreshes every 30 seconds. Click&nbsp;
+                This page refreshes every 30 seconds. Click{" "}
                 <Link href="#" onClick={refreshPortfolio}>
                   here
-                </Link>
-                &nbsp; to refresh.
+                </Link>{" "}
+                to refresh.
               </Trans>
             </Typography>
           </Grid>
@@ -395,10 +396,10 @@ const PorfolioPage: React.SFC = () => {
                             <Trans>Days till Expiration</Trans>
                           </TableCell>
                           <TableCell align="center">
-                            <Trans>Cost</Trans>&nbsp;({PAYMENT_TOKEN_NAME})
+                            <Trans>Cost</Trans> ({PAYMENT_TOKEN_NAME})
                           </TableCell>
                           <TableCell align="center">
-                            <Trans>Revenue Accrued</Trans>&nbsp;({COLLATERAL_TOKEN_NAME})
+                            <Trans>Revenue Accrued</Trans> ({COLLATERAL_TOKEN_NAME})
                           </TableCell>
                           <TableCell></TableCell>
                         </TableRow>
@@ -479,11 +480,10 @@ const PorfolioPage: React.SFC = () => {
                             <Trans>Days till Expiration</Trans>
                           </TableCell>
                           <TableCell align="center">
-                            <Trans>Received</Trans>&nbsp;({PAYMENT_TOKEN_NAME})
+                            <Trans>Received</Trans> ({PAYMENT_TOKEN_NAME})
                           </TableCell>
                           <TableCell align="center">
-                            <Trans>Collateral Locked</Trans>&nbsp;({COLLATERAL_TOKEN_NAME}
-                            )
+                            <Trans>Collateral Locked</Trans> ({COLLATERAL_TOKEN_NAME})
                           </TableCell>
                           <TableCell></TableCell>
                         </TableRow>
@@ -567,7 +567,7 @@ const PorfolioPage: React.SFC = () => {
                             <Trans>Quantity (TH)</Trans>
                           </TableCell>
                           <TableCell align="right">
-                            <Trans>Contract Total</Trans>&nbsp;({PAYMENT_TOKEN_NAME})
+                            <Trans>Contract Total</Trans> ({PAYMENT_TOKEN_NAME})
                           </TableCell>
                           <TableCell></TableCell>
                         </TableRow>
@@ -653,10 +653,10 @@ const PorfolioPage: React.SFC = () => {
                       <TableHead>
                         <TableRow>
                           <TableCell align="center">
-                            <Trans>Cost</Trans>&nbsp; ({PAYMENT_TOKEN_NAME})
+                            <Trans>Cost</Trans> ({PAYMENT_TOKEN_NAME})
                           </TableCell>
                           <TableCell align="center">
-                            <Trans>Received</Trans>&nbsp;({COLLATERAL_TOKEN_NAME})
+                            <Trans>Received</Trans> ({COLLATERAL_TOKEN_NAME})
                           </TableCell>
                           <TableCell align="right">
                             <Trans>Status</Trans>
@@ -727,10 +727,10 @@ const PorfolioPage: React.SFC = () => {
                       <TableHead>
                         <TableRow>
                           <TableCell align="center">
-                            <Trans>Received</Trans>&nbsp;({PAYMENT_TOKEN_NAME})
+                            <Trans>Received</Trans> ({PAYMENT_TOKEN_NAME})
                           </TableCell>
                           <TableCell align="center">
-                            <Trans>Paid</Trans>&nbsp;({COLLATERAL_TOKEN_NAME})
+                            <Trans>Paid</Trans> ({COLLATERAL_TOKEN_NAME})
                           </TableCell>
                           <TableCell align="center">
                             <Trans>Status</Trans>
@@ -810,7 +810,7 @@ const PorfolioPage: React.SFC = () => {
                               <Trans>Position</Trans>
                             </TableCell>
                             <TableCell align="center">
-                              <Trans>Total</Trans>&nbsp;({COLLATERAL_TOKEN_NAME})
+                              <Trans>Total</Trans> ({COLLATERAL_TOKEN_NAME})
                             </TableCell>
                             <TableCell align="right">
                               <Trans>No of Contracts</Trans>
@@ -875,7 +875,7 @@ const PorfolioPage: React.SFC = () => {
                               shortCollateralForBatchWithdraw >
                             0 ? (
                               <>
-                                <Trans>REDEEM ALL</Trans>&nbsp;
+                                <Trans>REDEEM ALL</Trans>{" "}
                                 {`(${(
                                   longCollateralForBatchWithdraw +
                                   shortCollateralForBatchWithdraw
@@ -885,13 +885,13 @@ const PorfolioPage: React.SFC = () => {
                               </>
                             ) : (
                               <>
-                                <Trans>REDEEM ALL</Trans>&nbsp;
+                                <Trans>REDEEM ALL</Trans>{" "}
                                 <RadioButtonUnchecked className={classes.icon} />
                               </>
                             )
                           ) : (
                             <>
-                              <Trans>REDEEM ALL</Trans>&nbsp;
+                              <Trans>REDEEM ALL</Trans>{" "}
                               <CircularProgress
                                 className={classes.loadingSpinner}
                                 size={20}
@@ -927,7 +927,7 @@ const PorfolioPage: React.SFC = () => {
                             <Trans>Position</Trans>
                           </TableCell>
                           <TableCell align="center">
-                            <Trans>Amount</Trans>&nbsp; ({COLLATERAL_TOKEN_NAME})
+                            <Trans>Amount</Trans> ({COLLATERAL_TOKEN_NAME})
                           </TableCell>
                           <TableCell align="center">
                             <Trans>Settlement</Trans>
@@ -971,7 +971,7 @@ const PorfolioPage: React.SFC = () => {
                                     )
                                   }
                                 >
-                                  <Trans>REDEEM</Trans>&nbsp;
+                                  <Trans>REDEEM</Trans>{" "}
                                   {isWithdrawing && (
                                     <CircularProgress
                                       className={classes.loadingSpinner}
