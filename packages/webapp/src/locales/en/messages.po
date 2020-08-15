@@ -21,7 +21,7 @@ msgstr "% Block Rewards"
 msgid "% Transaction Fee"
 msgstr "% Transaction Fee"
 
-#: src/components/BuyContractPage.tsx:562
+#: src/components/BuyContractPage.tsx:565
 msgid "* <0>Estimated Revenue</0> is the amount of {COLLATERAL_TOKEN_NAME} expected to receive when this contract settles, if BTC price & difficulty stays constant over 28 days. <1/>* <2>Revenue Cap</2> is the maximum amount of {COLLATERAL_TOKEN_NAME} you can receive when this contract settles, calculated as 125% of current MRI_BTC times 28. <3/>* <4>Buy Contract vs. Buy BTC</4> is the discount/premium of cost basis for this Mining Revenue Contract compared to buying BTC spot with {PAYMENT_TOKEN_NAME} now, if BTC price & difficulty stays constant over 28 days.<5/>* Small discrepancy between your Budget and Contract Total is due to available offers in orderbook, and minimum order increment of 1TH."
 msgstr "* <0>Estimated Revenue</0> is the amount of {COLLATERAL_TOKEN_NAME} expected to receive when this contract settles, if BTC price & difficulty stays constant over 28 days. <1/>* <2>Revenue Cap</2> is the maximum amount of {COLLATERAL_TOKEN_NAME} you can receive when this contract settles, calculated as 125% of current MRI_BTC times 28. <3/>* <4>Buy Contract vs. Buy BTC</4> is the discount/premium of cost basis for this Mining Revenue Contract compared to buying BTC spot with {PAYMENT_TOKEN_NAME} now, if BTC price & difficulty stays constant over 28 days.<5/>* Small discrepancy between your Budget and Contract Total is due to available offers in orderbook, and minimum order increment of 1TH."
 
@@ -81,7 +81,7 @@ msgstr "Active Short Position Details"
 msgid "Amount"
 msgstr "Amount"
 
-#: src/components/BuyContractPage.tsx:339
+#: src/components/BuyContractPage.tsx:341
 #: src/components/OfferContractPage.tsx:244
 msgid "Approve"
 msgstr "Approve"
@@ -90,7 +90,7 @@ msgstr "Approve"
 msgid "Approve {COLLATERAL_TOKEN_NAME} for Collateral"
 msgstr "Approve {COLLATERAL_TOKEN_NAME} for Collateral"
 
-#: src/components/BuyContractPage.tsx:319
+#: src/components/BuyContractPage.tsx:321
 msgid "Approve {PAYMENT_TOKEN_NAME} for Payment"
 msgstr "Approve {PAYMENT_TOKEN_NAME} for Payment"
 
@@ -98,11 +98,8 @@ msgstr "Approve {PAYMENT_TOKEN_NAME} for Payment"
 msgid "Arbitration"
 msgstr "Arbitration"
 
-#: src/components/BuyContractPage.tsx:636
-#~ msgid "At settlement, you will receive mining revenue (in {COLLATERAL_TOKEN_NAME}) over {CONTRACT_DURATION} days, which is the network average BTC block reward & transaction fees (MRI_BTC) per TH over contract duration, up to a max revenue of <0>{0} {COLLATERAL_TOKEN_NAME} .</0>You can withdraw your mining revenue (in {COLLATERAL_TOKEN_NAME}) after settlement."
-#~ msgstr "At settlement, you will receive mining revenue (in {COLLATERAL_TOKEN_NAME}) over {CONTRACT_DURATION} days, which is the network average BTC block reward & transaction fees (MRI_BTC) per TH over contract duration, up to a max revenue of <0>{0} {COLLATERAL_TOKEN_NAME} .</0>You can withdraw your mining revenue (in {COLLATERAL_TOKEN_NAME}) after settlement."
 
-#: src/components/BuyContractPage.tsx:640
+#: src/components/BuyContractPage.tsx:648
 msgid "At settlement, you will receive mining revenue (in {COLLATERAL_TOKEN_NAME}) over {CONTRACT_DURATION} days, which is the network average BTC block reward & transaction fees (MRI_BTC) per TH over contract duration, up to a max revenue of <0>{0} {COLLATERAL_TOKEN_NAME} .</0>You can withdraw your mining revenue (in {COLLATERAL_TOKEN_NAME}) after settlement."
 msgstr "At settlement, you will receive mining revenue (in {COLLATERAL_TOKEN_NAME}) over {CONTRACT_DURATION} days, which is the network average BTC block reward & transaction fees (MRI_BTC) per TH over contract duration, up to a max revenue of <0>{0} {COLLATERAL_TOKEN_NAME} .</0>You can withdraw your mining revenue (in {COLLATERAL_TOKEN_NAME}) after settlement."
 
@@ -134,7 +131,7 @@ msgstr "BTC Price"
 msgid "BUY CONTRACTS"
 msgstr "BUY CONTRACTS"
 
-#: src/components/BuyContractPage.tsx:699
+#: src/components/BuyContractPage.tsx:709
 msgid "BUY NOW"
 msgstr "BUY NOW"
 
@@ -142,15 +139,15 @@ msgstr "BUY NOW"
 msgid "Bitcoin Mining Live Stats"
 msgstr "Bitcoin Mining Live Stats"
 
-#: src/components/BuyContractPage.tsx:341
+#: src/components/BuyContractPage.tsx:343
 msgid "Buy"
 msgstr "Buy"
 
-#: src/components/BuyContractPage.tsx:543
+#: src/components/BuyContractPage.tsx:546
 msgid "Buy Contract vs. Buy BTC"
 msgstr "Buy Contract vs. Buy BTC"
 
-#: src/components/BuyContractPage.tsx:369
+#: src/components/BuyContractPage.tsx:371
 msgid "Buy {CONTRACT_DURATION}-Day Mining Revenue Contract"
 msgstr "Buy {CONTRACT_DURATION}-Day Mining Revenue Contract"
 
@@ -162,7 +159,7 @@ msgstr "Buyers and sellers may withdraw their settlement value after settlement.
 msgid "CONNECT WALLET TO TRADE"
 msgstr "CONNECT WALLET TO TRADE"
 
-#: src/components/BuyContractPage.tsx:722
+#: src/components/BuyContractPage.tsx:732
 #: src/components/OfferContractPage.tsx:603
 msgid "Cancel"
 msgstr "Cancel"
@@ -187,11 +184,11 @@ msgstr "Collateral Locked"
 msgid "Collateral Requirement"
 msgstr "Collateral Requirement"
 
-#: src/components/BuyContractPage.tsx:320
+#: src/components/BuyContractPage.tsx:322
 msgid "Complete Payment"
 msgstr "Complete Payment"
 
-#: src/components/BuyContractPage.tsx:493
+#: src/components/BuyContractPage.tsx:495
 #: src/components/OfferContractPage.tsx:399
 #: src/components/UnfilledOfferModal.tsx:85
 msgid "Contract Duration"
@@ -216,7 +213,7 @@ msgstr "Contract Size"
 msgid "Contract Specification"
 msgstr "Contract Specification"
 
-#: src/components/BuyContractPage.tsx:464
+#: src/components/BuyContractPage.tsx:466
 #: src/components/OfferContractPage.tsx:371
 msgid "Contract Specs"
 msgstr "Contract Specs"
@@ -225,7 +222,7 @@ msgstr "Contract Specs"
 msgid "Contract Start"
 msgstr "Contract Start"
 
-#: src/components/BuyContractPage.tsx:499
+#: src/components/BuyContractPage.tsx:501
 #: src/components/OfferContractPage.tsx:408
 #: src/components/PortfolioPage.tsx:406
 #: src/components/UnfilledOfferModal.tsx:101
@@ -252,7 +249,7 @@ msgstr "Contracts Sold (Short)"
 msgid "Cost"
 msgstr "Cost"
 
-#: src/components/BuyContractPage.tsx:337
+#: src/components/BuyContractPage.tsx:339
 #: src/components/OfferContractPage.tsx:242
 msgid "Create"
 msgstr "Create"
@@ -265,6 +262,10 @@ msgstr "Create Offer"
 #: src/components/OfferContractPage.tsx:403
 msgid "Days"
 msgstr "Days"
+
+#: src/components/OfferContractPage.tsx:480
+msgid "Days After Start"
+msgstr "Days After Start"
 
 #: src/components/PortfolioPage.tsx:284
 #: src/components/PortfolioPage.tsx:343
@@ -283,11 +284,11 @@ msgstr "Difficulty"
 msgid "Duration (Days)"
 msgstr "Duration (Days)"
 
-#: src/components/BuyContractPage.tsx:405
+#: src/components/BuyContractPage.tsx:407
 msgid "Enter quantity you would like to buy as budget to check the market price below. Make sure sufficient {PAYMENT_TOKEN_NAME} & ETH (for fees) is in your wallet."
 msgstr "Enter quantity you would like to buy as budget to check the market price below. Make sure sufficient {PAYMENT_TOKEN_NAME} & ETH (for fees) is in your wallet."
 
-#: src/components/BuyContractPage.tsx:432
+#: src/components/BuyContractPage.tsx:434
 msgid "Enter quantity you would like to buy as hash power to check the market price below. Make sure sufficient {PAYMENT_TOKEN_NAME} & ETH (for fees) is in your wallet."
 msgstr "Enter quantity you would like to buy as hash power to check the market price below. Make sure sufficient {PAYMENT_TOKEN_NAME} & ETH (for fees) is in your wallet."
 
@@ -307,7 +308,7 @@ msgstr "Estimated Collateral"
 msgid "Estimated Collateral (125%)"
 msgstr "Estimated Collateral (125%)"
 
-#: src/components/BuyContractPage.tsx:522
+#: src/components/BuyContractPage.tsx:524
 msgid "Estimated Revenue"
 msgstr "Estimated Revenue"
 
@@ -327,7 +328,7 @@ msgstr "Expired Short Position Details"
 msgid "FTX hashrate futures are instrument on difficulty, price shown is implied."
 msgstr "FTX hashrate futures are instrument on difficulty, price shown is implied."
 
-#: src/components/BuyContractPage.tsx:553
+#: src/components/BuyContractPage.tsx:556
 #: src/components/OfferContractPage.tsx:461
 msgid "Find Out More"
 msgstr "Find Out More"
@@ -356,7 +357,7 @@ msgstr "Hedge Mining Risk & Get Cash Upfront"
 msgid "Honeylemon Vault  (Optional)"
 msgstr "Honeylemon Vault  (Optional)"
 
-#: src/components/BuyContractPage.tsx:318
+#: src/components/BuyContractPage.tsx:320
 msgid "Honeylemon Vault (Optional)"
 msgstr "Honeylemon Vault (Optional)"
 
@@ -380,7 +381,7 @@ msgstr "I am a BTC investor."
 msgid "I am a BTC miner."
 msgstr "I am a BTC miner."
 
-#: src/components/BuyContractPage.tsx:325
+#: src/components/BuyContractPage.tsx:327
 #: src/components/OfferContractPage.tsx:232
 msgid "If you place multiple orders or use it more than once, create Honeylemon Vault will deploy a DSProxy contract for your wallet, which reduces future gas fee and streamline your transactions. Additional Ethereum gas fee applies."
 msgstr "If you place multiple orders or use it more than once, create Honeylemon Vault will deploy a DSProxy contract for your wallet, which reduces future gas fee and streamline your transactions. Additional Ethereum gas fee applies."
@@ -421,7 +422,7 @@ msgstr "Long settlement value = MAX(MRI_BTC_28 at contract expiration, cap price
 msgid "Long/short positions are represented as ERC20 tokens, named in the following format: <0/>index name-token symbol-forward length-start date-direction. <1/> <2/>For example, the long and short position tokens of a 28-Day BTC Mining Revenue Contract starting on June 1, 2020 and expiring on June 28, 2020 are, respectively named <3/>MRI-BTC-28D-20200601-Long <4/>MRI-BTC-28D-20200601-Short <5/> <6/>Long and short position tokens are fungible within the same MRI_BTC contract. <7/>Each position token represents 1TH/Day of hashpower till contract expiration. <8/>"
 msgstr "Long/short positions are represented as ERC20 tokens, named in the following format: <0/>index name-token symbol-forward length-start date-direction. <1/> <2/>For example, the long and short position tokens of a 28-Day BTC Mining Revenue Contract starting on June 1, 2020 and expiring on June 28, 2020 are, respectively named <3/>MRI-BTC-28D-20200601-Long <4/>MRI-BTC-28D-20200601-Short <5/> <6/>Long and short position tokens are fungible within the same MRI_BTC contract. <7/>Each position token represents 1TH/Day of hashpower till contract expiration. <8/>"
 
-#: src/components/BuyContractPage.tsx:473
+#: src/components/BuyContractPage.tsx:475
 msgid "Market Price"
 msgstr "Market Price"
 
@@ -445,7 +446,7 @@ msgstr "Mins"
 msgid "Network Daily Average Mining Revenue"
 msgstr "Network Daily Average Mining Revenue"
 
-#: src/components/BuyContractPage.tsx:302
+#: src/components/BuyContractPage.tsx:303
 msgid "New contracts are not available right now"
 msgstr "New contracts are not available right now"
 
@@ -549,7 +550,7 @@ msgstr "Price ($/TH/Day)"
 msgid "Price <0/>Quantity"
 msgstr "Price <0/>Quantity"
 
-#: src/components/BuyContractPage.tsx:457
+#: src/components/BuyContractPage.tsx:459
 msgid "Price Quote"
 msgstr "Price Quote"
 
@@ -613,7 +614,7 @@ msgstr "Remaining Collateral"
 msgid "Revenue Accrued"
 msgstr "Revenue Accrued"
 
-#: src/components/BuyContractPage.tsx:532
+#: src/components/BuyContractPage.tsx:534
 msgid "Revenue Cap"
 msgstr "Revenue Cap"
 
@@ -646,12 +647,12 @@ msgstr "Settlement Value"
 msgid "Short"
 msgstr "Short"
 
-#: src/components/BuyContractPage.tsx:685
+#: src/components/BuyContractPage.tsx:695
 #: src/components/OfferContractPage.tsx:565
 msgid "Show Less"
 msgstr "Show Less"
 
-#: src/components/BuyContractPage.tsx:720
+#: src/components/BuyContractPage.tsx:730
 #: src/components/OfferContractPage.tsx:601
 msgid "Skip"
 msgstr "Skip"
@@ -664,7 +665,7 @@ msgstr "Spot Market"
 msgid "Start"
 msgstr "Start"
 
-#: src/components/BuyContractPage.tsx:583
+#: src/components/BuyContractPage.tsx:586
 msgid "Start <0/>Expiration <1/>Settlement"
 msgstr "Start <0/>Expiration <1/>Settlement"
 
@@ -690,7 +691,7 @@ msgstr "Start<0/>Expiration<1/>Settlement<2/>Days till Expiration"
 msgid "Status"
 msgstr "Status"
 
-#: src/components/BuyContractPage.tsx:508
+#: src/components/BuyContractPage.tsx:510
 #: src/components/OfferContractPage.tsx:420
 msgid "Suggest to increase your contract total to above 100 {PAYMENT_TOKEN_NAME} due to recent high fees in ethereum network. See <0>fees for details.<1/></0>"
 msgstr "Suggest to increase your contract total to above 100 {PAYMENT_TOKEN_NAME} due to recent high fees in ethereum network. See <0>fees for details.<1/></0>"
@@ -715,7 +716,7 @@ msgstr "The timestamp the contract starts to trade (i.e. UTC 00:01 of the contra
 msgid "The timestamp the contract stops trading (i.e. UTC 00:01 of the expiration date)"
 msgstr "The timestamp the contract stops trading (i.e. UTC 00:01 of the expiration date)"
 
-#: src/components/BuyContractPage.tsx:305
+#: src/components/BuyContractPage.tsx:307
 msgid "There are not enough contracts available right now."
 msgstr "There are not enough contracts available right now."
 
@@ -743,12 +744,12 @@ msgstr "Trading Currency"
 msgid "Unfilled Offer Details"
 msgstr "Unfilled Offer Details"
 
-#: src/components/BuyContractPage.tsx:377
+#: src/components/BuyContractPage.tsx:379
 #: src/components/OfferContractPage.tsx:285
 msgid "View Offers"
 msgstr "View Offers"
 
-#: src/components/BuyContractPage.tsx:614
+#: src/components/BuyContractPage.tsx:617
 #: src/components/OfferContractPage.tsx:502
 msgid "WHAT DOES IT MEAN?"
 msgstr "WHAT DOES IT MEAN?"
@@ -761,7 +762,7 @@ msgstr "Withdrawal Period"
 msgid "You are granting permission for Honeylemon smart contracts to access {COLLATERAL_TOKEN_NAME} in your wallet, enabling actual collateral to be auto-deposited upon offer being taken. You can turn OFF permission in Side Menu (top-right) - Manage Your Wallet. Additional Ethereum gas fee applies."
 msgstr "You are granting permission for Honeylemon smart contracts to access {COLLATERAL_TOKEN_NAME} in your wallet, enabling actual collateral to be auto-deposited upon offer being taken. You can turn OFF permission in Side Menu (top-right) - Manage Your Wallet. Additional Ethereum gas fee applies."
 
-#: src/components/BuyContractPage.tsx:327
+#: src/components/BuyContractPage.tsx:329
 msgid "You are granting permission for Honeylemon smart contracts to access {PAYMENT_TOKEN_NAME} in your wallet, enabling order payment with your {PAYMENT_TOKEN_NAME}. You can turn OFF permission in Side Menu (top-right) - Manage Your Wallet. Additional Ethereum gas fee applies."
 msgstr "You are granting permission for Honeylemon smart contracts to access {PAYMENT_TOKEN_NAME} in your wallet, enabling order payment with your {PAYMENT_TOKEN_NAME}. You can turn OFF permission in Side Menu (top-right) - Manage Your Wallet. Additional Ethereum gas fee applies."
 
@@ -773,15 +774,15 @@ msgstr "You are offering <0>{hashAmount} TH</0> of {CONTRACT_DURATION}-Day Minin
 msgid "You are offering {0} TH of {CONTRACT_DURATION}-Day BTC Mining Revenue Contract at a limit price of {1}/TH/Day. Your offer will be valid for 10 days and can be canceled (for free) anytime in Portfolio. Additional Ethereum gas fee applies."
 msgstr "You are offering {0} TH of {CONTRACT_DURATION}-Day BTC Mining Revenue Contract at a limit price of {1}/TH/Day. Your offer will be valid for 10 days and can be canceled (for free) anytime in Portfolio. Additional Ethereum gas fee applies."
 
-#: src/components/BuyContractPage.tsx:329
+#: src/components/BuyContractPage.tsx:331
 msgid "You are paying {PAYMENT_TOKEN_NAME} {0} for  {orderQuantity} TH of {CONTRACT_DURATION}-Day BTC Mining Revenue Contract at a market price of {1}/TH/Day. Additional Ethereum gas fee and 0x transaction fee apply."
 msgstr "You are paying {PAYMENT_TOKEN_NAME} {0} for  {orderQuantity} TH of {CONTRACT_DURATION}-Day BTC Mining Revenue Contract at a market price of {1}/TH/Day. Additional Ethereum gas fee and 0x transaction fee apply."
 
-#: src/components/BuyContractPage.tsx:304
+#: src/components/BuyContractPage.tsx:305
 msgid "You do not have enough {PAYMENT_TOKEN_NAME} to proceed. Open Side Menu (top-right) to manage your wallet balance and get more."
 msgstr "You do not have enough {PAYMENT_TOKEN_NAME} to proceed. Open Side Menu (top-right) to manage your wallet balance and get more."
 
-#: src/components/BuyContractPage.tsx:668
+#: src/components/BuyContractPage.tsx:677
 msgid "You may check your PNL from your Portfolio once order is placed. You can withdraw your mining revenue denominated in {COLLATERAL_TOKEN_NAME} after {0} UTC."
 msgstr "You may check your PNL from your Portfolio once order is placed. You can withdraw your mining revenue denominated in {COLLATERAL_TOKEN_NAME} after {0} UTC."
 
@@ -793,15 +794,15 @@ msgstr "You need at least {0} {COLLATERAL_TOKEN_NAME} to proceed. Open Side Menu
 msgid "You need to have at least <0>{0} {COLLATERAL_TOKEN_NAME}</0>in your wallet balance now, and approve Honeylemon smart contract to access your {COLLATERAL_TOKEN_NAME} in your wallet as collateral to list your offer. You may cancel your offer from your Portfolio anytime prior to it being filled. As soon as your order is filled, your approved collateral will be automatically deposited, you will receive payment in {PAYMENT_TOKEN_NAME} immediately and the contract will start."
 msgstr "You need to have at least <0>{0} {COLLATERAL_TOKEN_NAME}</0>in your wallet balance now, and approve Honeylemon smart contract to access your {COLLATERAL_TOKEN_NAME} in your wallet as collateral to list your offer. You may cancel your offer from your Portfolio anytime prior to it being filled. As soon as your order is filled, your approved collateral will be automatically deposited, you will receive payment in {PAYMENT_TOKEN_NAME} immediately and the contract will start."
 
-#: src/components/BuyContractPage.tsx:618
-msgid "You will pay <0>{0} {PAYMENT_TOKEN_NAME}</0> to buy <1>{1} TH</1> of {CONTRACT_DURATION}-Day Mining Revenue Contracts at <2>{PAYMENT_TOKEN_NAME} {2} /TH/Day</2>."
-msgstr "You will pay <0>{0} {PAYMENT_TOKEN_NAME}</0> to buy <1>{1} TH</1> of {CONTRACT_DURATION}-Day Mining Revenue Contracts at <2>{PAYMENT_TOKEN_NAME} {2} /TH/Day</2>."
+#: src/components/BuyContractPage.tsx:622
+msgid "You will pay <0>{0} {PAYMENT_TOKEN_NAME}</0>to buy <1>{1} TH</1> of {CONTRACT_DURATION}-Day Mining Revenue Contracts at <2>{PAYMENT_TOKEN_NAME} {2} /TH/Day</2>."
+msgstr "You will pay <0>{0} {PAYMENT_TOKEN_NAME}</0>to buy <1>{1} TH</1> of {CONTRACT_DURATION}-Day Mining Revenue Contracts at <2>{PAYMENT_TOKEN_NAME} {2} /TH/Day</2>."
 
-#: src/components/BuyContractPage.tsx:657
-msgid "You will receive the network average BTC block reward & transaction fees per TH based on the average value of the <0>Bitcoin Mining Revenue Index (MRI_BTC) <1/></0> over {CONTRACT_DURATION} days starting today."
-msgstr "You will receive the network average BTC block reward & transaction fees per TH based on the average value of the <0>Bitcoin Mining Revenue Index (MRI_BTC) <1/></0> over {CONTRACT_DURATION} days starting today."
+#: src/components/BuyContractPage.tsx:665
+msgid "You will receive the network average BTC block reward & transaction fees per TH based on the average value of the <0>Bitcoin Mining Revenue Index (MRI_BTC) <1/></0>over {CONTRACT_DURATION} days starting today."
+msgstr "You will receive the network average BTC block reward & transaction fees per TH based on the average value of the <0>Bitcoin Mining Revenue Index (MRI_BTC) <1/></0>over {CONTRACT_DURATION} days starting today."
 
-#: src/components/BuyContractPage.tsx:485
+#: src/components/BuyContractPage.tsx:487
 #: src/components/OfferContractPage.tsx:390
 msgid "Your Quantity"
 msgstr "Your Quantity"
@@ -826,10 +827,6 @@ msgstr "hour(s)"
 #: src/components/UnfilledOfferModal.tsx:88
 msgid "{CONTRACT_DURATION} Days"
 msgstr "{CONTRACT_DURATION} Days"
-
-#: src/components/OfferContractPage.tsx:480
-msgid "{CONTRACT_DURATION} Days After Start"
-msgstr "{CONTRACT_DURATION} Days After Start"
 
 #: src/components/MRIInformationModal.tsx:12
 msgid "• The BTC Mining Revenue Index (<0>MRI_BTC_d</0>) represents the Bitcoin network daily average block rewards plus fees (in BTC) per 1 terahash (TH) of hash power in the past d days.<1/>• For example, <2>MRI_BTC_1</2> represents “1-day BTC Mining Revenue Index” (abbreviated as MRI_BTC). <3>MRI_BTC_28</3> represents the “28-day BTC Mining Revenue Index”.<4/>• <5>MRI_BTC_d</5> follows the mining industry convention of Full Pay-Per-Share (FPPS) approach.<6/>"

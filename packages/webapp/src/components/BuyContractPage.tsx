@@ -394,12 +394,16 @@ const BuyContractPage: React.SFC = () => {
   }
   const errors = [];
 
-  !isDailyContractDeployed && errors.push(i18n._(t`New contracts are not available right now`));
+  !isDailyContractDeployed &&
+    errors.push(i18n._(t`New contracts are not available right now`));
   !sufficientPaymentTokens &&
     errors.push(
-      i18n._(t`You do not have enough ${PAYMENT_TOKEN_NAME} to proceed. Open Side Menu (top-right) to manage your wallet balance and get more.`)
+      i18n._(
+        t`You do not have enough ${PAYMENT_TOKEN_NAME} to proceed. Open Side Menu (top-right) to manage your wallet balance and get more.`
+      )
     );
-  !isLiquid && errors.push(i18n._(t`There are not enough contracts available right now.`));
+  !isLiquid &&
+    errors.push(i18n._(t`There are not enough contracts available right now.`));
 
   const getActiveStep = () => {
     if (!skipDsProxy && !isDsProxyDeployed) return 0;
@@ -711,7 +715,8 @@ const BuyContractPage: React.SFC = () => {
                         (expectedBTCAccrual || 0) * CONTRACT_COLLATERAL_RATIO
                       ).toLocaleString(undefined, {
                         maximumFractionDigits: 8
-                      })} ${COLLATERAL_TOKEN_NAME}`}&nbsp;
+                      })} ${COLLATERAL_TOKEN_NAME}`}
+                      &nbsp;
                       <br />
                     </TableCell>
                   </TableRow>
@@ -797,7 +802,8 @@ const BuyContractPage: React.SFC = () => {
                         <TableCell colSpan={2}>
                           <Typography variant="subtitle1" style={{ paddingTop: 4 }}>
                             <Trans>WHAT DOES IT MEAN?</Trans>
-                          </Typography>&nbsp;
+                          </Typography>
+                          &nbsp;
                           <br />
                           <Typography
                             variant="body2"
@@ -809,11 +815,15 @@ const BuyContractPage: React.SFC = () => {
                               <strong>
                                 {(orderValue || 0).toLocaleString(undefined, {
                                   maximumFractionDigits: PAYMENT_TOKEN_DECIMALS
-                                })}&nbsp;
+                                })}
+                                &nbsp;
                                 {PAYMENT_TOKEN_NAME}
-                              </strong>&nbsp;
-                              to buy&nbsp;
-                              <strong>{`${orderQuantity.toLocaleString()}`} TH</strong> of&nbsp;
+                              </strong>
+                              &nbsp; to buy&nbsp;
+                              <strong>
+                                {`${orderQuantity.toLocaleString()}`} TH
+                              </strong>{" "}
+                              of&nbsp;
                               {CONTRACT_DURATION}-Day Mining Revenue Contracts at&nbsp;
                               <strong>
                                 {PAYMENT_TOKEN_NAME}&nbsp;
@@ -855,15 +865,16 @@ const BuyContractPage: React.SFC = () => {
                           >
                             <Trans>
                               You will receive the network average BTC block reward &
-                              transaction fees per TH based on the average value of the&nbsp;
+                              transaction fees per TH based on the average value of
+                              the&nbsp;
                               <Link
                                 href="#"
                                 onClick={() => setShowMRIInformationModal(true)}
                               >
                                 Bitcoin Mining Revenue Index (MRI_BTC)&nbsp;
                                 <Info fontSize="small" />
-                              </Link>&nbsp;
-                              over {CONTRACT_DURATION} days starting today.
+                              </Link>
+                              &nbsp; over {CONTRACT_DURATION} days starting today.
                             </Trans>
                           </Typography>
                           <Typography
@@ -873,15 +884,16 @@ const BuyContractPage: React.SFC = () => {
                           >
                             <Trans>
                               You may check your PNL from your Portfolio once order is
-                              placed. You can withdraw your mining revenue denominated in&nbsp;
+                              placed. You can withdraw your mining revenue denominated
+                              in&nbsp;
                               {COLLATERAL_TOKEN_NAME} after&nbsp;
                               {dayjs()
                                 .utc()
                                 .startOf("day")
                                 .add(1, "minute")
                                 .add(CONTRACT_DURATION + 1, "d")
-                                .format("YYYY/MM/DD HH:mm")}&nbsp;
-                              UTC.
+                                .format("YYYY/MM/DD HH:mm")}
+                              &nbsp; UTC.
                             </Trans>
                           </Typography>
                         </TableCell>
