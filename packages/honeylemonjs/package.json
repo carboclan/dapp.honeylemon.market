@@ -2,7 +2,7 @@
   "name": "@honeylemon/honeylemonjs",
   "version": "0.1.0",
   "description": "Javascript wrapper for all core services and contracts",
-  "main": "lib/index.js",
+  "main": "lib/src/index.js",
   "scripts": {
     "build": "tsc -d --declarationDir lib --declarationMap",
     "test": "echo \"Error: no test specified\" && exit 1",

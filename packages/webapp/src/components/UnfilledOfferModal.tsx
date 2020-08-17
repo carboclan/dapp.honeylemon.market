@@ -15,7 +15,6 @@ import {
 import { useHoneylemon } from "../contexts/HoneylemonContext";
 import dayjs from "dayjs";
 import { useOnboard } from "../contexts/OnboardContext";
-import { COLLATERAL_TOKEN_DECIMALS } from "@honeylemon/honeylemonjs/lib/src";
 import * as Sentry from "@sentry/react";
 import { Trans } from "@lingui/macro";
 
@@ -49,6 +48,7 @@ const UnfilledOfferModal: React.SFC<UnfilledOfferModalProps> = ({
     CONTRACT_DURATION,
     CONTRACT_COLLATERAL_RATIO,
     COLLATERAL_TOKEN_NAME,
+    COLLATERAL_TOKEN_DECIMALS,
     portfolioData: { openOrders },
     refreshPortfolio,
     marketData: { currentMRI }
@@ -188,8 +188,7 @@ const UnfilledOfferModal: React.SFC<UnfilledOfferModalProps> = ({
               className={classes.cancelButton}
               fullWidth
             >
-              <Trans>Cancel Offer</Trans>
-              &nbsp;
+              <Trans>Cancel Offer</Trans>{" "}
               {isCancelling && (
                 <CircularProgress className={classes.loadingSpinner} size={20} />
               )}

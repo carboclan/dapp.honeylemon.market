@@ -79,7 +79,7 @@ const ActiveShortPositionModal: React.SFC<ActiveShortPositionModalProps> = ({
                 {dayjs(position.startDate).format("DD-MMM-YY")} <br />
                 {dayjs(position.expirationDate).format("DD-MMM-YY")} <br />
                 {dayjs(position.settlementDate).format("DD-MMM-YY")} <br />
-                <Trans>{position.daysToExpiration} days</Trans>
+                {position.daysToExpiration}&nbsp;<Trans>day(s)</Trans>
               </TableCell>
             </TableRow>
             <TableRow>
@@ -152,16 +152,17 @@ const ActiveShortPositionModal: React.SFC<ActiveShortPositionModalProps> = ({
                 <Typography variant="caption">
                   <Trans>
                     Your transaction was executed on Ethereum blockchain, check on{" "}
-                    <Link
-                      href={`${etherscanUrl}/tx/${position.transaction.id}`}
-                      target="_blank"
-                      rel="noopener"
-                      underline="always"
-                    >
-                      Etherscan
-                    </Link>
-                    : {`${displayAddress(position.transaction.id, 20)}`}
                   </Trans>
+                  &nbsp;
+                  <Link
+                    href={`${etherscanUrl}/tx/${position.transaction.id}`}
+                    target="_blank"
+                    rel="noopener"
+                    underline="always"
+                  >
+                    Etherscan
+                  </Link>
+                  : {`${displayAddress(position.transaction.id, 20)}`}
                 </Typography>
               </TableCell>
             </TableRow>
