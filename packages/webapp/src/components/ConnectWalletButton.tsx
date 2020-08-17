@@ -49,8 +49,12 @@ const ConnectWalletButton: React.SFC = () => {
             href="https://docs.honeylemon.market/audit-report"
             target="_blank"
             rel="noopener"
-            color="secondary">
-            <Trans>⚠️ This project is in Alpha, use at your own risk. View audit report.</Trans>&nbsp;
+            color="secondary"
+          >
+            <Trans>
+              ⚠️ This project is in Alpha, use at your own risk. View audit report.
+            </Trans>
+            &nbsp;
             <OpenInNew fontSize="small" />
           </Link>
         </Typography>
@@ -62,8 +66,10 @@ const ConnectWalletButton: React.SFC = () => {
           }}
           className={classes.button}
           fullWidth
-          disabled={!onboard || isConnecting}>
-          <Trans>CONNECT WALLET TO TRADE</Trans>&nbsp;
+          disabled={!onboard || isConnecting}
+        >
+          <Trans>CONNECT WALLET TO TRADE</Trans>
+          &nbsp;
           {isConnecting && (
             <CircularProgress className={classes.loadingSpinner} size={20} />
           )}

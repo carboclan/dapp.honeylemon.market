@@ -136,10 +136,8 @@ const DifficultyAdjustmentCountdown: React.FC = () => {
       </Grid>
       <Grid item xs={12}>
         <Typography style={{ fontWeight: "bold" }}>
-          <Trans>
-            Estimate: {dayjs(btcDifficultyAdjustmentDate).format("MMM DD, YYYY HH:mm")}&nbsp;
-            UTC
-          </Trans>
+          <Trans>Estimate:</Trans>&nbsp;
+          {dayjs(btcDifficultyAdjustmentDate).format("MMM DD, YYYY HH:mm")} UTC
         </Typography>
       </Grid>
     </Grid>

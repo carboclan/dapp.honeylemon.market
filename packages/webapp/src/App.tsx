@@ -10,15 +10,15 @@ import config from "./contexts/HoneylemonConfig";
 import HoneyLemonApp from "./components/HoneyLemonApp";
 import { OnboardProvider } from "./contexts/OnboardContext";
 import { HoneylemonProvider } from "./contexts/HoneylemonContext";
-import catalogEn from "./locales/en/messages.js";
-import { setupI18n } from "@lingui/core";
+import { messages as catalogEn } from "./locales/en/messages.js";
+import { i18n } from "@lingui/core";
 
 const validNetworks = Object.keys(config).map(network => Number(network));
 
-const catalogs = { en: catalogEn };
-export const i18n = setupI18n({
-  catalogs,
-})
+//@ts-ignore
+i18n.load("en", catalogEn);
+i18n.activate("en");
+
 function App() {
   const onboardInit = {
     dappId: process.env.REACT_APP_BLOCKNATIVE_API_KEY || "",
@@ -32,7 +32,7 @@ function App() {
   return (
     <MuiThemeProvider theme={theme}>
       <Router history={history}>
-        <I18nProvider i18n={i18n} language='en'>
+        <I18nProvider i18n={i18n}>
           <ScrollToTop>
             <CssBaseline />
             <OnboardProvider {...onboardInit}>

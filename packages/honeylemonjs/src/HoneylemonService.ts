@@ -585,7 +585,7 @@ class HoneylemonService {
         redemptionTxLong = await method.send({
           from: recipientAddress,
           gas: gas.toString(),
-          gasPrice: price?.toString(),
+          gasPrice: price?.toString()
         });
       }
     }

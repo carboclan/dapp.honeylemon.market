@@ -185,9 +185,9 @@ const ContractSpecificationModal: React.SFC<ContractSpecificationModalProps> = (
             respectively named <br />
             MRI-BTC-28D-20200601-Long <br />
             MRI-BTC-28D-20200601-Short <br /> <br />
-            Long and short position tokens are fungible within the same MRI_BTC contract.&nbsp;
+            Long and short position tokens are fungible within the same MRI_BTC contract.{" "}
             <br />
-            Each position token represents 1TH/Day of hashpower till contract expiration.&nbsp;
+            Each position token represents 1TH/Day of hashpower till contract expiration.{" "}
             <br />
           </Trans>
         </Typography>

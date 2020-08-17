@@ -41,7 +41,7 @@ import OrderbookModal from "./OrderbookModal";
 import { useEffect } from "react";
 import * as Sentry from "@sentry/react";
 import { t, Trans } from "@lingui/macro";
-import { i18n } from "../App";
+import { useLingui } from "@lingui/react";
 
 const useStyles = makeStyles(({ spacing, palette, transitions }) => ({
   inputUnitLabel: {
@@ -113,6 +113,7 @@ enum BuyType {
 }
 
 const BuyContractPage: React.SFC = () => {
+  const { i18n } = useLingui();
   const { address, gasPrice, refreshGasPrice } = useOnboard();
   const {
     honeylemonService,
@@ -394,12 +395,16 @@ const BuyContractPage: React.SFC = () => {
   }
   const errors = [];
 
-  !isDailyContractDeployed && errors.push(i18n._(t`New contracts are not available right now`));
+  !isDailyContractDeployed &&
+    errors.push(i18n._(t`New contracts are not available right now`));
   !sufficientPaymentTokens &&
     errors.push(
-      i18n._(t`You do not have enough ${PAYMENT_TOKEN_NAME} to proceed. Open Side Menu (top-right) to manage your wallet balance and get more.`)
+      i18n._(
+        t`You do not have enough ${PAYMENT_TOKEN_NAME} to proceed. Open Side Menu (top-right) to manage your wallet balance and get more.`
+      )
     );
-  !isLiquid && errors.push(i18n._(t`There are not enough contracts available right now.`));
+  !isLiquid &&
+    errors.push(i18n._(t`There are not enough contracts available right now.`));
 
   const getActiveStep = () => {
     if (!skipDsProxy && !isDsProxyDeployed) return 0;
@@ -542,8 +547,8 @@ const BuyContractPage: React.SFC = () => {
               <Typography variant="caption">
                 <Trans>
                   Enter quantity you would like to buy as budget to check the market price
-                  below. Make sure sufficient {PAYMENT_TOKEN_NAME} &amp; ETH (for fees) is
-                  in your wallet.
+                  below. Make sure sufficient {PAYMENT_TOKEN_NAME} & ETH (for fees) is in
+                  your wallet.
                 </Trans>
               </Typography>
             </Grid>
@@ -675,9 +680,9 @@ const BuyContractPage: React.SFC = () => {
                       <TableCell colSpan={2}>
                         <Typography variant="caption" color="secondary">
                           <Trans>
-                            Suggest to increase your contract total to above 100&nbsp;
+                            Suggest to increase your contract total to above 100{" "}
                             {PAYMENT_TOKEN_NAME} due to recent high fees in ethereum
-                            network. See&nbsp;
+                            network. See{" "}
                             <Link
                               href="https://docs.honeylemon.market/fees"
                               target="_blank"
@@ -711,7 +716,7 @@ const BuyContractPage: React.SFC = () => {
                         (expectedBTCAccrual || 0) * CONTRACT_COLLATERAL_RATIO
                       ).toLocaleString(undefined, {
                         maximumFractionDigits: 8
-                      })} ${COLLATERAL_TOKEN_NAME}`}&nbsp;
+                      })} ${COLLATERAL_TOKEN_NAME}`}{" "}
                       <br />
                     </TableCell>
                   </TableRow>
@@ -745,17 +750,17 @@ const BuyContractPage: React.SFC = () => {
                         <TableCell colSpan={2} style={{ color: "#a9a9a9" }}>
                           <Typography variant="caption">
                             <Trans>
-                              * <b>Estimated Revenue</b> is the amount of&nbsp;
+                              * <b>Estimated Revenue</b> is the amount of{" "}
                               {COLLATERAL_TOKEN_NAME} expected to receive when this
-                              contract settles, if BTC price &amp; difficulty stays
-                              constant over 28 days. <br />* <b>Revenue Cap</b> is the
-                              maximum amount of {COLLATERAL_TOKEN_NAME} you can receive
-                              when this contract settles, calculated as 125% of current
-                              MRI_BTC times 28. <br />* <b>Buy Contract vs. Buy BTC</b> is
-                              the discount/premium of cost basis for this Mining Revenue
-                              Contract compared to buying BTC spot with&nbsp;
-                              {PAYMENT_TOKEN_NAME} now, if BTC price &amp; difficulty
-                              stays constant over 28 days.
+                              contract settles, if BTC price & difficulty stays constant
+                              over 28 days. <br />* <b>Revenue Cap</b> is the maximum
+                              amount of {COLLATERAL_TOKEN_NAME} you can receive when this
+                              contract settles, calculated as 125% of current MRI_BTC
+                              times 28. <br />* <b>Buy Contract vs. Buy BTC</b> is the
+                              discount/premium of cost basis for this Mining Revenue
+                              Contract compared to buying BTC spot with{" "}
+                              {PAYMENT_TOKEN_NAME} now, if BTC price & difficulty stays
+                              constant over 28 days.
                               <br />* Small discrepancy between your Budget and Contract
                               Total is due to available offers in orderbook, and minimum
                               order increment of 1TH.
@@ -797,7 +802,7 @@ const BuyContractPage: React.SFC = () => {
                         <TableCell colSpan={2}>
                           <Typography variant="subtitle1" style={{ paddingTop: 4 }}>
                             <Trans>WHAT DOES IT MEAN?</Trans>
-                          </Typography>&nbsp;
+                          </Typography>
                           <br />
                           <Typography
                             variant="body2"
@@ -805,18 +810,18 @@ const BuyContractPage: React.SFC = () => {
                             paragraph
                           >
                             <Trans>
-                              You will pay&nbsp;
+                              You will pay{" "}
                               <strong>
                                 {(orderValue || 0).toLocaleString(undefined, {
                                   maximumFractionDigits: PAYMENT_TOKEN_DECIMALS
-                                })}&nbsp;
+                                })}{" "}
                                 {PAYMENT_TOKEN_NAME}
-                              </strong>&nbsp;
-                              to buy&nbsp;
-                              <strong>{`${orderQuantity.toLocaleString()}`} TH</strong> of&nbsp;
-                              {CONTRACT_DURATION}-Day Mining Revenue Contracts at&nbsp;
+                              </strong>{" "}
+                              to buy{" "}
+                              <strong>{`${orderQuantity.toLocaleString()}`} TH</strong> of{" "}
+                              {CONTRACT_DURATION}-Day Mining Revenue Contracts at{" "}
                               <strong>
-                                {PAYMENT_TOKEN_NAME}&nbsp;
+                                {PAYMENT_TOKEN_NAME}{" "}
                                 {hashPrice.toLocaleString(undefined, {
                                   maximumFractionDigits: PAYMENT_TOKEN_DECIMALS
                                 })}
@@ -831,11 +836,11 @@ const BuyContractPage: React.SFC = () => {
                             paragraph
                           >
                             <Trans>
-                              At settlement, you will receive mining revenue (in&nbsp;
+                              At settlement, you will receive mining revenue (in{" "}
                               {COLLATERAL_TOKEN_NAME}) over {CONTRACT_DURATION} days,
                               which is the network average BTC block reward & transaction
                               fees (MRI_BTC) per TH over contract duration, up to a max
-                              revenue of&nbsp;
+                              revenue of{" "}
                               <strong>
                                 {`${(
                                   (expectedBTCAccrual || 0) * CONTRACT_COLLATERAL_RATIO
@@ -843,8 +848,8 @@ const BuyContractPage: React.SFC = () => {
                                   maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS
                                 })} ${COLLATERAL_TOKEN_NAME}`}
                                 .
-                              </strong>
-                              &nbsp; You can withdraw your mining revenue (in&nbsp;
+                              </strong>{" "}
+                              You can withdraw your mining revenue (in{" "}
                               {COLLATERAL_TOKEN_NAME}) after settlement.
                             </Trans>
                           </Typography>
@@ -855,14 +860,14 @@ const BuyContractPage: React.SFC = () => {
                           >
                             <Trans>
                               You will receive the network average BTC block reward &
-                              transaction fees per TH based on the average value of the&nbsp;
+                              transaction fees per TH based on the average value of the{" "}
                               <Link
                                 href="#"
                                 onClick={() => setShowMRIInformationModal(true)}
                               >
-                                Bitcoin Mining Revenue Index (MRI_BTC)&nbsp;
+                                Bitcoin Mining Revenue Index (MRI_BTC){" "}
                                 <Info fontSize="small" />
-                              </Link>&nbsp;
+                              </Link>{" "}
                               over {CONTRACT_DURATION} days starting today.
                             </Trans>
                           </Typography>
@@ -873,14 +878,14 @@ const BuyContractPage: React.SFC = () => {
                           >
                             <Trans>
                               You may check your PNL from your Portfolio once order is
-                              placed. You can withdraw your mining revenue denominated in&nbsp;
-                              {COLLATERAL_TOKEN_NAME} after&nbsp;
+                              placed. You can withdraw your mining revenue denominated in{" "}
+                              {COLLATERAL_TOKEN_NAME} after{" "}
                               {dayjs()
                                 .utc()
                                 .startOf("day")
                                 .add(1, "minute")
                                 .add(CONTRACT_DURATION + 1, "d")
-                                .format("YYYY/MM/DD HH:mm")}&nbsp;
+                                .format("YYYY/MM/DD HH:mm")}{" "}
                               UTC.
                             </Trans>
                           </Typography>
@@ -918,7 +923,7 @@ const BuyContractPage: React.SFC = () => {
               !isValid || showBuyModal || orderValue === 0 || resultOrders.length === 0
             }
           >
-            <Trans>BUY NOW</Trans> &nbsp;
+            <Trans>BUY NOW</Trans>{" "}
             {showBuyModal && (
               <CircularProgress className={classes.loadingSpinner} size={20} />
             )}
@@ -955,7 +960,7 @@ const BuyContractPage: React.SFC = () => {
                       className={classes.button}
                       disabled={txActive}
                     >
-                      {getStepButtonLabel(activeStep)}&nbsp;
+                      {getStepButtonLabel(activeStep)}{" "}
                       {txActive && (
                         <CircularProgress className={classes.loadingSpinner} size={20} />
                       )}
