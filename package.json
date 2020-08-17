@@ -38,7 +38,8 @@
     "nohoist": [
       "**/truffle",
       "**/typechain",
-      "**/openzeppelin-solidity"
+      "**/openzeppelin-solidity",
+      "**/typescript"
     ]
   },
   "husky": {

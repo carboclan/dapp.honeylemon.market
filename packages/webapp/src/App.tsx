@@ -10,7 +10,7 @@ import config from "./contexts/HoneylemonConfig";
 import HoneyLemonApp from "./components/HoneyLemonApp";
 import { OnboardProvider } from "./contexts/OnboardContext";
 import { HoneylemonProvider } from "./contexts/HoneylemonContext";
-import catalogEn from "./locales/en/messages.js";
+import { messages as catalogEn } from "./locales/en/messages.js";
 import { i18n } from "@lingui/core";
 
 const validNetworks = Object.keys(config).map(network => Number(network));

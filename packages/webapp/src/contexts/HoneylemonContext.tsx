@@ -7,7 +7,7 @@ import {
   OrderbookService,
   COLLATERAL_TOKEN_DECIMALS,
   PAYMENT_TOKEN_DECIMALS
-} from "@honeylemon/honeylemonjs/lib/src";
+} from "@honeylemon/honeylemonjs";
 import { useOnboard } from "./OnboardContext";
 import { ethers } from "ethers";
 import dayjs from "dayjs";
@@ -15,7 +15,6 @@ import utc from "dayjs/plugin/utc";
 import { BigNumber } from "@0x/utils";
 import * as Sentry from "@sentry/react";
 
-import { networkName } from "../helpers/ethereumNetworkUtils";
 import config from "./HoneylemonConfig";
 
 dayjs.extend(utc);

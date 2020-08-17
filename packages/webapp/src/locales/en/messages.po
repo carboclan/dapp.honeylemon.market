@@ -154,7 +154,7 @@ msgstr "Buy {CONTRACT_DURATION}-Day Mining Revenue Contract"
 msgid "Buyers and sellers may withdraw their settlement value after settlement."
 msgstr "Buyers and sellers may withdraw their settlement value after settlement."
 
-#: src/components/ConnectWalletButton.tsx:56
+#: src/components/ConnectWalletButton.tsx:57
 msgid "CONNECT WALLET TO TRADE"
 msgstr "CONNECT WALLET TO TRADE"
 
