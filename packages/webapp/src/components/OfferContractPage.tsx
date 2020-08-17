@@ -36,7 +36,7 @@ import dayjs from "dayjs";
 import AboutHoneylemonContractModal from "./AboutHoneylemonContractModal";
 import * as Sentry from "@sentry/react";
 import { t, Trans } from "@lingui/macro";
-import { i18n } from "../App";
+import { useLingui } from "@lingui/react";
 
 const useStyles = makeStyles(({ spacing, palette, transitions }) => ({
   rightAlign: {
@@ -102,6 +102,7 @@ const useStyles = makeStyles(({ spacing, palette, transitions }) => ({
 }));
 
 const OfferContractPage: React.SFC = () => {
+  const { i18n } = useLingui();
   const {
     honeylemonService,
     COLLATERAL_TOKEN_DECIMALS,
@@ -161,11 +162,18 @@ const OfferContractPage: React.SFC = () => {
         })
       );
 
-      const quote = await honeylemonService?.getQuoteForSize(new BigNumber(startingQuantity));
+      const quote = await honeylemonService?.getQuoteForSize(
+        new BigNumber(startingQuantity)
+      );
 
       const startingPrice =
         Number(quote?.remainingMakerFillAmount?.toString() || -1) === 0
-          ? Number(quote?.price.dividedBy(CONTRACT_DURATION).decimalPlaces(PAYMENT_TOKEN_DECIMALS).toString())
+          ? Number(
+              quote?.price
+                .dividedBy(CONTRACT_DURATION)
+                .decimalPlaces(PAYMENT_TOKEN_DECIMALS)
+                .toString()
+            )
           : mriPrice;
 
       setHashPrice(startingPrice);
@@ -456,7 +464,7 @@ const OfferContractPage: React.SFC = () => {
           <Typography variant="caption">
             <Trans>
               Enter your limit order. Make sure sufficient {COLLATERAL_TOKEN_NAME} (for
-              collateral) &amp; ETH (for Ethereum gas fees) is in your wallet.
+              collateral) & ETH (for Ethereum gas fees) is in your wallet.
             </Trans>
           </Typography>
         </Grid>
@@ -530,7 +538,7 @@ const OfferContractPage: React.SFC = () => {
                     <br />
                   </TableCell>
                   <TableCell align="right">
-                    <Trans>{CONTRACT_DURATION} Days</Trans>
+                    {CONTRACT_DURATION} <Trans>Days</Trans>
                   </TableCell>
                 </TableRow>
                 <TableRow>
@@ -554,9 +562,9 @@ const OfferContractPage: React.SFC = () => {
                     <TableCell colSpan={2}>
                       <Typography variant="caption" color="secondary">
                         <Trans>
-                          Suggest to increase your contract total to above 100&nbsp;
+                          Suggest to increase your contract total to above 100{" "}
                           {PAYMENT_TOKEN_NAME} due to recent high fees in ethereum
-                          network. See&nbsp;
+                          network. See{" "}
                           <Link
                             href="https://docs.honeylemon.market/fees"
                             target="_blank"
@@ -578,8 +586,7 @@ const OfferContractPage: React.SFC = () => {
                   <TableCell align="right" className={classes.offerSummaryEstimate}>
                     {`${collateralAmount.toLocaleString(undefined, {
                       maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS
-                    })} ${COLLATERAL_TOKEN_NAME}`}
-                    &nbsp;
+                    })} ${COLLATERAL_TOKEN_NAME}`}{" "}
                     <br />
                   </TableCell>
                 </TableRow>
@@ -631,7 +638,7 @@ const OfferContractPage: React.SFC = () => {
                         <Trans>Expiration</Trans>
                       </TableCell>
                       <TableCell align="right">
-                        <Trans>{`${CONTRACT_DURATION} Days After Start`}</Trans>
+                        {CONTRACT_DURATION} <Trans>Days After Start</Trans>
                       </TableCell>
                     </TableRow>
                     <TableRow>
@@ -654,15 +661,14 @@ const OfferContractPage: React.SFC = () => {
                       <TableCell colSpan={2} style={{ color: "#a9a9a9" }}>
                         <Typography variant="subtitle1" style={{ paddingTop: 4 }}>
                           <Trans>WHAT DOES IT MEAN?</Trans>
-                        </Typography>
-                        &nbsp;
+                        </Typography>{" "}
                         <br />
                         <Typography variant="body2" paragraph>
                           <Trans>
-                            You are offering <strong>{hashAmount} TH</strong> of&nbsp;
-                            {CONTRACT_DURATION}-Day Mining Revenue Contract at&nbsp;
+                            You are offering <strong>{hashAmount} TH</strong> of{" "}
+                            {CONTRACT_DURATION}-Day Mining Revenue Contract at{" "}
                             <strong>
-                              {PAYMENT_TOKEN_NAME}&nbsp;
+                              {PAYMENT_TOKEN_NAME}{" "}
                               {hashPrice.toLocaleString(undefined, {
                                 maximumFractionDigits: PAYMENT_TOKEN_DECIMALS
                               })}
@@ -673,38 +679,35 @@ const OfferContractPage: React.SFC = () => {
                         </Typography>
                         <Typography variant="body2" paragraph>
                           <Trans>
-                            You need to have at least&nbsp;
+                            You need to have at least{" "}
                             <strong>
                               {collateralAmount.toLocaleString(undefined, {
                                 maximumFractionDigits: COLLATERAL_TOKEN_DECIMALS
-                              })}
-                              &nbsp;
+                              })}{" "}
                               {COLLATERAL_TOKEN_NAME}
-                            </strong>
-                            &nbsp; in your wallet balance now, and approve Honeylemon
-                            smart contract to access your {COLLATERAL_TOKEN_NAME} in your
-                            wallet as collateral to list your offer. You may cancel your
-                            offer from your Portfolio anytime prior to it being filled. As
-                            soon as your order is filled, your approved collateral will be
+                            </strong>{" "}
+                            in your wallet balance now, and approve Honeylemon smart
+                            contract to access your {COLLATERAL_TOKEN_NAME} in your wallet
+                            as collateral to list your offer. You may cancel your offer
+                            from your Portfolio anytime prior to it being filled. As soon
+                            as your order is filled, your approved collateral will be
                             automatically deposited, you will receive payment in{" "}
-                            {PAYMENT_TOKEN_NAME}
-                            &nbsp; immediately and the contract will start.
+                            {PAYMENT_TOKEN_NAME} immediately and the contract will start.
                           </Trans>
                         </Typography>
                         <Typography variant="body2" paragraph>
                           <Trans>
                             At the end of <strong>{CONTRACT_DURATION} days</strong> your
                             counterparty will receive the network average BTC block reward
-                            & transaction fees per TH based on the average value of
-                            the&nbsp;
+                            & transaction fees per TH based on the average value of the{" "}
                             <Link
                               href="#"
                               onClick={() => setShowMRIInformationModal(true)}
                             >
-                              Bitcoin Mining Revenue Index (MRI_BTC)&nbsp;
+                              Bitcoin Mining Revenue Index (MRI_BTC){" "}
                               <Info fontSize="small" />
-                            </Link>
-                            &nbsp; over {CONTRACT_DURATION} days up to a&nbsp;
+                            </Link>{" "}
+                            over {CONTRACT_DURATION} days up to a{" "}
                             <strong>max capped by your collateral</strong>.
                           </Trans>
                         </Typography>
@@ -744,7 +747,7 @@ const OfferContractPage: React.SFC = () => {
             onClick={handleStartOffer}
             disabled={hashAmount === 0 || !sufficientCollateral || showOfferModal}
           >
-            <Trans>OFFER LIMIT ORDER</Trans> &nbsp;
+            <Trans>OFFER LIMIT ORDER</Trans>{" "}
             {showOfferModal && (
               <CircularProgress className={classes.loadingSpinner} size={20} />
             )}
@@ -764,7 +767,9 @@ const OfferContractPage: React.SFC = () => {
         maxWidth="sm"
         fullWidth
       >
-        <DialogTitle id="form-dialog-title"><Trans>Create Offer</Trans></DialogTitle>
+        <DialogTitle id="form-dialog-title">
+          <Trans>Create Offer</Trans>
+        </DialogTitle>
         <DialogContent>
           <Stepper activeStep={activeStep} orientation="vertical">
             {steps.map((label, index) => (
@@ -781,7 +786,7 @@ const OfferContractPage: React.SFC = () => {
                       className={classes.button}
                       disabled={txActive}
                     >
-                      {getStepButtonLabel(activeStep)}&nbsp;
+                      {getStepButtonLabel(activeStep)}{" "}
                       {txActive && (
                         <CircularProgress className={classes.loadingSpinner} size={20} />
                       )}
