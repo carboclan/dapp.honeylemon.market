@@ -20,6 +20,7 @@ import MRIDisplay from "./MRIDisplay";
 import { OpenInNew } from "@material-ui/icons";
 import clsx from "clsx";
 import { forwardTo } from "../helpers/history";
+import { Trans } from "@lingui/macro";
 
 SL(Highcharts);
 
@@ -83,7 +84,7 @@ const MiningStatsPage: React.SFC = () => {
       style: {
         fontFamily: '"Roboto", Helvetica, Arial, sans-serif'
       },
-      height: 300,
+      height: 300
     },
     yAxis: [
       {
@@ -136,7 +137,7 @@ const MiningStatsPage: React.SFC = () => {
         },
         dataLabels: {
           enabled: true,
-          formatter: function () {
+          formatter: function() {
             // @ts-ignore
             return this.point.desc + "<br/>" + Highcharts.numberFormat(this.y || 0, 4);
           },
@@ -148,20 +149,44 @@ const MiningStatsPage: React.SFC = () => {
     tooltip: {
       useHTML: true,
       style: {
-        pointerEvents: 'auto'
+        pointerEvents: "auto"
       },
       formatter() {
         //@ts-ignore
         return `${this.point.desc}<br/> Best Price: $${this.y.toFixed(4)}/TH/Day<br/>
-        `}
+        `;
+      }
     },
     series: [
       {
         name: "",
         type: "line",
+        yAxis: 0,
+        tooltip: {
+          valueDecimals: 4,
+          valueSuffix: `$/TH/Day`
+        },
+        dataLabels: { enabled: true },
+        data: [
+          {
+            x: Date.now() + 28 * 1000 * 86400,
+            y: bestHoneylemonPrice,
+            //@ts-ignore
+            desc: "honeylemon"
+          }
+        ],
+        marker: {
+          symbol: "url(favicon.ico)",
+          width: 16,
+          height: 16
+        }
+      },
+      {
+        name: "",
+        type: "line",
         color: "#FFF",
         yAxis: 0,
-        dataLabels: { style: { color: 'white' } },
+        dataLabels: { style: { color: "white" } },
         tooltip: {
           valueDecimals: 4,
           valueSuffix: `$/TH/Day`
@@ -186,7 +211,7 @@ const MiningStatsPage: React.SFC = () => {
           valueDecimals: 4,
           valueSuffix: `$/TH/Day`
         },
-        dataLabels: { style: { color: 'white' } },
+        dataLabels: { style: { color: "white" } },
         data: [
           ...miningContracts
             .filter(c => c.issuer === "FTX")
@@ -197,29 +222,6 @@ const MiningStatsPage: React.SFC = () => {
               desc: `FTX ${c.durationAlias}`
             }))
         ]
-      },
-      {
-        name: "",
-        type: "line",
-        yAxis: 0,
-        tooltip: {
-          valueDecimals: 4,
-          valueSuffix: `$/TH/Day`
-        },
-        dataLabels: { enabled: true },
-        data: [
-          {
-            x: Date.now() + 28 * 1000 * 86400,
-            y: bestHoneylemonPrice,
-            //@ts-ignore
-            desc: "honeylemon"
-          }
-        ],
-        marker: {
-          symbol: "url(favicon.ico)",
-          width: 16,
-          height: 16
-        }
       },
       {
         name: "MRI_BTC",
@@ -248,7 +250,7 @@ const MiningStatsPage: React.SFC = () => {
     <Grid container direction="column" spacing={2}>
       <Grid item xs={12}>
         <Typography variant="h6" className={classes.pageHeader}>
-          Bitcoin Mining Live Stats
+          <Trans>Bitcoin Mining Live Stats</Trans>
         </Typography>
       </Grid>
       <Grid item xs={12}>
@@ -257,9 +259,13 @@ const MiningStatsPage: React.SFC = () => {
             <TableBody>
               <TableRow>
                 <TableCell>
-                  <Typography variant="caption">BTC Price</Typography>
+                  <Typography variant="caption">
+                    <Trans>BTC Price</Trans>
+                  </Typography>
                   <br />
-                  <Typography variant="caption">24h Chg%</Typography>
+                  <Typography variant="caption">
+                    <Trans>24h Chg%</Trans>
+                  </Typography>
                 </TableCell>
                 <TableCell align="right">
                   <Typography variant="caption">
@@ -286,11 +292,17 @@ const MiningStatsPage: React.SFC = () => {
               </TableRow>
               <TableRow>
                 <TableCell>
-                  <Typography variant="caption">Difficulty</Typography>
+                  <Typography variant="caption">
+                    <Trans>Difficulty</Trans>
+                  </Typography>
                   <br />
-                  <Typography variant="caption">Last Adj Chg%</Typography>
+                  <Typography variant="caption">
+                    <Trans>Last Adj Chg%</Trans>
+                  </Typography>
                   <br />
-                  <Typography variant="caption">Next Adj Date</Typography>
+                  <Typography variant="caption">
+                    <Trans>Next Adj Date</Trans>
+                  </Typography>
                 </TableCell>
                 <TableCell align="right">
                   <Typography variant="caption">
@@ -308,9 +320,9 @@ const MiningStatsPage: React.SFC = () => {
                   >
                     {`${
                       difficultyChange > 0 ? "+" : ""
-                      } ${difficultyChange.toLocaleString(undefined, {
-                        maximumFractionDigits: 1
-                      })}`}
+                    } ${difficultyChange.toLocaleString(undefined, {
+                      maximumFractionDigits: 1
+                    })}`}
                     %
                   </Typography>
                   <br />
@@ -321,20 +333,24 @@ const MiningStatsPage: React.SFC = () => {
               </TableRow>
               <TableRow>
                 <TableCell>
-                  <Typography variant="caption">24h Hashrate</Typography>
+                  <Typography variant="caption">
+                    <Trans>24h Hashrate</Trans>
+                  </Typography>
                 </TableCell>
                 <TableCell align="right">
                   <Typography variant="caption">
                     {(btcStats?.hashrate24h / 10 ** 9).toLocaleString(undefined, {
                       maximumFractionDigits: 0
                     })}{" "}
-                    TH{" "}
+                    TH
                   </Typography>
                 </TableCell>
               </TableRow>
               <TableRow>
                 <TableCell>
-                  <Typography variant="caption">24h Mining Revenue</Typography>
+                  <Typography variant="caption">
+                    <Trans>24h Mining Revenue</Trans>
+                  </Typography>
                 </TableCell>
                 <TableCell align="right">
                   <Typography variant="caption">
@@ -348,7 +364,9 @@ const MiningStatsPage: React.SFC = () => {
               </TableRow>
               <TableRow>
                 <TableCell>
-                  <Typography variant="caption">% Block Rewards</Typography>
+                  <Typography variant="caption">
+                    <Trans>% Block Rewards</Trans>
+                  </Typography>
                 </TableCell>
                 <TableCell align="right">
                   <Typography variant="caption">
@@ -362,7 +380,9 @@ const MiningStatsPage: React.SFC = () => {
               </TableRow>
               <TableRow>
                 <TableCell>
-                  <Typography variant="caption">% Transaction Fee</Typography>
+                  <Typography variant="caption">
+                    <Trans>% Transaction Fee</Trans>
+                  </Typography>
                 </TableCell>
                 <TableCell align="right">
                   <Typography variant="caption">
@@ -389,7 +409,9 @@ const MiningStatsPage: React.SFC = () => {
           <TableBody>
             <TableRow>
               <TableCell className={classes.heading}>
-                <strong>Spot Market</strong>
+                <strong>
+                  <Trans>Spot Market</Trans>
+                </strong>
               </TableCell>
               <TableCell style={{ width: 50 }}>
                 <strong>($/TH/Day)</strong>
@@ -474,7 +496,9 @@ const MiningStatsPage: React.SFC = () => {
               ))}
             <TableRow>
               <TableCell className={classes.heading}>
-                <strong>Futures Market</strong>
+                <strong>
+                  <Trans>Futures Market</Trans>
+                </strong>
               </TableCell>
               <TableCell style={{ width: 50 }}>
                 <strong>($/TH/Day)</strong>
@@ -489,11 +513,12 @@ const MiningStatsPage: React.SFC = () => {
                   <TableCell>{`${mc.issuer} ${mc.id}`}</TableCell>
                   <TableCell>
                     ${" "}
-                    {(
-                      mc.contract_cost_btc * currentBTCSpotPrice
-                    ).toLocaleString(undefined, {
-                      maximumFractionDigits: PAYMENT_TOKEN_DECIMALS
-                    })}
+                    {(mc.contract_cost_btc * currentBTCSpotPrice).toLocaleString(
+                      undefined,
+                      {
+                        maximumFractionDigits: PAYMENT_TOKEN_DECIMALS
+                      }
+                    )}
                   </TableCell>
                   <TableCell style={{ width: 50 }} align="right">
                     <Link
@@ -509,15 +534,18 @@ const MiningStatsPage: React.SFC = () => {
               ))}
             <TableRow>
               <TableCell colSpan={3}>
-                <Typography variant='caption'  style={{ color: "#a9a9a9" }}>
-                  FTX hashrate futures are instrument on difficulty, price shown is implied.
+                <Typography variant="caption" style={{ color: "#a9a9a9" }}>
+                  <Trans>
+                    FTX hashrate futures are instrument on difficulty, price shown is
+                    implied.
+                  </Trans>
                 </Typography>
               </TableCell>
             </TableRow>
           </TableBody>
         </Table>
         <Grid item xs={12} style={{ paddingTop: 16 }}>
-          Go to aggregator:{" "}
+          <Trans>Go to aggregator:</Trans>{" "}
           <Link
             href={`https://honeylemon.market/`}
             target="_blank"

@@ -7,7 +7,8 @@ import {
   Link
 } from "@material-ui/core";
 import { useOnboard } from "../contexts/OnboardContext";
-import { OpenInBrowser, OpenInNew } from "@material-ui/icons";
+import { OpenInNew } from "@material-ui/icons";
+import { Trans } from "@lingui/macro";
 
 const useStyles = makeStyles(({ palette, spacing }) => ({
   button: {
@@ -48,8 +49,12 @@ const ConnectWalletButton: React.SFC = () => {
             href="https://docs.honeylemon.market/audit-report"
             target="_blank"
             rel="noopener"
-            color="secondary">
-            ⚠️ This project is in Alpha, use at your own risk. View audit report. &nbsp;
+            color="secondary"
+          >
+            <Trans>
+              ⚠️ This project is in Alpha, use at your own risk. View audit report.
+            </Trans>
+            &nbsp;
             <OpenInNew fontSize="small" />
           </Link>
         </Typography>
@@ -61,8 +66,10 @@ const ConnectWalletButton: React.SFC = () => {
           }}
           className={classes.button}
           fullWidth
-          disabled={!onboard || isConnecting}>
-          CONNECT WALLET TO TRADE&nbsp;
+          disabled={!onboard || isConnecting}
+        >
+          <Trans>CONNECT WALLET TO TRADE</Trans>
+          &nbsp;
           {isConnecting && (
             <CircularProgress className={classes.loadingSpinner} size={20} />
           )}
