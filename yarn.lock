@@ -11200,10 +11200,10 @@ highcharts-react-official@3.0.0:
   resolved "https://registry.yarnpkg.com/highcharts-react-official/-/highcharts-react-official-3.0.0.tgz#f2e81ed59d299c3473a0dd5ba5df24028875226a"
   integrity sha512-VefJgDY2hkT9gfppsQGrRF2g5u8d9dtfHGcx2/xqiP+PkZXCqalw9xOeKVCRvJKTOh0coiDFwvVjOvB7KaGl4A==
 
-highcharts@8.1.0:
-  version "8.1.0"
-  resolved "https://registry.yarnpkg.com/highcharts/-/highcharts-8.1.0.tgz#f93adaf8d53b0f83c74c9854f0ad10baec010d97"
-  integrity sha512-4KXq9t2/PU0cqKUtET7om9Kh5AyOinIn4vYi62oYVsb4ql5wyUYW06f9Si/ERG2Thoy/rcwNmR77upKjg8xhqQ==
+highcharts@8.2.0:
+  version "8.2.0"
+  resolved "https://registry.yarnpkg.com/highcharts/-/highcharts-8.2.0.tgz#3d4893015caf1a7c9ed85284d983911e844649f3"
+  integrity sha512-s3R7UEaMWUDJNxFfdjuiOtI8rnSvhEZUNN4TA7LiDRc9Tw7DUKvTv5WXSTYzxojokLbybwwlf9t3jg/meAUTnQ==
 
 highlight.js@^9.12.0, highlight.js@^9.15.8:
   version "9.18.1"
@@ -19119,11 +19119,6 @@ rustbn.js@~0.2.0:
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/rustbn.js/-/rustbn.js-0.2.0.tgz#8082cb886e707155fd1cb6f23bd591ab8d55d0ca"
   integrity sha512-4VlvkRUuCJvr2J6Y0ImW7NvTCriMi7ErOAqWk1y69vAdoNIzCF3yPmgeNzx+RQTLEDFq5sHfscn1MwHxP9hNfA==
-
-rx@^4.1.0:
-  version "4.1.0"
-  resolved "https://registry.yarnpkg.com/rx/-/rx-4.1.0.tgz#a5f13ff79ef3b740fe30aa803fb09f98805d4782"
-  integrity sha1-pfE/957zt0D+MKqAP7CfmIBdR4I=
 
 rxjs@^6.4.0, rxjs@^6.5.2, rxjs@^6.5.3, rxjs@^6.5.4:
   version "6.5.5"
