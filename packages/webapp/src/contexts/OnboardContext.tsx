@@ -161,8 +161,6 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
   useEffect(() => {
     const initializeNotify = async () => {
       if (network && !notify) {
-        debugger;
-        //@ts-ignore
         const notify = Notify({
           dappId: onboardProps.dappId,
           networkId: network,
@@ -176,11 +174,11 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
   }, [network]);
 
   //TODO: Enable once Blocknative update notifyjs
-  // useEffect(() => {
-  //   if (notify && network) {
-  //     notify.config({ networkId: network });
-  //   }
-  // }, [network]);
+  useEffect(() => {
+    if (notify && network) {
+      notify.config({ networkId: network });
+    }
+  }, [network]);
 
   useEffect(() => {
     if (address && notify) {
