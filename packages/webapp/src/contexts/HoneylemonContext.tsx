@@ -7,7 +7,7 @@ import {
   OrderbookService,
   COLLATERAL_TOKEN_DECIMALS,
   PAYMENT_TOKEN_DECIMALS
-} from "@honeylemon/honeylemonjs/lib/src";
+} from "@honeylemon/honeylemonjs";
 import { useOnboard } from "./OnboardContext";
 import { ethers } from "ethers";
 import dayjs from "dayjs";
@@ -15,7 +15,6 @@ import utc from "dayjs/plugin/utc";
 import { BigNumber } from "@0x/utils";
 import * as Sentry from "@sentry/react";
 
-import { networkName } from "../helpers/ethereumNetworkUtils";
 import config from "./HoneylemonConfig";
 
 dayjs.extend(utc);
@@ -370,7 +369,7 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
 
   // Instantiate honeylemon service and get all initial user data
   useEffect(() => {
-    setContractDuration(Number(process.env.REACT_APP_CONTRACT_DURATION));
+    setContractDuration(config[network || validNetworks[0]].contractDuration);
     if (isReady && wallet && network && validNetworks.includes(network) && address) {
       const initHoneylemonService = async () => {
         try {
@@ -404,10 +403,16 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
           setCollateralTokenAllowance(
             Number(collateral.allowance.shiftedBy(-COLLATERAL_TOKEN_DECIMALS).toString())
           );
-          setCollateralTokenBalance(Number(collateral.balance.shiftedBy(-COLLATERAL_TOKEN_DECIMALS).toString()));
+          setCollateralTokenBalance(
+            Number(collateral.balance.shiftedBy(-COLLATERAL_TOKEN_DECIMALS).toString())
+          );
           const payment = await honeylemonService.getPaymentTokenAmounts(address);
-          setPaymentTokenAllowance(Number(payment.allowance.shiftedBy(-PAYMENT_TOKEN_DECIMALS).toString()));
-          setPaymentTokenBalance(Number(payment.balance.shiftedBy(-PAYMENT_TOKEN_DECIMALS).toString()));
+          setPaymentTokenAllowance(
+            Number(payment.allowance.shiftedBy(-PAYMENT_TOKEN_DECIMALS).toString())
+          );
+          setPaymentTokenBalance(
+            Number(payment.balance.shiftedBy(-PAYMENT_TOKEN_DECIMALS).toString())
+          );
           const proxyDeployed: boolean = await honeylemonService.addressHasDSProxy(
             address
           );
@@ -433,7 +438,6 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
         setPaymentTokenBalance(0);
         setIsDsProxyDeployed(false);
         setDsProxyAddress("");
-        notify?.unsubscribe(address || "0x");
       };
     }
   }, [wallet, network, isReady, address]);
@@ -579,11 +583,19 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
     const checkBalancesAndApprovals = async () => {
       if (!honeylemonService) return;
       const collateral = await honeylemonService.getCollateralTokenAmounts(address);
-      setCollateralTokenAllowance(Number(collateral.allowance.shiftedBy(-COLLATERAL_TOKEN_DECIMALS).toString()));
-      setCollateralTokenBalance(Number(collateral.balance.shiftedBy(-COLLATERAL_TOKEN_DECIMALS).toString()));
+      setCollateralTokenAllowance(
+        Number(collateral.allowance.shiftedBy(-COLLATERAL_TOKEN_DECIMALS).toString())
+      );
+      setCollateralTokenBalance(
+        Number(collateral.balance.shiftedBy(-COLLATERAL_TOKEN_DECIMALS).toString())
+      );
       const payment = await honeylemonService.getPaymentTokenAmounts(address);
-      setPaymentTokenAllowance(Number(payment.allowance.shiftedBy(-PAYMENT_TOKEN_DECIMALS).toString()));
-      setPaymentTokenBalance(Number(payment.balance.shiftedBy(-PAYMENT_TOKEN_DECIMALS).toString()));
+      setPaymentTokenAllowance(
+        Number(payment.allowance.shiftedBy(-PAYMENT_TOKEN_DECIMALS).toString())
+      );
+      setPaymentTokenBalance(
+        Number(payment.balance.shiftedBy(-PAYMENT_TOKEN_DECIMALS).toString())
+      );
     };
     if (honeylemonService && address) {
       checkBalancesAndApprovals();

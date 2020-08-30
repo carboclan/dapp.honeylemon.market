@@ -56,7 +56,7 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
     const initializeOnboard = async () => {
       try {
         const montserrat = new FontFaceObserver("Montserrat");
-        await montserrat.load(undefined);
+        await montserrat.load(undefined, 10000);
 
         const onboard = Onboard({
           dappId: onboardProps.dappId,
@@ -160,8 +160,7 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
 
   useEffect(() => {
     const initializeNotify = async () => {
-      if (network) {
-        //@ts-ignore
+      if (network && !notify) {
         const notify = Notify({
           dappId: onboardProps.dappId,
           networkId: network,
@@ -172,14 +171,13 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
       }
     };
     initializeNotify();
-  }, []);
+  }, [network]);
 
-  //TODO: Enable once Blocknative update notifyjs
-  // useEffect(() => {
-  //   if (notify && network) {
-  //     notify.config({ networkId: network });
-  //   }
-  // }, [network]);
+  useEffect(() => {
+    if (notify && network) {
+      notify.config({ networkId: network });
+    }
+  }, [network]);
 
   useEffect(() => {
     if (address && notify) {
@@ -197,7 +195,7 @@ function OnboardProvider({ children, ...onboardProps }: OnboardProviderProps) {
         notify?.unsubscribe(address);
       }
     };
-  }, [network, address]);
+  }, [network, address, notify]);
 
   useEffect(() => {
     const setUserScope = () => {
