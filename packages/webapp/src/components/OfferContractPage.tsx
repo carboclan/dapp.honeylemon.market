@@ -118,8 +118,7 @@ const OfferContractPage: React.SFC = () => {
     PAYMENT_TOKEN_DECIMALS,
     deployDSProxyContract,
     approveToken,
-    setShowTokenInfoModal,
-    orderbook
+    setShowTokenInfoModal
   } = useHoneylemon();
   const { address = "0x" } = useOnboard();
   const classes = useStyles();

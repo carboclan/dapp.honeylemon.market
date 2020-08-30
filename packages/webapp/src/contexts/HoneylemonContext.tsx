@@ -369,8 +369,8 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
 
   // Instantiate honeylemon service and get all initial user data
   useEffect(() => {
+    setContractDuration(config[network || validNetworks[0]].contractDuration);
     if (isReady && wallet && network && validNetworks.includes(network) && address) {
-      setContractDuration(config[network].contractDuration);
       const initHoneylemonService = async () => {
         try {
           let wrappedSubprovider;
@@ -438,7 +438,6 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
         setPaymentTokenBalance(0);
         setIsDsProxyDeployed(false);
         setDsProxyAddress("");
-        notify?.unsubscribe(address || "0x");
       };
     }
   }, [wallet, network, isReady, address]);
