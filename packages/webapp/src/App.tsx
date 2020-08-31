@@ -2,7 +2,6 @@ import React, { useEffect } from "react";
 import theme from "./theme";
 import { MuiThemeProvider, CssBaseline } from "@material-ui/core";
 import { Router } from "react-router-dom";
-import { I18nProvider } from "@lingui/react";
 import ScrollToTop from "./helpers/scrollToTop";
 import history from "./helpers/history";
 import { initHotjar } from "./helpers/hotjar";
@@ -10,14 +9,8 @@ import config from "./contexts/HoneylemonConfig";
 import HoneyLemonApp from "./components/HoneyLemonApp";
 import { OnboardProvider } from "./contexts/OnboardContext";
 import { HoneylemonProvider } from "./contexts/HoneylemonContext";
-import { messages as catalogEn } from "./locales/en/messages.js";
-import { i18n } from "@lingui/core";
-
+import { LanguageSwitcherProvider } from "./contexts/LanguageSwitcherContext";
 const validNetworks = Object.keys(config).map(network => Number(network));
-
-//@ts-ignore
-i18n.load("en", catalogEn);
-i18n.activate("en");
 
 function App() {
   const onboardInit = {
@@ -32,7 +25,7 @@ function App() {
   return (
     <MuiThemeProvider theme={theme}>
       <Router history={history}>
-        <I18nProvider i18n={i18n}>
+        <LanguageSwitcherProvider>
           <ScrollToTop>
             <CssBaseline />
             <OnboardProvider {...onboardInit}>
@@ -41,7 +34,7 @@ function App() {
               </HoneylemonProvider>
             </OnboardProvider>
           </ScrollToTop>
-        </I18nProvider>
+        </LanguageSwitcherProvider>
       </Router>
     </MuiThemeProvider>
   );
