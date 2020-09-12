@@ -64,7 +64,6 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "analyze": "source-map-explorer 'build/static/js/*.js'",
-    "add-locale": "lingui add-locale",
     "extract": "lingui extract",
     "compile": "lingui compile"
   },
