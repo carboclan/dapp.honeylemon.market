@@ -429,7 +429,7 @@ msgstr "Miners can make offers and cancel before the listed offer is filled.<0/>
 
 #: src/components/HomePage.tsx:70
 msgid "Mining Market Live Stats"
-msgstr "Mining Market Live Stats"
+msgstr "Статисьтики Рынка"
 
 #: src/components/DifficultyAdjustmentCountdown.tsx:109
 msgid "Mins"

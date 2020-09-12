@@ -1,17 +1,22 @@
 import React, { useState, useEffect } from "react";
 import { i18n } from "@lingui/core";
 import { messages as catalogEn } from "../locales/en/messages.js";
-import { messages as catalogRu } from "../locales/ru/messages.js";
 import { I18nProvider } from "@lingui/react";
 
 export type LanguageSwitcherContext = {
-  availableLanguages: string[];
+  availableLanguages: Language[];
   selectedLanguage: string;
   setActiveLanguage(newLanguage: string): void | Promise<void>;
 };
 
-type LanguageSwitcherProvider = {
+type Language = {
+  id: string;
+  label: string;
+};
+
+type LanguageSwitcherProviderProps = {
   children: React.ReactNode | React.ReactNode[];
+  availableLanguages: Language[];
 };
 
 const LanguageSwitcherContext = React.createContext<LanguageSwitcherContext | undefined>(
@@ -38,17 +43,18 @@ const getLocales = (): string[] => {
   return ["en"];
 };
 
-const LanguageSwitcherProvider = ({ children }: LanguageSwitcherProvider) => {
-  const [availableLocales, setAvailableLocales] = useState<string[]>([]);
+const LanguageSwitcherProvider = ({
+  children,
+  availableLanguages
+}: LanguageSwitcherProviderProps) => {
   const [selectedLocale, setSelectedLocale] = useState<string>("");
 
   useEffect(() => {
     const userLocales = getLocales();
     // Add new wlanguages here
-    setAvailableLocales(["en", "ru"]);
 
     const matchingLocales = [...new Set(userLocales)].filter(x =>
-      new Set(availableLocales).has(x)
+      new Set(availableLanguages.map(l => l.id)).has(x)
     );
     const defaultLocale = matchingLocales[0] || "en";
     //@ts-ignore
@@ -58,7 +64,7 @@ const LanguageSwitcherProvider = ({ children }: LanguageSwitcherProvider) => {
   }, []);
 
   const setLanguage = async (newLanguage: string) => {
-    if (!availableLocales.includes(newLanguage)) {
+    if (!availableLanguages.map(l => l.id).includes(newLanguage)) {
       console.log("This locale is not available");
       return;
     }
@@ -72,7 +78,7 @@ const LanguageSwitcherProvider = ({ children }: LanguageSwitcherProvider) => {
   return (
     <LanguageSwitcherContext.Provider
       value={{
-        availableLanguages: availableLocales,
+        availableLanguages: availableLanguages,
         selectedLanguage: selectedLocale,
         setActiveLanguage: setLanguage
       }}

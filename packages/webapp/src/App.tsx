@@ -25,7 +25,12 @@ function App() {
   return (
     <MuiThemeProvider theme={theme}>
       <Router history={history}>
-        <LanguageSwitcherProvider>
+        <LanguageSwitcherProvider
+          availableLanguages={[
+            { id: "en", label: "English" },
+            { id: "ru", label: "Русский" }
+          ]}
+        >
           <ScrollToTop>
             <CssBaseline />
             <OnboardProvider {...onboardInit}>

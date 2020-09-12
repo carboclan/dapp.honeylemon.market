@@ -15,7 +15,9 @@ import {
   Avatar,
   Link,
   Button,
-  Switch
+  Switch,
+  Select,
+  MenuItem
 } from "@material-ui/core";
 import {
   Menu,
@@ -27,7 +29,9 @@ import {
   Whatshot,
   ExitToApp,
   Home,
-  Info
+  Info,
+  Label,
+  Language
 } from "@material-ui/icons";
 import Blockies from "react-blockies";
 
@@ -43,6 +47,7 @@ import { networkName } from "../helpers/ethereumNetworkUtils";
 import { displayAddress } from "../helpers/displayAddress";
 import { useLocation } from "react-router-dom";
 import * as Sentry from "@sentry/react";
+import { useLanguageSwitcher } from "../contexts/LanguageSwitcherContext";
 
 const drawerWidth = 300;
 const footerHeight = 150;
@@ -143,6 +148,11 @@ function AppWrapper(props: { children: ReactNode }) {
   const [txActive, setTxActive] = useState(false);
 
   const { isReady, address, network, ethBalance, resetOnboard, isMobile } = useOnboard();
+  const {
+    availableLanguages,
+    selectedLanguage,
+    setActiveLanguage
+  } = useLanguageSwitcher();
   const {
     isDsProxyDeployed,
     dsProxyAddress,
@@ -291,6 +301,28 @@ function AppWrapper(props: { children: ReactNode }) {
             )}
           </IconButton>
         </div>
+        <Divider />
+        <List>
+          <ListItem>
+            <ListItemIcon>
+              <Language />
+            </ListItemIcon>
+            <ListItemText primary="Language" />
+            <Select
+              onChange={e => {
+                //@ts-ignore
+                setActiveLanguage(e.target.value);
+              }}
+              value={selectedLanguage}
+            >
+              {availableLanguages.map(l => (
+                <MenuItem value={l.id} key={l.id}>
+                  {l.label}
+                </MenuItem>
+              ))}
+            </Select>
+          </ListItem>
+        </List>
         <Divider />
         <List>
           <ListItem
