@@ -29,8 +29,8 @@ const config: HoneylemonConfig = {
   42: {
     apiUrl: "https://api.hldev.net:3000/sra/v3/",
     subgraphUrl: "https://api.thegraph.com/subgraphs/name/carboclan/honeylemon-kovan",
-    collateralTokenAddress: "0xE2F58b9747e0b417C0D4c36390Ea40E1e064D592",
-    paymentTokenAddress: "0x3CE983761C26c2F36CB438a3B0103Aa72D43B299",
+    collateralTokenAddress: "0xd3a691c852cdb01e281545a27064741f0b7f6825",
+    paymentTokenAddress: "0x07de306ff27a2b630b1141956844eb1552b956b5",
     marketContractProxy: "0x3270070240747337Dbc27C7C7CD70D1921098eD2",
     minterBridgeAddress: "0xE874aD2963dc4BE26A69E6bA0112023aAD0Cd1c1",
     contractDuration: 28
