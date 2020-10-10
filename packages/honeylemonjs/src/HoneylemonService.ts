@@ -34,6 +34,7 @@ const PAYMENT_TOKEN_DECIMALS = 6; // USDT has 6 decimals
 const COLLATERAL_TOKEN_DECIMALS = 8; // wBTC has 8 decimals
 const SHIFT_PRICE_BY = TH_DECIMALS - PAYMENT_TOKEN_DECIMALS;
 const USDT_ADDRESS = "0xdAC17F958D2ee523a2206206994597C13D831ec7";
+const USDT_ADDRESS_KOVAN = "0x07de306FF27a2B630B1141956844eB1552B956B5";
 
 class HoneylemonService {
   subgraphClient: any;
@@ -366,7 +367,10 @@ class HoneylemonService {
         : new BigNumber(amount);
     const price = gasPrice ? Number(`${gasPrice}e9`) : undefined;
 
-    if (this.paymentTokenAddress.toLowerCase() == USDT_ADDRESS.toLowerCase()) {
+    if (
+      this.paymentTokenAddress.toLowerCase() == USDT_ADDRESS.toLowerCase() ||
+      this.paymentTokenAddress.toLowerCase() == USDT_ADDRESS_KOVAN.toLowerCase()
+    ) {
       // Hack for Tether approval not being compliant with ERC20
       const usdt = new web3.eth.Contract(TetherERC20.abi, this.paymentTokenAddress);
       usdt.setProvider(this.provider);

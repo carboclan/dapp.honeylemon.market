@@ -2,7 +2,6 @@ import React, { useEffect } from "react";
 import theme from "./theme";
 import { MuiThemeProvider, CssBaseline } from "@material-ui/core";
 import { Router } from "react-router-dom";
-import { I18nProvider } from "@lingui/react";
 import ScrollToTop from "./helpers/scrollToTop";
 import history from "./helpers/history";
 import { initHotjar } from "./helpers/hotjar";
