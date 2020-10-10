@@ -156,9 +156,12 @@ const OfferContractPage: React.SFC = () => {
       setHashAmount(startingQuantity);
 
       const mriPrice = Number(
-        (btcStats.mri * marketData.currentBTCSpotPrice).toLocaleString(undefined, {
-          maximumFractionDigits: PAYMENT_TOKEN_DECIMALS
-        })
+        (marketData.currentMRI * marketData.currentBTCSpotPrice).toLocaleString(
+          undefined,
+          {
+            maximumFractionDigits: PAYMENT_TOKEN_DECIMALS
+          }
+        )
       );
 
       const quote = await honeylemonService?.getQuoteForSize(
@@ -353,8 +356,8 @@ const OfferContractPage: React.SFC = () => {
   };
 
   const premiumOverMRI =
-    ((hashPrice - btcStats.mri * marketData.currentBTCSpotPrice) /
-      (btcStats.mri * marketData.currentBTCSpotPrice)) *
+    ((hashPrice - marketData.currentMRI * marketData.currentBTCSpotPrice) /
+      (marketData.currentMRI * marketData.currentBTCSpotPrice)) *
     100;
 
   return (
