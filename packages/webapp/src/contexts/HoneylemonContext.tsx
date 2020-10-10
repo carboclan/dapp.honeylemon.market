@@ -518,23 +518,23 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
             coingeckoResponse.bitcoin &&
             coingeckoResponse.bitcoin.usd &&
             setCurrentBTCSpotPrice(Number.parseFloat(coingeckoResponse.bitcoin.usd));
-          // const { contracts } = await (
-          //   await fetch(`${marketDataApiUrl}/blockchain/agg?coin=BTC`)
-          // ).json();
-          // const stats = await (
-          //   await fetch(`${marketDataApiUrl}/blockchain/stats`)
-          // ).json();
-          // setMiningContracts(
-          //   contracts.map((c: any) =>
-          //     c.type === "DIFFICULTY_FUTURES"
-          //       ? {
-          //           ...c,
-          //           duration: dayjs(c.expiry).diff(dayjs(), "d", true)
-          //         }
-          //       : c
-          //   )
-          // );
-          // setBtcStats(stats);
+          const { contracts } = await (
+            await fetch(`${marketDataApiUrl}/production/stats/agg?coin=BTC`)
+          ).json();
+          setMiningContracts(
+            contracts.map((c: any) =>
+              c.type === "DIFFICULTY_FUTURES"
+                ? {
+                    ...c,
+                    duration: dayjs(c.expiry).diff(dayjs(), "d", true)
+                  }
+                : c
+            )
+          );
+          const stats = await (
+            await fetch(`${marketDataApiUrl}/production/stats/btc`)
+          ).json();
+          setBtcStats(stats);
         }
       } catch (error) {
         console.log("There was an error getting the market data");
