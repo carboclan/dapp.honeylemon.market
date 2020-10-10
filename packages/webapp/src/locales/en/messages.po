@@ -114,7 +114,7 @@ msgstr "Available Offers"
 msgid "BTC Mining Revenue Contracts are bought and sold in {PAYMENT_TOKEN_NAME}."
 msgstr "BTC Mining Revenue Contracts are bought and sold in {PAYMENT_TOKEN_NAME}."
 
-#: src/components/MRIDisplay.tsx:20
+#: src/components/MRIDisplay.tsx:21
 msgid "BTC Mining Revenue Index (MRI_BTC)"
 msgstr "BTC Mining Revenue Index (MRI_BTC)"
 
@@ -163,7 +163,7 @@ msgstr "CONNECT WALLET TO TRADE"
 msgid "Cancel"
 msgstr "Cancel"
 
-#: src/components/UnfilledOfferModal.tsx:144
+#: src/components/UnfilledOfferModal.tsx:143
 msgid "Cancel Offer"
 msgstr "Cancel Offer"
 
@@ -189,7 +189,7 @@ msgstr "Complete Payment"
 
 #: src/components/BuyContractPage.tsx:496
 #: src/components/OfferContractPage.tsx:400
-#: src/components/UnfilledOfferModal.tsx:85
+#: src/components/UnfilledOfferModal.tsx:84
 msgid "Contract Duration"
 msgstr "Contract Duration"
 
@@ -224,7 +224,7 @@ msgstr "Contract Start"
 #: src/components/BuyContractPage.tsx:502
 #: src/components/OfferContractPage.tsx:409
 #: src/components/PortfolioPage.tsx:406
-#: src/components/UnfilledOfferModal.tsx:101
+#: src/components/UnfilledOfferModal.tsx:100
 msgid "Contract Total"
 msgstr "Contract Total"
 
@@ -279,7 +279,7 @@ msgstr "Description"
 msgid "Difficulty"
 msgstr "Difficulty"
 
-#: src/components/OrderbookModal.tsx:21
+#: src/components/OrderbookModal.tsx:27
 msgid "Duration (Days)"
 msgstr "Duration (Days)"
 
@@ -299,7 +299,7 @@ msgstr "Enter your limit order. Make sure sufficient {COLLATERAL_TOKEN_NAME} (fo
 msgid "Estimate:"
 msgstr "Estimate:"
 
-#: src/components/UnfilledOfferModal.tsx:112
+#: src/components/UnfilledOfferModal.tsx:111
 msgid "Estimated Collateral"
 msgstr "Estimated Collateral"
 
@@ -389,15 +389,15 @@ msgstr "If you place multiple orders or use it more than once, create Honeylemon
 msgid "Last Adj Chg%"
 msgstr "Last Adj Chg%"
 
-#: src/components/UnfilledOfferModal.tsx:73
+#: src/components/UnfilledOfferModal.tsx:72
 msgid "Limit Price"
 msgstr "Limit Price"
 
-#: src/components/UnfilledOfferModal.tsx:125
+#: src/components/UnfilledOfferModal.tsx:124
 msgid "Listing Date"
 msgstr "Listing Date"
 
-#: src/components/MRIDisplay.tsx:31
+#: src/components/MRIDisplay.tsx:36
 msgid "Loading..."
 msgstr "Loading..."
 
@@ -429,7 +429,7 @@ msgstr "Market Price"
 msgid "Market Protocol + 0x Protocol"
 msgstr "Market Protocol + 0x Protocol"
 
-#: src/components/OrderbookModal.tsx:12
+#: src/components/OrderbookModal.tsx:13
 msgid "Miners can make offers and cancel before the listed offer is filled.<0/>Buyers are not able to bid, buy orders will be filled by best available offers."
 msgstr "Miners can make offers and cancel before the listed offer is filled.<0/>Buyers are not able to bid, buy orders will be filled by best available offers."
 
@@ -441,7 +441,7 @@ msgstr "Mining Market Live Stats"
 msgid "Mins"
 msgstr "Mins"
 
-#: src/components/MRIDisplay.tsx:23
+#: src/components/MRIDisplay.tsx:26
 msgid "Network Daily Average Mining Revenue"
 msgstr "Network Daily Average Mining Revenue"
 
@@ -502,7 +502,7 @@ msgid "Offer Summary"
 msgstr "Offer Summary"
 
 #: src/components/OfferContractPage.tsx:493
-#: src/components/UnfilledOfferModal.tsx:133
+#: src/components/UnfilledOfferModal.tsx:132
 msgid "Offer Valid Till"
 msgstr "Offer Valid Till"
 
@@ -540,7 +540,7 @@ msgstr "Portfolio"
 msgid "Position"
 msgstr "Position"
 
-#: src/components/OrderbookModal.tsx:20
+#: src/components/OrderbookModal.tsx:24
 #: src/components/PortfolioPage.tsx:400
 msgid "Price ($/TH/Day)"
 msgstr "Price ($/TH/Day)"
@@ -572,11 +572,11 @@ msgid "Protocols"
 msgstr "Protocols"
 
 #: src/components/OfferContractPage.tsx:319
-#: src/components/UnfilledOfferModal.tsx:93
+#: src/components/UnfilledOfferModal.tsx:92
 msgid "Quantity"
 msgstr "Quantity"
 
-#: src/components/OrderbookModal.tsx:22
+#: src/components/OrderbookModal.tsx:30
 #: src/components/PortfolioPage.tsx:403
 msgid "Quantity (TH)"
 msgstr "Quantity (TH)"
@@ -739,7 +739,7 @@ msgstr "Total"
 msgid "Trading Currency"
 msgstr "Trading Currency"
 
-#: src/components/UnfilledOfferModal.tsx:66
+#: src/components/UnfilledOfferModal.tsx:65
 msgid "Unfilled Offer Details"
 msgstr "Unfilled Offer Details"
 
@@ -823,7 +823,7 @@ msgstr "day(s)"
 msgid "hour(s)"
 msgstr "hour(s)"
 
-#: src/components/UnfilledOfferModal.tsx:88
+#: src/components/UnfilledOfferModal.tsx:87
 msgid "{CONTRACT_DURATION} Days"
 msgstr "{CONTRACT_DURATION} Days"
 
