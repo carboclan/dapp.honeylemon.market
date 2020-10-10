@@ -500,25 +500,41 @@ const HoneylemonProvider = ({ children }: HoneylemonProviderProps) => {
       try {
         const marketDataApiUrl = process.env.REACT_APP_MARKET_DATA_API_URL;
         if (marketDataApiUrl) {
-          const { contracts } = await (
-            await fetch(`${marketDataApiUrl}/blockchain/agg?coin=BTC`)
-          ).json();
-          const stats = await (
-            await fetch(`${marketDataApiUrl}/blockchain/stats`)
-          ).json();
-          setMiningContracts(
-            contracts.map((c: any) =>
-              c.type === "DIFFICULTY_FUTURES"
-                ? {
-                    ...c,
-                    duration: dayjs(c.expiry).diff(dayjs(), "d", true)
-                  }
-                : c
+          const { mri } = await (
+            await fetch(
+              `${marketDataApiUrl}/production/chain/btc/mri?day=${dayjs()
+                .subtract(1, "day")
+                .format("YYYY-MM-DD")}T00:00Z&days=1`
             )
-          );
-          setCurrentBTCSpotPrice(stats.quote?.price);
-          setCurrentMRI(stats.mri);
-          setBtcStats(stats);
+          ).json();
+
+          setCurrentMRI(mri);
+
+          const coingeckoResponse = await fetch(
+            "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd"
+          ).then(response => response.json());
+
+          coingeckoResponse &&
+            coingeckoResponse.bitcoin &&
+            coingeckoResponse.bitcoin.usd &&
+            setCurrentBTCSpotPrice(Number.parseFloat(coingeckoResponse.bitcoin.usd));
+          // const { contracts } = await (
+          //   await fetch(`${marketDataApiUrl}/blockchain/agg?coin=BTC`)
+          // ).json();
+          // const stats = await (
+          //   await fetch(`${marketDataApiUrl}/blockchain/stats`)
+          // ).json();
+          // setMiningContracts(
+          //   contracts.map((c: any) =>
+          //     c.type === "DIFFICULTY_FUTURES"
+          //       ? {
+          //           ...c,
+          //           duration: dayjs(c.expiry).diff(dayjs(), "d", true)
+          //         }
+          //       : c
+          //   )
+          // );
+          // setBtcStats(stats);
         }
       } catch (error) {
         console.log("There was an error getting the market data");
