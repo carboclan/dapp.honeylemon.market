@@ -6,6 +6,6 @@
    }],
    "compileNamespace": "es",
    "format": "po",
-   "locales": ["en", "ru"],
+   "locales": ["en"],
    "sourceLocale": "en"
 }
